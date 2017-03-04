@@ -26,7 +26,7 @@ Alternatively it can be installed via the [Admin Plugin](http://learn.getgrav.or
 
 Once installed you can either create entries manually, or you can copy the sample data set:
 
-```
+```shell
 $ cp user/plugins/flex-directory/data/entries.json user/data/flex-directory/entries.json
 ```
 
@@ -49,14 +49,14 @@ Simply edit the **Flex Directory** plugin options in the Admin plugin, or copy t
 
 To display the directory simply add the following to our Twig template or even your page content (with Twig processing enabled):
 
-```
+```twig
 {% include 'partials/flex-directory-cols.html.twig' %}
 ```
 
 Alternatively just create a page called `flex-template.md` or set the template of your existing page to `template: flex-template`.  This will use the `flex-template.html.twig` file provided by the plugin.  If this doesn't suit your needs.  You can copy the provided Twig templates into your theme and modify them:
 
 
-```
+```shell
 flex-directory/templates
 ├── flex-directory.html.twig
 └── partials
@@ -82,7 +82,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
 1. Edit the `user/data/flex-directory/entries.yaml` like so:
 
-    ```
+    ```yaml
     title: Flex Directory
     form:
       validation: loose
@@ -128,7 +128,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
     The first part to edit is the column headers, let's replace the `Tags` header with `Phone`
 
-    ```
+    ```twig
         <thead>
             <tr>
                 <th>Name</th>
@@ -142,7 +142,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
     Next you simple need to edit the actual column, replacing the `entry.tags` output with:
 
-    ```
+    ```twig
         <td>
             {{ entry.phone }}
         </td>
@@ -154,7 +154,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
 1. Edit the `flex-directory-cols.html.twig` file you just copied so it has these modifications:
 
-    ```
+    ```twig
         <li>
             <div class="entry-details">
                 {% if entry.website %}
@@ -174,7 +174,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
     And also the JavaScript initialization which provides which hooks up certain classes to the search:
     
-    ```
+    ```html
     <script>
         var options = {
             valueNames: [ 'name', 'email', 'website', 'phone' ]
