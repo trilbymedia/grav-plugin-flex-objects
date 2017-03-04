@@ -34,7 +34,7 @@ $ cp user/plugins/flex-directory/data/entries.json user/data/flex-directory/entr
 
 This plugin works out of the box, but provides several fields that make modifying and extending this plugin easier:
 
-```
+```yaml
 enabled: true
 built_in_css: true
 json_file: 'user://data/flex-directory/entries.json'
