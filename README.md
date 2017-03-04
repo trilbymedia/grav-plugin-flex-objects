@@ -4,6 +4,14 @@
 
 The **Flex Directory** Plugin is for [Grav CMS](http://github.com/getgrav/grav).  It provides a simple plugin that 'out-of-the-box' acts as a simple user directory.  This plugin allows for CRUD operations via the admin plugin to easily manage large sets of data that don't fit as simple YAML configuration files, or Grav pages.  The example plugin comes with a dummy database of 500 entries which is a realistic real-world data set that you can experiment with.
 
+![](assets/flex-directory-list.png)
+
+![](assets/flex-directory-edit.png)
+
+![](assets/flex-directory-options.png)
+
+![](assets/flex-directory-compressor.gif)
+
 ## Installation
 
 Typically a plugin should be installed via [GPM](http://learn.getgrav.org/advanced/grav-gpm) (Grav Package Manager):
