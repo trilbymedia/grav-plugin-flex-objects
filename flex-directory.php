@@ -162,7 +162,9 @@ class FlexDirectoryPlugin extends Plugin
                 $this->grav['assets']->addJs('plugin://flex-directory/js/widgets/widget-pager.min.js');
             }
         } else {
-            $this->grav['assets']->addCss('plugin://flex-directory/css/site.css');
+            if ($this->config->get('plugins.flex-directory.built_in_css')) {
+                $this->grav['assets']->addCss('plugin://flex-directory/css/site.css');
+            }
             $this->grav['assets']->addJs('plugin://flex-directory/js/list.min.js');
         }
     }

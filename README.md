@@ -24,11 +24,18 @@ $ cp user/plugins/flex-directory/data/entries.json user/data/flex-directory/entr
 
 ## Configuration
 
-This plugin really has no configuration except for the ability to enable/disable it:
+This plugin works out of the box, but provides several fields that make modifying and extending this plugin easier:
 
 ```
 enabled: true
+built_in_css: true
+json_file: 'user://data/flex-directory/entries.json'
+blueprint_file: 'plugin://flex-directory/blueprints/entries.yaml'
+extra_admin_twig_path: 'theme://admin/templates'
+extra_site_twig_path:
 ```
+
+Simply edit the **Flex Directory** plugin options in the Admin plugin, or copy the `flex-directory.yaml` default file to your `user/config/plugins/` folder and edit the values there.   Read below for more help on what these fields do and how they can help you modify the plugin.
 
 ## Displaying
 
@@ -64,7 +71,8 @@ These are probably not the exact fields you might want, so you will probably wan
 Let's assume you simply want to add a new "Phone Number" field to the existing Data and remove the "Tags".  These are the steps you would need to perform:
 
 1. Copy the `blueprints/entries.yaml` Blueprint file to another location, let's say `user/data/flex-directory/` but really it could be anywhere (another plugin, your theme, etc.)
-2. Edit the `user/data/flex-directory/entries.yaml` like so:
+
+1. Edit the `user/data/flex-directory/entries.yaml` like so:
 
     ```
     title: Flex Directory
@@ -104,13 +112,13 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
           label: Phone Number
     ```
 
-Notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject.
+    Notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject.
 
-3. Now we have to instruct the plugin to use this new blueprint rather then the default one provided with the plugin.  This is simple enough, just edit the **Blueprint File** option in the plugin configuration file `flex-directory.yaml` to point to: `user://data/flex-directory/entries.yaml`, and make sure you save it. This will modify the `entries-edit` form automatically.  
+1. Now we have to instruct the plugin to use this new blueprint rather then the default one provided with the plugin.  This is simple enough, just edit the **Blueprint File** option in the plugin configuration file `flex-directory.yaml` to point to: `user://data/flex-directory/entries.yaml`, and make sure you save it. This will modify the `entries-edit` form automatically.  
 
-4. Now we need to adjust the `entries-list` form that shows the columns.  To do this, you are going to need to copy the existing `user/plugins/flex-directory/admin/templates/partials/entries-list.html.twig` file to another location that is in the **Twig Paths** <sup>1</sup>. The simplest way to add Twig templates is to simply add them under your theme's `templates/` folder ensuring the folder structure is maintained. Let's assume you are using Antimatter theme (although any theme will work), simply copy the `entries-list.html.twig` file to `user/themes/antimatter/admin/templates/partials/entries-list.html.twig` (you will have to create these folders as `admin/` doesn't exist under themes usually) and edit it.
+1. Now we need to adjust the `entries-list` form that shows the columns.  To do this, you are going to need to copy the existing `user/plugins/flex-directory/admin/templates/partials/entries-list.html.twig` file to another location that is in the **Twig Paths** <sup>1</sup>. The simplest way to add Twig templates is to simply add them under your theme's `templates/` folder ensuring the folder structure is maintained. Let's assume you are using Antimatter theme (although any theme will work), simply copy the `entries-list.html.twig` file to `user/themes/antimatter/admin/templates/partials/entries-list.html.twig` (you will have to create these folders as `admin/` doesn't exist under themes usually) and edit it.
 
-  The first part to edit is the column headers, let's replace the `Tags` header with `Phone`
+    The first part to edit is the column headers, let's replace the `Tags` header with `Phone`
 
     ```
         <thead>
@@ -124,7 +132,7 @@ Notice how we removed the `tags:` Blueprint field definition, and added a simple
         </thead>
     ```
 
-  Next you simple need to edit the actual column, replacing the `entry.tags` output with:
+    Next you simple need to edit the actual column, replacing the `entry.tags` output with:
 
     ```
         <td>
@@ -132,11 +140,11 @@ Notice how we removed the `tags:` Blueprint field definition, and added a simple
         </td>
     ```
     
-  This will ensure the backend now lets you edit and list the new "Phone" field, but now we have to fix the frontend to render it.
+    This will ensure the backend now lets you edit and list the new "Phone" field, but now we have to fix the frontend to render it.
 
-5. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has it's `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-directory/templates/partials/flex-directory-cols.html.twig` file to `user/themes/antimatter/templates/partials/partials/flex-directory-cols.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
+1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has it's `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-directory/templates/partials/flex-directory-cols.html.twig` file to `user/themes/antimatter/templates/partials/partials/flex-directory-cols.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
 
-6. Edit the `flex-directory-cols.html.twig` file you just copied so it has these modifications:
+1. Edit the `flex-directory-cols.html.twig` file you just copied so it has these modifications:
 
     ```
         <li>
@@ -168,8 +176,7 @@ Notice how we removed the `tags:` Blueprint field definition, and added a simple
     </script>
     ```
 
-
-Notice, we removed the `entry-extra` DIV, and added a new `if` block with the Twig code to display the phone number if set.
+    Notice, we removed the `entry-extra` DIV, and added a new `if` block with the Twig code to display the phone number if set.
 
 # Advanced
 
