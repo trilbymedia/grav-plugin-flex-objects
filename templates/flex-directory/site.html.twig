@@ -1,0 +1,41 @@
+{% set data = flex_entries.getData().toArray()|sort_by_key('last_name') %}
+<div id="flex-directory">
+    <div class="text-center">
+        <input class="form-input search" type="text" placeholder="Search by name, email, etc" />
+        <button class="button button-primary sort asc" data-sort="name">
+            Sort by Name
+        </button>
+    </div>
+
+    <ul class="list">
+        {% for entry in data if entry.published %}
+            <li>
+                <div class="entry-details">
+                    {% if entry.website %}
+                        <a href="{{ entry.website }}"><span class="name">{{ entry.last_name }}, {{ entry.first_name }}</span></a>
+                    {% else %}
+                        <span class="name">{{ entry.last_name }}, {{ entry.first_name }}</span>
+                    {% endif %}
+                    {% if entry.email %}
+                        <p><a href="mailto:{{ entry.email }}" class="email">{{ entry.email }}</a></p>
+                    {% endif %}
+                </div>
+                <div class="entry-extra">
+                    {% for tag in entry.tags %}
+                        <span>{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    var options = {
+        valueNames: [ 'name', 'email', 'website', 'entry-extra' ]
+    };
+
+    var flexList = new List('flex-directory', options);
+</script>
+
+

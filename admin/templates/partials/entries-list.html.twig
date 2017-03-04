@@ -1,0 +1,113 @@
+{% set tbl_data = flex_entries.getData %}
+{% set entry_url =  base_url_relative ~ '/' ~ location ~ '/entries/id' ~ separator %}
+
+{% if not tbl_data.toArray|length %}
+    <div class="no-entries">
+        There are currently no entries, click the <a href="{{ base_url ~ '/flex-directory/entries/action:add' }}">Add</a> button to create a new one...
+    </div>
+{% else %}
+    <table id="data-table" class="tablesorter tablesorter-default">
+        <colgroup>
+            <col width="24" />
+            <col width="24" />
+            <col width="22" />
+            <col width="22" />
+            <col width="8" />
+        </colgroup>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Website</th>
+            <th>Tags</th>
+            <th>&nbsp;</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for id,entry in tbl_data.toArray %}
+            <tr>
+                <td>
+                    {% if entry.published %}
+                        <i class="published fa fa-check-circle"></i>
+                    {% else %}
+                        <i class="unpublished fa fa-times-circle"></i>
+                    {% endif %}
+                    <a href="{{ entry_url ~ id }}">{{ entry.first_name }} {{ entry.last_name }}</a>
+                </td>
+                <td>
+                    {{ entry.email }}
+                </td>
+                <td>
+                    <a href="{{ entry.website }}"><i class="fa fa-link"></i> URL</a>
+                </td>
+                <td>
+                    {{ entry.tags|join(', ') }}
+                </td>
+                <td>
+
+                    <a href="{{ entry_url ~ id }}"
+                       title="Edit '{{ entry.first_name }} {{ entry.second_name }}'"
+                       class="edit-action"><i class="fa fa-pencil"></i></a>
+                    <a href="#delete"
+                       class="page-delete delete-action"
+                       title="Delete '{{ entry.first_name }} {{ entry.second_name }}'"
+                       data-remodal-target="delete"
+                       data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="pager" class="pager">
+        <form>
+            <button class="button first"><i class="fa fa-fw fa-angle-double-left"></i></button>
+            <button class="button prev"><i class="fa fa-fw fa-chevron-left"></i></button>
+
+            <span class="pagedisplay"></span>
+
+            <button class="button next"><i class="fa fa-fw fa-chevron-right"></i></button>
+            <button class="button last"><i class="fa fa-fw fa-angle-double-right"></i></button>
+
+            <select data-grav-selectize class="pagesize">
+                <option selected="selected" value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">All</option>
+            </select>
+        </form>
+    </div>
+
+    <script>
+        ((function($) {
+            var list = $('#data-table');
+
+            list.tablesorter({
+                theme: 'blue',
+                cssChildRow: 'tablesorter-childRow',
+                widgets: ['zebra', 'filter', 'pager'],
+                headers: {
+                    3: { sorter: false, filter: false },
+                    4: { sorter: false, filter: false }
+                },
+                widgetOptions: {
+                    pager_output: '{startRow} - {endRow} / {filteredRows} ({totalRows})',
+                    pager_removeRows: false,
+                    pager_size: 10,
+                    filter_childRows: false,
+                    filter_cssFilter: 'tablesorter-filter',
+                    filter_startsWith: false,
+                    filter_ignoreCase: true
+                }
+            });
+
+            list.find('.tablesorter-childRow td').addClass('hidden');
+
+            $('#pager button').on('click', function(e) { e.preventDefault(); });
+        })(jQuery));
+    </script>
+
+{% endif %}
+
+{% include 'partials/modal-remove.html.twig' with { name: 'entry' } %}

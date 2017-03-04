@@ -1,0 +1,40 @@
+title: Flex Directory
+form:
+  validation: loose
+
+  fields:
+    published:
+      type: toggle
+      label: Published
+      highlight: 1
+      default: 1
+      options:
+        1: PLUGIN_ADMIN.YES
+        0: PLUGIN_ADMIN.NO
+      validate:
+        type: bool
+        required: true
+    last_name:
+      type: text
+      label: Second Name
+      validate:
+        required: true
+    first_name:
+      type: text
+      label: First Name
+    email:
+      type: email
+      label: Email
+      validate:
+        required: true
+    website:
+      type: text
+      label: Website
+    tags:
+      type: selectize
+      size: large
+      label: Tags
+      classes: fancy
+      validate:
+        type: commalist
+
