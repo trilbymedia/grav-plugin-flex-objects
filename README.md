@@ -50,7 +50,7 @@ Simply edit the **Flex Directory** plugin options in the Admin plugin, or copy t
 To display the directory simply add the following to our Twig template or even your page content (with Twig processing enabled):
 
 ```twig
-{% include 'partials/flex-directory-cols.html.twig' %}
+{% include 'flex-directory/site.html.twig' %}
 ```
 
 Alternatively just create a page called `flex-template.md` or set the template of your existing page to `template: flex-template`.  This will use the `flex-template.html.twig` file provided by the plugin.  If this doesn't suit your needs.  You can copy the provided Twig templates into your theme and modify them:
@@ -59,8 +59,8 @@ Alternatively just create a page called `flex-template.md` or set the template o
 ```shell
 flex-directory/templates
 ├── flex-directory.html.twig
-└── partials
-    └── flex-directory-cols.html.twig
+└── flex-directory
+    └── site.html.twig
 ```
 
 # Modifications
@@ -150,9 +150,9 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
     
     This will ensure the backend now lets you edit and list the new "Phone" field, but now we have to fix the frontend to render it.
 
-1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has it's `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-directory/templates/partials/flex-directory-cols.html.twig` file to `user/themes/antimatter/templates/partials/partials/flex-directory-cols.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
+1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has it's `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-directory/templates/flex-directory/site.html.twig` file to `user/themes/antimatter/templates/flex-directory/site.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
 
-1. Edit the `flex-directory-cols.html.twig` file you just copied so it has these modifications:
+1. Edit the `site.html.twig` file you just copied so it has these modifications:
 
     ```twig
         <li>
