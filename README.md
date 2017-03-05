@@ -101,7 +101,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
             required: true
         last_name:
           type: text
-          label: Second Name
+          label: Last Name
           validate:
             required: true
         first_name:
