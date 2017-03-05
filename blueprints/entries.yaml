@@ -16,7 +16,7 @@ form:
         required: true
     last_name:
       type: text
-      label: Second Name
+      label: Last Name
       validate:
         required: true
     first_name:
