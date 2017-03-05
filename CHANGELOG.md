@@ -1,3 +1,9 @@
+# v1.0.2
+##  03/05/2017
+
+1. [](#bugfix)
+    * Fixed issue with deleting entry from edit page [#3](https://github.com/trilbymedia/grav-plugin-flex-directory/issues/3)
+
 # v1.0.1
 ##  03/05/2017
 
