@@ -85,7 +85,7 @@ class FlexDirectoryPlugin extends Plugin
     }
 
     /**
-     * Add Studio Directory to admin menu
+     * Add Flex Directory to admin menu
      */
     public function onAdminMenu()
     {
@@ -93,7 +93,7 @@ class FlexDirectoryPlugin extends Plugin
     }
 
     /**
-     * Exclude Studio Directory data from the Data Manager plugin
+     * Exclude Flex Directory data from the Data Manager plugin
      */
     public function onDataTypeExcludeFromDataManagerPluginHook()
     {
