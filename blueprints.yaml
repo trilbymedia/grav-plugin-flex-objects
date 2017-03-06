@@ -6,7 +6,7 @@ author:
   name: Trilby Media, LLC
   email: hello@trilby.media
 homepage: https://github.com/trilbymedia/grav-plugin-flex-directory
-keywords: grav, plugin, crud, directry
+keywords: grav, plugin, crud, directory
 bugs: https://github.com/trilbymedia/grav-plugin-flex-directory/issues
 docs: https://github.com/trilbymedia/grav-plugin-flex-directory/blob/develop/README.md
 license: MIT
