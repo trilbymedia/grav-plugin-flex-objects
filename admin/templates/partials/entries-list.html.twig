@@ -8,41 +8,45 @@
 {% else %}
     <table id="data-table" class="tablesorter tablesorter-default">
         <colgroup>
-            <col width="24" />
-            <col width="24" />
-            <col width="22" />
-            <col width="22" />
-            <col width="8" />
+            {% set fields = entry_blueprints.form.fields %}
+            {% set fieldsCount = count(fields) %}
+            {% for key,field in fields %}
+                {% if (key == 'published') %}
+                    <col width="10" />
+                {% else %}
+                    <col width="{{ (fields.published) ? 100 / fieldsCount - 18 / fieldsCount : 100 / fieldsCount - 8 / fieldsCount }}" />
+                {% endif %}
+            {% endfor %}
+            <col width="8">
         </colgroup>
         <thead>
         <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Website</th>
-            <th>Tags</th>
-            <th>&nbsp;</th>
+            {% for key,field in fields %}
+                <th>{{ field.label }}</th>
+            {% endfor %}
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
         {% for id,entry in tbl_data.toArray %}
             <tr>
-                <td>
-                    {% if entry.published %}
-                        <i class="published fa fa-check-circle"></i>
-                    {% else %}
-                        <i class="unpublished fa fa-times-circle"></i>
-                    {% endif %}
-                    <a href="{{ entry_url ~ id }}">{{ entry.first_name }} {{ entry.last_name }}</a>
-                </td>
-                <td>
-                    {{ entry.email }}
-                </td>
-                <td>
-                    <a href="{{ entry.website }}"><i class="fa fa-link"></i> URL</a>
-                </td>
-                <td>
-                    {{ entry.tags|join(', ') }}
-                </td>
+                {% for key,field in fields %}
+                    <td>
+                        {% if field.type == 'toggle' %}
+                            {% if entry[key] %}
+                                <i class="published fa fa-check-circle"></i>
+                            {% else %}
+                                <i class="unpublished fa fa-times-circle"></i>
+                            {% endif %}
+                        {% elseif field.type == 'url' %}
+                            <a href="{{ entry[key] }}" target="_blank"><i class="fa fa-link"></i> {{ entry[key] }}</a>
+                        {% elseif field.type == 'selectize' %}
+                            {{ entry[key]|join(',') }}
+                        {% else %}
+                            {{ entry[key] }}
+                        {% endif %}
+                    </td>
+                {% endfor %}
                 <td>
 
                     <a href="{{ entry_url ~ id }}"
