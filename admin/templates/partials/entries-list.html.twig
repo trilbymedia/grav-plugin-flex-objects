@@ -92,9 +92,13 @@
                 cssChildRow: 'tablesorter-childRow',
                 widgets: ['zebra', 'filter', 'pager'],
                 headers: {
-                    2: { sorter: false, filter: false },
-                    3: { sorter: false, filter: false },
-                    4: { sorter: false, filter: false }
+                    {% for key,field in fields %}
+                        {% if field.type != 'text' and field.type != 'url' and field.type != 'selectize' %}
+                            {{ loop.index - 1 }}: { sorter: false, filter: false },
+                        {% else %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ count(fields) }}: { sorter: false, filter: false },
                 },
                 widgetOptions: {
                     pager_output: '{startRow} - {endRow} / {filteredRows} ({totalRows})',
