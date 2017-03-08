@@ -8,7 +8,7 @@
 {% else %}
     <table id="data-table" class="tablesorter tablesorter-default">
         <colgroup>
-            {% set fields = entry_blueprints.form.fields %}
+            {% set fields = flex_entries.getData.blueprints.init.form.fields %}
             {% set fieldsCount = count(fields) %}
             {% for key,field in fields %}
                 {% if (key == 'published') %}
