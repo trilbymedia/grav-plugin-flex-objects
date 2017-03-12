@@ -38,3 +38,18 @@ form:
       validate:
         type: commalist
 
+    conditional_section:
+        type: conditional
+        condition: "id ? 'false' : 'true'"
+
+        fields:
+            tools:
+                type: section
+                underline: true
+            _create_after_save:
+                type: checkbox
+                label: Create New on Save
+                default: true
+
+  process:
+    - create_after_save: true

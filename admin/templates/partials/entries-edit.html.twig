@@ -5,16 +5,14 @@
 {% set file_url_add = base_url_relative ~ '/' ~ location ~ '/entries.json/id' ~ separator ~ uri.param('id') %}
 {% set file_url_remove = base_url_relative ~ '/' ~ location ~ '/id' ~ separator ~ uri.param('id') %}
 
-{{ dump(entry) }}
-
 {% include 'partials/blueprints.html.twig' with { data: entry, blueprints: entry_blueprints } %}
 
 {% if id %}
-<div class="button-bar danger">
-    <span class="danger-zone"></span>
-    <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
-</div>
-{% include 'partials/modal-remove.html.twig' with { name: 'entry' } %}
+    <div class="button-bar danger">
+        <span class="danger-zone"></span>
+        <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
+    </div>
+    {% include 'partials/modal-remove.html.twig' with { name: 'entry' } %}
 {% endif %}
 
 {% include 'partials/modal-changes-detected.html.twig' %}
