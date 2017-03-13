@@ -167,6 +167,13 @@ class SimpleController extends AdminBaseController
         }
     }
 
+    public function setMessage($msg, $type = 'info')
+    {
+        /** @var Message $messages */
+        $messages = $this->grav['messages'];
+        $messages->add($msg, $type);
+    }
+
     public function isActive()
     {
         return (bool) $this->active;
