@@ -147,12 +147,14 @@ class AdminController extends SimpleController
 
         $id = Grav::instance()['uri']->param('id');
         $field = $this->grav['uri']->param('field');
+        $type      = $this->grav['uri']->param('type');
         $path = base64_decode($this->grav['uri']->param('path'));
 
         // dynamically change this
-        $data_type = Grav::instance()['flex-entries'];
+        $data_type = Grav::instance()['flex-' . $type];
+        $method = 'get' . ucfirst($type);
+        $obj = $this->$method($id);
 
-        $obj = $this->getEntries($id);
         $files = $obj->{$field};
 
         if ($files) {
