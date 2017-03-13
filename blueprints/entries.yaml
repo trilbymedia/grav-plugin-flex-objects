@@ -38,18 +38,33 @@ form:
       validate:
         type: commalist
 
-    conditional_section:
+    conditional_new_entries:
         type: conditional
         condition: "id ? 'false' : 'true'"
+        classes: overlay bottom
 
         fields:
-            tools:
-                type: section
-                underline: true
-            _create_after_save:
-                type: checkbox
-                label: Create New on Save
-                default: true
+            _post_entries_save:
+                label: After Save
+                type: radio
+                default: create-new
 
-  process:
-    - create_after_save: true
+                options:
+                    create-new: 'Create New Item'
+                    edit: 'Edit Item'
+                    list: 'Show List'
+
+    conditional_edit_entries:
+        type: conditional
+        condition: "id ? 'true' : 'false'"
+        classes: overlay bottom
+
+        fields:
+            _post_entries_save:
+                label: After Save
+                type: radio
+                default: edit
+
+                options:
+                    edit: 'Edit Item'
+                    list: 'Show List'

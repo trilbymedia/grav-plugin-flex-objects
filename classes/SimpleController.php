@@ -78,6 +78,9 @@ class SimpleController extends AdminBaseController
                 return false;
             }
             $method = $this->task_prefix . ucfirst($this->task);
+
+            $this->handlePostProcesses();
+
         } elseif ($this->target) {
             if (!$this->action) {
                 if ($this->id) {
@@ -142,6 +145,26 @@ class SimpleController extends AdminBaseController
         }
 
         return false;
+    }
+
+    protected function handlePostProcesses()
+    {
+        if (is_array($this->data)) {
+            foreach ($this->data as $key => $value) {
+                if (Utils::startsWith($key, '_')) {
+                    $method = 'process' . $this->grav['inflector']->camelize($key);
+
+                    if (method_exists($this, $method)) {
+                        try {
+                            call_user_func([$this, $method], $value);
+                        } catch (\RuntimeException $e) {
+                            $this->setMessage($e->getMessage(), 'error');
+                        }
+                    }
+                    unset ($this->data[$key]);
+                }
+            }
+        }
     }
 
     public function isActive()

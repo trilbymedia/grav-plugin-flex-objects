@@ -78,7 +78,6 @@ class AdminController extends SimpleController
         }
 
         $obj = $this->get($type, $id);
-
         $obj->merge($this->data);
 
         $status = $this->saveObjectItem($id, $obj, $data_type);
@@ -86,7 +85,7 @@ class AdminController extends SimpleController
         if ($status) {
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
-            if ($new) {
+            if (!$this->redirect && $new) {
                 $edit_page = $this->location . '/' . $this->target . '/id:' . $id;
                 $this->setRedirect($edit_page);
             }
@@ -98,4 +97,15 @@ class AdminController extends SimpleController
         return $status;
     }
 
+    protected function processPostEntriesSave($var)
+    {
+        switch ($var) {
+            case 'create-new':
+                $this->setRedirect($this->location . '/' . $this->target . '/action:add');
+                break;
+            case 'list':
+                $this->setRedirect($this->location . '/' . $this->target);
+                break;
+        }
+    }
 }
