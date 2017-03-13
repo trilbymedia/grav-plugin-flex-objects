@@ -38,33 +38,15 @@ form:
       validate:
         type: commalist
 
-    conditional_new_entries:
-        type: conditional
-        condition: "id ? 'false' : 'true'"
-        classes: overlay bottom
+    tools_section:
+      type: section
+      field_classes: overlay bottom
 
-        fields:
-            _post_entries_save:
-                label: After Save
-                type: radio
-                default: create-new
 
-                options:
-                    create-new: 'Create New Item'
-                    edit: 'Edit Item'
-                    list: 'Show List'
+      fields:
 
-    conditional_edit_entries:
-        type: conditional
-        condition: "id ? 'true' : 'false'"
-        classes: overlay bottom
+        _post_entries_save:
+          label: PLUGIN_FLEX_DIRECTORY.AFTER_SAVE
+          type: save-redirect
+          default: create-new
 
-        fields:
-            _post_entries_save:
-                label: After Save
-                type: radio
-                default: edit
-
-                options:
-                    edit: 'Edit Item'
-                    list: 'Show List'

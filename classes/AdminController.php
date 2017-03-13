@@ -99,13 +99,19 @@ class AdminController extends SimpleController
 
     protected function processPostEntriesSave($var)
     {
+        $saved_option = 'edit';
+
         switch ($var) {
             case 'create-new':
                 $this->setRedirect($this->location . '/' . $this->target . '/action:add');
+                $saved_option = $var;
                 break;
             case 'list':
                 $this->setRedirect($this->location . '/' . $this->target);
+                $saved_option = $var;
                 break;
         }
+
+        $this->grav['session']->post_entries_save = $saved_option;
     }
 }
