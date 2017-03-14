@@ -12,8 +12,6 @@
 {% endif %}
 
 {% block input %}
-    {{ dump(isNew) }}
-    {{ dump(savedOption) }}
     {% set savedOption = not isNew and savedOption == 'create-new' ? 'edit' : savedOption %}
     {% for key, text in options %}
         {% set id = field.id|default(field.name) ~ '-' ~ key %}
