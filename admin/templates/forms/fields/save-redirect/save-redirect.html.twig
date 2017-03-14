@@ -3,7 +3,7 @@
 {% set originalValue = value %}
 {% set value = (value is null ? field.default : value) %}
 {% set isNew = uri.param('id') ? false : true %}
-{% set savedOption = grav.session.post_entries_save %}
+{% set savedOption = grav.session.post_entries_save|default('create-new') %}
 
 {% if isNew %}
     {% set options = {'create-new':'PLUGIN_FLEX_DIRECTORY.CREATE_NEW', 'edit':'PLUGIN_FLEX_DIRECTORY.EDIT', 'list':'PLUGIN_FLEX_DIRECTORY.LIST'} %}

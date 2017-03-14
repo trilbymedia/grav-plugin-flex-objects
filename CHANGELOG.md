@@ -1,3 +1,9 @@
+# v2.0.1
+##  03/14/2017
+
+1. [](#bugfix)
+    * Fixed an issue where no save option is selected with new session
+
 # v2.0.0
 ##  03/13/2017
 
