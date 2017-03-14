@@ -115,9 +115,26 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
         website:
           type: text
           label: Website
-        phone:
-          type: text
-          label: Phone Number
+        tags:
+          type: selectize
+          size: large
+          label: Tags
+          classes: fancy
+          validate:
+            type: commalist
+    
+        tools_section:
+          type: section
+          field_classes: overlay bottom
+    
+    
+          fields:
+    
+            _post_entries_save:
+              label: PLUGIN_FLEX_DIRECTORY.AFTER_SAVE
+              type: save-redirect
+              default: create-new
+
     ```
 
     Notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject.
@@ -185,6 +202,19 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
     ```
 
     Notice, we removed the `entry-extra` DIV, and added a new `if` block with the Twig code to display the phone number if set.
+
+# File Upload
+
+With Flex Directory v2.0, you can now utilize the `file` form field.  []The standard features apply](https://learn.getgrav.org/forms/blueprints/how-to-add-file-upload), and you can simply edit your custom blueprint with a field definition similar to:
+
+```
+    item_image:
+      type: file
+      label: Item Image
+      random_name: true
+      destination: 'user/data/flex-directory/files'
+      multiple: true
+```
 
 # Advanced
 
