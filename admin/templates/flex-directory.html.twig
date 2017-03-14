@@ -23,7 +23,7 @@
             <a class="button" href="{{ base_url ~ '/flex-directory/' ~ target ~ '/action:add' }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
         {% else %}
             <a class="button" href="{{ base_url ~ '/flex-directory/' ~ target }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
-        <button class="button" type="submit" name="task" value="save" form="blueprints"><i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}</button>
+            <button class="button" type="submit" name="task" value="save" form="blueprints"><i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}</button>
         {% endif %}
 
     </div>
@@ -36,6 +36,6 @@
 
 {% block content %}
     <div id="directory">
-    {% include "partials/"~target~"-"~template~".html.twig" %}
+    {% include "partials/"~target~"-"~template~".html.twig" ignore missing %}
     </div>
 {% endblock %}

@@ -1,12 +1,12 @@
 name: Flex-Directory
-version: 1.0.2
+version: 2.0.0
 description: Simple Flexible Directory Plugin
 icon: list
 author:
-  name: Trilby Media, LLC
+  name: Trilby Media
   email: hello@trilby.media
 homepage: https://github.com/trilbymedia/grav-plugin-flex-directory
-keywords: grav, plugin, crud, directry
+keywords: grav, plugin, crud, directory
 bugs: https://github.com/trilbymedia/grav-plugin-flex-directory/issues
 docs: https://github.com/trilbymedia/grav-plugin-flex-directory/blob/develop/README.md
 license: MIT

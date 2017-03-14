@@ -1,3 +1,10 @@
+# v2.0.0
+##  03/13/2017
+
+1. [](#new)
+    * Added new field to allow `create-new`, `edit`, and `list` on **Save** of item [#10](https://github.com/trilbymedia/grav-plugin-flex-directory/issues/10)
+    * Added support for `file` form field type [#9](https://github.com/trilbymedia/grav-plugin-flex-directory/issues/9)
+
 # v1.0.2
 ##  03/05/2017
 

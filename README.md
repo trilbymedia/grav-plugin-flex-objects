@@ -53,7 +53,7 @@ To display the directory simply add the following to our Twig template or even y
 {% include 'flex-directory/site.html.twig' %}
 ```
 
-Alternatively just create a page called `flex-template.md` or set the template of your existing page to `template: flex-template`.  This will use the `flex-template.html.twig` file provided by the plugin.  If this doesn't suit your needs.  You can copy the provided Twig templates into your theme and modify them:
+Alternatively just create a page called `flex-directory.md` or set the template of your existing page to `template: flex-directory`.  This will use the `flex-directory.html.twig` file provided by the plugin.  If this doesn't suit your needs, you can copy the provided Twig templates into your theme and modify them:
 
 
 ```shell
@@ -115,9 +115,26 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
         website:
           type: text
           label: Website
-        phone:
-          type: text
-          label: Phone Number
+        tags:
+          type: selectize
+          size: large
+          label: Tags
+          classes: fancy
+          validate:
+            type: commalist
+    
+        tools_section:
+          type: section
+          field_classes: overlay bottom
+    
+    
+          fields:
+    
+            _post_entries_save:
+              label: PLUGIN_FLEX_DIRECTORY.AFTER_SAVE
+              type: save-redirect
+              default: create-new
+
     ```
 
     Notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject.
@@ -140,7 +157,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
         </thead>
     ```
 
-    Next you simple need to edit the actual column, replacing the `entry.tags` output with:
+    Next you simply need to edit the actual column, replacing the `entry.tags` output with:
 
     ```twig
         <td>
@@ -150,7 +167,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
     
     This will ensure the backend now lets you edit and list the new "Phone" field, but now we have to fix the frontend to render it.
 
-1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has it's `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-directory/templates/flex-directory/site.html.twig` file to `user/themes/antimatter/templates/flex-directory/site.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
+1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has its `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-directory/templates/flex-directory/site.html.twig` file to `user/themes/antimatter/templates/flex-directory/site.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
 
 1. Edit the `site.html.twig` file you just copied so it has these modifications:
 
@@ -185,6 +202,19 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
     ```
 
     Notice, we removed the `entry-extra` DIV, and added a new `if` block with the Twig code to display the phone number if set.
+
+# File Upload
+
+With Flex Directory v2.0, you can now utilize the `file` form field.  []The standard features apply](https://learn.getgrav.org/forms/blueprints/how-to-add-file-upload), and you can simply edit your custom blueprint with a field definition similar to:
+
+```
+    item_image:
+      type: file
+      label: Item Image
+      random_name: true
+      destination: 'user/data/flex-directory/files'
+      multiple: true
+```
 
 # Advanced
 
