@@ -203,6 +203,19 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
     Notice, we removed the `entry-extra` DIV, and added a new `if` block with the Twig code to display the phone number if set.
 
+# File Upload
+
+With Flex Directory v2.0, you can now utilize the `file` form field.  []The standard features apply](https://learn.getgrav.org/forms/blueprints/how-to-add-file-upload), and you can simply edit your custom blueprint with a field definition similar to:
+
+```
+    item_image:
+      type: file
+      label: Item Image
+      random_name: true
+      destination: 'user/data/flex-directory/files'
+      multiple: true
+```
+
 # Advanced
 
 You can radically alter the structure of the `entries.json` data file by making major edits to the `entries.yaml` blueprint file.  However, it's best to start with an empty `entries.json` if you are making wholesale changes or you will have data conflicts.  Best to create your blueprint first.  Reloading a **New Entry** until the form looks correct, then try saving, and check to make sure the stored `user/data/flex-directory/entries.json` file looks correct.
