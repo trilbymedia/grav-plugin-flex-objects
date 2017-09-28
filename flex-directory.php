@@ -135,7 +135,10 @@ class FlexDirectoryPlugin extends Plugin
     public function onTwigInitialized()
     {
         // Twig shortcuts
-        $this->grav['twig']->twig_vars['flex_entries'] = $this->grav['flex-entries'];
+        if (isset($this->grav['flex-entries'])) {
+            $this->grav['twig']->twig_vars['flex_entries'] = $this->grav['flex-entries'];
+        }
+
     }
 
     /**

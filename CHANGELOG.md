@@ -1,3 +1,9 @@
+# v2.0.2
+##  03/xx/2017
+
+1. [](#bugfix)
+    * Ensure we don't add flex-directory to Twig if it doesn't exist
+
 # v2.0.1
 ##  03/14/2017
 
