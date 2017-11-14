@@ -6,6 +6,7 @@ use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Common\Utils;
 use Grav\Plugin\Admin\AdminBaseController;
+use RocketTheme\Toolbox\Session\Message;
 
 class SimpleController extends AdminBaseController
 {
@@ -41,7 +42,7 @@ class SimpleController extends AdminBaseController
             list($base, $location, $target) = $this->grav['admin']->getRouteDetails();
 
             // return null if this is not running
-            if ($location != $plugin->name)  {
+            if ($location !== $plugin->name)  {
                 return;
             }
             $this->location = $location;
@@ -53,18 +54,16 @@ class SimpleController extends AdminBaseController
         }
 
         $task = !empty($post['task']) ? $post['task'] : $uri->param('task');
-        if ($task && ($this->location == $plugin->name || $uri->route() == '/lessons')) {
+        if ($task && ($this->location === $plugin->name || $uri->route() === '/lessons')) {
             $this->task = $task;
             $this->active = true;
         }
-
-
     }
 
     /**
      * Performs a task or action on a post or target.
      *
-     * @return bool|mixed|void
+     * @return bool|mixed
      */
     public function execute()
     {
@@ -92,11 +91,11 @@ class SimpleController extends AdminBaseController
             }
             $method = strtolower($this->action) . ucfirst($this->target);
         } else {
-            return;
+            return null;
         }
 
         if (!method_exists($this, $method)) {
-            return;
+            return null;
         }
 
         try {
@@ -156,7 +155,7 @@ class SimpleController extends AdminBaseController
 
                     if (method_exists($this, $method)) {
                         try {
-                            call_user_func([$this, $method], $value);
+                            $this->{$method}($value);
                         } catch (\RuntimeException $e) {
                             $this->setMessage($e->getMessage(), 'error');
                         }

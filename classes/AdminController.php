@@ -23,7 +23,11 @@ class AdminController extends SimpleController
     public function get($type, $id)
     {
         $method = 'get' . ucfirst($type);
-        return call_user_func([$this, $method], $id);
+        if (method_exists($this, $method)) {
+            return $this->{$method}($id);
+        }
+
+        return null;
     }
 
     /**
@@ -159,7 +163,7 @@ class AdminController extends SimpleController
 
         if ($files) {
             foreach ($files as $key => $value) {
-                if ($key == $path) {
+                if ($key === $path) {
                     unset($files[$key]);
                 }
             }

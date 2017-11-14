@@ -13,6 +13,8 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexDirectoryPlugin extends Plugin
 {
+    /** @var AdminController|SiteController */
+    protected $controller;
 
     protected $version;
 
@@ -156,7 +158,7 @@ class FlexDirectoryPlugin extends Plugin
             // CSS / JS Assets
             $this->grav['assets']->addCss('plugin://flex-directory/css/admin.css');
 
-            if ($this->controller->getTarget() == 'entries' && $this->controller->getAction() == 'list') {
+            if ($this->controller->getTarget() === 'entries' && $this->controller->getAction() === 'list') {
                 $this->grav['assets']->addCss('plugin://flex-directory/css/filter.formatter.css');
                 $this->grav['assets']->addCss('plugin://flex-directory/css/theme.default.css');
                 $this->grav['assets']->addJs('plugin://flex-directory/js/jquery.tablesorter.min.js');
