@@ -13,7 +13,7 @@
         <span class="danger-zone"></span>
         <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
     </div>
-    {% include 'partials/modal-remove.html.twig' with { name: 'entry' } %}
+    {% include 'flex-directory/pages/modals/remove.html.twig' with { name: target } %}
 {% endif %}
 
 {% include 'partials/modal-changes-detected.html.twig' %}

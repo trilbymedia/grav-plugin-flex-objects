@@ -1,4 +1,7 @@
-title: Flex Directory
+title: User Directory
+description: Simple user directory with tags.
+type: flex-directory
+
 form:
   validation: loose
 
@@ -37,15 +40,3 @@ form:
       classes: fancy
       validate:
         type: commalist
-
-    # Don't mess with this stuff below unless you know what you are doing
-    tools_section:
-      type: section
-      field_classes: overlay bottom
-
-      fields:
-        _post_entries_save:
-          label: PLUGIN_FLEX_DIRECTORY.AFTER_SAVE
-          type: save-redirect
-          default: create-new
-

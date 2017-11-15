@@ -89,7 +89,7 @@ class SimpleController extends AdminBaseController
                     $this->action = 'list';
                 }
             }
-            $method = strtolower($this->action) . ucfirst($this->target);
+            $method = 'task' . ucfirst(strtolower($this->action));
         } else {
             return null;
         }

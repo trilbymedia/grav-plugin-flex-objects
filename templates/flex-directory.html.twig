@@ -1,7 +1,15 @@
 {% extends 'partials/base.html.twig' %}
 
+{% set type = page.header.directory ?? uri.param('type') %}
+{% set flex = grav.flex_directory %}
+{% set types = flex.types %}
+
 {% block content %}
     {{ page.content }}
 
-    {% include 'flex-directory/site.html.twig' %}
+    {% if not type and flex.count %}
+    {% include 'flex-directory/types.html.twig' %}
+    {% else %}
+    {% include 'flex-directory/list.html.twig' with {type: type } %}
+    {% endif %}
 {% endblock %}

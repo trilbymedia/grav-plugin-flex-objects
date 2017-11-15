@@ -16,6 +16,7 @@ class SimpleDataContainer
     protected $data_file;
     protected $data_path;
     protected $blueprint_file;
+    protected $blueprint;
     protected $cache_id;
 
     protected $data = [];
@@ -25,14 +26,18 @@ class SimpleDataContainer
      * Initialize with location of data file
      *
      * @param $data_file
-     * @param $blueprint_file
+     * @param string|object $blueprint
      * @internal param $file
      */
-    public function __construct($data_file, $blueprint_file)
+    public function __construct($data_file, $blueprint)
     {
         $this->data_file = $data_file;
         $this->extension = pathinfo($data_file, PATHINFO_EXTENSION);
-        $this->blueprint_file = $blueprint_file;
+        if (is_string($blueprint)) {
+            $this->blueprint_file = $blueprint;
+        } else {
+            $this->blueprint = $blueprint;
+        }
         $this->data_path = Grav::instance()['locator']->findResource($data_file, true, true);
         $this->cache_id = substr(md5($data_file), 0, 10);
     }
@@ -52,8 +57,15 @@ class SimpleDataContainer
                 }
             }
 
-            $blueprint = new Blueprint($this->blueprint_file);
-            $blueprint->load();
+            if ($this->blueprint) {
+                $blueprint = $this->blueprint;
+            } else {
+                $blueprint = (new Blueprint($this->blueprint_file))->load();
+                if ($blueprint->get('type') === 'flex-directory') {
+                    $blueprint->extend((new Blueprint('plugin://flex-directory/blueprints/flex-directory.yaml'))->load(), true);
+                }
+                $blueprint->init();
+            }
             $data = $this->file->content(null, true);
 
             $obj = new Data($data, $blueprint);
@@ -160,5 +172,7 @@ class SimpleDataContainer
         return true;
     }
 
-
+    protected function prepareDataItem(&$data)
+    {
+    }
 }

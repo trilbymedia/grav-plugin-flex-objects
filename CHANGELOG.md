@@ -1,6 +1,8 @@
-# v2.0.2
-##  03/xx/2017
+# v3.0.9
+##  mm/dd/2017
 
+1. [](#new)
+    * Added support for multiple customizable directories
 1. [](#bugfix)
     * Ensure we don't add flex-directory to Twig if it doesn't exist
 

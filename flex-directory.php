@@ -3,6 +3,7 @@ namespace Grav\Plugin;
 
 use Grav\Common\Plugin;
 use Grav\Plugin\FlexDirectory\AdminController;
+use Grav\Plugin\FlexDirectory\Entities\Directory;
 use Grav\Plugin\FlexDirectory\SiteController;
 use Grav\Plugin\FlexDirectory\Entries;
 use RocketTheme\Toolbox\Event\Event;
@@ -66,9 +67,17 @@ class FlexDirectoryPlugin extends Plugin
         }
 
         $config = $this->config->get('plugins.flex-directory');
+        $blueprint = $config['blueprint_file'];
+        $blueprints = isset($config['blueprints']) ? $config['blueprints'] : [basename($blueprint, '.yaml') => $blueprint];
 
         // Add to DI container
-        $this->grav['flex-entries'] = new Entries($config['json_file'], $config['blueprint_file']);
+        $this->grav['flex_directory'] = function () use ($blueprints) {
+            return new Directory($blueprints);
+        };
+        // Backwards compatibility to 2.0
+        $this->grav['flex-entries'] = function () use ($config) {
+            return new Entries($config['json_file'], $config['blueprint_file']);
+        };
 
     }
 
@@ -91,7 +100,7 @@ class FlexDirectoryPlugin extends Plugin
      */
     public function onAdminMenu()
     {
-        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_DIRECTORY.TITLE'] = ['route' => $this->name .'/entries', 'icon' => 'fa-list'];
+        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_DIRECTORY.TITLE'] = ['route' => $this->name, 'icon' => 'fa-list'];
     }
 
     /**
