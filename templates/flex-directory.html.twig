@@ -7,7 +7,7 @@
 {% block content %}
     {{ page.content }}
 
-    {% if not type and flex.count %}
+    {% if not type and flex.count > 1 %}
     {% include 'flex-directory/types.html.twig' %}
     {% else %}
     {% include 'flex-directory/list.html.twig' with {type: type } %}
