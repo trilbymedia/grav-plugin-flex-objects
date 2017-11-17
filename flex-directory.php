@@ -68,11 +68,15 @@ class FlexDirectoryPlugin extends Plugin
 
         $config = $this->config->get('plugins.flex-directory');
         $blueprint = $config['blueprint_file'];
-        $blueprints = isset($config['directories']) ? $config['directories'] : [basename($blueprint, '.yaml') => $blueprint];
+        $blueprints = isset($config['directories']) ? $config['directories'] : [$blueprint];
 
         // Add to DI container
         $this->grav['flex_directory'] = function () use ($blueprints) {
-            return new Directory($blueprints);
+            $list = [];
+            foreach ($blueprints as $blueprint) {
+                $list[basename($blueprint, '.yaml')] = $blueprint;
+            }
+            return new Directory($list);
         };
         // Backwards compatibility to 2.0
         $this->grav['flex-entries'] = function () use ($config) {

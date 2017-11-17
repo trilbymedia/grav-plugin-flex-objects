@@ -53,3 +53,8 @@ form:
       type: text
       label: Extra Site Twig Path
 
+    directories:
+      type: text
+      label: Directories
+      validate:
+        type: commalist
