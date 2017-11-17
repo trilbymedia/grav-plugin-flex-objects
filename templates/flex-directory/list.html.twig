@@ -1,4 +1,6 @@
-{% set type = type ?: 'entries' %}
+{% set flex = grav.flex_directory %}
+{% set directory = flex.directory(type) %}
+{% set type = directory.type %}
 
 <h2>{{ type|capitalize }}</h2>
 

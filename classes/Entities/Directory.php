@@ -21,8 +21,12 @@ class Directory implements \Countable
         return $this->types;
     }
 
-    public function getDirectory($type)
+    public function getDirectory($type = null)
     {
+        if (!$type) {
+            return reset($this->types) ?: null;
+        }
+
         return isset($this->types[$type]) ? $this->types[$type] : null;
     }
 

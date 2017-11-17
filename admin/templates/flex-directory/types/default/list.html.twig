@@ -3,9 +3,13 @@
 {% set fields_count = count(fields) %}
 {% set fields_width = 8 %}
 {% set fields_set = 0 %}
+{% set title_field = directory.config('admin/list/title') %}
 {% for key,options in fields %}
     {% set fields_width = fields_width + options.width ?: 0 %}
     {% set fields_set = fields_set + (options.width ? 1 : 0) %}
+    {% if not title_field and options.link == 'edit' %}
+        {% set title_field = key %}
+    {% endif %}
 {% endfor %}
 {% set schema = directory.blueprint.schema %}
 
@@ -65,12 +69,13 @@
                     </td>
                 {% endfor %}
                 <td>
+                    {% set entry_title = title_field ? "'" ~ entry[title_field]|join(' ') ~ "'" : 'Item' %}
                     <a href="{{ entry_url ~ id }}"
-                       title="Edit '{{ entry.name }}'"
+                       title="Edit {{ entry_title }}"
                        class="edit-action"><i class="fa fa-pencil"></i></a>
                     <a href="#delete"
                        class="page-delete delete-action"
-                       title="Delete '{{ entry.name }}'"
+                       title="Delete {{ entry_title }}"
                        data-remodal-target="delete"
                        data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
                 </td>
