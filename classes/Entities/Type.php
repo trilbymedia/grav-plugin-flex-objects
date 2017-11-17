@@ -36,7 +36,7 @@ class Type
 
     public function getStorage($resolve = false)
     {
-        $file = $this->getConfig('data/storage/file', 'user://data/flex-directory/' . $this->getType() . '.json');
+        $file = $this->getConfig('data/storage', 'user://data/flex-directory/' . $this->getType() . '.json');
 
         if ($resolve) {
             $grav = Grav::instance();
