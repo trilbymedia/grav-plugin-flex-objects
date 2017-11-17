@@ -6,7 +6,7 @@
 
 {% block head %}
     {% if flex.count == 1 %}
-        {{ redirect_me(base_url ~ '/flex-directory/entries') }}
+        {{ redirect_me(base_url ~ '/flex-directory/' ~ flex.directory.type) }}
     {% endif %}
     {{ parent() }}
 {% endblock %}
