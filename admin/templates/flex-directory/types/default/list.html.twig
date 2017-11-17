@@ -1,10 +1,16 @@
 {% set entry_url =  base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '/id' ~ separator %}
-{% set columns = directory.config('admin/list/columns') %}
-{% set linked = directory.config('admin/list/link') %}
+{% set fields = directory.config('admin/list/fields') %}
+{% set fields_count = count(fields) %}
+{% set fields_width = 8 %}
+{% set fields_set = 0 %}
+{% for key,options in fields %}
+    {% set fields_width = fields_width + options.width ?: 0 %}
+    {% set fields_set = fields_set + (options.width ? 1 : 0) %}
+{% endfor %}
 {% set schema = directory.blueprint.schema %}
 
-{% if not columns %}
-<div class="no-entries">
+{% if not fields %}
+    <div class="no-entries">
     <p>Blueprint for '{{ target }}' does not define displayed fields or list page override.</p>
     <ul>
         <li>
@@ -22,30 +28,41 @@
 {% else %}
     <table id="data-table" class="tablesorter tablesorter-default">
         <colgroup>
-            {% for column in columns %}
-            <col width="24" />
+            {% for key,options in fields %}
+                <col width="{{ options.width ?: ((100-fields_width) / ((fields_count-fields_set) ?: 1))|round(3) }}" />
             {% endfor %}
             <col width="8" />
         </colgroup>
         <thead>
         <tr>
-            {% for column in columns %}
-            <th>{{ schema.get(column).label }}</th>
+            {% for key,options in fields %}
+            <th>{{ schema.get(key).label }}</th>
             {% endfor %}
-            <th>&nbsp;</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
         {% for id,entry in data.toArray %}
             <tr>
-                {% for column in columns %}
-                <td>
-                {% if column == linked %}
-                    <a href="{{ entry_url ~ id }}">{{ entry[column] }}</a>
-                {% else %}
-                    {{ entry[column] }}
-                {% endif %}
-                </td>
+                {% for key,options in fields %}
+                    {% set field = schema.get(key) %}
+                    <td>
+                        {% if options.link == 'edit' %}
+                            <a href="{{ entry_url ~ id }}">{{ entry[key] }}</a>
+                        {% elseif field.type == 'toggle' %}
+                            {% if entry[key] %}
+                                <i class="published fa fa-check-circle"></i>
+                            {% else %}
+                                <i class="unpublished fa fa-times-circle"></i>
+                            {% endif %}
+                        {% elseif field.type == 'url' %}
+                            <a href="{{ entry[key] }}" target="_blank"><i class="fa fa-link"></i> {{ entry[key] }}</a>
+                        {% elseif field.type == 'selectize' %}
+                            {{ entry[key]|join(',') }}
+                        {% else %}
+                            {{ entry[key] }}
+                        {% endif %}
+                    </td>
                 {% endfor %}
                 <td>
                     <a href="{{ entry_url ~ id }}"
@@ -55,7 +72,7 @@
                        class="page-delete delete-action"
                        title="Delete '{{ entry.name }}'"
                        data-remodal-target="delete"
-                       data-delete-url="{{ uri.addNonce(entry_url ~ id ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
+                       data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
                 </td>
             </tr>
         {% endfor %}
@@ -90,14 +107,24 @@
                 theme: 'blue',
                 cssChildRow: 'tablesorter-childRow',
                 widgets: ['zebra', 'filter', 'pager'],
+                headers: {
+                    {% for key,options in fields %}
+                    {% set field = schema.get(key) %}
+                    {% if field.type not in ['text', 'textarea', 'url', 'selectize', 'email'] %}
+                    {{ loop.index - 1 }}: { sorter: false, filter: false },
+                    {% else %}
+                    {% endif %}
+                    {% endfor %}
+                    {{ fields_count }}: { sorter: false, filter: false },
+                },
                 widgetOptions: {
                     pager_output: '{startRow} - {endRow} / {filteredRows} ({totalRows})',
-                    pager_removeRows: false,
-                    pager_size: 10,
-                    filter_childRows: false,
-                    filter_cssFilter: 'tablesorter-filter',
-                    filter_startsWith: false,
-                    filter_ignoreCase: true
+                        pager_removeRows: false,
+                        pager_size: 10,
+                        filter_childRows: false,
+                        filter_cssFilter: 'tablesorter-filter',
+                        filter_startsWith: false,
+                        filter_ignoreCase: true
                 }
             });
 

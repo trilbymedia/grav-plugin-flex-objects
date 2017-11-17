@@ -3,6 +3,7 @@
 
 1. [](#new)
     * Added support for multiple customizable directories
+    * Added blueprint based configuration for listing page [#8](https://github.com/trilbymedia/grav-plugin-flex-directory/pull/8)
 1. [](#bugfix)
     * Ensure we don't add flex-directory to Twig if it doesn't exist
 
