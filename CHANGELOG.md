@@ -1,3 +1,9 @@
+# Grav 2.0 Feature
+##  mm/dd/2017
+
+1. [](#new)
+    * Removed all backwards compatibility to v2.0
+
 # v3.0.0
 ##  mm/dd/2017
 

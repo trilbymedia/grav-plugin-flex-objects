@@ -5,7 +5,6 @@ use Grav\Common\Plugin;
 use Grav\Plugin\FlexDirectory\AdminController;
 use Grav\Plugin\FlexDirectory\Entities\Directory;
 use Grav\Plugin\FlexDirectory\SiteController;
-use Grav\Plugin\FlexDirectory\Entries;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -35,7 +34,6 @@ class FlexDirectoryPlugin extends Plugin
     {
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0],
-            'onTwigInitialized' => ['onTwigInitialized'],
             'onTwigSiteVariables'  => ['onTwigSiteVariables', 0],
             'onPageInitialized'    => ['onPageInitialized', 0],
         ];
@@ -67,18 +65,12 @@ class FlexDirectoryPlugin extends Plugin
         }
 
         $config = $this->config->get('plugins.flex-directory');
-        $blueprint = $config['blueprint_file'];
-        $blueprints = isset($config['blueprints']) ? $config['blueprints'] : [basename($blueprint, '.yaml') => $blueprint];
+        $blueprints = $config['blueprints'] ?: [];
 
         // Add to DI container
         $this->grav['flex_directory'] = function () use ($blueprints) {
             return new Directory($blueprints);
         };
-        // Backwards compatibility to 2.0
-        $this->grav['flex-entries'] = function () use ($config) {
-            return new Entries($config['json_file'], $config['blueprint_file']);
-        };
-
     }
 
     public function onPageInitialized()
@@ -137,18 +129,6 @@ class FlexDirectoryPlugin extends Plugin
         }
 
         $this->grav['twig']->twig_paths[] = __DIR__ . '/admin/templates';
-
-    }
-
-    /**
-     * Set the entries on the Twig vars
-     */
-    public function onTwigInitialized()
-    {
-        // Twig shortcuts
-        if (isset($this->grav['flex-entries'])) {
-            $this->grav['twig']->twig_vars['flex_entries'] = $this->grav['flex-entries'];
-        }
 
     }
 

@@ -1,5 +1,4 @@
 <?php
-
 namespace Grav\Plugin\FlexDirectory;
 
 use Grav\Common\Grav;
@@ -8,6 +7,10 @@ use Grav\Common\Utils;
 use Grav\Plugin\Admin\AdminBaseController;
 use RocketTheme\Toolbox\Session\Message;
 
+/**
+ * Class SimpleController
+ * @package Grav\Plugin\FlexDirectory
+ */
 class SimpleController extends AdminBaseController
 {
     protected $action;

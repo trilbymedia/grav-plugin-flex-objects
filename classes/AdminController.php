@@ -1,5 +1,4 @@
 <?php
-
 namespace Grav\Plugin\FlexDirectory;
 
 use Grav\Common\Grav;
@@ -8,8 +7,8 @@ use Grav\Common\Utils;
 use Grav\Plugin\FlexDirectory\Entities\Collection;
 
 /**
- * Class Controller
- * @package Grav\Plugin\Directory
+ * Class AdminController
+ * @package Grav\Plugin\FlexDirectory
  */
 class AdminController extends SimpleController
 {

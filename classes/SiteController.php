@@ -1,12 +1,10 @@
 <?php
-
 namespace Grav\Plugin\FlexDirectory;
 
 /**
- * Class Controller
- * @package Grav\Plugin\Directory
+ * Class SiteController
+ * @package Grav\Plugin\FlexDirectory
  */
 class SiteController extends SimpleController
 {
-
 }

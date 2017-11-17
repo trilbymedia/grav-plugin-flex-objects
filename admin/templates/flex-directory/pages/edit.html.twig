@@ -11,6 +11,6 @@
 {% block content %}
 <div id="directory">
     {% set path = directory.config('admin/edit/template')|default('flex-directory/types/' ~ target ~ '/edit.html.twig') %}
-    {% include [path, 'partials/' ~ target ~ '-edit.html.twig', 'flex-directory/types/default/edit.html.twig'] %}
+    {% include [path, 'flex-directory/types/default/edit.html.twig'] %}
 </div>
 {% endblock %}

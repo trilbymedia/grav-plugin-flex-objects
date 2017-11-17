@@ -8,6 +8,10 @@ use Grav\Common\Data\Blueprint;
 use Grav\Common\Data\Data;
 use Symfony\Component\Yaml\Yaml;
 
+/**
+ * Class SimpleDataContainer
+ * @package Grav\Plugin\FlexDirectory
+ */
 class SimpleDataContainer
 {
 

@@ -5,6 +5,10 @@ use Grav\Common\Data\Blueprint;
 use Grav\Common\Grav;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
+/**
+ * Class Type
+ * @package Grav\Plugin\FlexDirectory\Entities
+ */
 class Type
 {
     protected $type;

@@ -1,5 +1,5 @@
 name: Flex-Directory
-version: 2.0.1
+version: 4.0.0
 description: Simple Flexible Directory Plugin
 icon: list
 author:
@@ -34,16 +34,6 @@ form:
         0: Disabled
       validate:
         type: bool
-    json_file:
-      type: text
-      label: JSON File
-      validate:
-        required: true
-    blueprint_file:
-      type: text
-      label: Blueprint File
-      validate:
-        required: true
     extra_admin_twig_path:
       type: text
       label: Extra Admin Twig Path
@@ -52,4 +42,6 @@ form:
     extra_site_twig_path:
       type: text
       label: Extra Site Twig Path
-
+    blueprints:
+      type: text
+      label: Blueprints to defined types

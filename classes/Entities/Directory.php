@@ -1,6 +1,10 @@
 <?php
 namespace Grav\Plugin\FlexDirectory\Entities;
 
+/**
+ * Class Directory
+ * @package Grav\Plugin\FlexDirectory\Entities
+ */
 class Directory implements \Countable
 {
     protected $types = [];
