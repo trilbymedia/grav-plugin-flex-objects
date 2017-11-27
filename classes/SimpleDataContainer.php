@@ -122,6 +122,12 @@ class SimpleDataContainer
         return $this->data;
     }
 
+    public function count()
+    {
+        $this->load();
+        return count($this->data);
+    }
+
     public function setData($data)
     {
         $this->data = $data;
