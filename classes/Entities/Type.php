@@ -12,11 +12,18 @@ class Type
     protected $blueprint;
     protected $blueprint_base;
     protected $collection;
+    protected $enabled;
 
-    public function __construct($type, $blueprint_file)
+    public function __construct($type, $blueprint_file, $enabled = false)
     {
         $this->type = $type;
         $this->blueprint_file = $blueprint_file;
+        $this->enabled = (bool) $enabled;
+    }
+
+    public function isEnabled()
+    {
+        return $this->enabled;
     }
 
     public function getType()
@@ -73,6 +80,11 @@ class Type
         }
 
         return $this->blueprint;
+    }
+
+    public function getBlueprintFile()
+    {
+        return $this->blueprint_file;
     }
 
     public function getCollection()

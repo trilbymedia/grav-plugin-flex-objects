@@ -54,7 +54,7 @@ form:
       label: Extra Site Twig Path
 
     directories:
-      type: text
+      type: flex-directory
       label: Directories
       validate:
-        type: commalist
+        type: item-list

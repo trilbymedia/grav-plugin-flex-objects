@@ -4,3 +4,4 @@ json_file: 'user://data/flex-directory/entries.json'
 blueprint_file: 'plugin://flex-directory/blueprints/entries.yaml'
 extra_admin_twig_path: 'theme://admin/templates'
 extra_site_twig_path:
+directories:
