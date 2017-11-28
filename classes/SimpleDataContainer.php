@@ -8,7 +8,7 @@ use Grav\Common\Data\Blueprint;
 use Grav\Common\Data\Data;
 use Symfony\Component\Yaml\Yaml;
 
-class SimpleDataContainer
+class SimpleDataContainer implements \Countable
 {
 
     protected $file;
