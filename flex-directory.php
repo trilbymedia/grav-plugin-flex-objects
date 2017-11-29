@@ -65,11 +65,15 @@ class FlexDirectoryPlugin extends Plugin
         }
 
         $config = $this->config->get('plugins.flex-directory');
-        $blueprints = $config['blueprints'] ?: [];
+        $blueprints = $config['directories'] ?: [];
 
         // Add to DI container
         $this->grav['flex_directory'] = function () use ($blueprints) {
-            return new Directory($blueprints);
+            $list = [];
+            foreach ($blueprints as $blueprint) {
+                $list[basename($blueprint, '.yaml')] = $blueprint;
+            }
+            return new Directory($list);
         };
     }
 

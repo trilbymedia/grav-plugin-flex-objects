@@ -42,6 +42,9 @@ form:
     extra_site_twig_path:
       type: text
       label: Extra Site Twig Path
-    blueprints:
-      type: text
-      label: Blueprints to defined types
+
+    directories:
+      type: flex-directory
+      label: Directories
+      validate:
+        type: item-list

@@ -16,11 +16,18 @@ class Type
     protected $blueprint;
     protected $blueprint_base;
     protected $collection;
+    protected $enabled;
 
-    public function __construct($type, $blueprint_file)
+    public function __construct($type, $blueprint_file, $enabled = false)
     {
         $this->type = $type;
         $this->blueprint_file = $blueprint_file;
+        $this->enabled = (bool) $enabled;
+    }
+
+    public function isEnabled()
+    {
+        return $this->enabled;
     }
 
     public function getType()
@@ -40,7 +47,7 @@ class Type
 
     public function getStorage($resolve = false)
     {
-        $file = $this->getConfig('data/storage/file', 'user://data/flex-directory/' . $this->getType() . '.json');
+        $file = $this->getConfig('data/storage', 'user://data/flex-directory/' . $this->getType() . '.json');
 
         if ($resolve) {
             $grav = Grav::instance();
@@ -77,6 +84,11 @@ class Type
         }
 
         return $this->blueprint;
+    }
+
+    public function getBlueprintFile()
+    {
+        return $this->blueprint_file;
     }
 
     public function getCollection()
