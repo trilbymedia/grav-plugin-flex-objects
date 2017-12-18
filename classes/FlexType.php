@@ -126,10 +126,10 @@ class FlexType
             $raw = (array)$this->getFile()->content();
             $entries = [];
             foreach ($raw as $key => $entry) {
-                $entries[$key] = new FlexObject($entry, $key, $this);
+                $entries[$key] = $this->createObject($entry, $key);
             }
 
-            $this->collection = new FlexCollection($entries, $this);
+            $this->collection = $this->createCollection($entries);
         }
 
         return $this->collection;
@@ -169,11 +169,11 @@ class FlexType
         if (null === $object) {
             $key = $this->getNextKey();
 
-            $object = new FlexObject($data, $key, $this);
+            $object = $this->createObject($data, $key);
         } else {
             $blueprint = $this->getBlueprint();
 
-            $object = new FlexObject($blueprint->mergeData($object->jsonSerialize(), $data), $key, $this);
+            $object = $this->createObject($blueprint->mergeData($object->jsonSerialize(), $data), $key);
         }
 
         $this->getCollection()->set($key, $object);
@@ -244,5 +244,28 @@ class FlexType
         }
 
         return $file;
+    }
+
+    /**
+     * @param array $data
+     * @param $key
+     * @return FlexObject
+     */
+    protected function createObject(array $data, $key)
+    {
+        $className = $this->getConfig('data/object', 'Grav\\Plugin\\FlexDirectory\\FlexObject');
+
+        return new $className($data, $key, $this);
+    }
+
+    /**
+     * @param array $entries
+     * @return FlexCollection
+     */
+    protected function createCollection(array $entries)
+    {
+        $className = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexDirectory\\FlexCollection');
+
+        return new $className($entries, $this);
     }
 }
