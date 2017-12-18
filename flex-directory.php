@@ -2,9 +2,9 @@
 namespace Grav\Plugin;
 
 use Grav\Common\Plugin;
-use Grav\Plugin\FlexDirectory\AdminController;
-use Grav\Plugin\FlexDirectory\Entities\Directory;
-use Grav\Plugin\FlexDirectory\SiteController;
+use Grav\Plugin\FlexDirectory\Controllers\AdminController;
+use Grav\Plugin\FlexDirectory\Controllers\SiteController;
+use Grav\Plugin\FlexDirectory\FlexDirectory;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -73,7 +73,7 @@ class FlexDirectoryPlugin extends Plugin
             foreach ($blueprints as $blueprint) {
                 $list[basename($blueprint, '.yaml')] = $blueprint;
             }
-            return new Directory($list);
+            return new FlexDirectory($list);
         };
     }
 

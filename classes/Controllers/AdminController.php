@@ -1,10 +1,8 @@
 <?php
-namespace Grav\Plugin\FlexDirectory;
+namespace Grav\Plugin\FlexDirectory\Controllers;
 
 use Grav\Common\Grav;
-use Grav\Common\Helpers\Base32;
-use Grav\Common\Utils;
-use Grav\Plugin\FlexDirectory\Entities\Collection;
+use Grav\Plugin\FlexDirectory\FlexType;
 
 /**
  * Class AdminController
@@ -21,7 +19,11 @@ class AdminController extends SimpleController
         $type = $this->target;
         $id = Grav::instance()['uri']->param('id');
 
-        $status = $this->getCollection($type)->deleteDataItem($id);
+        $directory = $this->getDirectory($type);
+        $directory->remove($id);
+
+        $status = $directory->save();
+
         if ($status) {
             $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
             $list_page = $this->location . '/' . $type;
@@ -34,28 +36,20 @@ class AdminController extends SimpleController
     public function taskSave()
     {
         $type = $this->target;
-        $id = Grav::instance()['uri']->param('id');
+        $id = Grav::instance()['uri']->param('id') ?: null;
+
+        $directory = $this->getDirectory($type);
 
         // if no id param, assume new, generate an ID
-        $new = false;
-        if (!$id) {
-            $new = true;
-            do {
-                $id = strtolower(Base32::encode(Utils::generateRandomString(10)));
-            } while (($obj = $this->get($type, $id)) && $obj->toArray());
-        } else {
-            $obj = $this->get($type, $id);
-        }
+        $object = $directory->update($this->data, $id);
 
-        $obj->merge($this->data);
-
-        $status = $this->saveObjectItem($id, $obj, $this->getCollection($type));
+        $status = $directory->save();
 
         if ($status) {
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
-            if (!$this->redirect && $new) {
-                $edit_page = $this->location . '/' . $this->target . '/id:' . $id;
+            if (!$this->redirect && !$id) {
+                $edit_page = $this->location . '/' . $this->target . '/id:' . $object->getKey();
                 $this->setRedirect($edit_page);
             }
 
@@ -95,21 +89,17 @@ class AdminController extends SimpleController
      */
     protected function get($type, $id = null)
     {
-        $collection = $this->getCollection($type);
+        $collection = $this->getDirectory($type)->getCollection();
 
-        if ($id) {
-            return $collection->filterData($id);
-        }
-
-        return $collection->getData();
+        return null !== $id ? $collection[$id] : $collection;
     }
 
     /**
-     * @param $type
-     * @return Collection
+     * @param string $type
+     * @return FlexType
      */
-    protected function getCollection($type)
+    protected function getDirectory($type)
     {
-        return Grav::instance()['flex_directory']->getDirectory($type)->getCollection();
+        return Grav::instance()['flex_directory']->getDirectory($type);
     }
 }

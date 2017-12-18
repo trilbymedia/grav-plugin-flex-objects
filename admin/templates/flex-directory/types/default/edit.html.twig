@@ -1,5 +1,5 @@
 {% set id = uri.param('id') %}
-{% set entry = directory.collection.filterData(id) %}
+{% set entry = directory.collection[id] %}
 {% set entry_url = base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '/id' ~ separator %}
 {% set file_url_add = base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '.json/id' ~ separator ~ uri.param('id') %}
 {% set file_url_remove = base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '.json/id' ~ separator ~ uri.param('id') %}

@@ -3,7 +3,7 @@
 
 {% set flex = grav.flex_directory %}
 {% set directory = flex.directory(target) %}
-{% set data = directory.collection.data %}
+{% set collection = directory.collection %}
 
 {% block content_top %}
     <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ directory.storage(true) }}</b></div>

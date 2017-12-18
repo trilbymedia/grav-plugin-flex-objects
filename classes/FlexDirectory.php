@@ -1,20 +1,23 @@
 <?php
-namespace Grav\Plugin\FlexDirectory\Entities;
+namespace Grav\Plugin\FlexDirectory;
 
 use Grav\Common\Filesystem\Folder;
 
 /**
- * Class Directory
+ * Class FlexDirectory
  * @package Grav\Plugin\FlexDirectory\Entities
  */
-class Directory implements \Countable
+class FlexDirectory implements \Countable
 {
+    /**
+     * @var array|FlexType[]
+     */
     protected $types = [];
 
     public function __construct(array $types = [])
     {
         foreach ($types as $type => $config) {
-            $this->types[$type] = new Type($type, $config, true);
+            $this->types[$type] = new FlexType($type, $config, true);
         }
     }
 
@@ -32,7 +35,7 @@ class Directory implements \Countable
         foreach ($all as $url) {
             $type = basename($url, '.yaml');
             if (!isset($directories[$type])) {
-                $directories[$type] = new Type($type, $url);
+                $directories[$type] = new FlexType($type, $url);
             }
         }
 
@@ -46,6 +49,10 @@ class Directory implements \Countable
         return $this->types;
     }
 
+    /**
+     * @param string|null $type
+     * @return FlexType|null
+     */
     public function getDirectory($type = null)
     {
         if (!$type) {
@@ -55,6 +62,9 @@ class Directory implements \Countable
         return isset($this->types[$type]) ? $this->types[$type] : null;
     }
 
+    /**
+     * @return int
+     */
     public function count()
     {
         return count($this->types);
