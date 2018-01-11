@@ -1,8 +1,13 @@
 <?php
 namespace Grav\Plugin\FlexDirectory;
 
+use Grav\Common\Debugger;
+use Grav\Common\Grav;
+use Grav\Common\Twig\Twig;
+use Grav\Framework\ContentBlock\HtmlBlock;
 use Grav\Framework\Object\ArrayObject;
 use Grav\Plugin\FlexDirectory\Interfaces\FlexObjectInterface;
+use RocketTheme\Toolbox\Event\Event;
 
 /**
  * Class FlexObject
@@ -23,7 +28,46 @@ class FlexObject extends ArrayObject implements FlexObjectInterface
     {
         $this->flexType = $type;
 
+        // TODO: need a better way
+        static::$type = $type->getType();
+
         parent::__construct($elements, $key);
+    }
+
+    /**
+     * @param string $layout
+     * @param array $context
+     * @return HtmlBlock
+     * @throws \Exception
+     * @throws \Throwable
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Syntax
+     */
+    public function render($layout = 'default', array $context = [])
+    {
+        $grav = Grav::instance();
+
+        /** @var Debugger $debugger */
+        $debugger = $grav['debugger'];
+        $debugger->startTimer('flex-object-' . $this->getType(), 'Object ' . $this->getType());
+
+        $block = new HtmlBlock();
+
+        $grav->fireEvent('onFlexObjectRender', new Event([
+            'object' => $this,
+            'layout' => &$layout,
+            'context' => &$context
+        ]));
+
+        $output = $this->getTemplate($layout)->render(
+            ['grav' => $grav, 'block' => $block, 'object' => $this] + $context
+        );
+
+        $block->setContent($output);
+
+        $debugger->stopTimer('flex-object-' . $this->getType());
+
+        return $block;
     }
 
     /**
@@ -51,5 +95,50 @@ class FlexObject extends ArrayObject implements FlexObjectInterface
     public function jsonSerialize()
     {
         return $this->getElements();
+    }
+
+    protected function getCollectionByProperty($type, $property)
+    {
+        $collection = $this->getDirectory($type)->getCollection();
+        $list = $this->getNestedProperty($property) ?: [];
+
+        return $collection->filter(function ($object) use ($list) { return \in_array($object->id, $list, true); });
+    }
+
+    /**
+     * @param $type
+     * @return FlexType
+     * @throws \RuntimeException
+     */
+    protected function getDirectory($type)
+    {
+        /** @var FlexDirectory $flex */
+        $flex = Grav::instance()['flex_directory'];
+        $directory = $flex->getDirectory($type);
+        if (!$directory) {
+            throw new \RuntimeException(ucfirst($type). ' directory does not exist!');
+        }
+
+        return $directory;
+    }
+
+    /**
+     * @param string $layout
+     * @return \Twig_Template
+     * @throws \Twig_Error_Loader
+     * @throws \Twig_Error_Syntax
+     */
+    protected function getTemplate($layout)
+    {
+        $grav = Grav::instance();
+
+        /** @var Twig $twig */
+        $twig = $grav['twig'];
+
+        try {
+            return $twig->twig()->resolveTemplate(["flex-directory/layouts/{$this->getType()}/object/{$layout}.html.twig"]);
+        } catch (\Twig_Error_Loader $e) {
+            return $twig->twig()->resolveTemplate(["flex-directory/layouts/404.html.twig"]);
+        }
     }
 }

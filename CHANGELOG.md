@@ -3,6 +3,7 @@
 
 1. [](#new)
     * Removed all backwards compatibility to v2.0
+    * Added support for rendering Flex collections and objects 
 
 # v3.0.0
 ##  mm/dd/2017
