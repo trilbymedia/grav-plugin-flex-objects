@@ -101,22 +101,19 @@ class FlexObject extends ArrayObject implements FlexObjectInterface
     }
 
     /**
-     * @param string $property
+     * @param string $filename
      * @return Medium|null
      */
-    protected function createMedium($property)
+    protected function createMedium($filename)
     {
         $grav = Grav::instance();
 
         /** @var UniformResourceLocator $locator */
         $locator = $grav['locator'];
 
-        $file = $locator->findResource($this->getNestedProperty($property));
-        if ($file) {
-            return MediumFactory::fromFile($file);
-        }
+        $file = $locator->findResource($filename);
 
-        return null;
+        return $file ? MediumFactory::fromFile($file) : null;
     }
 
     /**
