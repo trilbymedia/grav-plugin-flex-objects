@@ -31,10 +31,16 @@ class FlexObject extends ArrayObject implements FlexObjectInterface
     {
         $this->flexType = $type;
 
-        // TODO: need a better way
-        static::$type = $type->getType();
-
         parent::__construct($elements, $key);
+    }
+
+    /**
+     * @param bool $prefix
+     * @return string
+     */
+    public function getType($prefix = true)
+    {
+        return ($prefix ? static::$prefix : '') . $this->flexType->getType();
     }
 
     /**
@@ -63,7 +69,7 @@ class FlexObject extends ArrayObject implements FlexObjectInterface
         ]));
 
         $output = $this->getTemplate($layout)->render(
-            ['grav' => $grav, 'block' => $block, 'object' => $this] + $context
+            ['grav' => $grav, 'block' => $block, 'object' => $this, 'layout' => $layout] + $context
         );
 
         $block->setContent($output);
@@ -117,9 +123,9 @@ class FlexObject extends ArrayObject implements FlexObjectInterface
     }
 
     /**
-     * @param $type
-     * @param $property
-     * @return static
+     * @param string $type
+     * @param string $property
+     * @return FlexCollection
      */
     protected function getCollectionByProperty($type, $property)
     {

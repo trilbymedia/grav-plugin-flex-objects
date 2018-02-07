@@ -33,6 +33,15 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     }
 
     /**
+     * @param bool $prefix
+     * @return string
+     */
+    public function getType($prefix = true)
+    {
+        return ($prefix ? static::$prefix : '') . $this->flexType->getType();
+    }
+
+    /**
      * @param string $layout
      * @param array $context
      * @return HtmlBlock
@@ -51,14 +60,14 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 
         $block = new HtmlBlock();
 
-        $grav->fireEvent('onFlexCollectiontRender', new Event([
+        $grav->fireEvent('onFlexCollectionRender', new Event([
             'collection' => $this,
             'layout' => &$layout,
             'context' => &$context
         ]));
 
         $output = $this->getTemplate($layout)->render(
-            ['grav' => $grav, 'block' => $block, 'collection' => $this] + $context
+            ['grav' => $grav, 'block' => $block, 'collection' => $this, 'layout' => $layout] + $context
         );
 
         $block->setContent($output);
