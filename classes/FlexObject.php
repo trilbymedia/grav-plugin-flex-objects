@@ -3,11 +3,14 @@ namespace Grav\Plugin\FlexDirectory;
 
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
+use Grav\Common\Page\Medium\Medium;
+use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Twig\Twig;
 use Grav\Framework\ContentBlock\HtmlBlock;
 use Grav\Framework\Object\ArrayObject;
 use Grav\Plugin\FlexDirectory\Interfaces\FlexObjectInterface;
 use RocketTheme\Toolbox\Event\Event;
+use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
  * Class FlexObject
@@ -97,6 +100,30 @@ class FlexObject extends ArrayObject implements FlexObjectInterface
         return $this->getElements();
     }
 
+    /**
+     * @param string $property
+     * @return Medium|null
+     */
+    protected function createMedium($property)
+    {
+        $grav = Grav::instance();
+
+        /** @var UniformResourceLocator $locator */
+        $locator = $grav['locator'];
+
+        $file = $locator->findResource($this->getNestedProperty($property));
+        if ($file) {
+            return MediumFactory::fromFile($file);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param $type
+     * @param $property
+     * @return static
+     */
     protected function getCollectionByProperty($type, $property)
     {
         $collection = $this->getDirectory($type)->getCollection();
