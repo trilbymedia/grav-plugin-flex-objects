@@ -85,9 +85,6 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     {
         $this->flexType = $type;
 
-        // TODO: need a better way
-        static::$type = $type->getType();
-
         return $this;
     }
 
