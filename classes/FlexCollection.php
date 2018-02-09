@@ -97,6 +97,22 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     }
 
     /**
+     * @param string $value
+     * @param string $field
+     * @return object|null
+     */
+    public function find($value, $field = 'id')
+    {
+        if ($value) foreach ($this as $element) {
+            if (strtolower($element->getProperty($field)) === strtolower($value)) {
+                return $element;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @return array
      */
     public function jsonSerialize()
