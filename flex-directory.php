@@ -155,6 +155,7 @@ class FlexDirectoryPlugin extends Plugin
 
             // CSS / JS Assets
             $this->grav['assets']->addCss('plugin://flex-directory/css/admin.css');
+            $this->grav['assets']->addCss('plugin://admin/themes/grav/css/codemirror/codemirror.css');
 
             if ($this->controller->getTarget() == 'entries' && $this->controller->getAction() == 'list') {
                 $this->grav['assets']->addCss('plugin://flex-directory/css/filter.formatter.css');
