@@ -7,7 +7,7 @@ use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Twig\Twig;
 use Grav\Framework\ContentBlock\HtmlBlock;
-use Grav\Framework\Object\ArrayObject;
+use Grav\Framework\Object\LazyObject;
 use Grav\Plugin\FlexDirectory\Interfaces\FlexObjectInterface;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
@@ -16,7 +16,7 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
  * Class FlexObject
  * @package Grav\Plugin\FlexDirectory\Entities
  */
-class FlexObject extends ArrayObject implements FlexObjectInterface
+class FlexObject extends LazyObject implements FlexObjectInterface
 {
     /** @var FlexType */
     private $flexType;
