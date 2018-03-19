@@ -1,0 +1,19 @@
+{% set directory = grav.flex_directory.directory(type) %}
+{% set collection = directory.collection %}
+
+<div id="flex-directory">
+    <ul class="list">
+        {% for entry in collection %}
+            <li>
+                <div class="entry-details">
+                    {% for key,field in entry %}
+                        {% set html %}
+                            <p>{{ key|capitalize }}: <b>{% verbatim %}{{{% endverbatim %} entry.{{ key }} {% verbatim %}}}{% endverbatim %}</b></p>
+                        {% endset %}
+                        {{ html|e }}<br>
+                    {% endfor %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>

@@ -1,0 +1,16 @@
+{% extends 'partials/base.html.twig' %}
+{% use 'flex-directory/pages/titlebar/edit.html.twig' %}
+
+{% set flex = grav.flex_directory %}
+{% set directory = flex.directory(target) %}
+
+{% block content_top %}
+    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ directory.storage(true) }}</b></div>
+{% endblock %}
+
+{% block content %}
+<div id="directory">
+    {% set path = directory.config('admin/edit/template')|default('flex-directory/types/' ~ target ~ '/edit.html.twig') %}
+    {% include [path, 'flex-directory/types/default/edit.html.twig'] %}
+</div>
+{% endblock %}

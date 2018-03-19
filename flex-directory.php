@@ -2,9 +2,9 @@
 namespace Grav\Plugin;
 
 use Grav\Common\Plugin;
-use Grav\Plugin\FlexDirectory\AdminController;
-use Grav\Plugin\FlexDirectory\SiteController;
-use Grav\Plugin\FlexDirectory\Entries;
+use Grav\Plugin\FlexDirectory\Controllers\AdminController;
+use Grav\Plugin\FlexDirectory\Controllers\SiteController;
+use Grav\Plugin\FlexDirectory\FlexDirectory;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -13,6 +13,8 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexDirectoryPlugin extends Plugin
 {
+    /** @var AdminController|SiteController */
+    protected $controller;
 
     protected $version;
 
@@ -32,7 +34,6 @@ class FlexDirectoryPlugin extends Plugin
     {
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0],
-            'onTwigInitialized' => ['onTwigInitialized'],
             'onTwigSiteVariables'  => ['onTwigSiteVariables', 0],
             'onPageInitialized'    => ['onPageInitialized', 0],
         ];
@@ -64,10 +65,16 @@ class FlexDirectoryPlugin extends Plugin
         }
 
         $config = $this->config->get('plugins.flex-directory');
+        $blueprints = $config['directories'] ?: [];
 
         // Add to DI container
-        $this->grav['flex-entries'] = new Entries($config['json_file'], $config['blueprint_file']);
-
+        $this->grav['flex_directory'] = function () use ($blueprints) {
+            $list = [];
+            foreach ($blueprints as $blueprint) {
+                $list[basename($blueprint, '.yaml')] = $blueprint;
+            }
+            return new FlexDirectory($list);
+        };
     }
 
     public function onPageInitialized()
@@ -89,7 +96,7 @@ class FlexDirectoryPlugin extends Plugin
      */
     public function onAdminMenu()
     {
-        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_DIRECTORY.TITLE'] = ['route' => $this->name .'/entries', 'icon' => 'fa-list'];
+        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_DIRECTORY.TITLE'] = ['route' => $this->name, 'icon' => 'fa-list'];
     }
 
     /**
@@ -130,18 +137,6 @@ class FlexDirectoryPlugin extends Plugin
     }
 
     /**
-     * Set the entries on the Twig vars
-     */
-    public function onTwigInitialized()
-    {
-        // Twig shortcuts
-        if (isset($this->grav['flex-entries'])) {
-            $this->grav['twig']->twig_vars['flex_entries'] = $this->grav['flex-entries'];
-        }
-
-    }
-
-    /**
      * Set needed variables to display direcotry.
      */
     public function onTwigSiteVariables()
@@ -157,7 +152,7 @@ class FlexDirectoryPlugin extends Plugin
             $this->grav['assets']->addCss('plugin://flex-directory/css/admin.css');
             $this->grav['assets']->addCss('plugin://admin/themes/grav/css/codemirror/codemirror.css');
 
-            if ($this->controller->getTarget() == 'entries' && $this->controller->getAction() == 'list') {
+            if ($this->controller->getLocation() === 'flex-directory' && $this->controller->getAction() === 'list') {
                 $this->grav['assets']->addCss('plugin://flex-directory/css/filter.formatter.css');
                 $this->grav['assets']->addCss('plugin://flex-directory/css/theme.default.css');
                 $this->grav['assets']->addJs('plugin://flex-directory/js/jquery.tablesorter.min.js');

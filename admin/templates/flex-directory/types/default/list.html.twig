@@ -1,0 +1,144 @@
+{% set entry_url =  base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '/id' ~ separator %}
+{% set fields = directory.config('admin/list/fields') %}
+{% set fields_count = count(fields) %}
+{% set fields_width = 8 %}
+{% set fields_set = 0 %}
+{% set title_field = directory.config('admin/list/title') %}
+{% for key,options in fields %}
+    {% set fields_width = fields_width + options.width ?: 0 %}
+    {% set fields_set = fields_set + (options.width ? 1 : 0) %}
+    {% if not title_field and options.link == 'edit' %}
+        {% set title_field = key %}
+    {% endif %}
+{% endfor %}
+{% set schema = directory.blueprint.schema %}
+
+{% if not fields %}
+    <div class="no-entries">
+    <p>Blueprint for '{{ target }}' does not define displayed fields or list page override.</p>
+    <ul>
+        <li>
+            Please add list of fields to blueprints file.
+        </li>
+        <li>
+            Please create template file for the type in <strong>flex-directory/types/{{ target }}/list.html.twig</strong>
+        </li>
+    </ul>
+</div>
+{% elseif not collection.count %}
+    <div class="no-entries">
+        There are currently no entries, click the <a href="{{ base_url ~ '/flex-directory/' ~ target ~ '/action:add' }}">Add</a> button to create a new one...
+    </div>
+{% else %}
+    <table id="data-table" class="tablesorter tablesorter-default">
+        <colgroup>
+            {% for key,options in fields %}
+                <col width="{{ options.width ?: ((100-fields_width) / ((fields_count-fields_set) ?: 1))|round(3) }}" />
+            {% endfor %}
+            <col width="8" />
+        </colgroup>
+        <thead>
+        <tr>
+            {% for key,options in fields %}
+            <th>{{ schema.get(key).label }}</th>
+            {% endfor %}
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for id,entry in collection %}
+            <tr>
+                {% for key,options in fields %}
+                    {% set field = schema.get(key) %}
+                    <td>
+                        {% if options.link == 'edit' %}
+                            <a href="{{ entry_url ~ id }}">{{ entry[key] }}</a>
+                        {% elseif field.type == 'toggle' %}
+                            {% if entry[key] %}
+                                <i class="published fa fa-check-circle"></i>
+                            {% else %}
+                                <i class="unpublished fa fa-times-circle"></i>
+                            {% endif %}
+                        {% elseif field.type == 'url' %}
+                            <a href="{{ entry[key] }}" target="_blank"><i class="fa fa-link"></i> {{ entry[key] }}</a>
+                        {% elseif field.type == 'selectize' %}
+                            {{ entry[key]|join(',') }}
+                        {% else %}
+                            {{ entry[key] }}
+                        {% endif %}
+                    </td>
+                {% endfor %}
+                <td>
+                    {% set entry_title = title_field ? "'" ~ entry[title_field]|join(' ') ~ "'" : 'Item' %}
+                    <a href="{{ entry_url ~ id }}"
+                       title="Edit {{ entry_title }}"
+                       class="edit-action"><i class="fa fa-pencil"></i></a>
+                    <a href="#delete"
+                       class="page-delete delete-action"
+                       title="Delete {{ entry_title }}"
+                       data-remodal-target="delete"
+                       data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div id="pager" class="pager">
+        <form>
+            <button class="button first"><i class="fa fa-fw fa-angle-double-left"></i></button>
+            <button class="button prev"><i class="fa fa-fw fa-chevron-left"></i></button>
+
+            <span class="pagedisplay"></span>
+
+            <button class="button next"><i class="fa fa-fw fa-chevron-right"></i></button>
+            <button class="button last"><i class="fa fa-fw fa-angle-double-right"></i></button>
+
+            <select data-grav-selectize class="pagesize">
+                <option selected="selected" value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">All</option>
+            </select>
+        </form>
+    </div>
+
+    <script>
+        ((function($) {
+            var list = $('#data-table');
+
+            list.tablesorter({
+                theme: 'blue',
+                cssChildRow: 'tablesorter-childRow',
+                widgets: ['zebra', 'filter', 'pager'],
+                headers: {
+                    {% for key,options in fields %}
+                    {% set field = schema.get(key) %}
+                    {% if field.type not in ['text', 'textarea', 'url', 'selectize', 'email'] %}
+                    {{ loop.index - 1 }}: { sorter: false, filter: false },
+                    {% else %}
+                    {% endif %}
+                    {% endfor %}
+                    {{ fields_count }}: { sorter: false, filter: false },
+                },
+                widgetOptions: {
+                    pager_output: '{startRow} - {endRow} / {filteredRows} ({totalRows})',
+                        pager_removeRows: false,
+                        pager_size: 10,
+                        filter_childRows: false,
+                        filter_cssFilter: 'tablesorter-filter',
+                        filter_startsWith: false,
+                        filter_ignoreCase: true
+                }
+            });
+
+            list.find('.tablesorter-childRow td').addClass('hidden');
+
+            $('#pager button').on('click', function(e) { e.preventDefault(); });
+        })(jQuery));
+    </script>
+
+{% endif %}
+
+{% include 'flex-directory/pages/modals/remove.html.twig' with { name: target } %}

@@ -1,6 +1,16 @@
-# v2.0.2
-##  03/xx/2017
+# Grav 2.0 Feature
+##  mm/dd/2017
 
+1. [](#new)
+    * Removed all backwards compatibility to v2.0
+    * Added support for rendering Flex collections and objects 
+
+# v3.0.0
+##  mm/dd/2017
+
+1. [](#new)
+    * Added support for multiple customizable directories
+    * Added blueprint based configuration for listing page [#8](https://github.com/trilbymedia/grav-plugin-flex-directory/pull/8)
 1. [](#bugfix)
     * Ensure we don't add flex-directory to Twig if it doesn't exist
 

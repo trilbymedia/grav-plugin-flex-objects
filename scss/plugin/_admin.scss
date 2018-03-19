@@ -1,4 +1,18 @@
 /* Admin Styles */
+
+#types {
+    padding: 3rem;
+
+    .card-item {
+        max-width: 100%;
+
+        p {
+            margin: 1rem 0 0;
+        }
+    }
+
+}
+
 #directory {
 
     .no-entries {
