@@ -6,9 +6,9 @@
 {% set savedOption = grav.session.post_entries_save|default('create-new') %}
 
 {% if isNew %}
-    {% set options = {'create-new':'PLUGIN_FLEX_DIRECTORY.CREATE_NEW', 'edit':'PLUGIN_FLEX_DIRECTORY.EDIT', 'list':'PLUGIN_FLEX_DIRECTORY.LIST'} %}
+    {% set options = {'create-new':'PLUGIN_FLEX_OBJECTS.CREATE_NEW', 'edit':'PLUGIN_FLEX_OBJECTS.EDIT', 'list':'PLUGIN_FLEX_OBJECTS.LIST'} %}
 {% else %}
-    {% set options = {'edit':'PLUGIN_FLEX_DIRECTORY.EDIT', 'list':'PLUGIN_FLEX_DIRECTORY.LIST'} %}
+    {% set options = {'edit':'PLUGIN_FLEX_OBJECTS.EDIT', 'list':'PLUGIN_FLEX_OBJECTS.LIST'} %}
 {% endif %}
 
 {% block input %}

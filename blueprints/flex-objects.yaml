@@ -1,4 +1,4 @@
-type: flex-directory
+type: flex-objects
 
 form:
   fields:
@@ -10,7 +10,7 @@ form:
 
       fields:
         _post_entries_save:
-          label: PLUGIN_FLEX_DIRECTORY.AFTER_SAVE
+          label: PLUGIN_FLEX_OBJECTS.AFTER_SAVE
           type: save-redirect
           default: create-new
 

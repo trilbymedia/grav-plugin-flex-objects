@@ -1,5 +1,5 @@
 {% set template = (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: 'types' %}
-{% extends 'flex-directory/pages/' ~ template ~ '.html.twig' %}
+{% extends 'flex-objects/pages/' ~ template ~ '.html.twig' %}
 
 {% set base_route = location %}
 {% set separator = config.system.param_sep %}

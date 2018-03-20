@@ -1,5 +1,5 @@
 <?php
-namespace Grav\Plugin\FlexDirectory;
+namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
@@ -8,13 +8,13 @@ use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Twig\Twig;
 use Grav\Framework\ContentBlock\HtmlBlock;
 use Grav\Framework\Object\LazyObject;
-use Grav\Plugin\FlexDirectory\Interfaces\FlexObjectInterface;
+use Grav\Plugin\FlexObjects\Interfaces\FlexObjectInterface;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
  * Class FlexObject
- * @package Grav\Plugin\FlexDirectory\Entities
+ * @package Grav\Plugin\FlexObjects\Entities
  */
 class FlexObject extends LazyObject implements FlexObjectInterface
 {
@@ -142,8 +142,8 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function getDirectory($type)
     {
-        /** @var FlexDirectory $flex */
-        $flex = Grav::instance()['flex_directory'];
+        /** @var FlexObjects $flex */
+        $flex = Grav::instance()['flex_objects'];
         $directory = $flex->getDirectory($type);
         if (!$directory) {
             throw new \RuntimeException(ucfirst($type). ' directory does not exist!');
@@ -166,9 +166,9 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $twig = $grav['twig'];
 
         try {
-            return $twig->twig()->resolveTemplate(["flex-directory/layouts/{$this->getType()}/object/{$layout}.html.twig"]);
+            return $twig->twig()->resolveTemplate(["flex-objects/layouts/{$this->getType()}/object/{$layout}.html.twig"]);
         } catch (\Twig_Error_Loader $e) {
-            return $twig->twig()->resolveTemplate(["flex-directory/layouts/404.html.twig"]);
+            return $twig->twig()->resolveTemplate(["flex-objects/layouts/404.html.twig"]);
         }
     }
 }

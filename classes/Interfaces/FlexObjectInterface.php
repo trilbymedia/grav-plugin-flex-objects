@@ -1,12 +1,12 @@
 <?php
-namespace Grav\Plugin\FlexDirectory\Interfaces;
+namespace Grav\Plugin\FlexObjects\Interfaces;
 
 use Grav\Framework\Object\Interfaces\NestedObjectInterface;
-use Grav\Plugin\FlexDirectory\FlexType;
+use Grav\Plugin\FlexObjects\FlexType;
 
 /**
  * Interface FlexObjectInterface
- * @package Grav\Plugin\FlexDirectory\Objects
+ * @package Grav\Plugin\FlexObjects\Objects
  */
 interface FlexObjectInterface extends NestedObjectInterface, \ArrayAccess
 {

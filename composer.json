@@ -1,7 +1,7 @@
 {
   "autoload": {
     "psr-4": {
-      "Grav\\Plugin\\FlexDirectory\\": "classes/"
+      "Grav\\Plugin\\FlexObjects\\": "classes/"
     }
   }
 }

@@ -2,16 +2,16 @@
 namespace Grav\Plugin;
 
 use Grav\Common\Plugin;
-use Grav\Plugin\FlexDirectory\Controllers\AdminController;
-use Grav\Plugin\FlexDirectory\Controllers\SiteController;
-use Grav\Plugin\FlexDirectory\FlexDirectory;
+use Grav\Plugin\FlexObjects\Controllers\AdminController;
+use Grav\Plugin\FlexObjects\Controllers\SiteController;
+use Grav\Plugin\FlexObjects\FlexObjects;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
- * Class FlexDirectoryPlugin
+ * Class FlexObjectsPlugin
  * @package Grav\Plugin
  */
-class FlexDirectoryPlugin extends Plugin
+class FlexObjectsPlugin extends Plugin
 {
     /** @var AdminController|SiteController */
     protected $controller;
@@ -64,16 +64,16 @@ class FlexDirectoryPlugin extends Plugin
             $this->controller = new SiteController($this);
         }
 
-        $config = $this->config->get('plugins.flex-directory');
+        $config = $this->config->get('plugins.flex-objects');
         $blueprints = $config['directories'] ?: [];
 
         // Add to DI container
-        $this->grav['flex_directory'] = function () use ($blueprints) {
+        $this->grav['flex_objects'] = function () use ($blueprints) {
             $list = [];
             foreach ($blueprints as $blueprint) {
                 $list[basename($blueprint, '.yaml')] = $blueprint;
             }
-            return new FlexDirectory($list);
+            return new FlexObjects($list);
         };
     }
 
@@ -96,7 +96,7 @@ class FlexDirectoryPlugin extends Plugin
      */
     public function onAdminMenu()
     {
-        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_DIRECTORY.TITLE'] = ['route' => $this->name, 'icon' => 'fa-list'];
+        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_OBJECTS.TITLE'] = ['route' => $this->name, 'icon' => 'fa-list'];
     }
 
     /**
@@ -112,7 +112,7 @@ class FlexDirectoryPlugin extends Plugin
      */
     public function onTwigTemplatePaths()
     {
-        $extra_site_twig_path = $this->config->get('plugins.flex-directory.extra_site_twig_path');
+        $extra_site_twig_path = $this->config->get('plugins.flex-objects.extra_site_twig_path');
         $extra_path = $extra_site_twig_path ? $this->grav['locator']->findResource($extra_site_twig_path) : null;
         if ($extra_path) {
             $this->grav['twig']->twig_paths[] = $extra_path;
@@ -126,7 +126,7 @@ class FlexDirectoryPlugin extends Plugin
      */
     public function onTwigAdminTemplatePaths()
     {
-        $extra_admin_twig_path = $this->config->get('plugins.flex-directory.extra_admin_twig_path');
+        $extra_admin_twig_path = $this->config->get('plugins.flex-objects.extra_admin_twig_path');
         $extra_path = $extra_admin_twig_path ? $this->grav['locator']->findResource($extra_admin_twig_path) : null;
         if ($extra_path) {
             $this->grav['twig']->twig_paths[] = $extra_path;
@@ -149,22 +149,22 @@ class FlexDirectoryPlugin extends Plugin
             $this->grav['twig']->twig_vars['target'] = $this->controller->getTarget();
 
             // CSS / JS Assets
-            $this->grav['assets']->addCss('plugin://flex-directory/css/admin.css');
+            $this->grav['assets']->addCss('plugin://flex-objects/css/admin.css');
             $this->grav['assets']->addCss('plugin://admin/themes/grav/css/codemirror/codemirror.css');
 
-            if ($this->controller->getLocation() === 'flex-directory' && $this->controller->getAction() === 'list') {
-                $this->grav['assets']->addCss('plugin://flex-directory/css/filter.formatter.css');
-                $this->grav['assets']->addCss('plugin://flex-directory/css/theme.default.css');
-                $this->grav['assets']->addJs('plugin://flex-directory/js/jquery.tablesorter.min.js');
-                $this->grav['assets']->addJs('plugin://flex-directory/js/widgets/widget-storage.min.js');
-                $this->grav['assets']->addJs('plugin://flex-directory/js/widgets/widget-filter.min.js');
-                $this->grav['assets']->addJs('plugin://flex-directory/js/widgets/widget-pager.min.js');
+            if ($this->controller->getLocation() === 'flex-objects' && $this->controller->getAction() === 'list') {
+                $this->grav['assets']->addCss('plugin://flex-objects/css/filter.formatter.css');
+                $this->grav['assets']->addCss('plugin://flex-objects/css/theme.default.css');
+                $this->grav['assets']->addJs('plugin://flex-objects/js/jquery.tablesorter.min.js');
+                $this->grav['assets']->addJs('plugin://flex-objects/js/widgets/widget-storage.min.js');
+                $this->grav['assets']->addJs('plugin://flex-objects/js/widgets/widget-filter.min.js');
+                $this->grav['assets']->addJs('plugin://flex-objects/js/widgets/widget-pager.min.js');
             }
         } else {
-            if ($this->config->get('plugins.flex-directory.built_in_css')) {
-                $this->grav['assets']->addCss('plugin://flex-directory/css/site.css');
+            if ($this->config->get('plugins.flex-objects.built_in_css')) {
+                $this->grav['assets']->addCss('plugin://flex-objects/css/site.css');
             }
-            $this->grav['assets']->addJs('plugin://flex-directory/js/list.min.js');
+            $this->grav['assets']->addJs('plugin://flex-objects/js/list.min.js');
         }
     }
 }

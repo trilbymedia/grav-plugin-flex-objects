@@ -1,19 +1,19 @@
 {% extends 'partials/base.html.twig' %}
-{% use 'flex-directory/pages/titlebar/types.html.twig' %}
+{% use 'flex-objects/pages/titlebar/types.html.twig' %}
 
-{% set flex = grav.flex_directory %}
+{% set flex = grav.flex_objects %}
 {% set directory_url =  base_url_relative ~ '/' ~ location %}
 
 {% block head %}
     {% if flex.count == 1 %}
-        {{ redirect_me(base_url ~ '/flex-directory/' ~ flex.directory.type) }}
+        {{ redirect_me(base_url ~ '/flex-objects/' ~ flex.directory.type) }}
     {% endif %}
     {{ parent() }}
 {% endblock %}
 
 {% block content %}
 
-    <h1>{{ 'PLUGIN_FLEX_DIRECTORY.TYPES_TITLE'|tu }}</h1>
+    <h1>{{ 'PLUGIN_FLEX_OBJECTS.TYPES_TITLE'|tu }}</h1>
 
     <div id="types" class="card-row grid fixed-blocks pure-g">
         {% for type,directory in flex.directories %}

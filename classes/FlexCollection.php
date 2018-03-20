@@ -1,17 +1,17 @@
 <?php
-namespace Grav\Plugin\FlexDirectory;
+namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Twig\Twig;
 use Grav\Framework\ContentBlock\HtmlBlock;
 use Grav\Framework\Object\ObjectCollection;
-use Grav\Plugin\FlexDirectory\Interfaces\FlexCollectionInterface;
+use Grav\Plugin\FlexObjects\Interfaces\FlexCollectionInterface;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
  * Class FlexCollection
- * @package Grav\Plugin\FlexDirectory\Entities
+ * @package Grav\Plugin\FlexObjects\Entities
  */
 class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 {
@@ -144,9 +144,9 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
         $twig = $grav['twig'];
 
         try {
-            return $twig->twig()->resolveTemplate(["flex-directory/layouts/{$this->getType()}/collection/{$layout}.html.twig"]);
+            return $twig->twig()->resolveTemplate(["flex-objects/layouts/{$this->getType()}/collection/{$layout}.html.twig"]);
         } catch (\Twig_Error_Loader $e) {
-            return $twig->twig()->resolveTemplate(["flex-directory/layouts/404.html.twig"]);
+            return $twig->twig()->resolveTemplate(["flex-objects/layouts/404.html.twig"]);
         }
     }
 }

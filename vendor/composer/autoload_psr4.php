@@ -6,5 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Grav\\Plugin\\FlexDirectory\\' => array($baseDir . '/classes'),
+    'Grav\\Plugin\\FlexObjects\\' => array($baseDir . '/classes'),
 );

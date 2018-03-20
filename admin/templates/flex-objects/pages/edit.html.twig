@@ -1,7 +1,7 @@
 {% extends 'partials/base.html.twig' %}
-{% use 'flex-directory/pages/titlebar/edit.html.twig' %}
+{% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
-{% set flex = grav.flex_directory %}
+{% set flex = grav.flex_objects %}
 {% set directory = flex.directory(target) %}
 
 {% block content_top %}
@@ -10,7 +10,7 @@
 
 {% block content %}
 <div id="directory">
-    {% set path = directory.config('admin/edit/template')|default('flex-directory/types/' ~ target ~ '/edit.html.twig') %}
-    {% include [path, 'flex-directory/types/default/edit.html.twig'] %}
+    {% set path = directory.config('admin/edit/template')|default('flex-objects/types/' ~ target ~ '/edit.html.twig') %}
+    {% include [path, 'flex-objects/types/default/edit.html.twig'] %}
 </div>
 {% endblock %}

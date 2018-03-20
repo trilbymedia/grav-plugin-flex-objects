@@ -1,13 +1,13 @@
 <?php
-namespace Grav\Plugin\FlexDirectory;
+namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Filesystem\Folder;
 
 /**
- * Class FlexDirectory
- * @package Grav\Plugin\FlexDirectory\Entities
+ * Class FlexObjects
+ * @package Grav\Plugin\FlexObjects\Entities
  */
-class FlexDirectory implements \Countable
+class FlexObjects implements \Countable
 {
     /**
      * @var array|FlexType[]
@@ -30,7 +30,7 @@ class FlexDirectory implements \Countable
         ];
 
         $directories = $this->getDirectories();
-        $all = Folder::all('blueprints://flex-directory', $params);
+        $all = Folder::all('blueprints://flex-objects', $params);
 
         foreach ($all as $url) {
             $type = basename($url, '.yaml');

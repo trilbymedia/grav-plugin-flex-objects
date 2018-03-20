@@ -1,9 +1,9 @@
 <?php
-namespace Grav\Plugin\FlexDirectory\Controllers;
+namespace Grav\Plugin\FlexObjects\Controllers;
 
 /**
  * Class SiteController
- * @package Grav\Plugin\FlexDirectory
+ * @package Grav\Plugin\FlexObjects
  */
 class SiteController extends SimpleController
 {

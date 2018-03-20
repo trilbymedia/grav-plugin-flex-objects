@@ -1,6 +1,6 @@
 title: Contacts
 description: Simple contact directory with tags.
-type: flex-directory
+type: flex-objects
 
 config:
   admin:
@@ -20,7 +20,7 @@ config:
   data:
     storage:
       type: file
-      file: user://data/flex-directory/contacts.yaml
+      file: user://data/flex-objects/contacts.yaml
 
 form:
   validation: loose

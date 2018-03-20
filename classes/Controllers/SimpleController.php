@@ -1,5 +1,5 @@
 <?php
-namespace Grav\Plugin\FlexDirectory\Controllers;
+namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
 use Grav\Common\Plugin;
@@ -9,7 +9,7 @@ use RocketTheme\Toolbox\Session\Message;
 
 /**
  * Class SimpleController
- * @package Grav\Plugin\FlexDirectory
+ * @package Grav\Plugin\FlexObjects
  */
 abstract class SimpleController extends AdminBaseController
 {
@@ -57,7 +57,7 @@ abstract class SimpleController extends AdminBaseController
         }
 
         $task = !empty($post['task']) ? $post['task'] : $uri->param('task');
-        if ($task && ($this->location === $plugin->name || $uri->route() === '/lessons')) {
+        if ($task && ($this->location === $plugin->name)) {
             $this->task = $task;
             $this->active = true;
         }

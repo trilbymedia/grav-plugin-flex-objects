@@ -1,5 +1,5 @@
 <?php
-namespace Grav\Plugin\FlexDirectory;
+namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Data\Blueprint;
 use Grav\Common\File\CompiledJsonFile;
@@ -12,7 +12,7 @@ use RuntimeException;
 
 /**
  * Class FlexType
- * @package Grav\Plugin\FlexDirectory\Entities
+ * @package Grav\Plugin\FlexObjects\Entities
  */
 class FlexType
 {
@@ -91,8 +91,8 @@ class FlexType
     {
         if (null === $this->blueprint) {
             $this->blueprint = (new Blueprint($this->blueprint_file))->load();
-            if ($this->blueprint->get('type') === 'flex-directory') {
-                $blueprintBase = (new Blueprint('plugin://flex-directory/blueprints/flex-directory.yaml'))->load();
+            if ($this->blueprint->get('type') === 'flex-objects') {
+                $blueprintBase = (new Blueprint('plugin://flex-objects/blueprints/flex-objects.yaml'))->load();
                 $this->blueprint->extend($blueprintBase, true);
             }
             $this->blueprint->init();
@@ -210,7 +210,7 @@ class FlexType
      */
     public function getStorage($resolve = false)
     {
-        $filename = $this->getConfig('data/storage', 'user://data/flex-directory/' . $this->getType() . '.json');
+        $filename = $this->getConfig('data/storage', 'user://data/flex-objects/' . $this->getType() . '.json');
 
         if ($resolve) {
             $grav = Grav::instance();
@@ -253,7 +253,7 @@ class FlexType
      */
     protected function createObject(array $data, $key)
     {
-        $className = $this->getConfig('data/object', 'Grav\\Plugin\\FlexDirectory\\FlexObject');
+        $className = $this->getConfig('data/object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
 
         return new $className($data, $key, $this);
     }
@@ -264,7 +264,7 @@ class FlexType
      */
     protected function createCollection(array $entries)
     {
-        $className = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexDirectory\\FlexCollection');
+        $className = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
 
         return new $className($entries, $this);
     }

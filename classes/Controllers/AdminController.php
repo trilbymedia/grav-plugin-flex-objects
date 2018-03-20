@@ -1,12 +1,12 @@
 <?php
-namespace Grav\Plugin\FlexDirectory\Controllers;
+namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
-use Grav\Plugin\FlexDirectory\FlexType;
+use Grav\Plugin\FlexObjects\FlexType;
 
 /**
  * Class AdminController
- * @package Grav\Plugin\FlexDirectory
+ * @package Grav\Plugin\FlexObjects
  */
 class AdminController extends SimpleController
 {
@@ -100,6 +100,6 @@ class AdminController extends SimpleController
      */
     protected function getDirectory($type)
     {
-        return Grav::instance()['flex_directory']->getDirectory($type);
+        return Grav::instance()['flex_objects']->getDirectory($type);
     }
 }

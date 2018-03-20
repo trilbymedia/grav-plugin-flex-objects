@@ -1,14 +1,14 @@
-name: Flex-Directory
-version: 4.0.0
-description: Simple Flexible Directory Plugin
+name: Flex-Objects
+version: 0.9.0
+description: Flexible Objects Plugin
 icon: list
 author:
   name: Trilby Media
   email: hello@trilby.media
-homepage: https://github.com/trilbymedia/grav-plugin-flex-directory
+homepage: https://github.com/trilbymedia/grav-plugin-flex-objects
 keywords: grav, plugin, crud, directory
-bugs: https://github.com/trilbymedia/grav-plugin-flex-directory/issues
-docs: https://github.com/trilbymedia/grav-plugin-flex-directory/blob/develop/README.md
+bugs: https://github.com/trilbymedia/grav-plugin-flex-objects/issues
+docs: https://github.com/trilbymedia/grav-plugin-flex-objects/blob/develop/README.md
 license: MIT
 
 form:
@@ -44,7 +44,7 @@ form:
       label: Extra Site Twig Path
 
     directories:
-      type: flex-directory
+      type: flex-objects
       label: Directories
       validate:
         type: item-list

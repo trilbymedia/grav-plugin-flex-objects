@@ -1,6 +1,6 @@
 en:
-  PLUGIN_FLEX_DIRECTORY:
-    TITLE: FlexDirectory
+  PLUGIN_FLEX_OBJECTS:
+    TITLE: FlexObjects
     TYPES_TITLE: Directory Types
     AFTER_SAVE: After Save...
     CREATE_NEW: Create New Item
