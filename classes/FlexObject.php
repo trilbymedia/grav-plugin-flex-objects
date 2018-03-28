@@ -129,10 +129,16 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function getCollectionByProperty($type, $property)
     {
-        $collection = $this->getDirectory($type)->getCollection();
+        $type = $this->getDirectory($type);
+        $collection = $type->getCollection();
         $list = $this->getNestedProperty($property) ?: [];
 
-        return $collection->filter(function ($object) use ($list) { return \in_array($object->id, $list, true); });
+        $collection = $collection->filter(function ($object) use ($list) { return \in_array($object->id, $list, true); });
+
+        // Workaround Doctrine 1.3 issue.
+        $collection->setFlexType($type);
+
+        return $collection;
     }
 
     /**
