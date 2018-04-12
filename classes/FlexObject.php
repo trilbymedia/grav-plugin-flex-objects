@@ -31,6 +31,9 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     {
         $this->flexType = $type;
 
+        $blueprint = $this->getFlexType()->getBlueprint();
+        $elements = $blueprint->filter($elements);
+
         parent::__construct($elements, $key);
     }
 
