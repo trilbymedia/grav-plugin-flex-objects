@@ -7,16 +7,8 @@
             {% if entry.published %}
             <li>
                 <div class="entry-details">
-                    <h3>{{ entry.name.first }} {{ entry.name.last }}<small>&lt;{{ entry.email }}&gt;</small></h3>
-                    <div>Company Name: <b>{{ entry.company }}</b></div>
+                    <h3>{{ entry.first_name }} {{ entry.last_name }}<small>&lt;{{ entry.email }}&gt;</small></h3>
                     <div>Web Site: <b>{{ entry.website }}</b></div>
-                    <hr>
-                    <div>
-                        {{ entry.address.street1 }}
-                        {% if entry.address.street2 %}<br>{{ entry.address.street1 }}{% endif %}
-                        <br>{{ entry.address.city }}, {{ entry.address.state }} {{ entry.address.zip }}
-                        <br>{{ entry.address.country }}
-                    </div>
                 </div>
             </li>
         {% endif %}

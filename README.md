@@ -52,12 +52,19 @@ Most interesting configuration option is `directiories`, which contains list or 
 To display the directory simply add the following to our Twig template or even your page content (with Twig processing enabled):
 
 ```twig
-{% include 'flex-objects/flex-objects.html.twig' %}
+---
+title: Contacts
+process:
+  markdown: false
+  twig: true
+directory: contacts
+---
+{% include 'flex-objects/directory.html.twig' %}
 ```
 
 Alternatively just create a page called `flex-objects.md` or set the template of your existing page to `template: flex-objects`.  This will use the `flex-objects.html.twig` file provided by the plugin.
 
-Please check the provided twig files inside ``
+If you do not specify directory name in the page header, the page will list all directories instead of displaying entries from a single directory.
 
 # Modifications
 
@@ -80,7 +87,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
     ```yaml
     title: Contacts
-    description: Simple contact directory with tags.
+    description: Simple contact directory with phone number.
     type: flex-objects
     
     config:
@@ -90,18 +97,15 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
           fields:
             published:
               width: 8
-            name.last:
+            last_name:
               link: edit
-            name.first:
+            first_name:
               link: edit
-            company:
             email:
             website:
             tags:
       data:
-        storage:
-          type: file
-          file: user://data/flex-objects/contacts.yaml
+        storage: user://data/flex-objects/contacts.json
     
     form:
       validation: loose
@@ -119,146 +123,38 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
             type: bool
             required: true
     
-        name.last:
-          type: text
-          label: Last Name
-          validate:
-            required: true
-        name.first:
+        first_name:
           type: text
           label: First Name
           validate:
             required: true
     
-        company:
-          type: text
-          label: Company Name
-        email:
-          type: email
-          label: Email Address
-          validate:
-            required: true
-        website:
-          type: url
-          label: Web Site
-    
-        address.street1:
-          type: text
-          label: Address 1
-        address.street2:
-          type: text
-          label: Address 2
-        address.city:
-          type: text
-          label: City
-        address.country:
-          type: text
-          label: Country
-        address.state:
-          type: text
-          label: State or Province
-        address.zip:
-          type: text
-          label: Postal / Zip Code
-    
-        tags:
-          type: selectize
-          size: large
-          label: Tags
-          classes: fancy
-          validate:
-            type: commalist
-    
- 
- 
- 
-    title: Flex Objects
-    form:
-      validation: loose
-    
-      fields:
-        published:
-          type: toggle
-          label: Published
-          highlight: 1
-          default: 1
-          options:
-            1: PLUGIN_ADMIN.YES
-            0: PLUGIN_ADMIN.NO
-          validate:
-            type: bool
-            required: true
         last_name:
           type: text
           label: Last Name
           validate:
             required: true
-        first_name:
-          type: text
-          label: First Name
+    
         email:
           type: email
-          label: Email
+          label: Email Address
           validate:
             required: true
+    
         website:
+          type: url
+          label: Web Site
+    
+        phone:
           type: text
-          label: Website
-        tags:
-          type: selectize
-          size: large
-          label: Tags
-          classes: fancy
-          validate:
-            type: commalist
-    
-        tools_section:
-          type: section
-          field_classes: overlay bottom
-    
-    
-          fields:
-    
-            _post_entries_save:
-              label: PLUGIN_FLEX_OBJECTS.AFTER_SAVE
-              type: save-redirect
-              default: create-new
-
+          label: Phone
     ```
 
     Notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject.
 
-1. Now we have to instruct the plugin to use this new blueprint rather then the default one provided with the plugin.  This is simple enough, just edit the **Blueprint File** option in the plugin configuration file `flex-objects.yaml` to point to: `user://data/flex-objects/entries.yaml`, and make sure you save it. This will modify the `entries-edit` form automatically.  
+1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has its `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-objects/templates/flex-objects/types/contacts.html.twig` file to `user/themes/antimatter/templates/flex-objects/types/contacts.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
 
-1. Now we need to adjust the `entries-list` form that shows the columns.  To do this, you are going to need to copy the existing `user/plugins/flex-objects/admin/templates/partials/entries-list.html.twig` file to another location that is in the **Twig Paths** <sup>1</sup>. The simplest way to add Twig templates is to simply add them under your theme's `templates/` folder ensuring the folder structure is maintained. Let's assume you are using Antimatter theme (although any theme will work), simply copy the `entries-list.html.twig` file to `user/themes/antimatter/admin/templates/partials/entries-list.html.twig` (you will have to create these folders as `admin/` doesn't exist under themes usually) and edit it.
-
-    The first part to edit is the column headers, let's replace the `Tags` header with `Phone`
-
-    ```twig
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Website</th>
-                <th>Phone</th>
-                <th>&nbsp;</th>
-            </tr>
-        </thead>
-    ```
-
-    Next you simply need to edit the actual column, replacing the `entry.tags` output with:
-
-    ```twig
-        <td>
-            {{ entry.phone }}
-        </td>
-    ```
-    
-    This will ensure the backend now lets you edit and list the new "Phone" field, but now we have to fix the frontend to render it.
-
-1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has its `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-objects/templates/flex-objects/site.html.twig` file to `user/themes/antimatter/templates/flex-objects/site.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
-
-1. Edit the `site.html.twig` file you just copied so it has these modifications:
+1. Edit the `contacts.html.twig` file you just copied so it has these modifications:
 
     ```twig
         <li>
@@ -307,9 +203,9 @@ To upload files you can use the `file` form field.  []The standard features appl
 
 # Advanced
 
-You can radically alter the structure of the `entries.json` data file by making major edits to the `entries.yaml` blueprint file.  However, it's best to start with an empty `entries.json` if you are making wholesale changes or you will have data conflicts.  Best to create your blueprint first.  Reloading a **New Entry** until the form looks correct, then try saving, and check to make sure the stored `user/data/flex-objects/entries.json` file looks correct.
+You can radically alter the structure of the `entries.json` data file by making major edits to the `contacts.yaml` blueprint file.  However, it's best to start with an empty `contacts.json` if you are making wholesale changes or you will have data conflicts.  Best to create your blueprint first.  Reloading a **New Entry** until the form looks correct, then try saving, and check to make sure the stored `user/data/flex-objects/contacts.json` file looks correct.
 
-Then you will need to make more widespread changes to the admin and site Twig templates.  You might need to adjust the number of columns and the field names.  You will also need to pay attention to the JavaScript initialization in each template.
+Then you will need to make more widespread changes to the site Twig templates.  You might need to adjust the number of columns and the field names.  You will also need to pay attention to the JavaScript initialization in each template.
 
 ### Notes:
 
