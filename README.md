@@ -2,7 +2,7 @@
 
 ## About
 
-The **Flex Objects** Plugin is for [Grav CMS](http://github.com/getgrav/grav).  It provides a simple plugin that 'out-of-the-box' acts as a simple user directory.  This plugin allows for CRUD operations via the admin plugin to easily manage large sets of data that don't fit as simple YAML configuration files, or Grav pages.  The example plugin comes with a dummy database of 500 entries which is a realistic real-world data set that you can experiment with.
+The **Flex Objects** Plugin is for [Grav CMS](http://github.com/getgrav/grav).  Flex objects allows you to create collections of objects, which can modified by CRUD operations via the admin plugin to easily manage large sets of data that don't fit as simple YAML configuration files, or Grav pages. These objects are defined by blueprint written in YAML and they are rendered by a set of twig files. Additionally both objects and collections can be customized by PHP classes, which allows you to define complex behaviors and relationships between the objects.
 
 ![](assets/flex-objects-list.png)
 
@@ -27,7 +27,7 @@ Alternatively it can be installed via the [Admin Plugin](http://learn.getgrav.or
 Once installed you can either create entries manually, or you can copy the sample data set:
 
 ```shell
-$ cp user/plugins/flex-objects/data/entries.json user/data/flex-objects/entries.json
+$ cp user/plugins/flex-objects/data/entries.json user/data/flex-objects/contacts.json
 ```
 
 ## Configuration
@@ -37,35 +37,31 @@ This plugin works out of the box, but provides several fields that make modifyin
 ```yaml
 enabled: true
 built_in_css: true
-json_file: 'user://data/flex-objects/entries.json'
-blueprint_file: 'plugin://flex-objects/blueprints/entries.yaml'
 extra_admin_twig_path: 'theme://admin/templates'
 extra_site_twig_path:
+directories:
+  - blueprints://flex-objects/contacts.yaml
 ```
 
 Simply edit the **Flex Objects** plugin options in the Admin plugin, or copy the `flex-objects.yaml` default file to your `user/config/plugins/` folder and edit the values there.   Read below for more help on what these fields do and how they can help you modify the plugin.
+
+Most interesting configuration option is `directiories`, which contains list or blueprint files which will define the flex types.
 
 ## Displaying
 
 To display the directory simply add the following to our Twig template or even your page content (with Twig processing enabled):
 
 ```twig
-{% include 'flex-objects/site.html.twig' %}
+{% include 'flex-objects/flex-objects.html.twig' %}
 ```
 
-Alternatively just create a page called `flex-objects.md` or set the template of your existing page to `template: flex-objects`.  This will use the `flex-objects.html.twig` file provided by the plugin.  If this doesn't suit your needs, you can copy the provided Twig templates into your theme and modify them:
+Alternatively just create a page called `flex-objects.md` or set the template of your existing page to `template: flex-objects`.  This will use the `flex-objects.html.twig` file provided by the plugin.
 
-
-```shell
-flex-objects/templates
-├── flex-objects.html.twig
-└── flex-objects
-    └── site.html.twig
-```
+Please check the provided twig files inside ``
 
 # Modifications
 
-This plugin is configured with a few sample fields:
+This plugin is configured with a sample contacts directory with a few sample fields:
 
 * published
 * first_name
@@ -78,11 +74,104 @@ These are probably not the exact fields you might want, so you will probably wan
 
 Let's assume you simply want to add a new "Phone Number" field to the existing Data and remove the "Tags".  These are the steps you would need to perform:
 
-1. Copy the `blueprints/entries.yaml` Blueprint file to another location, let's say `user/data/flex-objects/` but really it could be anywhere (another plugin, your theme, etc.)
+1. Copy the `blueprints/flex-objects/contacts.yaml` Blueprint file to another location, let's say `user/blueprints/flex-objects/`. The file can really be stored anywhere, but if you are using admin, it is best to keep the blueprint file where admin can automatically find it.
 
-1. Edit the `user/data/flex-objects/entries.yaml` like so:
+1. Edit the `user/blueprints/flex-objects/contacts.yaml` like so:
 
     ```yaml
+    title: Contacts
+    description: Simple contact directory with tags.
+    type: flex-objects
+    
+    config:
+      admin:
+        list:
+          title: name
+          fields:
+            published:
+              width: 8
+            name.last:
+              link: edit
+            name.first:
+              link: edit
+            company:
+            email:
+            website:
+            tags:
+      data:
+        storage:
+          type: file
+          file: user://data/flex-objects/contacts.yaml
+    
+    form:
+      validation: loose
+    
+      fields:
+        published:
+          type: toggle
+          label: Published
+          highlight: 1
+          default: 1
+          options:
+            1: PLUGIN_ADMIN.YES
+            0: PLUGIN_ADMIN.NO
+          validate:
+            type: bool
+            required: true
+    
+        name.last:
+          type: text
+          label: Last Name
+          validate:
+            required: true
+        name.first:
+          type: text
+          label: First Name
+          validate:
+            required: true
+    
+        company:
+          type: text
+          label: Company Name
+        email:
+          type: email
+          label: Email Address
+          validate:
+            required: true
+        website:
+          type: url
+          label: Web Site
+    
+        address.street1:
+          type: text
+          label: Address 1
+        address.street2:
+          type: text
+          label: Address 2
+        address.city:
+          type: text
+          label: City
+        address.country:
+          type: text
+          label: Country
+        address.state:
+          type: text
+          label: State or Province
+        address.zip:
+          type: text
+          label: Postal / Zip Code
+    
+        tags:
+          type: selectize
+          size: large
+          label: Tags
+          classes: fancy
+          validate:
+            type: commalist
+    
+ 
+ 
+ 
     title: Flex Objects
     form:
       validation: loose

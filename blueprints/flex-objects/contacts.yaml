@@ -9,18 +9,15 @@ config:
       fields:
         published:
           width: 8
-        name.last:
+        last_name:
           link: edit
-        name.first:
+        first_name:
           link: edit
-        company:
         email:
         website:
         tags:
   data:
-    storage:
-      type: file
-      file: user://data/flex-objects/contacts.yaml
+    storage: user://data/flex-objects/contacts.json
 
 form:
   validation: loose
@@ -38,47 +35,27 @@ form:
         type: bool
         required: true
 
-    name.last:
-      type: text
-      label: Last Name
-      validate:
-        required: true
-    name.first:
+    first_name:
       type: text
       label: First Name
       validate:
         required: true
 
-    company:
+    last_name:
       type: text
-      label: Company Name
+      label: Last Name
+      validate:
+        required: true
+
     email:
       type: email
       label: Email Address
       validate:
         required: true
+
     website:
       type: url
       label: Web Site
-
-    address.street1:
-      type: text
-      label: Address 1
-    address.street2:
-      type: text
-      label: Address 2
-    address.city:
-      type: text
-      label: City
-    address.country:
-      type: text
-      label: Country
-    address.state:
-      type: text
-      label: State or Province
-    address.zip:
-      type: text
-      label: Postal / Zip Code
 
     tags:
       type: selectize
