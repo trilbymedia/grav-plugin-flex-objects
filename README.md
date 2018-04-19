@@ -207,6 +207,30 @@ You can radically alter the structure of the `entries.json` data file by making 
 
 Then you will need to make more widespread changes to the site Twig templates.  You might need to adjust the number of columns and the field names.  You will also need to pay attention to the JavaScript initialization in each template.
 
+# Features
+
+Here are the main benefits of using Flex objects:
+
+* CRUD is automatically handled for you by Flex Objects plugin
+* Flex types can be easily extended by custom PHP collection and object classes
+* Both Flex objects and collections know how to render themselves: `echo $object->render($layout, $context)`
+* You can easily create custom layouts for your objects and collections to be used in different pages
+* Both Flex objects and collections support serialization and `json_serialize()`
+* Flex objects support Grav `Medium` objects with few lines of code
+* Flex objects can have relations to other Flex objects with few lines of code defining the relation
+
+# Limitations and future improvements
+
+Right now there are a few limitations in how objects are stored:
+
+* Administration needs more features like filtering, bulk updates etc
+* It would be nice to have an easy way to display Flex admin in other admin plugins (and hide the type from Flex)
+* All entries are stored in a single json or yaml file
+* Optional database storage layer would be nice to have
+* We need general collection functions to do simple filtering, like: "display all published items" without custom PHP code
+* We need indexes which allow searching objects without loading all of them
+* There is no caching for object and collection rendering
+
 ### Notes:
 
 1. You can actually use pretty much any folder under the `user/` folder of Grav. Simply edit the **Extra Admin Twig Path** option in the `flex-objects.yaml` file.  It defaults to `theme://admin/templates` which means it uses the default theme's `admin/templates/` folder if it exists.
