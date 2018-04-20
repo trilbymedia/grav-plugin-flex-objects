@@ -33,6 +33,22 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     }
 
     /**
+     * Creates a new instance from the specified elements.
+     *
+     * This method is provided for derived classes to specify how a new
+     * instance should be created when constructor semantics have changed.
+     *
+     * @param array $elements Elements.
+     *
+     * @return static
+     * @throws \InvalidArgumentException
+     */
+    protected function createFrom(array $elements)
+    {
+        return new static($elements, $this->flexType);
+    }
+
+    /**
      * @param bool $prefix
      * @return string
      */

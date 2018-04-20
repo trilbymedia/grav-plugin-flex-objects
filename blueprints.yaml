@@ -11,6 +11,9 @@ bugs: https://github.com/trilbymedia/grav-plugin-flex-objects/issues
 docs: https://github.com/trilbymedia/grav-plugin-flex-objects/blob/develop/README.md
 license: MIT
 
+dependencies:
+    - { name: grav, version: '>=1.5' }
+
 form:
   validation: strict
   fields:

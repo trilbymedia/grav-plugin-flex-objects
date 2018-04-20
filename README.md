@@ -215,13 +215,13 @@ Here are the main benefits of using Flex objects:
 * Flex types can be easily extended by custom PHP collection and object classes
 * Both Flex objects and collections know how to render themselves: `echo $object->render($layout, $context)`
 * You can easily create custom layouts for your objects and collections to be used in different pages
-* Both Flex objects and collections support serialization and `json_serialize()`
+* Both Flex objects and collections support serialization and `json_encode()`
 * Flex objects support Grav `Medium` objects with few lines of code
 * Flex objects can have relations to other Flex objects with few lines of code defining the relation
 
 # Limitations and future improvements
 
-Right now there are a few limitations in how objects are stored:
+Right now there are a few limitations:
 
 * Administration needs more features like filtering, bulk updates etc
 * It would be nice to have an easy way to display Flex admin in other admin plugins (and hide the type from Flex)
