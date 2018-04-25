@@ -9,9 +9,7 @@ use Grav\Common\Filesystem\Folder;
  */
 class FlexObjects implements \Countable
 {
-    /**
-     * @var array|FlexType[]
-     */
+    /** @var array|FlexType[] */
     protected $types = [];
 
     public function __construct(array $types = [])

@@ -1,13 +1,12 @@
 <?php
 namespace Grav\Plugin\FlexObjects;
 
+use Grav\Common\Cache;
 use Grav\Common\Data\Blueprint;
-use Grav\Common\File\CompiledJsonFile;
-use Grav\Common\File\CompiledYamlFile;
+use Grav\Common\Debugger;
 use Grav\Common\Grav;
-use Grav\Common\Helpers\Base32;
-use Grav\Common\Utils;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
+use Grav\Framework\Cache\Adapter\DoctrineCache;
+use Grav\Framework\Cache\CacheInterface;
 use RuntimeException;
 
 /**
@@ -26,6 +25,10 @@ class FlexType
     protected $collection;
     /** @var bool */
     protected $enabled;
+    /** @var object */
+    protected $storage;
+    /** @var CacheInterface */
+    protected $cache;
 
     /**
      * FlexType constructor.
@@ -123,13 +126,39 @@ class FlexType
     public function load()
     {
         if (null === $this->collection) {
-            $raw = (array)$this->getFile()->content();
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $storage = $this->getStorage();
+            $cache = $this->getCache();
+
+            $debugger->startTimer('flex-keys', 'Load Flex Keys');
+            $keys = $cache->get('keys');
+            if (null === $keys) {
+                $keys = $storage->getExistingKeys();
+                $cache->set('keys', $keys);
+            }
+            $debugger->stopTimer('flex-keys');
+
+            $debugger->startTimer('flex-rows', 'Load Flex Rows');
+            $updated = [];
+            $rows = $cache->getMultiple(array_keys($keys));
+            $rows = $storage->readRows($rows, $updated);
+            if ($updated) {
+                $cache->setMultiple($updated);
+            }
+
+            $debugger->stopTimer('flex-rows');
+
+            $debugger->startTimer('flex-objects', 'Initialize Flex Collection');
             $entries = [];
-            foreach ($raw as $key => $entry) {
-                $entries[$key] = $this->createObject($entry, $key);
+            foreach ($rows as $key => $entry) {
+                $object = $this->createObject($entry, $key);
+
+                $entries[$key] = $object;
             }
 
             $this->collection = $this->createCollection($entries);
+            $debugger->stopTimer('flex-objects');
         }
 
         return $this->collection;
@@ -140,6 +169,9 @@ class FlexType
      */
     public function save()
     {
+        // TODO:
+        throw new \RuntimeException('Not Implemented');
+
         $file = $this->getFile();
         $file->save($this->collection->jsonSerialize());
         $file->free();
@@ -153,6 +185,8 @@ class FlexType
      */
     public function create(array $data)
     {
+        // TODO:
+        throw new \RuntimeException('Not Implemented');
         return $this->update($data);
     }
 
@@ -163,11 +197,13 @@ class FlexType
      */
     public function update(array $data, $key = null)
     {
+        // TODO:
+        throw new \RuntimeException('Not Implemented');
         /** @var FlexObject $object */
         $object = null !== $key ? $this->getCollection()->get($key) : null;
 
         if (null === $object) {
-            $key = $this->getNextKey();
+            $key = null;
 
             $object = $this->createObject($data, $key);
         } else {
@@ -187,63 +223,37 @@ class FlexType
      */
     public function remove($key)
     {
+        // TODO:
+        throw new \RuntimeException('Not Implemented');
         return $this->getCollection()->remove($key);
     }
 
     /**
-     * @return string
+     * @return CacheInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    protected function getNextKey()
+    public function getCache()
     {
-        $collection = $this->getCollection();
+        if (!$this->cache) {
+            /** @var Cache $gravCache */
+            $gravCache = Grav::instance()['cache'];
 
-        do {
-            $key = strtolower(Base32::encode(Utils::generateRandomString(10)));
-        } while ($collection->containsKey($key));
+            $this->cache = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects', 60);
+        }
 
-        return $key;
+        return $this->cache;
     }
 
     /**
-     * @param bool $resolve
-     * @return string
+     * @return object
      */
-    public function getStorage($resolve = false)
+    public function getStorage()
     {
-        $filename = $this->getConfig('data/storage', 'user://data/flex-objects/' . $this->getType() . '.json');
-
-        if ($resolve) {
-            $grav = Grav::instance();
-            /** @var UniformResourceLocator $locator */
-            $locator = $grav['locator'];
-
-            $filename = $locator->findResource($filename, false, true);
+        if (!$this->storage) {
+            $this->storage = $this->createStorage();
         }
 
-        return $filename;
-    }
-
-    /**
-     * @return CompiledJsonFile|CompiledYamlFile
-     * @throws RuntimeException
-     */
-    protected function getFile()
-    {
-        $filename = $this->getStorage(true);
-        $extension = pathinfo($filename, PATHINFO_EXTENSION);
-
-        switch ($extension) {
-            case 'json':
-                $file = CompiledJsonFile::instance($filename);
-                break;
-            case 'yaml':
-                $file = CompiledYamlFile::instance($filename);
-                break;
-            default:
-                throw new RuntimeException('Unknown extension type ' . $extension);
-        }
-
-        return $file;
+        return $this->storage;
     }
 
     /**
@@ -251,7 +261,26 @@ class FlexType
      * @param $key
      * @return FlexObject
      */
-    protected function createObject(array $data, $key)
+    public function createStorage()
+    {
+        $storage = $this->getConfig('data/storage');
+
+        if (!is_array($storage)) {
+            $storage = ['options' => ['filename' => $storage]];
+        }
+
+        $className = isset($storage['class']) ? $storage['class'] : FlexStorage::class;
+        $options = isset($storage['options']) ? $storage['options'] : [];
+
+        return new $className($options);
+    }
+
+    /**
+     * @param array $data
+     * @param $key
+     * @return FlexObject
+     */
+    public function createObject(array $data, $key)
     {
         $className = $this->getConfig('data/object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
 
@@ -262,7 +291,7 @@ class FlexType
      * @param array $entries
      * @return FlexCollection
      */
-    protected function createCollection(array $entries)
+    public function createCollection(array $entries)
     {
         $className = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
 

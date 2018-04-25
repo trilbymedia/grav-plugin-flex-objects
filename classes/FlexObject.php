@@ -60,8 +60,8 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $grav = Grav::instance();
 
         /** @var Debugger $debugger */
-        $debugger = $grav['debugger'];
-        $debugger->startTimer('flex-object-' . $this->getType(), 'Object ' . $this->getType());
+        //$debugger = $grav['debugger'];
+        //$debugger->startTimer('flex-object-' . $this->getType(), 'Render Object ' . $this->getType());
 
         $block = new HtmlBlock();
 
@@ -77,7 +77,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
         $block->setContent($output);
 
-        $debugger->stopTimer('flex-object-' . $this->getType());
+        //$debugger->stopTimer('flex-object-' . $this->getType());
 
         return $block;
     }
@@ -138,7 +138,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
         $collection = $collection->filter(function ($object) use ($list) { return \in_array($object->id, $list, true); });
 
-        // Workaround Doctrine 1.3 issue.
+        // TODO: Remove workaround for Doctrine Collections 1.3.
         $collection->setFlexType($type);
 
         return $collection;

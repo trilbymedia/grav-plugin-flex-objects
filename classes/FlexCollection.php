@@ -72,7 +72,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 
         /** @var Debugger $debugger */
         $debugger = $grav['debugger'];
-        $debugger->startTimer('flex-collection-' . $this->getType(), 'Collection ' . $this->getType());
+        $debugger->startTimer('flex-collection-' . $this->getType(), 'Render Collection ' . $this->getType());
 
         $block = new HtmlBlock();
 
