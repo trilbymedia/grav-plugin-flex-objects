@@ -1,0 +1,11 @@
+<div id="flex-objects">
+    <ul class="list">
+        {% for object in collection %}
+            {% if object.published %}
+            <li>
+                {{ object.render()|raw }}
+            </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+</div>

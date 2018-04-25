@@ -1,7 +1,7 @@
 {% extends 'partials/base.html.twig' %}
 
 {% block content %}
-    {{ page.content }}
+    {{ page.content|raw }}
 
     {% include 'flex-objects/directory.html.twig' %}
 {% endblock %}

@@ -1,7 +1,9 @@
 {% set flex = grav.flex_objects %}
 {% set directory = flex.directory(type) %}
 {% set type = directory.type %}
+{% set collection = directory.collection %}
+
 
 <h2>{{ type|capitalize }}</h2>
 
-{% include ['flex-objects/types/' ~ type ~ '.html.twig', 'flex-objects/types/basic.html.twig'] %}
+{{ collection.render()|raw }}

@@ -1,0 +1,9 @@
+<div id="flex-objects">
+    <ul class="list">
+        {% for object in collection %}
+        <li>
+            {{ object.render()|raw }}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
