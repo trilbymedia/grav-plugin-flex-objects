@@ -148,7 +148,7 @@ class SimpleStorage extends AbstractFilesystemStorage
      */
     public function getPathFromKey($key)
     {
-        return sprintf('%s/$s/%s', $this->dataFolder, $this->dataPattern, $key);
+        return sprintf('%s/$s/%s', $this->dataFolder, basename($this->dataPattern, $this->dataFormatter->getFileExtension()), $key);
     }
 
     protected function save()
@@ -175,11 +175,12 @@ class SimpleStorage extends AbstractFilesystemStorage
      */
     protected function findAllKeys()
     {
-        $file = $this->getFile($this->dataFolder);
+        $file = $this->getFile($this->dataFolder . '/' . $this->dataPattern);
         $modified = $file->modified();
 
         $this->data = (array) $file->content();
 
+        $list = [];
         foreach ($this->data as $key => $info) {
             $list[$key] = $modified;
         }

@@ -138,9 +138,6 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
         $collection = $collection->filter(function ($object) use ($list) { return \in_array($object->id, $list, true); });
 
-        // TODO: Remove workaround for Doctrine Collections 1.3.
-        $collection->setFlexType($type);
-
         return $collection;
     }
 
