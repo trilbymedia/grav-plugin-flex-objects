@@ -3,7 +3,7 @@
         {% for object in collection %}
             {% if object.published %}
             <li>
-                {{ object.render()|raw }}
+                {{ object.render(layout)|raw }}
             </li>
         {% endif %}
         {% endfor %}
