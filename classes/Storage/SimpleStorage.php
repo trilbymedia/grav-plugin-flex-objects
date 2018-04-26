@@ -54,6 +54,14 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
+    public function hasKey($key)
+    {
+        return isset($this->data[$key]);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function createRows(array $rows)
     {
         // TODO: figure out how to detect and assign key if it's not set...
@@ -77,7 +85,7 @@ class SimpleStorage extends AbstractFilesystemStorage
         foreach ($rows as $key => $row) {
             if (null === $row || (!\is_object($row) && !\is_array($row))) {
                 // Only load rows which haven't been loaded before.
-                $list[$key] = isset($this->data[$key]) ? $this->data[$key] : null;
+                $list[$key] = $this->hasKey($key) ? $this->data[$key] : null;
                 if (null !== $fetched) {
                     $fetched[$key] = $list[$key];
                 }
@@ -97,7 +105,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     {
         $list = [];
         foreach ($rows as $key => $row) {
-            if (isset($this->data[$key])) {
+            if ($this->hasKey($key)) {
                 $this->data[$key] = $list[$key] = $row;
             }
         }
@@ -114,7 +122,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     {
         $list = [];
         foreach ($rows as $key => $row) {
-            if (isset($this->data[$key])) {
+            if ($this->hasKey($key)) {
                 unset($this->data[$key]);
                 $list[$key] = $row;
             }

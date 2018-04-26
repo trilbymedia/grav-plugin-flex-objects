@@ -53,6 +53,14 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
+    public function hasKey($key)
+    {
+        return file_exists($this->getPathFromKey($key));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function createRows(array $rows)
     {
         // TODO: figure out how to detect and assign key if it's not set...
@@ -79,7 +87,7 @@ class FolderStorage extends AbstractFilesystemStorage
                 // Only load rows which haven't been loaded before.
                 $path = $this->getPathFromKey($key);
                 $file = $this->getFile($path);
-                $list[$key] = $this->hasFile($file) ? $this->loadFile($file) : null;
+                $list[$key] = $this->hasKey($key) ? $this->loadFile($file) : null;
                 if (null !== $fetched) {
                     $fetched[$key] = $list[$key];
                 }
@@ -101,7 +109,7 @@ class FolderStorage extends AbstractFilesystemStorage
         foreach ($rows as $key => $row) {
             $path = $this->getPathFromKey($key);
             $file = $this->getFile($path);
-            $list[$key] = $this->hasFile($file) ? $this->saveFile($file, $row) : null;
+            $list[$key] = $this->hasKey($key) ? $this->saveFile($file, $row) : null;
         }
 
         return $list;
@@ -116,7 +124,7 @@ class FolderStorage extends AbstractFilesystemStorage
         foreach ($rows as $key => $row) {
             $path = $this->getPathFromKey($key);
             $file = $this->getFile($path);
-            $list[$key] = $this->hasFile($file) ? $this->deleteFile($file) : null;
+            $list[$key] = $this->hasKey($key) ? $this->deleteFile($file) : null;
         }
 
         return $list;
@@ -150,20 +158,11 @@ class FolderStorage extends AbstractFilesystemStorage
 
     /**
      * @param File $file
-     * @return bool
-     */
-    protected function hasFile(File $file)
-    {
-        return $file->exists();
-    }
-
-    /**
-     * @param File $file
      * @return array|null
      */
     protected function loadFile(File $file)
     {
-        return $this->hasFile($file) ? (array)$file->content() : null;
+        return $file->exists() ? (array)$file->content() : null;
     }
 
     /**

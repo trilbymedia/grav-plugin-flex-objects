@@ -24,6 +24,14 @@ interface StorageInterface
     public function getExistingKeys();
 
     /**
+     * Check if storage has a row for the key.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function hasKey($key);
+
+    /**
      * Create new rows.
      *
      * @param  array  $rows  Array of [key => row] pairs.
