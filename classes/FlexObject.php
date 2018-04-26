@@ -38,6 +38,14 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
+     * @return FlexType
+     */
+    public function getFlexType()
+    {
+        return $this->flexType;
+    }
+
+    /**
      * @param bool $prefix
      * @return string
      */
@@ -83,14 +91,6 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
-     * @return FlexType
-     */
-    public function getFlexType()
-    {
-        return $this->flexType;
-    }
-
-    /**
      * Form field compatibility.
      *
      * @param string $name
@@ -107,6 +107,14 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     public function jsonSerialize()
     {
         return $this->getElements();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getMediaFolder()
+    {
+        return dirname($this->flexType->getStorage()->getPathFromKey($this->getKey()));
     }
 
     /**
@@ -132,8 +140,8 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function getCollectionByProperty($type, $property)
     {
-        $type = $this->getDirectory($type);
-        $collection = $type->getCollection();
+        $directory = $this->getDirectory($type);
+        $collection = $directory->getCollection();
         $list = $this->getNestedProperty($property) ?: [];
 
         $collection = $collection->filter(function ($object) use ($list) { return \in_array($object->id, $list, true); });

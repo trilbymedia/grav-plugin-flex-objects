@@ -8,6 +8,7 @@ use Grav\Common\Grav;
 use Grav\Framework\Cache\Adapter\DoctrineCache;
 use Grav\Framework\Cache\CacheInterface;
 use Grav\Plugin\FlexObjects\Storage\SimpleStorage;
+use Grav\Plugin\FlexObjects\Storage\StorageInterface;
 use RuntimeException;
 
 /**
@@ -246,7 +247,7 @@ class FlexType
     }
 
     /**
-     * @return object
+     * @return StorageInterface
      */
     public function getStorage()
     {
@@ -258,9 +259,7 @@ class FlexType
     }
 
     /**
-     * @param array $data
-     * @param $key
-     * @return FlexObject
+     * @return StorageInterface
      */
     public function createStorage()
     {
