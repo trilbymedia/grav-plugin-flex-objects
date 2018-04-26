@@ -7,6 +7,7 @@ use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Framework\Cache\Adapter\DoctrineCache;
 use Grav\Framework\Cache\CacheInterface;
+use Grav\Plugin\FlexObjects\Storage\SimpleStorage;
 use RuntimeException;
 
 /**
@@ -266,10 +267,10 @@ class FlexType
         $storage = $this->getConfig('data/storage');
 
         if (!is_array($storage)) {
-            $storage = ['options' => ['filename' => $storage]];
+            $storage = ['options' => ['folder' => $storage]];
         }
 
-        $className = isset($storage['class']) ? $storage['class'] : FlexStorage::class;
+        $className = isset($storage['class']) ? $storage['class'] : SimpleStorage::class;
         $options = isset($storage['options']) ? $storage['options'] : [];
 
         return new $className($options);
