@@ -93,12 +93,21 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     /**
      * Form field compatibility.
      *
-     * @param string $name
+     * @param  string $name
+     * @param  mixed  $default
      * @return mixed
      */
-    public function value($name)
+    public function value($name, $default = null)
     {
-        return $this->getNestedProperty($name);
+        return $this->getNestedProperty($name, $default);
+    }
+
+    /**
+     * @return bool
+     */
+    public function exists()
+    {
+        return $this->getFlexType()->getStorage()->hasKey($this->getKey());
     }
 
     /**
