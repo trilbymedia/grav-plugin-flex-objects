@@ -160,11 +160,13 @@ class FlexObjectsPlugin extends Plugin
                 $this->grav['assets']->addJs('plugin://flex-objects/js/widgets/widget-filter.min.js');
                 $this->grav['assets']->addJs('plugin://flex-objects/js/widgets/widget-pager.min.js');
             }
-        } else {
+        }
+
+        /* else {
             if ($this->config->get('plugins.flex-objects.built_in_css')) {
                 $this->grav['assets']->addCss('plugin://flex-objects/css/site.css');
             }
             $this->grav['assets']->addJs('plugin://flex-objects/js/list.min.js');
-        }
+        }*/
     }
 }
