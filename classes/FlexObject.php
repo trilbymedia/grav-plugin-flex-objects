@@ -1,6 +1,7 @@
 <?php
 namespace Grav\Plugin\FlexObjects;
 
+use Grav\Common\Data\ValidationException;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Page\Medium\Medium;
@@ -26,12 +27,16 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      * @param string $key
      * @param FlexType $type
      * @throws \InvalidArgumentException
+     * @throws ValidationException
      */
     public function __construct(array $elements = [], $key, FlexType $type)
     {
         $this->flexType = $type;
 
         $blueprint = $this->getFlexType()->getBlueprint();
+
+        $blueprint->validate($elements);
+
         $elements = $blueprint->filter($elements);
 
         parent::__construct($elements, $key);
@@ -93,6 +98,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     /**
      * @param array $data
      * @return $this
+     * @throws ValidationException
      */
     public function update(array $data)
     {
@@ -101,7 +107,9 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $elements = $this->getElements();
         $data = $blueprint->mergeData($elements, $data);
 
-        $this->setElements($data);
+        $blueprint->validate($data);
+
+        $this->setElements($blueprint->filter($data));
 
         return $this;
     }

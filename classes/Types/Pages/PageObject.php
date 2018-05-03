@@ -67,6 +67,52 @@ class PageObject extends FlexObject implements PageInterface
         return (object)$this->getProperty('header', []);
     }
 
+    /**
+     * Get value from a page variable (used mostly for creating edit forms).
+     *
+     * @param string $name Variable name.
+     * @param mixed $default
+     *
+     * @return mixed
+     */
+    public function value($name, $default = null)
+    {
+        if ($name === 'content') {
+            return $this->getElement('content');
+        }
+        if ($name === 'order') {
+            $order = $this->order();
+
+            return $order ? (int)$this->order() : '';
+        }
+        if ($name === 'ordering') {
+            return (bool)$this->order();
+        }
+        if ($name === 'folder') {
+            return preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder());
+        }
+        if ($name === 'slug') {
+            return $this->slug();
+        }
+        if ($name === 'media') {
+            return $this->media()->all();
+        }
+        if ($name === 'media.file') {
+            return $this->media()->files();
+        }
+        if ($name === 'media.video') {
+            return $this->media()->videos();
+        }
+        if ($name === 'media.image') {
+            return $this->media()->images();
+        }
+        if ($name === 'media.audio') {
+            return $this->media()->audios();
+        }
+
+        return parent::value($name, $default);
+    }
+
     public function title($var = null)
     {
         if (null !== $var) {
