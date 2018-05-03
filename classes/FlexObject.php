@@ -91,6 +91,22 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
+     * @param array $data
+     * @return $this
+     */
+    public function update(array $data)
+    {
+        $blueprint = $this->getFlexType()->getBlueprint();
+
+        $elements = $this->getElements();
+        $data = $blueprint->mergeData($elements, $data);
+
+        $this->setElements($data);
+
+        return $this;
+    }
+
+    /**
      * Form field compatibility.
      *
      * @param  string $name
@@ -107,7 +123,9 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function exists()
     {
-        return $this->getFlexType()->getStorage()->hasKey($this->getKey());
+        $key = $this->getKey();
+
+        return $key && $this->getFlexType()->getStorage()->hasKey($key);
     }
 
     /**
@@ -119,11 +137,27 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
+     * @return array
+     */
+    public function prepareStorage()
+    {
+        return $this->getElements();
+    }
+
+    /**
+     * @return string
+     */
+    protected function getStorageFolder()
+    {
+        return $this->getFlexType()->getStorageFolder($this->getKey());
+    }
+
+    /**
      * @return string
      */
     protected function getMediaFolder()
     {
-        return dirname($this->flexType->getStorage()->getPathFromKey($this->getKey()));
+        return $this->getFlexType()->getMediaFolder($this->getKey());
     }
 
     /**
@@ -193,5 +227,29 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         } catch (\Twig_Error_Loader $e) {
             return $twig->twig()->resolveTemplate(["flex-objects/layouts/404.html.twig"]);
         }
+    }
+
+    /**
+     * @return $this
+     */
+    protected function save()
+    {
+        if (!$this->exists()) {
+            $this->getFlexType()->getStorage()->createRows([$this->prepareStorage()]);
+        } else {
+            $this->getFlexType()->getStorage()->updateRows([$this->getKey() => $this->prepareStorage()]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    protected function delete()
+    {
+        $this->getFlexType()->getStorage()->deleteRows([$this->getKey() => $this->prepareStorage()]);
+
+        return $this;
     }
 }

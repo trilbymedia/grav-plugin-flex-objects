@@ -9,6 +9,7 @@ use Grav\Framework\Cache\Adapter\DoctrineCache;
 use Grav\Framework\Cache\CacheInterface;
 use Grav\Plugin\FlexObjects\Storage\SimpleStorage;
 use Grav\Plugin\FlexObjects\Storage\StorageInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 
 /**
@@ -131,22 +132,26 @@ class FlexType
             /** @var Debugger $debugger */
             $debugger = Grav::instance()['debugger'];
             $storage = $this->getStorage();
-            $cache = $this->getCache();
+            try {
+                $cache = $this->getCache();
 
-            $debugger->startTimer('flex-keys', 'Load Flex Keys');
-            $keys = $cache->get('keys');
-            if (null === $keys) {
-                $keys = $storage->getExistingKeys();
-                $cache->set('keys', $keys);
-            }
-            $debugger->stopTimer('flex-keys');
+                $debugger->startTimer('flex-keys', 'Load Flex Keys');
+                $keys = $cache->get('__keys');
+                if (null === $keys) {
+                    $keys = $storage->getExistingKeys();
+                    $cache->set('keys', $keys);
+                }
+                $debugger->stopTimer('flex-keys');
 
-            $debugger->startTimer('flex-rows', 'Load Flex Rows');
-            $updated = [];
-            $rows = $cache->getMultiple(array_keys($keys));
-            $rows = $storage->readRows($rows, $updated);
-            if ($updated) {
-                $cache->setMultiple($updated);
+                $debugger->startTimer('flex-rows', 'Load Flex Rows');
+                $updated = [];
+                $rows = $cache->getMultiple(array_keys($keys));
+                $rows = $storage->readRows($rows, $updated);
+                if ($updated) {
+                    $cache->setMultiple($updated);
+                }
+            } catch (InvalidArgumentException $e) {
+                // Caching failed, but we can ignore that for now.
             }
 
             $debugger->stopTimer('flex-rows');
@@ -167,67 +172,55 @@ class FlexType
     }
 
     /**
-     * @return bool
-     */
-    public function save()
-    {
-        // TODO:
-        throw new \RuntimeException('Not Implemented');
-
-        $file = $this->getFile();
-        $file->save($this->collection->jsonSerialize());
-        $file->free();
-
-        return true;
-    }
-
-    /**
-     * @param array $data
-     * @return FlexObject
-     */
-    public function create(array $data)
-    {
-        // TODO:
-        throw new \RuntimeException('Not Implemented');
-        return $this->update($data);
-    }
-
-    /**
      * @param array $data
      * @param string|null $key
      * @return FlexObject
      */
     public function update(array $data, $key = null)
     {
-        // TODO:
-        throw new \RuntimeException('Not Implemented');
-        /** @var FlexObject $object */
         $object = null !== $key ? $this->getCollection()->get($key) : null;
 
         if (null === $object) {
             $key = null;
 
             $object = $this->createObject($data, $key);
-        } else {
-            $blueprint = $this->getBlueprint();
 
-            $object = $this->createObject($blueprint->mergeData($object->jsonSerialize(), $data), $key);
+            $this->getStorage()->createRows([$object->prepareStorage()]);
+        } else {
+            $object->update($data);
+
+            $this->getStorage()->updateRows([$key => $object->prepareStorage()]);
         }
 
-        $this->getCollection()->set($key, $object);
+        try {
+            $this->getCache()->clear();
+        } catch (InvalidArgumentException $e) {
+            // Caching failed, but we can ignore that for now.
+        }
 
         return $object;
     }
 
     /**
      * @param string $key
-     * @return FlexObject
+     * @return FlexObject|null
      */
     public function remove($key)
     {
-        // TODO:
-        throw new \RuntimeException('Not Implemented');
-        return $this->getCollection()->remove($key);
+        $object = null !== $key ? $this->getCollection()->get($key) : null;
+        if (!$object) {
+            return null;
+        }
+
+        $this->getStorage()->deleteRows([$key => $object->prepareStorage()]);
+
+        try {
+            $this->getCache()->clear();
+        } catch (InvalidArgumentException $e) {
+            // Caching failed, but we can ignore that for now.
+        }
+
+        return $object;
     }
 
     /**
@@ -240,10 +233,29 @@ class FlexType
             /** @var Cache $gravCache */
             $gravCache = Grav::instance()['cache'];
 
-            $this->cache = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects', 60);
+            $this->cache = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType(), 60);
         }
 
         return $this->cache;
+    }
+
+
+    /**
+     * @param string|null $key
+     * @return string
+     */
+    public function getStorageFolder($key = null)
+    {
+        return $this->getStorage()->getStoragePath($key);
+    }
+
+    /**
+     * @param string|null $key
+     * @return string
+     */
+    public function getMediaFolder($key = null)
+    {
+        return $this->getStorage()->getMediaPath($key);
     }
 
     /**
@@ -256,23 +268,6 @@ class FlexType
         }
 
         return $this->storage;
-    }
-
-    /**
-     * @return StorageInterface
-     */
-    public function createStorage()
-    {
-        $storage = $this->getConfig('data/storage');
-
-        if (!is_array($storage)) {
-            $storage = ['options' => ['folder' => $storage]];
-        }
-
-        $className = isset($storage['class']) ? $storage['class'] : SimpleStorage::class;
-        $options = isset($storage['options']) ? $storage['options'] : [];
-
-        return new $className($options);
     }
 
     /**
@@ -296,5 +291,22 @@ class FlexType
         $className = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
 
         return new $className($entries, $this);
+    }
+
+    /**
+     * @return StorageInterface
+     */
+    protected function createStorage()
+    {
+        $storage = $this->getConfig('data/storage');
+
+        if (!\is_array($storage)) {
+            $storage = ['options' => ['folder' => $storage]];
+        }
+
+        $className = isset($storage['class']) ? $storage['class'] : SimpleStorage::class;
+        $options = isset($storage['options']) ? $storage['options'] : [];
+
+        return new $className($options);
     }
 }

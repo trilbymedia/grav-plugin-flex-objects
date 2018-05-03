@@ -4,7 +4,7 @@ namespace Grav\Plugin;
 use Grav\Common\Plugin;
 use Grav\Plugin\FlexObjects\Controllers\AdminController;
 use Grav\Plugin\FlexObjects\Controllers\SiteController;
-use Grav\Plugin\FlexObjects\FlexObjects;
+use Grav\Plugin\FlexObjects\Flex;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -73,7 +73,7 @@ class FlexObjectsPlugin extends Plugin
             foreach ($blueprints as $blueprint) {
                 $list[basename($blueprint, '.yaml')] = $blueprint;
             }
-            return new FlexObjects($list);
+            return new Flex($list);
         };
     }
 

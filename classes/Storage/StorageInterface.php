@@ -8,11 +8,8 @@ namespace Grav\Plugin\FlexObjects\Storage;
 interface StorageInterface
 {
     /**
-     * Storage constructor.
-     *
-     * @param string $path
-     * @param string $filePattern
-     * @param string $extension
+     * StorageInterface constructor.
+     * @param array $options
      */
     public function __construct(array $options);
 
@@ -32,9 +29,9 @@ interface StorageInterface
     public function hasKey($key);
 
     /**
-     * Create new rows.
+     * Create new rows. New keys will be assigned when the objects are created.
      *
-     * @param  array  $rows  Array of [key => row] pairs.
+     * @param  array  $rows  Array of rows.
      * @return array  Returns created rows. Note that existing rows will fail to save and have null value.
      */
     public function createRows(array $rows);
@@ -75,10 +72,18 @@ interface StorageInterface
     public function replaceRows(array $rows);
 
     /**
-     * Get filesystem path from the key.
+     * Get filesystem path for the collection or object storage.
      *
-     * @param  string $key
+     * @param  string|null $key
      * @return string
      */
-    public function getPathFromKey($key);
+    public function getStoragePath($key = null);
+
+    /**
+     * Get filesystem path for the collection or object media.
+     *
+     * @param  string|null $key
+     * @return string
+     */
+    public function getMediaPath($key = null);
 }

@@ -3,9 +3,10 @@
 
 {% set flex = grav.flex_objects %}
 {% set directory = flex.directory(target) %}
+{% set id = uri.param('id') %}
 
 {% block content_top %}
-    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ directory.storage(true) }}</b></div>
+    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>.{{ url(directory.storageFolder(id)) }}</b></div>
 {% endblock %}
 
 {% block content %}

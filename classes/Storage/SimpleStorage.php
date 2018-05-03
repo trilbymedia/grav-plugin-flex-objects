@@ -64,7 +64,6 @@ class SimpleStorage extends AbstractFilesystemStorage
      */
     public function createRows(array $rows)
     {
-        // TODO: figure out how to detect and assign key if it's not set...
         $list = [];
         foreach ($rows as $key => $row) {
             $key = $this->getNewKey();
@@ -149,19 +148,24 @@ class SimpleStorage extends AbstractFilesystemStorage
     }
 
     /**
-     * Get filesystem path from the key.
-     *
-     * @param string $key
-     * @return string
+     * {@inheritdoc}
      */
-    public function getPathFromKey($key)
+    public function getStoragePath($key = null)
     {
-        return sprintf('%s/$s/%s', $this->dataFolder, basename($this->dataPattern, $this->dataFormatter->getFileExtension()), $key);
+        return $this->dataFolder . '/' . $this->dataPattern;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMediaPath($key = null)
+    {
+        return sprintf('%s/%s/%s', $this->dataFolder, basename($this->dataPattern, $this->dataFormatter->getFileExtension()), $key);
     }
 
     protected function save()
     {
-        $file = $this->getFile($this->dataFolder . '/' . $this->dataPattern);
+        $file = $this->getFile($this->getStoragePath());
         $file->save($this->data);
         $file->free();
     }
@@ -183,7 +187,7 @@ class SimpleStorage extends AbstractFilesystemStorage
      */
     protected function findAllKeys()
     {
-        $file = $this->getFile($this->dataFolder . '/' . $this->dataPattern);
+        $file = $this->getFile($this->getStoragePath());
         $modified = $file->modified();
 
         $this->data = (array) $file->content();
@@ -208,7 +212,7 @@ class SimpleStorage extends AbstractFilesystemStorage
         // Make sure that the key doesn't exist.
         do {
             $key = $this->generateKey();
-        } while (!isset($this->data[$key]));
+        } while (isset($this->data[$key]));
 
         return $key;
     }

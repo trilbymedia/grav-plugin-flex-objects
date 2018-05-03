@@ -4,10 +4,10 @@ namespace Grav\Plugin\FlexObjects;
 use Grav\Common\Filesystem\Folder;
 
 /**
- * Class FlexObjects
+ * Class Flex
  * @package Grav\Plugin\FlexObjects\Entities
  */
-class FlexObjects implements \Countable
+class Flex implements \Countable
 {
     /** @var array|FlexType[] */
     protected $types = [];

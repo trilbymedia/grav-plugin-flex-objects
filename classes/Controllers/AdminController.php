@@ -20,11 +20,9 @@ class AdminController extends SimpleController
         $id = Grav::instance()['uri']->param('id');
 
         $directory = $this->getDirectory($type);
-        $directory->remove($id);
+        $object = $directory->remove($id);
 
-        $status = $directory->save();
-
-        if ($status) {
+        if ($object) {
             $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
             $list_page = $this->location . '/' . $type;
             $this->setRedirect($list_page);
@@ -43,9 +41,7 @@ class AdminController extends SimpleController
         // if no id param, assume new, generate an ID
         $object = $directory->update($this->data, $id);
 
-        $status = $directory->save();
-
-        if ($status) {
+        if ($object) {
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect && !$id) {
@@ -56,7 +52,7 @@ class AdminController extends SimpleController
             Grav::instance()->fireEvent('gitsync');
         }
 
-        return $status;
+        return $object ? true : false;
     }
 
     protected function processPostEntriesSave($var)

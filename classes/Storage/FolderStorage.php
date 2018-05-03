@@ -55,7 +55,7 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     public function hasKey($key)
     {
-        return file_exists($this->getPathFromKey($key));
+        return $key && file_exists($this->getPathFromKey($key));
     }
 
     /**
@@ -63,7 +63,6 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     public function createRows(array $rows)
     {
-        // TODO: figure out how to detect and assign key if it's not set...
         $list = [];
         foreach ($rows as $key => $row) {
             // Create new file and save it.
@@ -146,6 +145,28 @@ class FolderStorage extends AbstractFilesystemStorage
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getStoragePath($key = null)
+    {
+        if (null === $key) {
+            $path = $this->dataFolder;
+        } else {
+            $path = sprintf($this->dataPattern, $this->dataFolder, $key);
+        }
+
+        return $path;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMediaPath($key = null)
+    {
+        return $key ? dirname($this->getStoragePath($key)) : $this->getStoragePath();
+    }
+
+    /**
      * Get filesystem path from the key.
      *
      * @param string $key
@@ -207,7 +228,7 @@ class FolderStorage extends AbstractFilesystemStorage
     protected function findAllKeys()
     {
         $flags = \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
-        $iterator = new \FilesystemIterator($this->dataFolder, $flags);
+        $iterator = new \FilesystemIterator($this->getStoragePath(), $flags);
         $list = [];
         /** @var \SplFileInfo $info */
         foreach ($iterator as $filename => $info) {

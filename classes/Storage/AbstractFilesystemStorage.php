@@ -4,11 +4,13 @@ namespace Grav\Plugin\FlexObjects\Storage;
 use Grav\Common\File\CompiledJsonFile;
 use Grav\Common\File\CompiledMarkdownFile;
 use Grav\Common\File\CompiledYamlFile;
+use Grav\Common\Grav;
 use Grav\Common\Helpers\Base32;
 use Grav\Common\Utils;
 use Grav\Framework\File\Formatter\FormatterInterface;
 use Grav\Framework\File\Formatter\JsonFormatter;
 use RocketTheme\Toolbox\File\File;
+use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use RuntimeException;
 
 /**
@@ -38,6 +40,10 @@ abstract class AbstractFilesystemStorage implements StorageInterface
      */
     protected function getFile($filename)
     {
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+        $filename = (string)$locator->findResource($filename, true, true);
+
         switch ($this->dataFormatter->getFileExtension()) {
             case '.json':
                 $file = CompiledJsonFile::instance($filename);

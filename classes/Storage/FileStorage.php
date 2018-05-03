@@ -13,6 +13,14 @@ class FileStorage extends FolderStorage
     /**
      * {@inheritdoc}
      */
+    public function getMediaPath($key = null)
+    {
+        return $key ? dirname($this->getStoragePath($key)) . '/' . $key : $this->getStoragePath();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function getKeyFromPath($path)
     {
         return basename($path, $this->dataFormatter->getFileExtension());
@@ -24,7 +32,7 @@ class FileStorage extends FolderStorage
     protected function findAllKeys()
     {
         $flags = \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
-        $iterator = new \FilesystemIterator($this->dataFolder, $flags);
+        $iterator = new \FilesystemIterator($this->getStoragePath(), $flags);
         $list = [];
         /** @var \SplFileInfo $info */
         foreach ($iterator as $filename => $info) {
