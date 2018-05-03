@@ -78,7 +78,7 @@ class PageObject extends FlexObject implements PageInterface
     public function value($name, $default = null)
     {
         if ($name === 'content') {
-            return $this->getElement('content');
+            return $this->getElement('markdown');
         }
         if ($name === 'order') {
             $order = $this->order();
@@ -138,6 +138,11 @@ class PageObject extends FlexObject implements PageInterface
         }
 
         return $this->getKey();
+    }
+
+    public function folderExists()
+    {
+        return $this->exists();
     }
 
     public function slug($var = null)

@@ -207,7 +207,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function getDirectory($type)
     {
-        /** @var FlexObjects $flex */
+        /** @var Flex $flex */
         $flex = Grav::instance()['flex_objects'];
         $directory = $flex->getDirectory($type);
         if (!$directory) {
