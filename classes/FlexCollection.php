@@ -11,7 +11,7 @@ use RocketTheme\Toolbox\Event\Event;
 
 /**
  * Class FlexCollection
- * @package Grav\Plugin\FlexObjects\Entities
+ * @package Grav\Plugin\FlexObjects
  */
 class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 {

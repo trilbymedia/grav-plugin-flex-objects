@@ -15,29 +15,34 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
  * Class FlexObject
- * @package Grav\Plugin\FlexObjects\Entities
+ * @package Grav\Plugin\FlexObjects
  */
 class FlexObject extends LazyObject implements FlexObjectInterface
 {
     /** @var FlexType */
     private $flexType;
+    /** @var int */
+    private $timestamp = 0;
 
     /**
      * @param array $elements
      * @param string $key
      * @param FlexType $type
+     * @param bool $validate
      * @throws \InvalidArgumentException
      * @throws ValidationException
      */
-    public function __construct(array $elements = [], $key, FlexType $type)
+    public function __construct(array $elements = [], $key, FlexType $type, $validate = false)
     {
         $this->flexType = $type;
 
-        $blueprint = $this->getFlexType()->getBlueprint();
+        if ($validate) {
+            $blueprint = $this->getFlexType()->getBlueprint();
 
-        $blueprint->validate($elements);
+            $blueprint->validate($elements);
 
-        $elements = $blueprint->filter($elements);
+            $elements = $blueprint->filter($elements);
+        }
 
         parent::__construct($elements, $key);
     }
@@ -57,6 +62,25 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     public function getType($prefix = true)
     {
         return ($prefix ? static::$prefix : '') . $this->flexType->getType();
+    }
+
+    /**
+     * @return int
+     */
+    public function getModifiedTime()
+    {
+        return $this->timestamp;
+    }
+
+    /**
+     * @param int $timestamp
+     * @return $this
+     */
+    public function setModifiedTime($timestamp = null)
+    {
+        $this->timestamp = $timestamp ?? time();
+
+        return $this;
     }
 
     /**

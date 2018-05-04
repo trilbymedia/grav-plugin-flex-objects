@@ -5,7 +5,7 @@ use Grav\Common\Filesystem\Folder;
 
 /**
  * Class Flex
- * @package Grav\Plugin\FlexObjects\Entities
+ * @package Grav\Plugin\FlexObjects
  */
 class Flex implements \Countable
 {

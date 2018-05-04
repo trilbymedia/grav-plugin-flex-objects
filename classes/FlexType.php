@@ -6,6 +6,7 @@ use Grav\Common\Data\Blueprint;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Framework\Cache\Adapter\DoctrineCache;
+use Grav\Framework\Cache\Adapter\MemoryCache;
 use Grav\Framework\Cache\CacheInterface;
 use Grav\Plugin\FlexObjects\Storage\SimpleStorage;
 use Grav\Plugin\FlexObjects\Storage\StorageInterface;
@@ -14,7 +15,7 @@ use RuntimeException;
 
 /**
  * Class FlexType
- * @package Grav\Plugin\FlexObjects\Entities
+ * @package Grav\Plugin\FlexObjects
  */
 class FlexType
 {
@@ -24,6 +25,8 @@ class FlexType
     protected $blueprint_file;
     /** @var Blueprint */
     protected $blueprint;
+    /** @var FlexIndex */
+    protected $index;
     /** @var FlexCollection */
     protected $collection;
     /** @var bool */
@@ -116,59 +119,92 @@ class FlexType
     }
 
     /**
-     * @return FlexCollection
+     * @param array|null $keys
+     * @return FlexCollection|FlexIndex
      */
-    public function getCollection()
+    public function getCollection(array $keys = null)
     {
-        return $this->load();
-    }
-
-    /**
-     * @return FlexCollection
-     */
-    public function load()
-    {
-        if (null === $this->collection) {
-            /** @var Debugger $debugger */
-            $debugger = Grav::instance()['debugger'];
-            $storage = $this->getStorage();
-            try {
-                $cache = $this->getCache();
-
-                $debugger->startTimer('flex-keys', 'Load Flex Keys');
-                $keys = $cache->get('__keys');
-                if (null === $keys) {
-                    $keys = $storage->getExistingKeys();
-                    $cache->set('keys', $keys);
-                }
-                $debugger->stopTimer('flex-keys');
-
-                $debugger->startTimer('flex-rows', 'Load Flex Rows');
-                $updated = [];
-                $rows = $cache->getMultiple(array_keys($keys));
-                $rows = $storage->readRows($rows, $updated);
-                if ($updated) {
-                    $cache->setMultiple($updated);
-                }
-            } catch (InvalidArgumentException $e) {
-                // Caching failed, but we can ignore that for now.
-            }
-
-            $debugger->stopTimer('flex-rows');
-
-            $debugger->startTimer('flex-objects', 'Initialize Flex Collection');
-            $entries = [];
-            foreach ($rows as $key => $entry) {
-                $object = $this->createObject($entry, $key);
-
-                $entries[$key] = $object;
-            }
-
-            $this->collection = $this->createCollection($entries);
-            $debugger->stopTimer('flex-objects');
+        if (null !== $keys) {
+            return $this->createCollection($this->getObjects($keys));
         }
 
-        return $this->collection;
+        return clone $this->getIndex();
+    }
+
+    public function getObject($key)
+    {
+        $objects = $this->getObjects([$key]);
+
+        return $objects ? reset($objects) : null;
+    }
+
+    public function getObjects($keys)
+    {
+        /** @var Debugger $debugger */
+        $debugger = Grav::instance()['debugger'];
+        $debugger->startTimer('flex-objects', sprintf('Initializing %d Flex Objects', \count($keys)));
+
+        $storage = $this->getStorage();
+        $cache = $this->getCache();
+
+        try {
+            $rows = $cache->getMultiple($keys);
+        } catch (InvalidArgumentException $e) {
+            $rows = [];
+        }
+
+        $updated = [];
+        $rows = $storage->readRows($rows, $updated);
+
+        if ($updated) {
+            try {
+                $cache->setMultiple($updated);
+            } catch (InvalidArgumentException $e) {
+                // TODO: log about the issue.
+            }
+        }
+
+        $list = [];
+        foreach ($rows as $key => $row) {
+            $list[$key] = $this->createObject($row, $key, false);
+        }
+
+        $debugger->stopTimer('flex-objects');
+
+        return $list;
+    }
+
+    protected function getIndex()
+    {
+        if (null === $this->index) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->startTimer('flex-keys', 'Loading Flex Index');
+
+            $storage = $this->getStorage();
+            $cache = $this->getCache();
+
+            try {
+                $keys = $cache->get('__keys');
+            } catch (InvalidArgumentException $e) {
+                $keys = null;
+            }
+
+            if (null === $keys) {
+                $keys = $storage->getExistingKeys();
+                 try {
+                    $cache->set('__keys', $keys);
+                } catch (InvalidArgumentException $e) {
+                     // TODO: log about the issue.
+                }
+            }
+
+            $this->index = new FlexIndex($keys, $this);
+
+            $debugger->stopTimer('flex-keys');
+        }
+
+        return $this->index;
     }
 
     /**
@@ -225,15 +261,18 @@ class FlexType
 
     /**
      * @return CacheInterface
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getCache()
     {
-        if (!$this->cache) {
-            /** @var Cache $gravCache */
-            $gravCache = Grav::instance()['cache'];
+        if (null === $this->cache) {
+            try {
+                /** @var Cache $gravCache */
+                $gravCache = Grav::instance()['cache'];
 
-            $this->cache = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType(), 60);
+                $this->cache = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType(), 60);
+            } catch (\Exception $e) {
+                $this->cache = new MemoryCache('flex-objects-' . $this->getType());
+            }
         }
 
         return $this->cache;
@@ -272,14 +311,15 @@ class FlexType
 
     /**
      * @param array $data
-     * @param $key
+     * @param string $key
+     * @param bool $validate
      * @return FlexObject
      */
-    public function createObject(array $data, $key)
+    public function createObject(array $data, $key, $validate = true)
     {
         $className = $this->getConfig('data/object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
 
-        return new $className($data, $key, $this);
+        return new $className($data, $key, $this, $validate);
     }
 
     /**
