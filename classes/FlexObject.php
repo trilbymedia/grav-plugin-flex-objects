@@ -158,6 +158,8 @@ class FlexObject extends LazyObject implements FlexObjectInterface
             $block = $data ? HtmlBlock::fromArray($data) : null;
         } catch (InvalidArgumentException $e) {
             $block = null;
+        } catch (\InvalidArgumentException $e) {
+            $block = null;
         }
 
         if (!$block) {
