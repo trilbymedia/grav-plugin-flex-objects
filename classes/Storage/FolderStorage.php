@@ -239,6 +239,8 @@ class FolderStorage extends AbstractFilesystemStorage
             $list[$key] = $info->getMTime();
         }
 
+        ksort($list, SORT_NATURAL);
+
         return $list;
     }
 
