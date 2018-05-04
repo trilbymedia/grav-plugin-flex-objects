@@ -6,7 +6,7 @@ use Closure;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Collections\Selectable;
-use Grav\Framework\Cache\Exception\InvalidArgumentException;
+use PSR\SimpleCache\InvalidArgumentException;
 
 class FlexIndex implements Collection, Selectable
 {
@@ -253,7 +253,7 @@ class FlexIndex implements Collection, Selectable
             throw new \InvalidArgumentException('First parameter needs to be FlexObject');
         }
 
-        $this->entries[$key] = $value->setKey($key)->getModifiedTime();
+        $this->entries[$key] = $value->setKey($key)->getTimestamp();
     }
 
     /**
@@ -265,7 +265,7 @@ class FlexIndex implements Collection, Selectable
             throw new \InvalidArgumentException('First parameter needs to be FlexObject');
         }
 
-        $this->entries[$element->getKey()] = $element->getModifiedTime();
+        $this->entries[$element->getKey()] = $element->getTimestamp();
 
         return true;
     }
@@ -356,12 +356,69 @@ class FlexIndex implements Collection, Selectable
 
     // FlexObject interface
 
+    public function limit($start, $limit = null)
+    {
+        return $this->createFrom($this->slice($start, $limit));
+    }
+
+    /**
+     * @return FlexType
+     */
+    public function getFlexType()
+    {
+        return $this->flexType;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getTypePrefix()
+    {
+        return 'i.';
+    }
+
+    /**
+     * @param bool $prefix
+     * @return string
+     */
+    public function getType($prefix = true)
+    {
+        $type = $prefix ? $this->getTypePrefix() : '';
+
+        return $type . $this->flexType->getType();
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getTimestamps()
+    {
+        return $this->entries;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCacheKey()
+    {
+        return $this->getType(true) . '.' . sha1(json_encode($this->getKeys()));
+    }
+
+    /**
+     * @return string
+     */
+    public function getCacheChecksum()
+    {
+        return sha1($this->getCacheKey() . json_encode($this->getTimestamps()));
+    }
+
     /**
      * {@inheritDoc}
      */
     public function call($method, array $arguments = [])
     {
-        $key = 'call-' . md5($method . json_encode($arguments));
+        $key = $this->getType(true) . '.call.' . sha1($method . json_encode($arguments) . $this->getCacheKey());
+
         $cache = $this->flexType->getCache();
 
         $test = new \stdClass;

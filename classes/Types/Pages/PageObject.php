@@ -49,12 +49,43 @@ class PageObject extends FlexObject implements PageInterface
         'last_modified'     => 'bool',
         'ssl'               => 'bool',
         'template_format'   => 'raw',
-        'debugger'          => 'bool',
+        'debugger'          => 'bool'
     ];
 
     protected $summary;
     protected $content;
 
+    /**
+     * @return array
+     */
+    public static function getCachedMethods()
+    {
+        return [
+            'title' => true,
+            'menu' => true,
+            'folder' => true,
+            'folderExists' => true,
+            'slug' => true,
+            'order' => true,
+            'summary' => true,
+            'content' => true,
+            'visible' => true,
+            'published' => true,
+            'publishDate' => true,
+            'unpublishDate' => true,
+            'process' => true,
+            'id' => true,
+            'modified' => true,
+            'lastModified' => true,
+            'date' => true,
+            'dateformat' => true,
+            'taxonomy' => true,
+            'shouldProcess' => true,
+            'isPage' => true,
+            'isDir' => true
+
+        ] + parent::getCachedMethods();
+    }
 
     // Page Interface.
 
@@ -301,14 +332,6 @@ class PageObject extends FlexObject implements PageInterface
     public function isDir()
     {
         return false;
-    }
-
-
-    // Media Interface.
-
-    public function getCacheKey()
-    {
-        return $this->id();
     }
 
 

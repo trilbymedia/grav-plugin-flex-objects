@@ -36,6 +36,9 @@ class FlexType
     /** @var CacheInterface */
     protected $cache;
 
+    protected $objectClassName;
+    protected $collectionClassName;
+
     /**
      * FlexType constructor.
      * @param string $type
@@ -46,7 +49,7 @@ class FlexType
     {
         $this->type = $type;
         $this->blueprint_file = $blueprint_file;
-        $this->enabled = (bool) $enabled;
+        $this->enabled = (bool)$enabled;
     }
 
     /**
@@ -174,39 +177,6 @@ class FlexType
         return $list;
     }
 
-    protected function getIndex()
-    {
-        if (null === $this->index) {
-            /** @var Debugger $debugger */
-            $debugger = Grav::instance()['debugger'];
-            $debugger->startTimer('flex-keys', 'Loading Flex Index');
-
-            $storage = $this->getStorage();
-            $cache = $this->getCache();
-
-            try {
-                $keys = $cache->get('__keys');
-            } catch (InvalidArgumentException $e) {
-                $keys = null;
-            }
-
-            if (null === $keys) {
-                $keys = $storage->getExistingKeys();
-                 try {
-                    $cache->set('__keys', $keys);
-                } catch (InvalidArgumentException $e) {
-                     // TODO: log about the issue.
-                }
-            }
-
-            $this->index = new FlexIndex($keys, $this);
-
-            $debugger->stopTimer('flex-keys');
-        }
-
-        return $this->index;
-    }
-
     /**
      * @param array $data
      * @param string|null $key
@@ -317,7 +287,10 @@ class FlexType
      */
     public function createObject(array $data, $key, $validate = true)
     {
-        $className = $this->getConfig('data/object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
+        if (!$this->objectClassName) {
+            $this->objectClassName = $this->getConfig('data/object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
+        }
+        $className = $this->objectClassName;
 
         return new $className($data, $key, $this, $validate);
     }
@@ -328,7 +301,10 @@ class FlexType
      */
     public function createCollection(array $entries)
     {
-        $className = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
+        if (!$this->collectionClassName) {
+            $this->collectionClassName = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
+        }
+        $className = $this->collectionClassName;
 
         return new $className($entries, $this);
     }
@@ -338,6 +314,8 @@ class FlexType
      */
     protected function createStorage()
     {
+        $this->collection = $this->createCollection([]);
+
         $storage = $this->getConfig('data/storage');
 
         if (!\is_array($storage)) {
@@ -348,5 +326,38 @@ class FlexType
         $options = isset($storage['options']) ? $storage['options'] : [];
 
         return new $className($options);
+    }
+
+    protected function getIndex()
+    {
+        if (null === $this->index) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->startTimer('flex-keys', 'Loading Flex Index');
+
+            $storage = $this->getStorage();
+            $cache = $this->getCache();
+
+            try {
+                $keys = $cache->get('__keys');
+            } catch (InvalidArgumentException $e) {
+                $keys = null;
+            }
+
+            if (null === $keys) {
+                $keys = $storage->getExistingKeys();
+                try {
+                    $cache->set('__keys', $keys);
+                } catch (InvalidArgumentException $e) {
+                    // TODO: log about the issue.
+                }
+            }
+
+            $this->index = new FlexIndex($keys, $this);
+
+            $debugger->stopTimer('flex-keys');
+        }
+
+        return $this->index;
     }
 }

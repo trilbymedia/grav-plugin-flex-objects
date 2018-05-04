@@ -1,12 +1,14 @@
 <?php
 namespace Grav\Plugin\FlexObjects;
 
+use Doctrine\Common\Collections\Criteria;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Twig\Twig;
 use Grav\Framework\ContentBlock\HtmlBlock;
 use Grav\Framework\Object\ObjectCollection;
 use Grav\Plugin\FlexObjects\Interfaces\FlexCollectionInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -17,6 +19,25 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 {
     /** @var FlexType */
     private $flexType;
+
+    /**
+     * @return array
+     */
+    public static function getCachedMethods()
+    {
+        return [
+            'getTypePrefix' => true,
+            'getType' => true,
+            'getFlexType' => true,
+            'getCacheKey' => true,
+            'getCacheChecksum' => true,
+            'getTimestamp' => true,
+            'hasProperty' => true,
+            'getProperty' => true,
+            'hasNestedProperty' => true,
+            'getNestedProperty' => true,
+        ];
+    }
 
     /**
      * @param array $elements
@@ -49,12 +70,22 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     }
 
     /**
+     * @return string
+     */
+    protected function getTypePrefix()
+    {
+        return 'c.';
+    }
+
+    /**
      * @param bool $prefix
      * @return string
      */
     public function getType($prefix = true)
     {
-        return ($prefix ? static::$prefix : '') . $this->flexType->getType();
+        $type = $prefix ? $this->getTypePrefix() : '';
+
+        return $type . $this->flexType->getType();
     }
 
     /**
@@ -72,23 +103,44 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 
         /** @var Debugger $debugger */
         $debugger = $grav['debugger'];
-        $debugger->startTimer('flex-collection-' . $this->getType(), 'Render Collection ' . $this->getType());
+        $debugger->startTimer('flex-collection-' . $this->getType(false), 'Render Collection ' . $this->getType(false));
 
-        $block = new HtmlBlock();
+        $cache = null;
+        if (!$context) {
+            $key = $this->getCacheKey() . '.' . $layout;
+            $cache = $this->flexType->getCache();
+        }
 
-        $grav->fireEvent('onFlexCollectionRender', new Event([
-            'collection' => $this,
-            'layout' => &$layout,
-            'context' => &$context
-        ]));
+        try {
+            $data = $cache ? $cache->get($key) : null;
 
-        $output = $this->getTemplate($layout)->render(
-            ['grav' => $grav, 'block' => $block, 'collection' => $this, 'layout' => $layout] + $context
-        );
+            $block = $data ? HtmlBlock::fromArray($data) : null;
+        } catch (InvalidArgumentException $e) {
+            $block = null;
+        }
 
-        $block->setContent($output);
+        if (!$block) {
+            $block = HtmlBlock::create($key);
 
-        $debugger->stopTimer('flex-collection-' . $this->getType());
+            $grav->fireEvent('onFlexCollectionRender', new Event([
+                'collection' => $this,
+                'layout' => &$layout,
+                'context' => &$context
+            ]));
+
+            $output = $this->getTemplate($layout)->render(
+                ['grav' => $grav, 'block' => $block, 'collection' => $this, 'layout' => $layout] + $context
+            );
+
+            $block->setContent($output);
+
+            try {
+                $cache && $cache->set($key, $block->toArray());
+            } catch (InvalidArgumentException $e) {
+            }
+        }
+
+        $debugger->stopTimer('flex-collection-' . $this->getType(false));
 
         return $block;
     }
@@ -113,6 +165,30 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     }
 
     /**
+     * @return string
+     */
+    public function getCacheKey()
+    {
+        return $this->getType(true) . '.' . sha1(json_encode($this->call('getKey')));
+    }
+
+    /**
+     * @return string
+     */
+    public function getCacheChecksum()
+    {
+        return sha1(json_encode($this->getTimestamps()));
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getTimestamps()
+    {
+        return $this->call('getTimestamp');
+    }
+
+    /**
      * @param string $value
      * @param string $field
      * @return object|null
@@ -126,6 +202,27 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
         }
 
         return null;
+    }
+
+    /**
+     * @param array $ordering
+     * @return FlexCollection
+     */
+    public function orderBy(array $ordering)
+    {
+        $criteria = Criteria::create()->orderBy($ordering);
+
+        return $this->matching($criteria);
+    }
+
+    /**
+     * @param int $start
+     * @param int|null $limit
+     * @return FlexCollection
+     */
+    public function limit($start, $limit = null)
+    {
+        return $this->createFrom($this->slice($start, $limit));
     }
 
     /**
@@ -160,7 +257,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
         $twig = $grav['twig'];
 
         try {
-            return $twig->twig()->resolveTemplate(["flex-objects/layouts/{$this->getType()}/collection/{$layout}.html.twig"]);
+            return $twig->twig()->resolveTemplate(["flex-objects/layouts/{$this->getType(false)}/collection/{$layout}.html.twig"]);
         } catch (\Twig_Error_Loader $e) {
             return $twig->twig()->resolveTemplate(["flex-objects/layouts/404.html.twig"]);
         }

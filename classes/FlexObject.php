@@ -10,6 +10,7 @@ use Grav\Common\Twig\Twig;
 use Grav\Framework\ContentBlock\HtmlBlock;
 use Grav\Framework\Object\LazyObject;
 use Grav\Plugin\FlexObjects\Interfaces\FlexObjectInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
@@ -23,6 +24,25 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     private $flexType;
     /** @var int */
     private $timestamp = 0;
+
+    /**
+     * @return array
+     */
+    public static function getCachedMethods()
+    {
+        return [
+            'getTypePrefix' => true,
+            'getType' => true,
+            'getFlexType' => true,
+            'getCacheKey' => true,
+            'getCacheChecksum' => true,
+            'getTimestamp' => true,
+            'value' => true,
+            'exists' => true,
+            'hasProperty' => true,
+            'getProperty' => true,
+        ];
+    }
 
     /**
      * @param array $elements
@@ -48,11 +68,11 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
-     * @return FlexType
+     * @return string
      */
-    public function getFlexType()
+    protected function getTypePrefix()
     {
-        return $this->flexType;
+        return 'o.';
     }
 
     /**
@@ -61,13 +81,39 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function getType($prefix = true)
     {
-        return ($prefix ? static::$prefix : '') . $this->flexType->getType();
+        $type = $prefix ? $this->getTypePrefix() : '';
+
+        return $type . $this->flexType->getType();
+    }
+
+    /**
+     * @return FlexType
+     */
+    public function getFlexType()
+    {
+        return $this->flexType;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCacheKey()
+    {
+        return $this->getType(true) .'.'. $this->getKey();
     }
 
     /**
      * @return int
      */
-    public function getModifiedTime()
+    public function getCacheChecksum()
+    {
+        return $this->getTimestamp();
+    }
+
+    /**
+     * @return int
+     */
+    public function getTimestamp()
     {
         return $this->timestamp;
     }
@@ -76,7 +122,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      * @param int $timestamp
      * @return $this
      */
-    public function setModifiedTime($timestamp = null)
+    public function setTimestamp($timestamp = null)
     {
         $this->timestamp = $timestamp ?? time();
 
@@ -97,24 +143,46 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $grav = Grav::instance();
 
         /** @var Debugger $debugger */
-        //$debugger = $grav['debugger'];
-        //$debugger->startTimer('flex-object-' . $this->getType(), 'Render Object ' . $this->getType());
+        $debugger = $grav['debugger'];
+        $debugger->startTimer('flex-object-' . $this->getType(false), 'Render Object ' . $this->getType(false));
 
-        $block = new HtmlBlock();
+        $cache = null;
+        if (!$context) {
+            $key = $this->getCacheKey() . '.' . $layout;
+            $cache = $this->flexType->getCache();
+        }
 
-        $grav->fireEvent('onFlexObjectRender', new Event([
-            'object' => $this,
-            'layout' => &$layout,
-            'context' => &$context
-        ]));
+        try {
+            $data = $cache ? $cache->get($key) : null;
 
-        $output = $this->getTemplate($layout)->render(
-            ['grav' => $grav, 'block' => $block, 'object' => $this, 'layout' => $layout] + $context
-        );
+            $block = $data ? HtmlBlock::fromArray($data) : null;
+        } catch (InvalidArgumentException $e) {
+            $block = null;
+        }
 
-        $block->setContent($output);
+        if (!$block) {
 
-        //$debugger->stopTimer('flex-object-' . $this->getType());
+            $block = HtmlBlock::create();
+
+            $grav->fireEvent('onFlexObjectRender', new Event([
+                'object' => $this,
+                'layout' => &$layout,
+                'context' => &$context
+            ]));
+
+            $output = $this->getTemplate($layout)->render(
+                ['grav' => $grav, 'block' => $block, 'object' => $this, 'layout' => $layout] + $context
+            );
+
+            $block->setContent($output);
+
+            try {
+                $cache && $cache->set($key, $block->toArray());
+            } catch (InvalidArgumentException $e) {
+            }
+        }
+
+        $debugger->stopTimer('flex-object-' . $this->getType(false));
 
         return $block;
     }
@@ -255,7 +323,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $twig = $grav['twig'];
 
         try {
-            return $twig->twig()->resolveTemplate(["flex-objects/layouts/{$this->getType()}/object/{$layout}.html.twig"]);
+            return $twig->twig()->resolveTemplate(["flex-objects/layouts/{$this->getType(false)}/object/{$layout}.html.twig"]);
         } catch (\Twig_Error_Loader $e) {
             return $twig->twig()->resolveTemplate(["flex-objects/layouts/404.html.twig"]);
         }
