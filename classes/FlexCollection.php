@@ -105,7 +105,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
         $debugger = $grav['debugger'];
         $debugger->startTimer('flex-collection-' . $this->getType(false), 'Render Collection ' . $this->getType(false));
 
-        $cache = null;
+        $cache = $key = null;
         if (!$context) {
             $key = $this->getCacheKey() . '.' . $layout;
             $cache = $this->flexType->getCache();
@@ -121,8 +121,14 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
             $block = null;
         }
 
+        $checksum = $this->getCacheChecksum();
+        if ($block && $checksum !== $block->getChecksum()) {
+            $block = null;
+        }
+
         if (!$block) {
             $block = HtmlBlock::create($key);
+            $block->setChecksum($checksum);
 
             $grav->fireEvent('onFlexCollectionRender', new Event([
                 'collection' => $this,

@@ -176,7 +176,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $debugger = $grav['debugger'];
         $debugger->startTimer('flex-object-' . $this->getType(false), 'Render Object ' . $this->getType(false));
 
-        $cache = null;
+        $cache = $key = null;
         if (!$context) {
             $key = $this->getCacheKey() . '.' . $layout;
             $cache = $this->flexType->getCache();
@@ -192,9 +192,14 @@ class FlexObject extends LazyObject implements FlexObjectInterface
             $block = null;
         }
 
-        if (!$block) {
+        $checksum = $this->getCacheChecksum();
+        if ($block && $checksum !== $block->getChecksum()) {
+            $block = null;
+        }
 
-            $block = HtmlBlock::create();
+        if (!$block) {
+            $block = HtmlBlock::create($key);
+            $block->setChecksum($checksum);
 
             $grav->fireEvent('onFlexObjectRender', new Event([
                 'object' => $this,
