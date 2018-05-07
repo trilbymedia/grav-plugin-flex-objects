@@ -10,6 +10,8 @@ use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
 use Grav\Plugin\FlexObjects\FlexObject;
 
+class_exists('Grav\\Common\\Page\\Page', true);
+
 /**
  * Class BuildObject
  * @package Grav\Plugin\RevKit\Repositories\Builds
