@@ -116,6 +116,9 @@ class FlexType
         return $this->blueprint;
     }
 
+    /**
+     * @return string
+     */
     public function getBlueprintFile()
     {
         return $this->blueprint_file;
@@ -128,37 +131,48 @@ class FlexType
     public function getCollection(array $keys = null)
     {
         if (null !== $keys) {
-            return $this->createCollection($this->getObjects($keys));
+            return $this->loadCollection($keys);
         }
 
         return clone $this->getIndex();
     }
 
-    public function getObject($key)
+    public function loadCollection(array $entries)
     {
-        $objects = $this->getObjects([$key]);
-
-        return $objects ? reset($objects) : null;
+        return $this->createCollection($this->loadObjects($entries));
     }
 
-    public function getObjects($keys)
+    /**
+     * @param array $entries
+     * @return FlexObject[]
+     */
+    public function loadObjects(array $entries)
     {
         /** @var Debugger $debugger */
         $debugger = Grav::instance()['debugger'];
-        $debugger->startTimer('flex-objects', sprintf('Initializing %d Flex Objects', \count($keys)));
+        $debugger->startTimer('flex-objects', sprintf('Initializing %d Flex Objects', \count($entries)));
 
         $storage = $this->getStorage();
         $cache = $this->getCache();
 
+        // Get storage keys for the objects.
+        $keys = [];
+        foreach ($entries as $key => $value) {
+            $keys[\is_array($value) ? $value[0] : $key] = $key;
+        }
+
+        // Fetch rows from the cache.
         try {
-            $rows = $cache->getMultiple($keys);
+            $rows = $cache->getMultiple(array_keys($keys));
         } catch (InvalidArgumentException $e) {
             $rows = [];
         }
 
+        // Read missing rows from the storage.
         $updated = [];
         $rows = $storage->readRows($rows, $updated);
 
+        // Store updated rows to the cache.
         if ($updated) {
             try {
                 $cache->setMultiple($updated);
@@ -167,9 +181,12 @@ class FlexType
             }
         }
 
+        // Create objects from the rows.
         $list = [];
-        foreach ($rows as $key => $row) {
-            $list[$key] = $this->createObject($row, $key, false);
+        foreach ($rows as $storageKey => $row) {
+            $key = $keys[$storageKey];
+            $object = $this->createObject($row, $key, false);
+            $list[$key] = $object->setStorageKey($storageKey)->setTimestamp($entries[$key][1] ?? $entries[$key]);
         }
 
         $debugger->stopTimer('flex-objects');
@@ -287,10 +304,7 @@ class FlexType
      */
     public function createObject(array $data, $key, $validate = true)
     {
-        if (!$this->objectClassName) {
-            $this->objectClassName = $this->getConfig('data/object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
-        }
-        $className = $this->objectClassName;
+        $className = $this->objectClassName ? $this->objectClassName : $this->getObjectClass();
 
         return new $className($data, $key, $this, $validate);
     }
@@ -301,12 +315,32 @@ class FlexType
      */
     public function createCollection(array $entries)
     {
+        $className = $this->collectionClassName ? $this->collectionClassName : $this->getCollectionClass();
+
+        return new $className($entries, $this);
+    }
+
+    /**
+     * @return string
+     */
+    public function getObjectClass()
+    {
+        if (!$this->objectClassName) {
+            $this->objectClassName = $this->getConfig('data/object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
+        }
+        return $this->objectClassName;
+
+    }
+
+    /**
+     * @return string
+     */
+    public function getCollectionClass()
+    {
         if (!$this->collectionClassName) {
             $this->collectionClassName = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
         }
-        $className = $this->collectionClassName;
-
-        return new $className($entries, $this);
+        return $this->collectionClassName;
     }
 
     /**
@@ -328,6 +362,9 @@ class FlexType
         return new $className($options);
     }
 
+    /**
+     * @return FlexIndex
+     */
     protected function getIndex()
     {
         if (null === $this->index) {
@@ -345,7 +382,8 @@ class FlexType
             }
 
             if (null === $keys) {
-                $keys = $storage->getExistingKeys();
+                $className = $this->getObjectClass();
+                $keys = $className::createIndex($storage->getExistingKeys());
                 try {
                     $cache->set('__keys', $keys);
                 } catch (InvalidArgumentException $e) {

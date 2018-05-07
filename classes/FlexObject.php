@@ -22,6 +22,8 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 {
     /** @var FlexType */
     private $flexType;
+    /** @var string */
+    private $storageKey;
     /** @var int */
     private $timestamp = 0;
 
@@ -42,6 +44,15 @@ class FlexObject extends LazyObject implements FlexObjectInterface
             'hasProperty' => true,
             'getProperty' => true,
         ];
+    }
+
+    /**
+     * @param array $index
+     * @return array
+     */
+    public static function createIndex(array $index)
+    {
+        return $index;
     }
 
     /**
@@ -99,7 +110,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function getCacheKey()
     {
-        return $this->getType(true) .'.'. $this->getKey();
+        return $this->getType(true) .'.'. $this->getStorageKey();
     }
 
     /**
@@ -108,6 +119,25 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     public function getCacheChecksum()
     {
         return $this->getTimestamp();
+    }
+
+    /**
+     * @return string
+     */
+    public function getStorageKey()
+    {
+        return $this->storageKey ?? $this->getKey();
+    }
+
+    /**
+     * @param string|null $key
+     * @return $this
+     */
+    public function setStorageKey($key = null)
+    {
+        $this->storageKey = $key ?? $this->getKey();
+
+        return $this;
     }
 
     /**
@@ -225,7 +255,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function exists()
     {
-        $key = $this->getKey();
+        $key = $this->getStorageKey();
 
         return $key && $this->getFlexType()->getStorage()->hasKey($key);
     }
@@ -251,7 +281,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function getStorageFolder()
     {
-        return $this->getFlexType()->getStorageFolder($this->getKey());
+        return $this->getFlexType()->getStorageFolder($this->getStorageKey());
     }
 
     /**
@@ -259,7 +289,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function getMediaFolder()
     {
-        return $this->getFlexType()->getMediaFolder($this->getKey());
+        return $this->getFlexType()->getMediaFolder($this->getStorageKey());
     }
 
     /**
@@ -339,7 +369,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         if (!$this->exists()) {
             $this->getFlexType()->getStorage()->createRows([$this->prepareStorage()]);
         } else {
-            $this->getFlexType()->getStorage()->updateRows([$this->getKey() => $this->prepareStorage()]);
+            $this->getFlexType()->getStorage()->updateRows([$this->getStorageKey() => $this->prepareStorage()]);
         }
 
         return $this;
@@ -350,7 +380,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function delete()
     {
-        $this->getFlexType()->getStorage()->deleteRows([$this->getKey() => $this->prepareStorage()]);
+        $this->getFlexType()->getStorage()->deleteRows([$this->getStorageKey() => $this->prepareStorage()]);
 
         return $this;
     }

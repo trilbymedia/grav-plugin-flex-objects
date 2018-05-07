@@ -87,6 +87,22 @@ class PageObject extends FlexObject implements PageInterface
         ] + parent::getCachedMethods();
     }
 
+    /**
+     * @param array $index
+     * @return array
+     */
+    public static function createIndex(array $index)
+    {
+        $list = [];
+        foreach ($index as $key => $timestamp) {
+            $slug = static::adjustRouteCase(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $key));
+
+            $list[$slug] = [$key, $timestamp];
+        }
+
+        return $list;
+    }
+
     // Page Interface.
 
     public function header($var = null)
@@ -168,7 +184,7 @@ class PageObject extends FlexObject implements PageInterface
             throw new \RuntimeException('Not Implemented');
         }
 
-        return $this->getKey();
+        return $this->getStorageKey();
     }
 
     public function folderExists()
@@ -182,7 +198,7 @@ class PageObject extends FlexObject implements PageInterface
             $this->setProperty('slug', $var);
         }
 
-        return $this->getProperty('slug') ?: $this->adjustRouteCase(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder()));
+        return $this->getProperty('slug') ?: static::adjustRouteCase(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder()));
     }
 
     public function order($var = null)
@@ -560,7 +576,7 @@ class PageObject extends FlexObject implements PageInterface
      * @param string $route
      * @return string
      */
-    protected function adjustRouteCase($route)
+    static protected function adjustRouteCase($route)
     {
         $case_insensitive = Grav::instance()['config']->get('system.force_lowercase_urls');
 
