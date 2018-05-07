@@ -352,6 +352,40 @@ abstract class ArrayIndex implements \ArrayAccess
     }
 
     /**
+     * Reverse the order of the items.
+     *
+     * @return static
+     */
+    public function reverse()
+    {
+        return $this->createFrom(array_reverse($this->entries));
+    }
+
+    /**
+     * Shuffle items.
+     *
+     * @return static
+     */
+    public function shuffle()
+    {
+        $keys = $this->getKeys();
+        shuffle($keys);
+
+        return $this->createFrom(array_replace(array_flip($keys), $this->entries));
+    }
+
+    /**
+     * Split collection into chunks.
+     *
+     * @param int $size     Size of each chunk.
+     * @return array
+     */
+    public function chunk($size)
+    {
+        return $this->getCollection($this->entries)->chunk($size);
+    }
+
+    /**
      * @param array $entries
      * @return static
      */

@@ -212,7 +212,7 @@ class FlexType
         } else {
             $object->update($data);
 
-            $this->getStorage()->updateRows([$key => $object->prepareStorage()]);
+            $this->getStorage()->updateRows([$object->getStorageKey() => $object->prepareStorage()]);
         }
 
         try {
@@ -235,7 +235,7 @@ class FlexType
             return null;
         }
 
-        $this->getStorage()->deleteRows([$key => $object->prepareStorage()]);
+        $this->getStorage()->deleteRows([$object->getStorageKey() => $object->prepareStorage()]);
 
         try {
             $this->getCache()->clear();
