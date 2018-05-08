@@ -52,19 +52,19 @@
                     {% set field = schema.get(key) %}
                     <td>
                         {% if options.link == 'edit' %}
-                            <a href="{{ entry_url ~ id }}">{{ entry[key] }}</a>
+                            <a href="{{ entry_url ~ id }}">{{ entry.value(key) }}</a>
                         {% elseif field.type == 'toggle' %}
-                            {% if entry[key] %}
+                            {% if entry.value(key) %}
                                 <i class="published fa fa-check-circle"></i>
                             {% else %}
                                 <i class="unpublished fa fa-times-circle"></i>
                             {% endif %}
                         {% elseif field.type == 'url' %}
-                            <a href="{{ entry[key] }}" target="_blank"><i class="fa fa-link"></i> {{ entry[key] }}</a>
+                            <a href="{{ entry[key] }}" target="_blank"><i class="fa fa-link"></i> {{ entry.value(key) }}</a>
                         {% elseif field.type == 'selectize' %}
-                            {{ entry[key]|join(',') }}
+                            {{ entry.value(key)|join(',') }}
                         {% else %}
-                            {{ entry[key] }}
+                            {{ entry.value(key) }}
                         {% endif %}
                     </td>
                 {% endfor %}

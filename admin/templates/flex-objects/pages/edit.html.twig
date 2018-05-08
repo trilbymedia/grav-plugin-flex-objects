@@ -1,12 +1,13 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
+{% set id = uri.param('id') %}
 {% set flex = grav.flex_objects %}
 {% set directory = flex.directory(target) %}
-{% set id = uri.param('id') %}
+{% set entry = directory.collection[id] %}
 
 {% block content_top %}
-    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>.{{ url(directory.storageFolder(id)) }}</b></div>
+    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>.{{ url(entry.getStorageFolder()) }}</b></div>
 {% endblock %}
 
 {% block content %}

@@ -274,7 +274,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->getValues());
+        return new ArrayIterator($this->getObjects());
     }
 
     /**

@@ -284,7 +284,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     /**
      * @return string
      */
-    protected function getStorageFolder()
+    public function getStorageFolder()
     {
         return $this->getFlexType()->getStorageFolder($this->getStorageKey());
     }
@@ -292,7 +292,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     /**
      * @return string
      */
-    protected function getMediaFolder()
+    public function getMediaFolder()
     {
         return $this->getFlexType()->getMediaFolder($this->getStorageKey());
     }
