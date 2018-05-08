@@ -4,10 +4,12 @@ namespace Grav\Plugin\FlexObjects\Collections;
 use ArrayIterator;
 use Closure;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Selectable;
+use Grav\Framework\Collection\CollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectCollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
 
-abstract class ArrayIndex implements \ArrayAccess
+abstract class ArrayIndex implements CollectionInterface, Selectable
 {
     /** @var array */
     private $entries;
@@ -383,6 +385,16 @@ abstract class ArrayIndex implements \ArrayAccess
     public function chunk($size)
     {
         return $this->getCollection($this->entries)->chunk($size);
+    }
+
+    /**
+     * Implementes JsonSerializable interface.
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return $this->getCollection()->jsonSerialize();
     }
 
     /**
