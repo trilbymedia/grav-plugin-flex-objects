@@ -125,73 +125,18 @@ class FlexType
     }
 
     /**
-     * @param array|null $keys
+     * @param array|null $keys  Array of keys.
      * @return FlexCollection|FlexIndex
      */
     public function getCollection(array $keys = null)
     {
+        $index = clone $this->getIndex();
+
         if (null !== $keys) {
-            return $this->loadCollection($keys);
+            $index = $index->select($keys);
         }
 
-        return clone $this->getIndex();
-    }
-
-    public function loadCollection(array $entries)
-    {
-        return $this->createCollection($this->loadObjects($entries));
-    }
-
-    /**
-     * @param array $entries
-     * @return FlexObject[]
-     */
-    public function loadObjects(array $entries)
-    {
-        /** @var Debugger $debugger */
-        $debugger = Grav::instance()['debugger'];
-        $debugger->startTimer('flex-objects', sprintf('Initializing %d Flex Objects', \count($entries)));
-
-        $storage = $this->getStorage();
-        $cache = $this->getCache();
-
-        // Get storage keys for the objects.
-        $keys = [];
-        foreach ($entries as $key => $value) {
-            $keys[\is_array($value) ? $value[0] : $key] = $key;
-        }
-
-        // Fetch rows from the cache.
-        try {
-            $rows = $cache->getMultiple(array_keys($keys));
-        } catch (InvalidArgumentException $e) {
-            $rows = [];
-        }
-
-        // Read missing rows from the storage.
-        $updated = [];
-        $rows = $storage->readRows($rows, $updated);
-
-        // Store updated rows to the cache.
-        if ($updated) {
-            try {
-                $cache->setMultiple($updated);
-            } catch (InvalidArgumentException $e) {
-                // TODO: log about the issue.
-            }
-        }
-
-        // Create objects from the rows.
-        $list = [];
-        foreach ($rows as $storageKey => $row) {
-            $key = $keys[$storageKey];
-            $object = $this->createObject($row, $key, false);
-            $list[$key] = $object->setStorageKey($storageKey)->setTimestamp($entries[$key][1] ?? $entries[$key]);
-        }
-
-        $debugger->stopTimer('flex-objects');
-
-        return $list;
+        return $index;
     }
 
     /**
@@ -341,6 +286,67 @@ class FlexType
             $this->collectionClassName = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
         }
         return $this->collectionClassName;
+    }
+
+    /**
+     * @param array $entries
+     * @return FlexCollection
+     */
+    public function loadCollection(array $entries)
+    {
+        return $this->createCollection($this->loadObjects($entries));
+    }
+
+    /**
+     * @param array $entries
+     * @return FlexObject[]
+     */
+    public function loadObjects(array $entries)
+    {
+        /** @var Debugger $debugger */
+        $debugger = Grav::instance()['debugger'];
+        $debugger->startTimer('flex-objects', sprintf('Initializing %d Flex Objects', \count($entries)));
+
+        $storage = $this->getStorage();
+        $cache = $this->getCache();
+
+        // Get storage keys for the objects.
+        $keys = [];
+        foreach ($entries as $key => $value) {
+            $keys[\is_array($value) ? $value[0] : $key] = $key;
+        }
+
+        // Fetch rows from the cache.
+        try {
+            $rows = $cache->getMultiple(array_keys($keys));
+        } catch (InvalidArgumentException $e) {
+            $rows = [];
+        }
+
+        // Read missing rows from the storage.
+        $updated = [];
+        $rows = $storage->readRows($rows, $updated);
+
+        // Store updated rows to the cache.
+        if ($updated) {
+            try {
+                $cache->setMultiple($updated);
+            } catch (InvalidArgumentException $e) {
+                // TODO: log about the issue.
+            }
+        }
+
+        // Create objects from the rows.
+        $list = [];
+        foreach ($rows as $storageKey => $row) {
+            $key = $keys[$storageKey];
+            $object = $this->createObject($row, $key, false);
+            $list[$key] = $object->setStorageKey($storageKey)->setTimestamp($entries[$key][1] ?? $entries[$key]);
+        }
+
+        $debugger->stopTimer('flex-objects');
+
+        return $list;
     }
 
     /**

@@ -108,7 +108,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
             }
 
             if ($result === $test) {
-                $result = $this->getCollection()->call($method, $arguments);
+                $result = $this->loadCollection()->call($method, $arguments);
 
                 try {
                     $cache->set($key, $result);
@@ -117,7 +117,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
                 }
             }
         } else {
-            $result = $this->getCollection()->call($method, $arguments);
+            $result = $this->loadCollection()->call($method, $arguments);
         }
 
         return $result;
@@ -142,7 +142,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
             }
 
             if ($result === $test) {
-                $result = $this->getCollection()->{$name}(...$arguments);
+                $result = $this->loadCollection()->{$name}(...$arguments);
 
                 try {
                     $cache->set($key, $result);
@@ -151,7 +151,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
                 }
             }
         } else {
-            $result = $this->getCollection()->{$name}(...$arguments);
+            $result = $this->loadCollection()->{$name}(...$arguments);
         }
 
         return $result;
@@ -180,7 +180,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
      * @param mixed $value
      * @return ObjectInterface|null
      */
-    protected function getObject($key, $value)
+    protected function loadObject($key, $value)
     {
         $objects = $this->flexType->loadObjects([$key => $value]);
 
@@ -191,7 +191,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
      * @param array|null $entries
      * @return ObjectInterface[]
      */
-    protected function getObjects(array $entries = null)
+    protected function loadObjects(array $entries = null)
     {
         return $this->flexType->loadObjects($entries ?? $this->getEntries());
     }
@@ -200,7 +200,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
      * @param array|null $entries
      * @return ObjectCollectionInterface
      */
-    protected function getCollection(array $entries = null)
+    protected function loadCollection(array $entries = null)
     {
         return $this->flexType->loadCollection($entries ?? $this->getEntries());
     }

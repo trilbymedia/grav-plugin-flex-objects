@@ -234,6 +234,19 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     }
 
     /**
+     * Select items from collection.
+     *
+     * @param array $keys
+     * @return FlexCollection
+     */
+    public function select(array $keys)
+    {
+        $selected = array_intersect_key($this->getElements(), array_flip($keys));
+
+        return $this->createFrom($selected);
+    }
+
+    /**
      * @return array
      */
     public function jsonSerialize()

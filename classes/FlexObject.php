@@ -367,14 +367,35 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
+     * Create new object into storage.
+     *
+     * @param string|null $key Optional new key.
+     * @return $this
+     */
+    protected function create($key = null)
+    {
+        if ($this->exists()) {
+            throw new \RuntimeException('Cannot create new object (Already exists)');
+        }
+
+        if ($key) {
+            $this->setStorageKey($key);
+        }
+
+        return $this->save();
+    }
+
+    /**
      * @return $this
      */
     protected function save()
     {
-        if (!$this->exists()) {
-            $this->getFlexType()->getStorage()->createRows([$this->prepareStorage()]);
-        } else {
-            $this->getFlexType()->getStorage()->updateRows([$this->getStorageKey() => $this->prepareStorage()]);
+        $this->getFlexType()->getStorage()->replaceRows([$this->getStorageKey() => $this->prepareStorage()]);
+
+        try {
+            $this->getFlexType()->getCache()->clear();
+        } catch (InvalidArgumentException $e) {
+            // Caching failed, but we can ignore that for now.
         }
 
         return $this;
@@ -386,6 +407,12 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     protected function delete()
     {
         $this->getFlexType()->getStorage()->deleteRows([$this->getStorageKey() => $this->prepareStorage()]);
+
+        try {
+            $this->getFlexType()->getCache()->clear();
+        } catch (InvalidArgumentException $e) {
+            // Caching failed, but we can ignore that for now.
+        }
 
         return $this;
     }

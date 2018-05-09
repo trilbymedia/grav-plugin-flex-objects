@@ -29,7 +29,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function toArray()
     {
-        return $this->getObjects($this->entries);
+        return $this->loadObjects($this->entries);
     }
 
     /**
@@ -40,7 +40,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
         $value = reset($this->entries);
         $key = key($this->entries);
 
-        return $this->getObject($key, $value);
+        return $this->loadObject($key, $value);
     }
 
     /**
@@ -51,7 +51,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
         $value = end($this->entries);
         $key = key($this->entries);
 
-        return $this->getObject($key, $value);
+        return $this->loadObject($key, $value);
     }
 
     /**
@@ -70,7 +70,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
         $value = next($this->entries);
         $key = key($this->entries);
 
-        return $this->getObject($key, $value);
+        return $this->loadObject($key, $value);
     }
 
     /**
@@ -81,7 +81,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
         $value = current($this->entries);
         $key = key($this->entries);
 
-        return $this->getObject($key, $value);
+        return $this->loadObject($key, $value);
     }
 
     /**
@@ -96,7 +96,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
         $value = $this->entries[$key];
         unset($this->entries[$key]);
 
-        return $this->getObject($key, $value);
+        return $this->loadObject($key, $value);
     }
 
     /**
@@ -182,7 +182,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function exists(Closure $p)
     {
-        return $this->getCollection($this->entries)->exists($p);
+        return $this->loadCollection($this->entries)->exists($p);
     }
 
     /**
@@ -204,7 +204,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
             return null;
         }
 
-        return $this->getObject($key, $this->entries[$key]);
+        return $this->loadObject($key, $this->entries[$key]);
     }
 
     /**
@@ -220,7 +220,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function getValues()
     {
-        return array_values($this->getObjects($this->entries));
+        return array_values($this->loadObjects($this->entries));
     }
 
     /**
@@ -274,7 +274,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function getIterator()
     {
-        return new ArrayIterator($this->getObjects());
+        return new ArrayIterator($this->loadObjects());
     }
 
     /**
@@ -282,7 +282,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function map(Closure $func)
     {
-        return $this->getCollection($this->entries)->map($func);
+        return $this->loadCollection($this->entries)->map($func);
     }
 
     /**
@@ -290,7 +290,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function filter(Closure $p)
     {
-        return $this->getCollection($this->entries)->filter($p);
+        return $this->loadCollection($this->entries)->filter($p);
     }
 
     /**
@@ -298,7 +298,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function forAll(Closure $p)
     {
-        return $this->getCollection($this->entries)->forAll($p);
+        return $this->loadCollection($this->entries)->forAll($p);
     }
 
     /**
@@ -306,7 +306,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function partition(Closure $p)
     {
-        return $this->getCollection($this->entries)->partition($p);
+        return $this->loadCollection($this->entries)->partition($p);
     }
 
     /**
@@ -332,7 +332,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function slice($offset, $length = null)
     {
-        return $this->getObjects(\array_slice($this->entries, $offset, $length, true));
+        return $this->loadObjects(\array_slice($this->entries, $offset, $length, true));
     }
 
     /**
@@ -340,13 +340,13 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function matching(Criteria $criteria)
     {
-        return $this->getCollection($this->entries)->matching($criteria);
+        return $this->loadCollection($this->entries)->matching($criteria);
     }
 
     /**
      * @param int $start
      * @param int|null $limit
-     * @return ArrayIndex
+     * @return static
      */
     public function limit($start, $limit = null)
     {
@@ -377,6 +377,20 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
     }
 
     /**
+     * Select items from collection.
+     *
+     * @param array $keys
+     * @return ArrayIndex
+     */
+    public function select(array $keys)
+    {
+        $selected = array_intersect_key($this->entries, array_flip($keys));
+
+        return $this->createFrom($selected);
+    }
+
+
+    /**
      * Split collection into chunks.
      *
      * @param int $size     Size of each chunk.
@@ -384,7 +398,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function chunk($size)
     {
-        return $this->getCollection($this->entries)->chunk($size);
+        return $this->loadCollection($this->entries)->chunk($size);
     }
 
     /**
@@ -394,7 +408,7 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      */
     public function jsonSerialize()
     {
-        return $this->getCollection()->jsonSerialize();
+        return $this->loadCollection()->jsonSerialize();
     }
 
     /**
@@ -419,19 +433,19 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
      * @param mixed $value
      * @return ObjectInterface|null
      */
-    abstract protected function getObject($key, $value);
+    abstract protected function loadObject($key, $value);
 
     /**
      * @param array|null $entries
      * @return ObjectInterface[]
      */
-    abstract protected function getObjects(array $entries = null);
+    abstract protected function loadObjects(array $entries = null);
 
     /**
      * @param array|null $entries
      * @return ObjectCollectionInterface
      */
-    abstract protected function getCollection(array $entries = null);
+    abstract protected function loadCollection(array $entries = null);
 
     /**
      * @param mixed $value
