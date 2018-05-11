@@ -40,9 +40,7 @@ abstract class AbstractFilesystemStorage implements StorageInterface
      */
     protected function getFile($filename)
     {
-        /** @var UniformResourceLocator $locator */
-        $locator = Grav::instance()['locator'];
-        $filename = (string)$locator->findResource($filename, true, true);
+        $filename = $this->resolvePath($filename);
 
         switch ($this->dataFormatter->getFileExtension()) {
             case '.json':
@@ -59,6 +57,18 @@ abstract class AbstractFilesystemStorage implements StorageInterface
         }
 
         return $file;
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    protected function resolvePath($path)
+    {
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
+        return (string) $locator->findResource($path) ?: $locator->findResource($path, true, true);
     }
 
     /**

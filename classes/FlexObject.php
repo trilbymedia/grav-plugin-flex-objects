@@ -374,12 +374,12 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function create($key = null)
     {
-        if ($this->exists()) {
-            throw new \RuntimeException('Cannot create new object (Already exists)');
-        }
-
         if ($key) {
             $this->setStorageKey($key);
+        }
+
+        if ($this->exists()) {
+            throw new \RuntimeException('Cannot create new object (Already exists)');
         }
 
         return $this->save();

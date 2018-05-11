@@ -33,12 +33,13 @@ class FolderStorage extends AbstractFilesystemStorage
         $extension = $this->dataFormatter->getFileExtension();
         $pattern = !empty($options['pattern']) ? $options['pattern'] : $this->dataPattern;
 
-        $this->dataPattern = dirname($pattern) . '/' . basename($pattern, $extension) . $extension;
+        $this->dataPattern = \dirname($pattern) . '/' . basename($pattern, $extension) . $extension;
         $this->dataFolder = $options['folder'];
 
         // Make sure that the data folder exists.
-        if (!file_exists($this->dataFolder)) {
-            Folder::create($this->dataFolder);
+        $folder = $this->resolvePath($this->dataFolder);
+        if (!file_exists($folder)) {
+            Folder::create($folder);
         }
     }
 
@@ -124,6 +125,12 @@ class FolderStorage extends AbstractFilesystemStorage
             $path = $this->getPathFromKey($key);
             $file = $this->getFile($path);
             $list[$key] = $this->hasKey($key) ? $this->deleteFile($file) : null;
+
+            $storage = $this->getStoragePath($key);
+            $media = $this->getMediaPath($key);
+
+            $this->deleteFolder($storage, true);
+            $media && $this->deleteFolder($media, true);
         }
 
         return $list;
@@ -208,6 +215,11 @@ class FolderStorage extends AbstractFilesystemStorage
         $file->delete();
 
         return $data;
+    }
+
+    protected function deleteFolder($path, $include_target = false)
+    {
+        return Folder::delete($this->resolvePath($path), $include_target);
     }
 
     /**

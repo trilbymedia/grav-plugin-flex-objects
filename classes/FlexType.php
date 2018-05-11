@@ -247,7 +247,7 @@ class FlexType
      * @param bool $validate
      * @return FlexObject
      */
-    public function createObject(array $data, $key, $validate = true)
+    public function createObject(array $data, $key, $validate = false)
     {
         $className = $this->objectClassName ? $this->objectClassName : $this->getObjectClass();
 
@@ -339,6 +339,9 @@ class FlexType
         // Create objects from the rows.
         $list = [];
         foreach ($rows as $storageKey => $row) {
+            if ($row === null) {
+                continue;
+            }
             $key = $keys[$storageKey];
             $object = $this->createObject($row, $key, false);
             $list[$key] = $object->setStorageKey($storageKey)->setTimestamp($entries[$key][1] ?? $entries[$key]);
