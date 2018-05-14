@@ -236,14 +236,21 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     /**
      * Select items from collection.
      *
+     * Collection is returned in the order of $keys given to the function.
+     *
      * @param array $keys
      * @return FlexCollection
      */
     public function select(array $keys)
     {
-        $selected = array_intersect_key($this->getElements(), array_flip($keys));
+        $list = [];
+        foreach ($keys as $key) {
+            if ($this->containsKey($key)) {
+                $list[$key] = $this->get($key);
+            }
+        }
 
-        return $this->createFrom($selected);
+        return $this->createFrom($list);
     }
 
     /**

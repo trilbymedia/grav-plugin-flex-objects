@@ -379,16 +379,22 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
     /**
      * Select items from collection.
      *
+     * Collection is returned in the order of $keys given to the function.
+     *
      * @param array $keys
      * @return ArrayIndex
      */
     public function select(array $keys)
     {
-        $selected = array_intersect_key($this->entries, array_flip($keys));
+        $list = [];
+        foreach ($keys as $key) {
+            if (isset($this->entries[$key])) {
+                $list[$key] = $this->entries[$key];
+            }
+        }
 
-        return $this->createFrom($selected);
+        return $this->createFrom($list);
     }
-
 
     /**
      * Split collection into chunks.
