@@ -8,27 +8,28 @@ use PSR\SimpleCache\InvalidArgumentException;
 
 class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
 {
-    /** @var FlexType */
-    private $flexType;
+    /** @var FlexDirectory */
+    private $flexDirectory;
 
     /**
      * Initializes a new IndexCollection.
      *
      * @param array $entries
-     * @param array $indexes
+     * @param FlexDirectory $flexDirectory
      */
-    public function __construct(array $entries, FlexType $flexType)
+    public function __construct(array $entries, FlexDirectory $flexDirectory)
     {
         parent::__construct($entries);
-        $this->flexType = $flexType;
+
+        $this->flexDirectory = $flexDirectory;
     }
 
     /**
-     * @return FlexType
+     * @return FlexDirectory
      */
-    public function getFlexType()
+    public function getFlexDirectory()
     {
-        return $this->flexType;
+        return $this->flexDirectory;
     }
 
     /**
@@ -39,7 +40,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
     {
         $type = $prefix ? $this->getTypePrefix() : '';
 
-        return $type . $this->flexType->getType();
+        return $type . $this->flexDirectory->getType();
     }
 
     /**
@@ -92,13 +93,13 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
     public function call($method, array $arguments = [])
     {
         /** @var FlexCollection $className */
-        $className = $this->flexType->getObjectClass();
+        $className = $this->flexDirectory->getObjectClass();
         $cachedMethods = $className::getCachedMethods();
 
         if (!empty($cachedMethods[$method])) {
             $key = $this->getType(true) . '.call.' . sha1($method . json_encode($arguments) . $this->getCacheKey());
 
-            $cache = $this->flexType->getCache();
+            $cache = $this->flexDirectory->getCache('object');
 
             $test = new \stdClass;
             try {
@@ -126,13 +127,13 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
     public function __call($name, $arguments)
     {
         /** @var FlexCollection $className */
-        $className = $this->flexType->getCollectionClass();
+        $className = $this->flexDirectory->getCollectionClass();
         $cachedMethods = $className::getCachedMethods();
 
         if (!empty($cachedMethods[$name])) {
             $key = $this->getType(true) . '.' . $name . '.' . sha1($name . json_encode($arguments) . $this->getCacheKey());
 
-            $cache = $this->flexType->getCache();
+            $cache = $this->flexDirectory->getCache('object');
 
             $test = new \stdClass;
             try {
@@ -164,7 +165,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
      */
     protected function createFrom(array $entries)
     {
-        return new static($entries, $this->flexType);
+        return new static($entries, $this->flexDirectory);
     }
 
     /**
@@ -182,7 +183,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
      */
     protected function loadObject($key, $value)
     {
-        $objects = $this->flexType->loadObjects([$key => $value]);
+        $objects = $this->flexDirectory->loadObjects([$key => $value]);
 
         return $objects ? reset($objects) : null;
     }
@@ -193,7 +194,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
      */
     protected function loadObjects(array $entries = null)
     {
-        return $this->flexType->loadObjects($entries ?? $this->getEntries());
+        return $this->flexDirectory->loadObjects($entries ?? $this->getEntries());
     }
 
     /**
@@ -202,7 +203,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
      */
     protected function loadCollection(array $entries = null)
     {
-        return $this->flexType->loadCollection($entries ?? $this->getEntries());
+        return $this->flexDirectory->loadCollection($entries ?? $this->getEntries());
     }
 
     /**

@@ -65,15 +65,17 @@ class FlexObjectsPlugin extends Plugin
         }
 
         $config = $this->config->get('plugins.flex-objects');
-        $blueprints = $config['directories'] ?: [];
 
         // Add to DI container
-        $this->grav['flex_objects'] = function () use ($blueprints) {
+        $this->grav['flex_objects'] = function () use ($config) {
+            $blueprints = $config['directories'] ?: [];
+
             $list = [];
             foreach ($blueprints as $blueprint) {
                 $list[basename($blueprint, '.yaml')] = $blueprint;
             }
-            return new Flex($list);
+
+            return new Flex($list, $config);
         };
     }
 

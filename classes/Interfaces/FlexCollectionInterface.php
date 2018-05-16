@@ -3,7 +3,7 @@ namespace Grav\Plugin\FlexObjects\Interfaces;
 
 use Grav\Framework\Object\Interfaces\NestedObjectInterface;
 use Grav\Framework\Object\Interfaces\ObjectCollectionInterface;
-use Grav\Plugin\FlexObjects\FlexType;
+use Grav\Plugin\FlexObjects\FlexDirectory;
 
 /**
  * Interface FlexCollectionInterface
@@ -13,13 +13,13 @@ interface FlexCollectionInterface extends ObjectCollectionInterface, NestedObjec
 {
     /**
      * @param array $elements
-     * @param FlexType $type
+     * @param FlexDirectory $type
      * @throws \InvalidArgumentException
      */
-    public function __construct(array $elements = [], FlexType $type);
+    public function __construct(array $elements = [], FlexDirectory $type);
 
     /**
-     * @return FlexType
+     * @return FlexDirectory
      */
-    public function getFlexType();
+    public function getFlexDirectory();
 }

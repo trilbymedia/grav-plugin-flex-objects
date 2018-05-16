@@ -2,6 +2,7 @@
 namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Cache;
+use Grav\Common\Config\Config;
 use Grav\Common\Data\Blueprint;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
@@ -14,10 +15,10 @@ use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 
 /**
- * Class FlexType
+ * Class FlexDirectory
  * @package Grav\Plugin\FlexObjects
  */
-class FlexType
+class FlexDirectory
 {
     /** @var string */
     protected $type;
@@ -31,6 +32,10 @@ class FlexType
     protected $collection;
     /** @var bool */
     protected $enabled;
+    /** @var array */
+    protected $defaults;
+    /** @var Config */
+    protected $config;
     /** @var object */
     protected $storage;
     /** @var CacheInterface */
@@ -40,16 +45,17 @@ class FlexType
     protected $collectionClassName;
 
     /**
-     * FlexType constructor.
+     * FlexDirectory constructor.
      * @param string $type
      * @param string $blueprint_file
-     * @param bool $enabled
+     * @param array $defaults
      */
-    public function __construct($type, $blueprint_file, $enabled = false)
+    public function __construct($type, $blueprint_file, $defaults = [])
     {
         $this->type = $type;
         $this->blueprint_file = $blueprint_file;
-        $this->enabled = (bool)$enabled;
+        $this->defaults = $defaults;
+        $this->enabled = !empty($defaults['enabled']);
     }
 
     /**
@@ -91,9 +97,11 @@ class FlexType
      */
     public function getConfig($name = null, $default = null)
     {
-        $path = 'config' . ($name ? '/' . $name : '');
+        if (null === $this->config) {
+            $this->config = new Config(array_merge_recursive($this->getBlueprint()->get('config'), $this->defaults));
+        }
 
-        return $this->getBlueprint()->get($path, $default);
+        return $this->config->get($name, $default);
     }
 
     /**
@@ -161,7 +169,7 @@ class FlexType
         }
 
         try {
-            $this->getCache()->clear();
+            $this->clearCache();
         } catch (InvalidArgumentException $e) {
             // Caching failed, but we can ignore that for now.
         }
@@ -183,7 +191,7 @@ class FlexType
         $this->getStorage()->deleteRows([$object->getStorageKey() => $object->prepareStorage()]);
 
         try {
-            $this->getCache()->clear();
+            $this->clearCache();
         } catch (InvalidArgumentException $e) {
             // Caching failed, but we can ignore that for now.
         }
@@ -192,24 +200,43 @@ class FlexType
     }
 
     /**
+     * @param string|null $namespace
      * @return CacheInterface
      */
-    public function getCache()
+    public function getCache($namespace = null)
     {
-        if (null === $this->cache) {
+        $namespace = $namespace ?: 'index';
+
+        if (!isset($this->cache[$namespace])) {
             try {
                 /** @var Cache $gravCache */
                 $gravCache = Grav::instance()['cache'];
+                $config = $this->getConfig('cache.' . $namespace);
+                if (empty($config['enabled'])) {
+                    throw new \RuntimeException('Cache not enabled');
+                }
+                $timeout = $config['timeout'] ?? 60;
 
-                $this->cache = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType() . $gravCache->getKey(), 60);
+                $this->cache[$namespace] = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType() . $gravCache->getKey(), $timeout);
             } catch (\Exception $e) {
-                $this->cache = new MemoryCache('flex-objects-' . $this->getType());
+                $this->cache[$namespace] = new MemoryCache('flex-objects-' . $this->getType());
             }
         }
 
-        return $this->cache;
+        return $this->cache[$namespace];
     }
 
+    /**
+     * @return $this
+     */
+    public function clearCache()
+    {
+        $this->getCache('index')->clear();
+        $this->getCache('object')->clear();
+        $this->getCache('render')->clear();
+
+        return $this;
+    }
 
     /**
      * @param string|null $key
@@ -271,7 +298,7 @@ class FlexType
     public function getObjectClass()
     {
         if (!$this->objectClassName) {
-            $this->objectClassName = $this->getConfig('data/object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
+            $this->objectClassName = $this->getConfig('data.object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
         }
         return $this->objectClassName;
 
@@ -283,7 +310,7 @@ class FlexType
     public function getCollectionClass()
     {
         if (!$this->collectionClassName) {
-            $this->collectionClassName = $this->getConfig('data/collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
+            $this->collectionClassName = $this->getConfig('data.collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
         }
         return $this->collectionClassName;
     }
@@ -308,7 +335,7 @@ class FlexType
         $debugger->startTimer('flex-objects', sprintf('Initializing %d Flex Objects', \count($entries)));
 
         $storage = $this->getStorage();
-        $cache = $this->getCache();
+        $cache = $this->getCache('object');
 
         // Get storage keys for the objects.
         $keys = [];
@@ -359,7 +386,7 @@ class FlexType
     {
         $this->collection = $this->createCollection([]);
 
-        $storage = $this->getConfig('data/storage');
+        $storage = $this->getConfig('data.storage');
 
         if (!\is_array($storage)) {
             $storage = ['options' => ['folder' => $storage]];
@@ -382,7 +409,7 @@ class FlexType
             $debugger->startTimer('flex-keys', 'Loading Flex Index');
 
             $storage = $this->getStorage();
-            $cache = $this->getCache();
+            $cache = $this->getCache('index');
 
             try {
                 $keys = $cache->get('__keys');

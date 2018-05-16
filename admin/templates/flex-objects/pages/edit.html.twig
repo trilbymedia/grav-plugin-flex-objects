@@ -12,7 +12,7 @@
 
 {% block content %}
 <div id="directory">
-    {% set path = directory.config('admin/edit/template')|default('flex-objects/types/' ~ target ~ '/edit.html.twig') %}
+    {% set path = directory.config('admin.edit.template')|default('flex-objects/types/' ~ target ~ '/edit.html.twig') %}
     {% include [path, 'flex-objects/types/default/edit.html.twig'] %}
 </div>
 {% endblock %}

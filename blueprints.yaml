@@ -42,9 +42,60 @@ form:
       label: Extra Admin Twig Path
       validate:
         required: true
-    extra_site_twig_path:
+
+    object.cache.index.enabled:
+      type: toggle
+      label: Enable Index Caching
+      highlight: 1
+      default: 1
+      options:
+        1: Enabled
+        0: Disabled
+      validate:
+        type: bool
+
+    object.cache.index.timeout:
       type: text
-      label: Extra Site Twig Path
+      label: Index Cache Timeout (s)
+      default: 60
+      validate:
+        type: int
+
+    object.cache.object.enabled:
+      type: toggle
+      label: Enable Object Caching
+      highlight: 1
+      default: 1
+      options:
+        1: Enabled
+        0: Disabled
+      validate:
+        type: bool
+
+    object.cache.object.timeout:
+      type: text
+      label: Object Cache Timeout (s)
+      default: 60
+      validate:
+        type: int
+
+    object.cache.render.enabled:
+      type: toggle
+      label: Enable Render Caching
+      highlight: 1
+      default: 1
+      options:
+        1: Enabled
+        0: Disabled
+      validate:
+        type: bool
+
+    object.cache.render.timeout:
+      type: text
+      label: Render Cache Timeout (s)
+      default: 60
+      validate:
+        type: int
 
     directories:
       type: flex-objects

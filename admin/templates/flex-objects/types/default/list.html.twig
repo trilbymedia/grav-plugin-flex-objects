@@ -1,9 +1,9 @@
 {% set entry_url =  base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '/id' ~ separator %}
-{% set fields = directory.config('admin/list/fields') %}
+{% set fields = directory.config('admin.list.fields') %}
 {% set fields_count = count(fields) %}
 {% set fields_width = 8 %}
 {% set fields_set = 0 %}
-{% set title_field = directory.config('admin/list/title') %}
+{% set title_field = directory.config('admin.list.title') %}
 {% for key,options in fields %}
     {% set fields_width = fields_width + options.width ?: 0 %}
     {% set fields_set = fields_set + (options.width ? 1 : 0) %}

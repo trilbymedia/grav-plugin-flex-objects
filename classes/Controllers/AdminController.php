@@ -2,7 +2,7 @@
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
-use Grav\Plugin\FlexObjects\FlexType;
+use Grav\Plugin\FlexObjects\FlexDirectory;
 
 /**
  * Class AdminController
@@ -92,7 +92,7 @@ class AdminController extends SimpleController
 
     /**
      * @param string $type
-     * @return FlexType
+     * @return FlexDirectory
      */
     protected function getDirectory($type)
     {

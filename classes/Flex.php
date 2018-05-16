@@ -9,13 +9,15 @@ use Grav\Common\Filesystem\Folder;
  */
 class Flex implements \Countable
 {
-    /** @var array|FlexType[] */
+    /** @var array|FlexDirectory[] */
     protected $types = [];
 
-    public function __construct(array $types = [])
+    public function __construct(array $types = [], array $config)
     {
-        foreach ($types as $type => $config) {
-            $this->types[$type] = new FlexType($type, $config, true);
+        $defaults = ['enabled' => true] + $config['object'];
+
+        foreach ($types as $type => $blueprint) {
+            $this->types[$type] = new FlexDirectory($type, $blueprint, $defaults);
         }
     }
 
@@ -33,7 +35,7 @@ class Flex implements \Countable
         foreach ($all as $url) {
             $type = basename($url, '.yaml');
             if (!isset($directories[$type])) {
-                $directories[$type] = new FlexType($type, $url);
+                $directories[$type] = new FlexDirectory($type, $url);
             }
         }
 
@@ -49,7 +51,7 @@ class Flex implements \Countable
 
     /**
      * @param string|null $type
-     * @return FlexType|null
+     * @return FlexDirectory|null
      */
     public function getDirectory($type = null)
     {
@@ -65,6 +67,6 @@ class Flex implements \Countable
      */
     public function count()
     {
-        return count($this->types);
+        return \count($this->types);
     }
 }

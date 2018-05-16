@@ -20,8 +20,8 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
  */
 class FlexObject extends LazyObject implements FlexObjectInterface
 {
-    /** @var FlexType */
-    private $flexType;
+    /** @var FlexDirectory */
+    private $flexDirectory;
     /** @var string */
     private $storageKey;
     /** @var int */
@@ -35,7 +35,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         return [
             'getTypePrefix' => true,
             'getType' => true,
-            'getFlexType' => true,
+            'getFlexDirectory' => true,
             'getCacheKey' => true,
             'getCacheChecksum' => true,
             'getTimestamp' => true,
@@ -58,17 +58,17 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     /**
      * @param array $elements
      * @param string $key
-     * @param FlexType $type
+     * @param FlexDirectory $flexDirectory
      * @param bool $validate
      * @throws \InvalidArgumentException
      * @throws ValidationException
      */
-    public function __construct(array $elements = [], $key, FlexType $type, $validate = false)
+    public function __construct(array $elements = [], $key, FlexDirectory $flexDirectory, $validate = false)
     {
-        $this->flexType = $type;
+        $this->flexDirectory = $flexDirectory;
 
         if ($validate) {
-            $blueprint = $this->getFlexType()->getBlueprint();
+            $blueprint = $this->getFlexDirectory()->getBlueprint();
 
             $blueprint->validate($elements);
 
@@ -94,15 +94,15 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     {
         $type = $prefix ? $this->getTypePrefix() : '';
 
-        return $type . $this->flexType->getType();
+        return $type . $this->flexDirectory->getType();
     }
 
     /**
-     * @return FlexType
+     * @return FlexDirectory
      */
-    public function getFlexType()
+    public function getFlexDirectory()
     {
-        return $this->flexType;
+        return $this->flexDirectory;
     }
 
     /**
@@ -179,7 +179,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $cache = $key = null;
         if (!$context) {
             $key = $this->getCacheKey() . '.' . $layout;
-            $cache = $this->flexType->getCache();
+            $cache = $this->flexDirectory->getCache('render');
         }
 
         try {
@@ -231,7 +231,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function update(array $data)
     {
-        $blueprint = $this->getFlexType()->getBlueprint();
+        $blueprint = $this->getFlexDirectory()->getBlueprint();
 
         $elements = $this->getElements();
         $data = $blueprint->mergeData($elements, $data);
@@ -262,7 +262,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     {
         $key = $this->getStorageKey();
 
-        return $key && $this->getFlexType()->getStorage()->hasKey($key);
+        return $key && $this->getFlexDirectory()->getStorage()->hasKey($key);
     }
 
     /**
@@ -286,7 +286,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function getStorageFolder()
     {
-        return $this->getFlexType()->getStorageFolder($this->getStorageKey());
+        return $this->getFlexDirectory()->getStorageFolder($this->getStorageKey());
     }
 
     /**
@@ -294,7 +294,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function getMediaFolder()
     {
-        return $this->getFlexType()->getMediaFolder($this->getStorageKey());
+        return $this->getFlexDirectory()->getMediaFolder($this->getStorageKey());
     }
 
     /**
@@ -320,7 +320,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function getCollectionByProperty($type, $property)
     {
-        $directory = $this->getDirectory($type);
+        $directory = $this->getRelatedDirectory($type);
         $collection = $directory->getCollection();
         $list = $this->getNestedProperty($property) ?: [];
 
@@ -331,10 +331,10 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
     /**
      * @param $type
-     * @return FlexType
+     * @return FlexDirectory
      * @throws \RuntimeException
      */
-    protected function getDirectory($type)
+    protected function getRelatedDirectory($type)
     {
         /** @var Flex $flex */
         $flex = Grav::instance()['flex_objects'];
@@ -390,10 +390,10 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function save()
     {
-        $this->getFlexType()->getStorage()->replaceRows([$this->getStorageKey() => $this->prepareStorage()]);
+        $this->getFlexDirectory()->getStorage()->replaceRows([$this->getStorageKey() => $this->prepareStorage()]);
 
         try {
-            $this->getFlexType()->getCache()->clear();
+            $this->getFlexDirectory()->clearCache();
         } catch (InvalidArgumentException $e) {
             // Caching failed, but we can ignore that for now.
         }
@@ -406,10 +406,10 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     protected function delete()
     {
-        $this->getFlexType()->getStorage()->deleteRows([$this->getStorageKey() => $this->prepareStorage()]);
+        $this->getFlexDirectory()->getStorage()->deleteRows([$this->getStorageKey() => $this->prepareStorage()]);
 
         try {
-            $this->getFlexType()->getCache()->clear();
+            $this->getFlexDirectory()->clearCache();
         } catch (InvalidArgumentException $e) {
             // Caching failed, but we can ignore that for now.
         }

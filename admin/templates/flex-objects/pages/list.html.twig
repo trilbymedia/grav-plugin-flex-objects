@@ -11,7 +11,7 @@
 
 {% block content %}
 <div id="directory">
-    {% set path = directory.config('admin/list/template')|default('flex-objects/types/' ~ target ~ '/list.html.twig') %}
+    {% set path = directory.config('admin.list.template')|default('flex-objects/types/' ~ target ~ '/list.html.twig') %}
     {% include [path, 'flex-objects/types/default/list.html.twig'] %}
 </div>
 {% endblock %}

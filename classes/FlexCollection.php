@@ -17,8 +17,8 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 {
-    /** @var FlexType */
-    private $flexType;
+    /** @var FlexDirectory */
+    private $flexDirectory;
 
     /**
      * @return array
@@ -28,7 +28,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
         return [
             'getTypePrefix' => true,
             'getType' => true,
-            'getFlexType' => true,
+            'getFlexDirectory' => true,
             'getCacheKey' => true,
             'getCacheChecksum' => true,
             'getTimestamp' => true,
@@ -41,15 +41,15 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 
     /**
      * @param array $elements
-     * @param FlexType $type
+     * @param FlexDirectory $type
      * @throws \InvalidArgumentException
      */
-    public function __construct(array $elements = [], FlexType $type = null)
+    public function __construct(array $elements = [], FlexDirectory $flexDirectory = null)
     {
         parent::__construct($elements);
 
-        if ($type) {
-            $this->setFlexType($type)->setKey($type->getType());
+        if ($flexDirectory) {
+            $this->setFlexDirectory($flexDirectory)->setKey($flexDirectory->getType());
         }
     }
 
@@ -66,7 +66,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
      */
     protected function createFrom(array $elements)
     {
-        return new static($elements, $this->flexType);
+        return new static($elements, $this->flexDirectory);
     }
 
     /**
@@ -85,7 +85,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     {
         $type = $prefix ? $this->getTypePrefix() : '';
 
-        return $type . $this->flexType->getType();
+        return $type . $this->flexDirectory->getType();
     }
 
     /**
@@ -108,7 +108,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
         $cache = $key = null;
         if (!$context) {
             $key = $this->getCacheKey() . '.' . $layout;
-            $cache = $this->flexType->getCache();
+            $cache = $this->flexDirectory->getCache('render');
         }
 
         try {
@@ -154,22 +154,22 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     }
 
     /**
-     * @param FlexType $type
+     * @param FlexDirectory $type
      * @return $this
      */
-    public function setFlexType(FlexType $type)
+    public function setFlexDirectory(FlexDirectory $type)
     {
-        $this->flexType = $type;
+        $this->flexDirectory = $type;
 
         return $this;
     }
 
     /**
-     * @return FlexType
+     * @return FlexDirectory
      */
-    public function getFlexType()
+    public function getFlexDirectory()
     {
-        return $this->flexType;
+        return $this->flexDirectory;
     }
 
     /**
