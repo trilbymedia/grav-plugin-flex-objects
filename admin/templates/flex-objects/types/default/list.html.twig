@@ -40,7 +40,7 @@
         <thead>
         <tr>
             {% for key,options in fields %}
-            <th>{{ schema.get(key).label }}</th>
+            <th>{{ schema.get(key).label|tu }}</th>
             {% endfor %}
             <th>Actions</th>
         </tr>
