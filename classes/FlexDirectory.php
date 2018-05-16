@@ -148,6 +148,15 @@ class FlexDirectory
     }
 
     /**
+     * @param string $key
+     * @return FlexObject|null
+     */
+    public function getObject($key)
+    {
+        return $this->getCollection()->get($key);
+    }
+
+    /**
      * @param array $data
      * @param string|null $key
      * @return FlexObject
