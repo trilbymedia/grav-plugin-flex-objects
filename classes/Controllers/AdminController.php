@@ -1,9 +1,9 @@
 <?php
 namespace Grav\Plugin\FlexObjects\Controllers;
 
-use Grav\Common\Data\Data;
 use Grav\Common\Grav;
 use Grav\Plugin\FlexObjects\FlexDirectory;
+use Grav\Plugin\FlexObjects\FlexObject;
 
 /**
  * Class AdminController
@@ -100,7 +100,10 @@ class AdminController extends SimpleController
         return Grav::instance()['flex_objects']->getDirectory($type);
     }
 
-
+    /**
+     * @param $type
+     * @return FlexObject
+     */
     public function data($type)
     {
         $uri = Grav::instance()['uri'];
@@ -112,6 +115,6 @@ class AdminController extends SimpleController
 
         $directory = $this->getDirectory($type);
 
-        return $id ? $directory->getObject($id) : null;
+        return $id ? $directory->getObject($id) : $directory->createObject([], '__new__');
     }
 }
