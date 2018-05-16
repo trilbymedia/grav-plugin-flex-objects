@@ -103,7 +103,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 
         /** @var Debugger $debugger */
         $debugger = $grav['debugger'];
-        $debugger->startTimer('flex-collection-' . $this->getType(false), 'Render Collection ' . $this->getType(false));
+        $debugger->startTimer('flex-collection-' . ($debugKey =  uniqid($this->getType(false), false)), 'Render Collection ' . $this->getType(false));
 
         $cache = $key = null;
         if (!$context) {
@@ -148,7 +148,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
             }
         }
 
-        $debugger->stopTimer('flex-collection-' . $this->getType(false));
+        $debugger->stopTimer('flex-collection-' . $debugKey);
 
         return $block;
     }

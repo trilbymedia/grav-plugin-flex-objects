@@ -174,7 +174,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
         /** @var Debugger $debugger */
         $debugger = $grav['debugger'];
-        $debugger->startTimer('flex-object-' . $this->getType(false), 'Render Object ' . $this->getType(false));
+        $debugger->startTimer('flex-object-' . ($debugKey =  uniqid($this->getType(false), false)), 'Render Object ' . $this->getType(false));
 
         $cache = $key = null;
         if (!$context) {
@@ -219,7 +219,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
             }
         }
 
-        $debugger->stopTimer('flex-object-' . $this->getType(false));
+        $debugger->stopTimer('flex-object-' . $debugKey);
 
         return $block;
     }
