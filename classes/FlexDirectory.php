@@ -427,7 +427,7 @@ class FlexDirectory
                 }
             }
 
-            $this->index = new FlexIndex($keys, $this);
+            $this->index = (new FlexIndex($keys, $this))->orderBy($this->getConfig('data.ordering', []));
 
             $debugger->stopTimer('flex-keys');
         }

@@ -1,6 +1,7 @@
 <?php
 namespace Grav\Plugin\FlexObjects;
 
+use Doctrine\Common\Collections\Criteria;
 use Grav\Framework\Object\Interfaces\ObjectCollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
 use Grav\Plugin\FlexObjects\Collections\ArrayIndex;
@@ -85,6 +86,59 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
     public function getCacheChecksum()
     {
         return sha1($this->getCacheKey() . json_encode($this->getTimestamps()));
+    }
+
+    /**
+     * @param array $orderings
+     * @return FlexIndex|FlexCollection
+     */
+    public function orderBy(array $orderings)
+    {
+        if (!$orderings) {
+            return $this;
+        }
+
+        // Check if ordering needs to load the objects.
+        if (array_diff_key($orderings, ['key' => true, 'storage_key' => true, 'timestamp' => true])) {
+            $criteria = Criteria::create()->orderBy($orderings);
+
+            return $this->matching($criteria);
+        }
+
+        // Ordering can be done by using index only.
+        $previous = null;
+        foreach (array_reverse($orderings) as $field => $ordering) {
+            switch ($field) {
+                case 'key':
+                    $keys = $this->getKeys();
+                    $search = array_combine($keys, $keys);
+                    break;
+                case 'storage_key':
+                    $search = array_flip($this->getStorageKeys());
+                    break;
+                case 'timestamp':
+                    $search = $this->getTimestamps();
+                    break;
+                default:
+                    continue 2;
+            }
+
+            // Update current search to match the previous ordering.
+            if (null !== $previous) {
+                $search = array_replace($previous, $search);
+            }
+
+            // Order by current field.
+            if ($ordering === 'DESC') {
+                arsort($search, SORT_NATURAL);
+            } else {
+                asort($search, SORT_NATURAL);
+            }
+
+            $previous = $search;
+        }
+
+        return $this->createFrom(array_replace($previous, $this->getEntries()));
     }
 
     /**
