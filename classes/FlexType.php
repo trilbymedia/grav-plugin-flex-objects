@@ -201,7 +201,7 @@ class FlexType
                 /** @var Cache $gravCache */
                 $gravCache = Grav::instance()['cache'];
 
-                $this->cache = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType(), 60);
+                $this->cache = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType() . $gravCache->getKey(), 60);
             } catch (\Exception $e) {
                 $this->cache = new MemoryCache('flex-objects-' . $this->getType());
             }
