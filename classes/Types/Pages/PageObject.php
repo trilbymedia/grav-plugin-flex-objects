@@ -5,6 +5,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Markdown\Parsedown;
 use Grav\Common\Markdown\ParsedownExtra;
+use Grav\Common\Media\Interfaces\MediaInterface;
 use Grav\Common\Media\Traits\MediaTrait;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
@@ -16,7 +17,7 @@ class_exists('Grav\\Common\\Page\\Page', true);
  * Class BuildObject
  * @package Grav\Plugin\RevKit\Repositories\Builds
  */
-class PageObject extends FlexObject implements PageInterface
+class PageObject extends FlexObject implements PageInterface, MediaInterface
 {
     use MediaTrait;
 

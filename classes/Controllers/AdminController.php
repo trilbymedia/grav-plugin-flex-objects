@@ -101,20 +101,17 @@ class AdminController extends SimpleController
     }
 
 
-    public function data($type, array $post)
+    public function data($type)
     {
         $uri = Grav::instance()['uri'];
         $post = $uri->post();
 
         $type = explode('/', $type, 2)[1] ?? null;
-        $params = json_decode($post['params']);
+        $params = json_decode($post['params'], true);
+        $id = $params['id'] ?? null;
 
         $directory = $this->getDirectory($type);
-        $item = $directory->getObject($params->id);
 
-        $data = new Data($item->getElements(), $item->getFlexDirectory()->getBlueprint());
-
-        return $data;
+        return $id ? $directory->getObject($id) : null;
     }
-
 }

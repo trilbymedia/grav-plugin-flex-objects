@@ -106,6 +106,14 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
+     * @return \Grav\Common\Data\Blueprint
+     */
+    public function getBlueprint()
+    {
+        return $this->flexDirectory->getBlueprint();
+    }
+
+    /**
      * @return string
      */
     public function getCacheKey()
