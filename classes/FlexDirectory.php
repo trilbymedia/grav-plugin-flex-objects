@@ -285,7 +285,7 @@ class FlexDirectory
      */
     public function createObject(array $data, $key, $validate = false)
     {
-        $className = $this->objectClassName ? $this->objectClassName : $this->getObjectClass();
+        $className = $this->objectClassName ?: $this->getObjectClass();
 
         return new $className($data, $key, $this, $validate);
     }
@@ -296,7 +296,7 @@ class FlexDirectory
      */
     public function createCollection(array $entries)
     {
-        $className = $this->collectionClassName ? $this->collectionClassName : $this->getCollectionClass();
+        $className = $this->collectionClassName ?: $this->getCollectionClass();
 
         return new $className($entries, $this);
     }
@@ -378,9 +378,13 @@ class FlexDirectory
             if ($row === null) {
                 continue;
             }
+            $row += [
+                '_storage_key' => $storageKey,
+                '_timestamp' => $entries[$key][1] ?? $entries[$key],
+            ];
             $key = $keys[$storageKey];
             $object = $this->createObject($row, $key, false);
-            $list[$key] = $object->setStorageKey($storageKey)->setTimestamp($entries[$key][1] ?? $entries[$key]);
+            $list[$key] = $object;
         }
 
         $debugger->stopTimer('flex-objects');

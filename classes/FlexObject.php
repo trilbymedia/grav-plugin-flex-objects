@@ -25,7 +25,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     /** @var string */
     private $storageKey;
     /** @var int */
-    private $timestamp = 0;
+    private $timestamp;
 
     /**
      * @return array
@@ -74,6 +74,11 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
             $elements = $blueprint->filter($elements);
         }
+
+        $this->storageKey = $elements['_storage_key'] ?? null;
+        $this->timestamp = $elements['_timestamp'] ?? 0;
+
+        unset ($elements['_storage_key'], $elements['_timestamp']);
 
         parent::__construct($elements, $key);
     }
