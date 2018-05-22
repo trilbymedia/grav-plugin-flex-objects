@@ -4,6 +4,7 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 use Grav\Common\Grav;
 use Grav\Plugin\FlexObjects\FlexDirectory;
 use Grav\Plugin\FlexObjects\FlexObject;
+use RocketTheme\Toolbox\Event\Event;
 
 /**
  * Class AdminController
@@ -28,7 +29,9 @@ class AdminController extends SimpleController
             $list_page = $this->location . '/' . $type;
             $this->setRedirect($list_page);
 
-            Grav::instance()->fireEvent('gitsync');
+            $grav = Grav::instance();
+            $grav->fireEvent('onAdminAfterDelete', new Event(['object' => $object]));
+            $grav->fireEvent('gitsync');
         }
     }
 
@@ -50,7 +53,9 @@ class AdminController extends SimpleController
                 $this->setRedirect($edit_page);
             }
 
-            Grav::instance()->fireEvent('gitsync');
+            $grav = Grav::instance();
+            $grav->fireEvent('onAdminAfterSave', new Event(['object' => $object]));
+            $grav->fireEvent('gitsync');
         }
 
         return $object ? true : false;
