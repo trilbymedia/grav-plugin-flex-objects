@@ -203,10 +203,12 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
                 try {
                     // If flex collection is returned, convert it back to flex index.
                     if ($result instanceof FlexCollection) {
-                        $result = $result->getFlexDirectory()->getCollection($result->getKeys());
+                        $cached = $result->getFlexDirectory()->getCollection($result->getKeys());
+                    } else {
+                        $cached = $result;
                     }
 
-                    $cache->set($key, $result);
+                    $cache->set($key, $cached);
                 } catch (InvalidArgumentException $e) {
                     // TODO: log error.
                 }
