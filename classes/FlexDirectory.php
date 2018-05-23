@@ -165,16 +165,28 @@ class FlexDirectory
     {
         $object = null !== $key ? $this->getCollection()->get($key) : null;
 
+        $storage = $this->getStorage();
+
         if (null === $object) {
-            $key = null;
-
             $object = $this->createObject($data, $key);
+            $key = $object->getStorageKey();
 
-            $this->getStorage()->createRows([$object->prepareStorage()]);
+            if ($key) {
+                $storage->replaceRows([$key => $object->prepareStorage()]);
+            } else {
+                $storage->createRows([$object->prepareStorage()]);
+            }
         } else {
+            $oldKey = $object->getStorageKey();
             $object->update($data);
+            $newKey = $object->getStorageKey();
 
-            $this->getStorage()->updateRows([$object->getStorageKey() => $object->prepareStorage()]);
+            if ($oldKey !== $newKey) {
+                $storage->renameRow($oldKey, $newKey);
+                // TODO: media support.
+            }
+
+            $storage->updateRows([$newKey => $object->prepareStorage()]);
         }
 
         try {
@@ -379,8 +391,8 @@ class FlexDirectory
                 continue;
             }
             $row += [
-                '_storage_key' => $storageKey,
-                '_timestamp' => $entries[$key][1] ?? $entries[$key],
+                'storage_key' => $storageKey,
+                'storage_timestamp' => $entries[$key][1] ?? $entries[$key],
             ];
             $key = $keys[$storageKey];
             $object = $this->createObject($row, $key, false);

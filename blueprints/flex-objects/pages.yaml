@@ -6,9 +6,15 @@ config:
   admin:
     list:
       fields:
+        header.published:
+          width: 8
+        order:
+          width: 8
+        folder:
+          link: edit
         header.title:
           link: edit
-        slug:
+
   data:
     object: 'Grav\Plugin\FlexObjects\Types\Pages\PageObject'
     collection: 'Grav\Plugin\FlexObjects\Types\Pages\PageCollection'
@@ -19,6 +25,8 @@ config:
           class: 'Grav\Framework\File\Formatter\MarkdownFormatter'
         folder: 'user://data/pages'
         pattern: '%s/%s/page.md'
+    ordering:
+      storage_key: ASC
 
 form:
   validation: loose
@@ -49,6 +57,7 @@ form:
               validate:
                 message: PLUGIN_ADMIN.FOLDER_VALIDATE_MESSAGE
                 rule: slug
+                required: true
 
             header.title:
               type: text

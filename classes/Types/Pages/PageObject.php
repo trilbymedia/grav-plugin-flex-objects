@@ -646,4 +646,20 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
         return $parsedown->text($content);
     }
 
+    /**
+     * @param array $elements
+     */
+    protected function filterElements(array &$elements)
+    {
+        $order = !empty($elements['order']) ? (int)$elements['order'] : null;
+        $folder = !empty($elements['folder']) ? trim($elements['folder']) : '';
+
+        if ($folder) {
+            $elements['storage_key'] = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
+        }
+
+        unset($elements['order'], $elements['folder']);
+
+        parent::filterElements($elements);
+    }
 }

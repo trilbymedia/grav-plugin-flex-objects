@@ -154,6 +154,22 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
+    public function renameRow($src, $dst)
+    {
+        if ($this->hasKey($dst)) {
+            throw new \RuntimeException("Cannot rename object: key '{$dst}' is already taken");
+        }
+
+        if (!$this->hasKey($src)) {
+            return;
+        }
+
+        $this->moveFolder($this->getMediaPath($src), $this->getMediaPath($dst));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getStoragePath($key = null)
     {
         if (null === $key) {
@@ -170,7 +186,7 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     public function getMediaPath($key = null)
     {
-        return $key ? dirname($this->getStoragePath($key)) : $this->getStoragePath();
+        return null !== $key ? dirname($this->getStoragePath($key)) : $this->getStoragePath();
     }
 
     /**
@@ -215,6 +231,11 @@ class FolderStorage extends AbstractFilesystemStorage
         $file->delete();
 
         return $data;
+    }
+
+    protected function moveFolder($src, $dst)
+    {
+        Folder::move($this->resolvePath($src), $this->resolvePath($dst));
     }
 
     protected function deleteFolder($path, $include_target = false)

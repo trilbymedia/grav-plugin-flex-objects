@@ -150,6 +150,26 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
+    public function renameRow($src, $dst)
+    {
+        if ($this->hasKey($dst)) {
+            throw new \RuntimeException("Cannot rename object: key '{$dst}' is already taken");
+        }
+
+        if (!$this->hasKey($src)) {
+            return;
+        }
+
+        // Change single key in the array without changing the order or value.
+        $keys = array_keys($this->data);
+        $keys[array_search($src, $keys, true)] = $dst;
+
+        $this->data = array_combine($keys, $this->data);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getStoragePath($key = null)
     {
         return $this->dataFolder . '/' . $this->dataPattern;
