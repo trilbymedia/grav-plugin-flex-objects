@@ -2,6 +2,7 @@
 namespace Grav\Plugin\FlexObjects;
 
 use Doctrine\Common\Collections\Criteria;
+use Grav\Common\Grav;
 use Grav\Framework\Object\Interfaces\ObjectCollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
 use Grav\Plugin\FlexObjects\Collections\ArrayIndex;
@@ -200,6 +201,11 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
                 $result = $this->loadCollection()->{$name}(...$arguments);
 
                 try {
+                    // If flex collection is returned, convert it back to flex index.
+                    if ($result instanceof FlexCollection) {
+                        $result = $result->getFlexDirectory()->getCollection($result->getKeys());
+                    }
+
                     $cache->set($key, $result);
                 } catch (InvalidArgumentException $e) {
                     // TODO: log error.
@@ -210,6 +216,25 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
         }
 
         return $result;
+    }
+
+    /**
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize(['type' => $this->getType(false), 'entries' => $this->getEntries()]);
+    }
+
+    /**
+     * @param string $serialized
+     */
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+
+        $this->flexDirectory = Grav::instance()['flex_objects']->getDirectory($data['type']);
+        $this->setEntries($data['entries']);
     }
 
     /**

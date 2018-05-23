@@ -9,7 +9,7 @@ use Grav\Framework\Collection\CollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectCollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
 
-abstract class ArrayIndex implements CollectionInterface, Selectable
+abstract class ArrayIndex implements CollectionInterface, Selectable, \Serializable
 {
     /** @var array */
     private $entries;
@@ -408,6 +408,24 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
     }
 
     /**
+     * @return string
+     */
+    public function serialize()
+    {
+        return serialize(['entries' => $this->entries]);
+    }
+
+    /**
+     * @param string $serialized
+     */
+    public function unserialize($serialized)
+    {
+        $data = unserialize($serialized);
+
+        $this->entries = $data['entries'];
+    }
+
+    /**
      * Implementes JsonSerializable interface.
      *
      * @return array
@@ -432,6 +450,14 @@ abstract class ArrayIndex implements CollectionInterface, Selectable
     protected function getEntries()
     {
         return $this->entries;
+    }
+
+    /**
+     * @param array $entries
+     */
+    protected function setEntries(array $entries)
+    {
+        $this->entries = $entries;
     }
 
     /**

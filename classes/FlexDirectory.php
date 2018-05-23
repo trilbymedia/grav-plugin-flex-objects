@@ -134,7 +134,7 @@ class FlexDirectory
 
     /**
      * @param array|null $keys  Array of keys.
-     * @return FlexCollection|FlexIndex
+     * @return FlexIndex
      */
     public function getCollection(array $keys = null)
     {
