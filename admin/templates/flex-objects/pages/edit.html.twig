@@ -6,10 +6,10 @@
 {% set directory = flex.directory(target) %}
 {% set entry = directory.collection[id] %}
 
-{% if not entry %}{% do grav.redirect(current_url) %}{% endif %}
+{% if not entry and uri.param('action') != 'add' %}{% do grav.redirect(current_url) %}{% endif %}
 
 {% block content_top %}
-    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>.{{ url(entry.getStorageFolder()) }}</b></div>
+    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>.{{ url(entry.storageFolder ?? directory.getStorageFolder()) }} {{ not entry ? '[NEW]' }}</b></div>
 {% endblock %}
 
 {% block content %}
