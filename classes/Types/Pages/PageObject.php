@@ -353,6 +353,30 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
         return false;
     }
 
+    /**
+     * Returns the clean path to the page file
+     * @deprecated Needed in admin for Page Media.
+     */
+    public function relativePagePath()
+    {
+        return $this->getMediaFolder();
+    }
+
+    /*
+    public function getNewStorageKey()
+    {
+        $order = $this->getElement('order');
+        $folder = $this->getElement('folder') ?? $this->value('folder');
+
+        $key = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
+
+        if ($key !== $this->getStorageKey()) {
+            return $key;
+        }
+
+        return null;
+    }
+    */
 
     // Overrides for header properties.
 
