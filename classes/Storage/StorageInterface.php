@@ -72,6 +72,13 @@ interface StorageInterface
     public function replaceRows(array $rows);
 
     /**
+     * @param string $src
+     * @param string $dst
+     * @return bool
+     */
+    public function renameRow($src, $dst);
+
+    /**
      * Get filesystem path for the collection or object storage.
      *
      * @param  string|null $key

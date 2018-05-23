@@ -354,6 +354,25 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function update(array $data)
+    {
+        $order = !empty($data['order']) ? (int)$data['order'] : null;
+        $folder = !empty($data['folder']) ? trim($data['folder']) : '';
+
+        if ($folder) {
+            $storage_key = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
+
+            $this->setKey($folder);
+            $this->setStorageKey($storage_key);
+        }
+        unset ($data['order'], $data['folder']);
+
+        return parent::update($data);
+    }
+
+    /**
      * Returns the clean path to the page file
      * @deprecated Needed in admin for Page Media.
      */

@@ -148,7 +148,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function getStorageKey()
     {
-        return $this->storageKey ?? $this->getKey();
+        return $this->storageKey;
     }
 
     /**
@@ -157,7 +157,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function setStorageKey($key = null)
     {
-        $this->storageKey = $key ?? $this->getKey();
+        $this->storageKey = $key;
 
         return $this;
     }
@@ -253,6 +253,13 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function update(array $data)
     {
+        $storage_key = !empty($data['storage_key']) ? trim($data['storage_key']) : '';
+        if ($storage_key) {
+            $this->setKey($storage_key);
+            $this->setStorageKey($storage_key);
+        }
+        unset ($data['storage_key']);
+
         $blueprint = $this->getFlexDirectory()->getBlueprint();
 
         $elements = $this->getElements();
@@ -274,6 +281,10 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function value($name, $default = null)
     {
+        if ($name === 'storage_key') {
+            return $this->getStorageKey();
+        }
+
         return $this->getNestedProperty($name, $default);
     }
 
