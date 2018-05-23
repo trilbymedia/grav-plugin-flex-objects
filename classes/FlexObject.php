@@ -87,12 +87,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function update(array $data)
     {
-        $storage_key = !empty($data['storage_key']) ? trim($data['storage_key']) : '';
-        if ($storage_key) {
-            $this->setKey($storage_key);
-            $this->setStorageKey($storage_key);
-        }
-        unset ($data['storage_key']);
+        $this->filterElements($data);
 
         $blueprint = $this->getFlexDirectory()->getBlueprint();
 
