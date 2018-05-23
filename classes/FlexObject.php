@@ -25,7 +25,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     /** @var string */
     private $storageKey;
     /** @var int */
-    private $timestamp;
+    private $timestamp = 0;
 
     /**
      * @return array
@@ -75,12 +75,35 @@ class FlexObject extends LazyObject implements FlexObjectInterface
             $elements = $blueprint->filter($elements);
         }
 
-        $this->storageKey = $elements['_storage_key'] ?? null;
-        $this->timestamp = $elements['_timestamp'] ?? 0;
-
-        unset ($elements['_storage_key'], $elements['_timestamp']);
+        $this->filterElements($elements);
 
         parent::__construct($elements, $key);
+    }
+
+    /**
+     * @param array $data
+     * @return $this
+     * @throws ValidationException
+     */
+    public function update(array $data)
+    {
+        $storage_key = !empty($data['storage_key']) ? trim($data['storage_key']) : '';
+        if ($storage_key) {
+            $this->setKey($storage_key);
+            $this->setStorageKey($storage_key);
+        }
+        unset ($data['storage_key']);
+
+        $blueprint = $this->getFlexDirectory()->getBlueprint();
+
+        $elements = $this->getElements();
+        $data = $blueprint->mergeData($elements, $data);
+
+        $blueprint->validate($data);
+
+        $this->setElements($blueprint->filter($data));
+
+        return $this;
     }
 
     /**
@@ -244,32 +267,6 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $debugger->stopTimer('flex-object-' . $debugKey);
 
         return $block;
-    }
-
-    /**
-     * @param array $data
-     * @return $this
-     * @throws ValidationException
-     */
-    public function update(array $data)
-    {
-        $storage_key = !empty($data['storage_key']) ? trim($data['storage_key']) : '';
-        if ($storage_key) {
-            $this->setKey($storage_key);
-            $this->setStorageKey($storage_key);
-        }
-        unset ($data['storage_key']);
-
-        $blueprint = $this->getFlexDirectory()->getBlueprint();
-
-        $elements = $this->getElements();
-        $data = $blueprint->mergeData($elements, $data);
-
-        $blueprint->validate($data);
-
-        $this->setElements($blueprint->filter($data));
-
-        return $this;
     }
 
     /**
@@ -448,5 +445,20 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @param array $elements
+     */
+    protected function filterElements(array &$elements)
+    {
+        if (!empty($elements['storage_key'])) {
+            $this->storageKey = trim($elements['storage_key']);
+        }
+        if (!empty($elements['storage_timestamp'])) {
+            $this->timestamp = (int)$elements['storage_timestamp'];
+        }
+
+        unset ($elements['storage_key'], $elements['storage_timestamp']);
     }
 }
