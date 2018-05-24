@@ -106,6 +106,14 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
         return $list;
     }
 
+    /**
+     * @return bool
+     */
+    public function isPublished()
+    {
+        return (bool)$this->getNestedProperty('header.published', true) === true;
+    }
+
     // Page Interface.
 
     public function header($var = null)

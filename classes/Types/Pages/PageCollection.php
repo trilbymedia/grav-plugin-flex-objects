@@ -9,12 +9,23 @@ use Grav\Plugin\FlexObjects\FlexCollection;
  */
 class PageCollection extends FlexCollection
 {
+
+    /**
+     * @return FlexCollection|PageCollection
+     */
+    public function withPublished()
+    {
+        $list = array_keys(array_filter($this->call('isPublished')));
+
+        return $this->select($list);
+    }
+
     public function getNextOrder()
     {
         $directory = $this->getFlexDirectory();
 
         /** @var PageObject $last */
-        $collection = $directory->getCollection();
+        $collection = $directory->getIndex();
         $keys = $collection->getStorageKeys();
 
         // Assign next free order.

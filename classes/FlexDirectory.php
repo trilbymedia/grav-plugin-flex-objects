@@ -6,6 +6,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Data\Blueprint;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
+use Grav\Common\Utils;
 use Grav\Framework\Cache\Adapter\DoctrineCache;
 use Grav\Framework\Cache\Adapter\MemoryCache;
 use Grav\Framework\Cache\CacheInterface;
@@ -138,10 +139,13 @@ class FlexDirectory
      */
     public function getCollection(array $keys = null)
     {
-        $index = clone $this->getIndex();
+        $index = clone $this->getIndex($keys);
 
-        if (null !== $keys) {
-            $index = $index->select($keys);
+        if (!Utils::isAdminPlugin()) {
+            $filters = (array)$this->getConfig('site.filter', []);
+            foreach ($filters as $filter) {
+                $index = $index->{$filter}();
+            }
         }
 
         return $index;
@@ -163,7 +167,7 @@ class FlexDirectory
      */
     public function update(array $data, $key = null)
     {
-        $object = null !== $key ? $this->getCollection()->get($key) : null;
+        $object = null !== $key ? $this->getIndex()->get($key) : null;
 
         $storage = $this->getStorage();
 
@@ -204,7 +208,7 @@ class FlexDirectory
      */
     public function remove($key)
     {
-        $object = null !== $key ? $this->getCollection()->get($key) : null;
+        $object = null !== $key ? $this->getIndex()->get($key) : null;
         if (!$object) {
             return null;
         }
@@ -287,6 +291,22 @@ class FlexDirectory
         }
 
         return $this->storage;
+    }
+
+    /**
+     * @param array|null $keys  Array of keys.
+     * @return FlexIndex
+     * @internal
+     */
+    public function getIndex(array $keys = null)
+    {
+        $index = clone $this->loadIndex();
+
+        if (null !== $keys) {
+            $index = $index->select($keys);
+        }
+
+        return $index;
     }
 
     /**
@@ -426,7 +446,7 @@ class FlexDirectory
     /**
      * @return FlexIndex
      */
-    protected function getIndex()
+    protected function loadIndex()
     {
         if (null === $this->index) {
             /** @var Debugger $debugger */

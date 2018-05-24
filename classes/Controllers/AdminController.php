@@ -91,7 +91,7 @@ class AdminController extends SimpleController
      */
     protected function get($type, $id = null)
     {
-        $collection = $this->getDirectory($type)->getCollection();
+        $collection = $this->getDirectory($type)->getIndex();
 
         return null !== $id ? $collection[$id] : $collection;
     }

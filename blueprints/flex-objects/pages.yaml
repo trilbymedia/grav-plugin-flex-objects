@@ -15,6 +15,10 @@ config:
         header.title:
           link: edit
 
+  site:
+    filter:
+      - withPublished
+
   data:
     object: 'Grav\Plugin\FlexObjects\Types\Pages\PageObject'
     collection: 'Grav\Plugin\FlexObjects\Types\Pages\PageCollection'
