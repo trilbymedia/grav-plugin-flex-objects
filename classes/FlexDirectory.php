@@ -172,7 +172,7 @@ class FlexDirectory
         $storage = $this->getStorage();
 
         if (null === $object) {
-            $object = $this->createObject($data, $key);
+            $object = $this->createObject($data, $key, true);
             $key = $object->getStorageKey();
 
             if ($key) {

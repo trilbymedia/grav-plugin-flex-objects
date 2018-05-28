@@ -94,7 +94,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $elements = $this->getElements();
         $data = $blueprint->mergeData($elements, $data);
 
-        $blueprint->validate($data);
+        $blueprint->validate($data + ['storage_key' => $this->getStorageKey()]);
 
         $this->setElements($blueprint->filter($data));
 
