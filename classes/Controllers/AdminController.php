@@ -12,7 +12,6 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class AdminController extends SimpleController
 {
-
     /**
      * Delete Directory
      */

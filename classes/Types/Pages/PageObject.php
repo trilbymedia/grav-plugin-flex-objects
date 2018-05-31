@@ -370,21 +370,15 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
         return $this->getMediaFolder();
     }
 
-    /*
-    public function getNewStorageKey()
+    /**
+     * Get display order for the associated media.
+     *
+     * @return array
+     */
+    public function getMediaOrder()
     {
-        $order = $this->getElement('order');
-        $folder = $this->getElement('folder') ?? $this->value('folder');
-
-        $key = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
-
-        if ($key !== $this->getStorageKey()) {
-            return $key;
-        }
-
-        return null;
+        return array_map('trim', explode(',', (string)$this->getNestedProperty('header.media_order')));
     }
-    */
 
     // Overrides for header properties.
 
