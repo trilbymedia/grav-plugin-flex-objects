@@ -227,8 +227,12 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
             $block = $data ? HtmlBlock::fromArray($data) : null;
         } catch (InvalidArgumentException $e) {
+            $debugger->addException($e);
+
             $block = null;
         } catch (\InvalidArgumentException $e) {
+            $debugger->addException($e);
+
             $block = null;
         }
 
@@ -256,6 +260,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface
             try {
                 $cache && $cache->set($key, $block->toArray());
             } catch (InvalidArgumentException $e) {
+                $debugger->addException($e);
             }
         }
 
@@ -387,6 +392,10 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         try {
             return $twig->twig()->resolveTemplate(["flex-objects/layouts/{$this->getType(false)}/object/{$layout}.html.twig"]);
         } catch (\Twig_Error_Loader $e) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->addException($e);
+
             return $twig->twig()->resolveTemplate(["flex-objects/layouts/404.html.twig"]);
         }
     }
@@ -420,6 +429,10 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         try {
             $this->getFlexDirectory()->clearCache();
         } catch (InvalidArgumentException $e) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->addException($e);
+
             // Caching failed, but we can ignore that for now.
         }
 
@@ -436,6 +449,10 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         try {
             $this->getFlexDirectory()->clearCache();
         } catch (InvalidArgumentException $e) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->addException($e);
+
             // Caching failed, but we can ignore that for now.
         }
 

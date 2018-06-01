@@ -2,6 +2,7 @@
 namespace Grav\Plugin\FlexObjects;
 
 use Doctrine\Common\Collections\Criteria;
+use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Framework\Object\Interfaces\ObjectCollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
@@ -160,6 +161,10 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
             try {
                 $result = $cache->get($key, $test);
             } catch (InvalidArgumentException $e) {
+                /** @var Debugger $debugger */
+                $debugger = Grav::instance()['debugger'];
+                $debugger->addException($e);
+
                 $result = $test;
             }
 
@@ -169,6 +174,10 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
                 try {
                     $cache->set($key, $result);
                 } catch (InvalidArgumentException $e) {
+                    /** @var Debugger $debugger */
+                    $debugger = Grav::instance()['debugger'];
+                    $debugger->addException($e);
+
                     // TODO: log error.
                 }
             }
@@ -194,6 +203,10 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
             try {
                 $result = $cache->get($key, $test);
             } catch (InvalidArgumentException $e) {
+                /** @var Debugger $debugger */
+                $debugger = Grav::instance()['debugger'];
+                $debugger->addException($e);
+
                 $result = $test;
             }
 
@@ -210,6 +223,10 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
 
                     $cache->set($key, $cached);
                 } catch (InvalidArgumentException $e) {
+                    /** @var Debugger $debugger */
+                    $debugger = Grav::instance()['debugger'];
+                    $debugger->addException($e);
+
                     // TODO: log error.
                 }
             }

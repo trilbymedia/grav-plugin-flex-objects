@@ -196,6 +196,10 @@ class FlexDirectory
         try {
             $this->clearCache();
         } catch (InvalidArgumentException $e) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->addException($e);
+
             // Caching failed, but we can ignore that for now.
         }
 
@@ -218,6 +222,10 @@ class FlexDirectory
         try {
             $this->clearCache();
         } catch (InvalidArgumentException $e) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->addException($e);
+
             // Caching failed, but we can ignore that for now.
         }
 
@@ -234,16 +242,26 @@ class FlexDirectory
 
         if (!isset($this->cache[$namespace])) {
             try {
+                $grav = Grav::instance();
+
                 /** @var Cache $gravCache */
-                $gravCache = Grav::instance()['cache'];
+                $gravCache = $grav['cache'];
                 $config = $this->getConfig('cache.' . $namespace);
                 if (empty($config['enabled'])) {
                     throw new \RuntimeException('Cache not enabled');
                 }
                 $timeout = $config['timeout'] ?? 60;
 
-                $this->cache[$namespace] = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType() . $gravCache->getKey(), $timeout);
+                $key = $gravCache->getKey();
+                if (Utils::isAdminPlugin()) {
+                    $key = substr($key, 0, -1);
+                }
+                $this->cache[$namespace] = new DoctrineCache($gravCache->getCacheDriver(), 'flex-objects-' . $this->getType() . $key, $timeout);
             } catch (\Exception $e) {
+                /** @var Debugger $debugger */
+                $debugger = Grav::instance()['debugger'];
+                $debugger->addException($e);
+
                 $this->cache[$namespace] = new MemoryCache('flex-objects-' . $this->getType());
             }
         }
@@ -388,6 +406,7 @@ class FlexDirectory
         try {
             $rows = $cache->getMultiple(array_keys($keys));
         } catch (InvalidArgumentException $e) {
+            $debugger->addException($e);
             $rows = [];
         }
 
@@ -400,6 +419,8 @@ class FlexDirectory
             try {
                 $cache->setMultiple($updated);
             } catch (InvalidArgumentException $e) {
+                $debugger->addException($e);
+
                 // TODO: log about the issue.
             }
         }
@@ -459,6 +480,7 @@ class FlexDirectory
             try {
                 $keys = $cache->get('__keys');
             } catch (InvalidArgumentException $e) {
+                $debugger->addException($e);
                 $keys = null;
             }
 
@@ -468,6 +490,8 @@ class FlexDirectory
                 try {
                     $cache->set('__keys', $keys);
                 } catch (InvalidArgumentException $e) {
+                    $debugger->addException($e);
+
                     // TODO: log about the issue.
                 }
             }
