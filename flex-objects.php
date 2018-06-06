@@ -3,7 +3,6 @@ namespace Grav\Plugin;
 
 use Grav\Common\Plugin;
 use Grav\Plugin\FlexObjects\Controllers\AdminController;
-use Grav\Plugin\FlexObjects\Controllers\SiteController;
 use Grav\Plugin\FlexObjects\Flex;
 use RocketTheme\Toolbox\Event\Event;
 
@@ -13,7 +12,7 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexObjectsPlugin extends Plugin
 {
-    /** @var AdminController|SiteController */
+    /** @var AdminController */
     protected $controller;
 
     protected $version;
@@ -60,8 +59,6 @@ class FlexObjectsPlugin extends Plugin
             $this->enable([
                 'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
             ]);
-            /** @var SiteController controller */
-            $this->controller = new SiteController($this);
         }
 
         $config = $this->config->get('plugins.flex-objects');
@@ -81,7 +78,7 @@ class FlexObjectsPlugin extends Plugin
 
     public function onPageInitialized()
     {
-        if ($this->controller->isActive()) {
+        if ($this->isAdmin() && $this->controller->isActive()) {
             $this->controller->execute();
             $this->controller->redirect();
         }
