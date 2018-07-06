@@ -73,7 +73,6 @@ class AdminController extends SimpleController
                 break;
             case 'edit':
             default:
-                $this->setRedirect($this->location . '/' . $this->target . '/id:' . Grav::instance()['uri']->param('id'));
                 $saved_option = 'edit';
                 break;
         }

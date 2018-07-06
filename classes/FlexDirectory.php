@@ -176,9 +176,9 @@ class FlexDirectory
             $key = $object->getStorageKey();
 
             if ($key) {
-                $storage->replaceRows([$key => $object->prepareStorage()]);
+                $rows = $storage->replaceRows([$key => $object->prepareStorage()]);
             } else {
-                $storage->createRows([$object->prepareStorage()]);
+                $rows = $storage->createRows([$object->prepareStorage()]);
             }
         } else {
             $oldKey = $object->getStorageKey();
@@ -190,7 +190,7 @@ class FlexDirectory
                 // TODO: media support.
             }
 
-            $storage->updateRows([$newKey => $object->prepareStorage()]);
+            $rows = $storage->updateRows([$newKey => $object->prepareStorage()]);
         }
 
         try {
@@ -202,6 +202,13 @@ class FlexDirectory
 
             // Caching failed, but we can ignore that for now.
         }
+
+        /** @var FlexObject $class */
+        $class = $this->getObjectClass();
+
+        $row = reset($rows);
+        $index = $class::createIndex([key($rows) => time()]);
+        $object = $this->createObject($row, key($index), false);
 
         return $object;
     }
