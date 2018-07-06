@@ -36,6 +36,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
             'getProperty' => true,
             'hasNestedProperty' => true,
             'getNestedProperty' => true,
+            'orderBy' => true,
         ];
     }
 
@@ -97,8 +98,12 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
      * @throws \Twig_Error_Loader
      * @throws \Twig_Error_Syntax
      */
-    public function render($layout = 'default', array $context = [])
+    public function render($layout = null, array $context = [])
     {
+        if (null === $layout) {
+            $layout = 'default';
+        }
+
         $grav = Grav::instance();
 
         /** @var Debugger $debugger */
@@ -296,5 +301,22 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 
             return $twig->twig()->resolveTemplate(["flex-objects/layouts/404.html.twig"]);
         }
+    }
+
+    /**
+     * @param $type
+     * @return FlexDirectory
+     * @throws \RuntimeException
+     */
+    protected function getRelatedDirectory($type)
+    {
+        /** @var Flex $flex */
+        $flex = Grav::instance()['flex_objects'];
+        $directory = $flex->getDirectory($type);
+        if (!$directory) {
+            throw new \RuntimeException(ucfirst($type). ' directory does not exist!');
+        }
+
+        return $directory;
     }
 }

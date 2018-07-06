@@ -208,8 +208,12 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      * @throws \Twig_Error_Loader
      * @throws \Twig_Error_Syntax
      */
-    public function render($layout = 'default', array $context = [])
+    public function render($layout = null, array $context = [])
     {
+        if (null === $layout) {
+            $layout = 'default';
+        }
+
         $grav = Grav::instance();
 
         /** @var Debugger $debugger */

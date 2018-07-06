@@ -274,6 +274,10 @@ class FlexDirectory
      */
     public function clearCache()
     {
+        /** @var Debugger $debugger */
+        $debugger = Grav::instance()['debugger'];
+        $debugger->addMessage('Flex: Clearing all cache', 'debug');
+
         $this->getCache('index')->clear();
         $this->getCache('object')->clear();
         $this->getCache('render')->clear();
@@ -417,6 +421,7 @@ class FlexDirectory
         // Store updated rows to the cache.
         if ($updated) {
             try {
+                $debugger->addMessage('Flex: Caching objects ' . implode(', ', array_keys($updated)), 'debug');
                 $cache->setMultiple($updated);
             } catch (InvalidArgumentException $e) {
                 $debugger->addException($e);
@@ -472,7 +477,7 @@ class FlexDirectory
         if (null === $this->index) {
             /** @var Debugger $debugger */
             $debugger = Grav::instance()['debugger'];
-            $debugger->startTimer('flex-keys', 'Loading Flex Index');
+            $debugger->startTimer('flex-keys', "Loading Flex Index {$this->type}");
 
             $storage = $this->getStorage();
             $cache = $this->getCache('index');
@@ -485,6 +490,7 @@ class FlexDirectory
             }
 
             if (null === $keys) {
+                $debugger->addMessage("Flex: Caching index {$this->type}", 'debug');
                 $className = $this->getObjectClass();
                 $keys = $className::createIndex($storage->getExistingKeys());
                 try {
@@ -496,7 +502,9 @@ class FlexDirectory
                 }
             }
 
-            $this->index = (new FlexIndex($keys, $this))->orderBy($this->getConfig('data.ordering', []));
+            // We need to do this in two steps as orderBy() calls loadIndex() again and we do not want infinite loop.
+            $this->index = new FlexIndex($keys, $this);
+            $this->index = $this->index->orderBy($this->getConfig('data.ordering', []));
 
             $debugger->stopTimer('flex-keys');
         }

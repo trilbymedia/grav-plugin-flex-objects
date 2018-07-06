@@ -102,9 +102,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
 
         // Check if ordering needs to load the objects.
         if (array_diff_key($orderings, ['key' => true, 'storage_key' => true, 'timestamp' => true])) {
-            $criteria = Criteria::create()->orderBy($orderings);
-
-            return $this->matching($criteria);
+            return $this->__call('orderBy', [$orderings]);
         }
 
         // Ordering can be done by using index only.
@@ -148,48 +146,14 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
      */
     public function call($method, array $arguments = [])
     {
-        /** @var FlexCollection $className */
-        $className = $this->flexDirectory->getObjectClass();
-        $cachedMethods = $className::getCachedMethods();
-
-        if (!empty($cachedMethods[$method])) {
-            $key = $this->getType(true) . '.call.' . sha1($method . json_encode($arguments) . $this->getCacheKey());
-
-            $cache = $this->flexDirectory->getCache('object');
-
-            $test = new \stdClass;
-            try {
-                $result = $cache->get($key, $test);
-            } catch (InvalidArgumentException $e) {
-                /** @var Debugger $debugger */
-                $debugger = Grav::instance()['debugger'];
-                $debugger->addException($e);
-
-                $result = $test;
-            }
-
-            if ($result === $test) {
-                $result = $this->loadCollection()->call($method, $arguments);
-
-                try {
-                    $cache->set($key, $result);
-                } catch (InvalidArgumentException $e) {
-                    /** @var Debugger $debugger */
-                    $debugger = Grav::instance()['debugger'];
-                    $debugger->addException($e);
-
-                    // TODO: log error.
-                }
-            }
-        } else {
-            $result = $this->loadCollection()->call($method, $arguments);
-        }
-
-        return $result;
+        return $this->__call('call', [$method, $arguments]);
     }
 
     public function __call($name, $arguments)
     {
+        /** @var Debugger $debugger */
+        $debugger = Grav::instance()['debugger'];
+
         /** @var FlexCollection $className */
         $className = $this->flexDirectory->getCollectionClass();
         $cachedMethods = $className::getCachedMethods();
@@ -223,8 +187,6 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
 
                     $cache->set($key, $cached);
                 } catch (InvalidArgumentException $e) {
-                    /** @var Debugger $debugger */
-                    $debugger = Grav::instance()['debugger'];
                     $debugger->addException($e);
 
                     // TODO: log error.
@@ -232,6 +194,7 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
             }
         } else {
             $result = $this->loadCollection()->{$name}(...$arguments);
+            $debugger->addMessage("Call '{$this->getType()}:{$name}()' cannot be cached", 'debug');
         }
 
         return $result;
