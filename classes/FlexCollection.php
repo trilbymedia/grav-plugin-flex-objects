@@ -262,6 +262,19 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     }
 
     /**
+     * Un-select items from collection.
+     *
+     * Collection is returned in the order of $keys given to the function.
+     *
+     * @param array $keys
+     * @return FlexCollection
+     */
+    public function unselect(array $keys)
+    {
+        return $this->select(array_diff($this->getKeys(), $keys));
+    }
+
+    /**
      * @return array
      */
     public function jsonSerialize()
