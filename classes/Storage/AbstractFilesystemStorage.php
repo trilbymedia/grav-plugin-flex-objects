@@ -9,6 +9,8 @@ use Grav\Common\Helpers\Base32;
 use Grav\Common\Utils;
 use Grav\Framework\File\Formatter\FormatterInterface;
 use Grav\Framework\File\Formatter\JsonFormatter;
+use Grav\Framework\File\Formatter\MarkdownFormatter;
+use Grav\Framework\File\Formatter\YamlFormatter;
 use RocketTheme\Toolbox\File\File;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use RuntimeException;
@@ -32,6 +34,26 @@ abstract class AbstractFilesystemStorage implements StorageInterface
         $formatterOptions = isset($formatter['options']) ? $formatter['options'] : [];
 
         $this->dataFormatter = new $formatterClassName($formatterOptions);
+    }
+
+    /**
+     * @param $filename
+     * @return null|string
+     */
+    protected function detectDataFormatter($filename)
+    {
+        if (preg_match('|(\.[a-z0-9]*)$|ui', $filename, $matches)) {
+            switch ($matches[1]) {
+                case '.json':
+                    return JsonFormatter::class;
+                case '.yaml':
+                    return YamlFormatter::class;
+                case '.md':
+                    return MarkdownFormatter::class;
+            }
+        }
+
+        return null;
     }
 
     /**

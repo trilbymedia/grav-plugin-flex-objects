@@ -13,6 +13,18 @@ class FileStorage extends FolderStorage
     /**
      * {@inheritdoc}
      */
+    public function __construct(array $options)
+    {
+        if (!isset($options['formatter']) && isset($options['pattern'])) {
+            $options['formatter'] = $this->detectDataFormatter($options['pattern']);
+        }
+
+        parent::__construct($options);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getMediaPath($key = null)
     {
         return $key ? dirname($this->getStoragePath($key)) . '/' . $key : $this->getStoragePath();

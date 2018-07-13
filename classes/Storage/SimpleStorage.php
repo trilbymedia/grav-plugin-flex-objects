@@ -29,7 +29,8 @@ class SimpleStorage extends AbstractFilesystemStorage
             throw new InvalidArgumentException("Argument \$options is missing 'folder'");
         }
 
-        $this->initDataFormatter(isset($options['formatter']) ? $options['formatter'] : []);
+        $formatter = isset($options['formatter']) ? $options['formatter'] : $this->detectDataFormatter($options['folder']);
+        $this->initDataFormatter($formatter);
 
         $extension = $this->dataFormatter->getFileExtension();
         $pattern = basename($options['folder']);
