@@ -484,7 +484,7 @@ class FlexDirectory
         if (null === $this->index) {
             /** @var Debugger $debugger */
             $debugger = Grav::instance()['debugger'];
-            $debugger->startTimer('flex-keys', "Loading Flex Index {$this->type}");
+            $debugger->startTimer('flex-keys-' . $this->type, "Loading Flex Index {$this->type}");
 
             $storage = $this->getStorage();
             $cache = $this->getCache('index');
@@ -498,6 +498,7 @@ class FlexDirectory
 
             if (null === $keys) {
                 $debugger->addMessage("Flex: Caching index {$this->type}", 'debug');
+                /** @var FlexObject $className */
                 $className = $this->getObjectClass();
                 $keys = $className::createIndex($storage->getExistingKeys());
                 try {
@@ -513,7 +514,7 @@ class FlexDirectory
             $this->index = new FlexIndex($keys, $this);
             $this->index = $this->index->orderBy($this->getConfig('data.ordering', []));
 
-            $debugger->stopTimer('flex-keys');
+            $debugger->stopTimer('flex-keys-' . $this->type);
         }
 
         return $this->index;

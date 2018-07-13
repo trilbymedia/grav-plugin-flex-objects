@@ -1,7 +1,6 @@
 <?php
 namespace Grav\Plugin\FlexObjects;
 
-use Doctrine\Common\Collections\Criteria;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Framework\Object\Interfaces\ObjectCollectionInterface;
@@ -193,8 +192,10 @@ class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
                 }
             }
         } else {
-            $result = $this->loadCollection()->{$name}(...$arguments);
-            $debugger->addMessage("Call '{$this->getType()}:{$name}()' cannot be cached", 'debug');
+            $collection = $this->loadCollection();
+            $result = $collection->{$name}(...$arguments);
+            $class = get_class($collection);
+            $debugger->addMessage("Call '{$class}:{$name}()' cannot be cached", 'debug');
         }
 
         return $result;
