@@ -32,10 +32,23 @@ class FlexObjectsPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onPluginsInitialized' => ['onPluginsInitialized', 0],
+            'onPluginsInitialized' => [
+                ['autoload', 100000],
+                ['onPluginsInitialized', 0]
+            ],
             'onTwigSiteVariables'  => ['onTwigSiteVariables', 0],
             'onPageInitialized'    => ['onPageInitialized', 0],
         ];
+    }
+
+    /**
+     * [onPluginsInitialized:100000] Composer autoload.
+     *
+     * @return \Composer\Autoload\ClassLoader
+     */
+    public function autoload()
+    {
+        return require __DIR__ . '/vendor/autoload.php';
     }
 
     /**
@@ -43,8 +56,6 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onPluginsInitialized()
     {
-        require_once __DIR__ . '/vendor/autoload.php';
-
         if ($this->isAdmin()) {
             $this->enable([
                 'onTwigTemplatePaths'                        => ['onTwigAdminTemplatePaths', 0],
