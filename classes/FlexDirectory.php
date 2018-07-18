@@ -481,10 +481,13 @@ class FlexDirectory
      */
     protected function loadIndex()
     {
+        static $i = 0;
+
         if (null === $this->index) {
+            $i++; $j = $i;
             /** @var Debugger $debugger */
             $debugger = Grav::instance()['debugger'];
-            $debugger->startTimer('flex-keys-' . $this->type, "Loading Flex Index {$this->type}");
+            $debugger->startTimer('flex-keys-' . $this->type . $j, "Loading Flex Index {$this->type}");
 
             $storage = $this->getStorage();
             $cache = $this->getCache('index');
@@ -505,7 +508,6 @@ class FlexDirectory
                     $cache->set('__keys', $keys);
                 } catch (InvalidArgumentException $e) {
                     $debugger->addException($e);
-
                     // TODO: log about the issue.
                 }
             }
@@ -514,7 +516,7 @@ class FlexDirectory
             $this->index = new FlexIndex($keys, $this);
             $this->index = $this->index->orderBy($this->getConfig('data.ordering', []));
 
-            $debugger->stopTimer('flex-keys-' . $this->type);
+            $debugger->stopTimer('flex-keys-' . $this->type . $j);
         }
 
         return $this->index;
