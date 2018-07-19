@@ -82,17 +82,20 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
     /**
      * @param array $data
+     * @param bool $isFullUpdate
      * @return $this
      * @throws ValidationException
      */
-    public function update(array $data)
+    public function update(array $data, $isFullUpdate = false)
     {
         $this->filterElements($data);
 
         $blueprint = $this->getFlexDirectory()->getBlueprint();
 
-        $elements = $this->getElements();
-        $data = $blueprint->mergeData($elements, $data);
+        if (!$isFullUpdate) {
+            $elements = $this->getElements();
+            $data = $blueprint->mergeData($elements, $data);
+        }
 
         $blueprint->validate($data + ['storage_key' => $this->getStorageKey()]);
 

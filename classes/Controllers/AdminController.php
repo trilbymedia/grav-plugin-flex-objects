@@ -42,7 +42,7 @@ class AdminController extends SimpleController
         $directory = $this->getDirectory($type);
 
         // if no id param, assume new, generate an ID
-        $object = $directory->update($this->data, $id);
+        $object = $directory->update($this->data, $id, true);
 
         if ($object) {
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');

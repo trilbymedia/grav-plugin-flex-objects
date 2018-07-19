@@ -163,9 +163,10 @@ class FlexDirectory
     /**
      * @param array $data
      * @param string|null $key
+     * @param bool $isFullUpdate
      * @return FlexObject
      */
-    public function update(array $data, $key = null)
+    public function update(array $data, $key = null, $isFullUpdate = false)
     {
         $object = null !== $key ? $this->getIndex()->get($key) : null;
 
@@ -182,7 +183,7 @@ class FlexDirectory
             }
         } else {
             $oldKey = $object->getStorageKey();
-            $object->update($data);
+            $object->update($data, $isFullUpdate);
             $newKey = $object->getStorageKey();
 
             if ($oldKey !== $newKey) {
