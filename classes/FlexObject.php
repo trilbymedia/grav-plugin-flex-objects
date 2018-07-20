@@ -4,6 +4,7 @@ namespace Grav\Plugin\FlexObjects;
 use Grav\Common\Data\ValidationException;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
+use Grav\Common\Media\Interfaces\MediaInterface;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Twig\Twig;
@@ -435,6 +436,9 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
         try {
             $this->getFlexDirectory()->clearCache();
+            if (method_exists($this, 'clearMediaCache')) {
+                $this->clearMediaCache();
+            }
         } catch (InvalidArgumentException $e) {
             /** @var Debugger $debugger */
             $debugger = Grav::instance()['debugger'];
@@ -455,6 +459,9 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
         try {
             $this->getFlexDirectory()->clearCache();
+            if (method_exists($this, 'clearMediaCache')) {
+                $this->clearMediaCache();
+            }
         } catch (InvalidArgumentException $e) {
             /** @var Debugger $debugger */
             $debugger = Grav::instance()['debugger'];
