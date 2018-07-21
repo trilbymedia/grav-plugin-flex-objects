@@ -177,9 +177,9 @@ class FlexDirectory
             $key = $object->getStorageKey();
 
             if ($key) {
-                $rows = $storage->replaceRows([$key => $object->prepareStorage()]);
+                $rows = $storage->replaceRows([$key => $object->triggerEvent('onSave')->prepareStorage()]);
             } else {
-                $rows = $storage->createRows([$object->prepareStorage()]);
+                $rows = $storage->createRows([$object->triggerEvent('onSave')->prepareStorage()]);
             }
         } else {
             $oldKey = $object->getStorageKey();
@@ -187,11 +187,12 @@ class FlexDirectory
             $newKey = $object->getStorageKey();
 
             if ($oldKey !== $newKey) {
+                $object->triggerEvent('move');
                 $storage->renameRow($oldKey, $newKey);
                 // TODO: media support.
             }
 
-            $rows = $storage->updateRows([$newKey => $object->prepareStorage()]);
+            $rows = $storage->updateRows([$newKey => $object->triggerEvent('onSave')->prepareStorage()]);
         }
 
         try {
@@ -225,7 +226,7 @@ class FlexDirectory
             return null;
         }
 
-        $this->getStorage()->deleteRows([$object->getStorageKey() => $object->prepareStorage()]);
+        $this->getStorage()->deleteRows([$object->getStorageKey() => $object->triggerEvent('onRemove')->prepareStorage()]);
 
         try {
             $this->clearCache();

@@ -336,6 +336,15 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
+     * @param string $name
+     * @return $this
+     */
+    public function triggerEvent($name)
+    {
+        return $this;
+    }
+
+    /**
      * @param string $uri
      * @return Medium|null
      */
