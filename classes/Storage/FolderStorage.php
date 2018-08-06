@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Grav\Plugin\FlexObjects\Storage;
 
 use Grav\Common\Filesystem\Folder;
@@ -28,9 +30,9 @@ class FolderStorage extends AbstractFilesystemStorage
             throw new InvalidArgumentException("Argument \$options is missing 'pattern'");
         }
 
-        $this->initDataFormatter(isset($options['formatter']) ? $options['formatter'] : []);
+        $this->initDataFormatter($options['formatter'] ?? []);
 
-        $extension = $this->dataFormatter->getFileExtension();
+        $extension = $this->dataFormatter->getDefaultFileExtension();
         $pattern = !empty($options['pattern']) ? $options['pattern'] : $this->dataPattern;
 
         $this->dataPattern = \dirname($pattern) . '/' . basename($pattern, $extension) . $extension;
@@ -46,7 +48,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function getExistingKeys()
+    public function getExistingKeys() : array
     {
         return $this->findAllKeys();
     }
@@ -54,7 +56,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function hasKey($key)
+    public function hasKey(string $key) : bool
     {
         return $key && file_exists($this->getPathFromKey($key));
     }
@@ -62,7 +64,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function createRows(array $rows)
+    public function createRows(array $rows) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -79,7 +81,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function readRows(array $rows, &$fetched = null)
+    public function readRows(array $rows, array &$fetched = null) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -103,7 +105,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function updateRows(array $rows)
+    public function updateRows(array $rows) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -118,7 +120,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function deleteRows(array $rows)
+    public function deleteRows(array $rows) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -139,7 +141,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function replaceRows(array $rows)
+    public function replaceRows(array $rows) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -154,23 +156,23 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function renameRow($src, $dst)
+    public function renameRow(string $src, string $dst) : bool
     {
         if ($this->hasKey($dst)) {
             throw new \RuntimeException("Cannot rename object: key '{$dst}' is already taken");
         }
 
         if (!$this->hasKey($src)) {
-            return;
+            return false;
         }
 
-        $this->moveFolder($this->getMediaPath($src), $this->getMediaPath($dst));
+        return $this->moveFolder($this->getMediaPath($src), $this->getMediaPath($dst));
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getStoragePath($key = null)
+    public function getStoragePath(string $key = null) : string
     {
         if (null === $key) {
             $path = $this->dataFolder;
@@ -184,7 +186,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function getMediaPath($key = null)
+    public function getMediaPath(string $key = null) : string
     {
         return null !== $key ? dirname($this->getStoragePath($key)) : $this->getStoragePath();
     }
@@ -195,7 +197,7 @@ class FolderStorage extends AbstractFilesystemStorage
      * @param string $key
      * @return string
      */
-    public function getPathFromKey($key)
+    public function getPathFromKey(string $key) : string
     {
         return sprintf($this->dataPattern, $this->dataFolder, $key);
     }
@@ -204,7 +206,7 @@ class FolderStorage extends AbstractFilesystemStorage
      * @param File $file
      * @return array|null
      */
-    protected function loadFile(File $file)
+    protected function loadFile(File $file) : ?array
     {
         return $file->exists() ? (array)$file->content() : null;
     }
@@ -214,7 +216,7 @@ class FolderStorage extends AbstractFilesystemStorage
      * @param array $data
      * @return array
      */
-    protected function saveFile(File $file, array $data)
+    protected function saveFile(File $file, array $data) : array
     {
         $file->save($data);
 
@@ -233,12 +235,24 @@ class FolderStorage extends AbstractFilesystemStorage
         return $data;
     }
 
-    protected function moveFolder($src, $dst)
+    /**
+     * @param string $src
+     * @param string $dst
+     * @return bool
+     */
+    protected function moveFolder(string $src, string $dst) : bool
     {
         Folder::move($this->resolvePath($src), $this->resolvePath($dst));
+
+        return true;
     }
 
-    protected function deleteFolder($path, $include_target = false)
+    /**
+     * @param string $path
+     * @param bool $include_target
+     * @return bool
+     */
+    protected function deleteFolder(string $path, bool $include_target = false) : bool
     {
         return Folder::delete($this->resolvePath($path), $include_target);
     }
@@ -249,16 +263,17 @@ class FolderStorage extends AbstractFilesystemStorage
      * @param  string $path
      * @return string
      */
-    protected function getKeyFromPath($path)
+    protected function getKeyFromPath(string $path) : string
     {
         return basename($path);
     }
+
     /**
      * Returns list of all stored keys in [key => timestamp] pairs.
      *
      * @return array
      */
-    protected function findAllKeys()
+    protected function findAllKeys() : array
     {
         $flags = \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
         $iterator = new \FilesystemIterator($this->getStoragePath(), $flags);
@@ -280,7 +295,7 @@ class FolderStorage extends AbstractFilesystemStorage
     /**
      * @return string
      */
-    protected function getNewKey()
+    protected function getNewKey() : string
     {
         // Make sure that the file doesn't exist.
         do {

@@ -42,7 +42,7 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
 
     /**
      * @param array $elements
-     * @param FlexDirectory $type
+     * @param FlexDirectory|null $flexDirectory
      * @throws \InvalidArgumentException
      */
     public function __construct(array $elements = [], FlexDirectory $flexDirectory = null)

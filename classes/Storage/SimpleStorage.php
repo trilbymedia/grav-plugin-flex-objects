@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace Grav\Plugin\FlexObjects\Storage;
 
 use Grav\Common\Filesystem\Folder;
-use Grav\Framework\File\Formatter\FormatterInterface;
 use InvalidArgumentException;
 
 /**
@@ -15,8 +16,6 @@ class SimpleStorage extends AbstractFilesystemStorage
     protected $dataFolder;
     /** @var string */
     protected $dataPattern;
-    /** @var FormatterInterface */
-    protected $dataFormatter;
     /** @var array */
     protected $data;
 
@@ -29,14 +28,14 @@ class SimpleStorage extends AbstractFilesystemStorage
             throw new InvalidArgumentException("Argument \$options is missing 'folder'");
         }
 
-        $formatter = isset($options['formatter']) ? $options['formatter'] : $this->detectDataFormatter($options['folder']);
+        $formatter = $options['formatter'] ?? $this->detectDataFormatter($options['folder']);
         $this->initDataFormatter($formatter);
 
-        $extension = $this->dataFormatter->getFileExtension();
+        $extension = $this->dataFormatter->getDefaultFileExtension();
         $pattern = basename($options['folder']);
 
         $this->dataPattern = basename($pattern, $extension) . $extension;
-        $this->dataFolder = dirname($options['folder']);
+        $this->dataFolder = \dirname($options['folder']);
 
         // Make sure that the data folder exists.
         if (!file_exists($this->dataFolder)) {
@@ -47,7 +46,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function getExistingKeys()
+    public function getExistingKeys() : array
     {
         return $this->findAllKeys();
     }
@@ -55,7 +54,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function hasKey($key)
+    public function hasKey(string $key) : bool
     {
         return isset($this->data[$key]);
     }
@@ -63,7 +62,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function createRows(array $rows)
+    public function createRows(array $rows) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -79,7 +78,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function readRows(array $rows, &$fetched = null)
+    public function readRows(array $rows, array &$fetched = null) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -101,7 +100,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function updateRows(array $rows)
+    public function updateRows(array $rows) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -118,7 +117,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function deleteRows(array $rows)
+    public function deleteRows(array $rows) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -136,7 +135,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function replaceRows(array $rows)
+    public function replaceRows(array $rows) : array
     {
         $list = [];
         foreach ($rows as $key => $row) {
@@ -151,14 +150,14 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function renameRow($src, $dst)
+    public function renameRow(string $src, string $dst) : bool
     {
         if ($this->hasKey($dst)) {
             throw new \RuntimeException("Cannot rename object: key '{$dst}' is already taken");
         }
 
         if (!$this->hasKey($src)) {
-            return;
+            return false;
         }
 
         // Change single key in the array without changing the order or value.
@@ -166,12 +165,14 @@ class SimpleStorage extends AbstractFilesystemStorage
         $keys[array_search($src, $keys, true)] = $dst;
 
         $this->data = array_combine($keys, $this->data);
+
+        return true;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getStoragePath($key = null)
+    public function getStoragePath(string $key = null) : string
     {
         return $this->dataFolder . '/' . $this->dataPattern;
     }
@@ -179,12 +180,12 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * {@inheritdoc}
      */
-    public function getMediaPath($key = null)
+    public function getMediaPath(string $key = null) : string
     {
-        return sprintf('%s/%s/%s', $this->dataFolder, basename($this->dataPattern, $this->dataFormatter->getFileExtension()), $key);
+        return sprintf('%s/%s/%s', $this->dataFolder, basename($this->dataPattern, $this->dataFormatter->getDefaultFileExtension()), $key);
     }
 
-    protected function save()
+    protected function save() : void
     {
         $file = $this->getFile($this->getStoragePath());
         $file->save($this->data);
@@ -197,16 +198,17 @@ class SimpleStorage extends AbstractFilesystemStorage
      * @param  string $path
      * @return string
      */
-    protected function getKeyFromPath($path)
+    protected function getKeyFromPath(string $path) : string
     {
         return basename($path);
     }
+
     /**
      * Returns list of all stored keys in [key => timestamp] pairs.
      *
      * @return array
      */
-    protected function findAllKeys()
+    protected function findAllKeys() : array
     {
         $file = $this->getFile($this->getStoragePath());
         $modified = $file->modified();
@@ -224,7 +226,7 @@ class SimpleStorage extends AbstractFilesystemStorage
     /**
      * @return string
      */
-    protected function getNewKey()
+    protected function getNewKey() : string
     {
         if (null === $this->data) {
             $this->findAllKeys();

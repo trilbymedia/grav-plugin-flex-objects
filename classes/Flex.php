@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Filesystem\Folder;
@@ -12,7 +14,7 @@ class Flex implements \Countable
     /** @var array|FlexDirectory[] */
     protected $types = [];
 
-    public function __construct(array $types = [], array $config)
+    public function __construct(array $types, array $config)
     {
         $defaults = ['enabled' => true] + $config['object'];
 
@@ -21,7 +23,10 @@ class Flex implements \Countable
         }
     }
 
-    public function getAll()
+    /**
+     * @return array
+     */
+    public function getAll() : array
     {
         $params = [
             'pattern' => '|\.yaml|',
@@ -44,7 +49,10 @@ class Flex implements \Countable
         return $directories;
     }
 
-    public function getDirectories()
+    /**
+     * @return array
+     */
+    public function getDirectories() : array
     {
         return $this->types;
     }
@@ -53,19 +61,19 @@ class Flex implements \Countable
      * @param string|null $type
      * @return FlexDirectory|null
      */
-    public function getDirectory($type = null)
+    public function getDirectory($type = null) : ?FlexDirectory
     {
         if (!$type) {
             return reset($this->types) ?: null;
         }
 
-        return isset($this->types[$type]) ? $this->types[$type] : null;
+        return $this->types[$type] ?? null;
     }
 
     /**
      * @return int
      */
-    public function count()
+    public function count() : int
     {
         return \count($this->types);
     }

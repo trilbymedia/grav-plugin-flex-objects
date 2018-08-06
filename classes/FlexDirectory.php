@@ -10,6 +10,7 @@ use Grav\Common\Utils;
 use Grav\Framework\Cache\Adapter\DoctrineCache;
 use Grav\Framework\Cache\Adapter\MemoryCache;
 use Grav\Framework\Cache\CacheInterface;
+use Grav\Framework\Collection\CollectionInterface;
 use Grav\Plugin\FlexObjects\Storage\SimpleStorage;
 use Grav\Plugin\FlexObjects\Storage\StorageInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -51,7 +52,7 @@ class FlexDirectory
      * @param string $blueprint_file
      * @param array $defaults
      */
-    public function __construct($type, $blueprint_file, $defaults = [])
+    public function __construct(string $type, string $blueprint_file, array $defaults = [])
     {
         $this->type = $type;
         $this->blueprint_file = $blueprint_file;
@@ -62,7 +63,7 @@ class FlexDirectory
     /**
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled() : bool
     {
         return $this->enabled;
     }
@@ -70,7 +71,7 @@ class FlexDirectory
     /**
      * @return string
      */
-    public function getType()
+    public function getType() : string
     {
         return $this->type;
     }
@@ -78,7 +79,7 @@ class FlexDirectory
     /**
      * @return string
      */
-    public function getTitle()
+    public function getTitle() : string
     {
         return $this->getBlueprint()->get('title', ucfirst($this->getType()));
     }
@@ -86,7 +87,7 @@ class FlexDirectory
     /**
      * @return string
      */
-    public function getDescription()
+    public function getDescription() : string
     {
         return $this->getBlueprint()->get('description', '');
     }
@@ -96,7 +97,7 @@ class FlexDirectory
      * @param mixed $default
      * @return mixed
      */
-    public function getConfig($name = null, $default = null)
+    public function getConfig(string $name = null, $default = null)
     {
         if (null === $this->config) {
             $this->config = new Config(array_merge_recursive($this->getBlueprint()->get('config'), $this->defaults));
@@ -108,7 +109,7 @@ class FlexDirectory
     /**
      * @return Blueprint
      */
-    public function getBlueprint()
+    public function getBlueprint() : Blueprint
     {
         if (null === $this->blueprint) {
             $this->blueprint = (new Blueprint($this->blueprint_file))->load();
@@ -128,16 +129,16 @@ class FlexDirectory
     /**
      * @return string
      */
-    public function getBlueprintFile()
+    public function getBlueprintFile() : string
     {
         return $this->blueprint_file;
     }
 
     /**
      * @param array|null $keys  Array of keys.
-     * @return FlexIndex
+     * @return FlexIndex|FlexCollection
      */
-    public function getCollection(array $keys = null)
+    public function getCollection(array $keys = null) : CollectionInterface
     {
         $index = clone $this->getIndex($keys);
 
@@ -155,7 +156,7 @@ class FlexDirectory
      * @param string $key
      * @return FlexObject|null
      */
-    public function getObject($key)
+    public function getObject($key) : ?FlexObject
     {
         return $this->getCollection()->get($key);
     }
@@ -166,7 +167,7 @@ class FlexDirectory
      * @param bool $isFullUpdate
      * @return FlexObject
      */
-    public function update(array $data, $key = null, $isFullUpdate = false)
+    public function update(array $data, string $key = null, bool $isFullUpdate = false) : FlexObject
     {
         $object = null !== $key ? $this->getIndex()->get($key) : null;
 
@@ -219,7 +220,7 @@ class FlexDirectory
      * @param string $key
      * @return FlexObject|null
      */
-    public function remove($key)
+    public function remove(string $key) : ?FlexObject
     {
         $object = null !== $key ? $this->getIndex()->get($key) : null;
         if (!$object) {
@@ -245,7 +246,7 @@ class FlexDirectory
      * @param string|null $namespace
      * @return CacheInterface
      */
-    public function getCache($namespace = null)
+    public function getCache(string $namespace = null) : CacheInterface
     {
         $namespace = $namespace ?: 'index';
 
@@ -281,7 +282,7 @@ class FlexDirectory
     /**
      * @return $this
      */
-    public function clearCache()
+    public function clearCache() : self
     {
         /** @var Debugger $debugger */
         $debugger = Grav::instance()['debugger'];
@@ -298,7 +299,7 @@ class FlexDirectory
      * @param string|null $key
      * @return string
      */
-    public function getStorageFolder($key = null)
+    public function getStorageFolder(string $key = null) : string
     {
         return $this->getStorage()->getStoragePath($key);
     }
@@ -307,7 +308,7 @@ class FlexDirectory
      * @param string|null $key
      * @return string
      */
-    public function getMediaFolder($key = null)
+    public function getMediaFolder(string $key = null) : string
     {
         return $this->getStorage()->getMediaPath($key);
     }
@@ -315,7 +316,7 @@ class FlexDirectory
     /**
      * @return StorageInterface
      */
-    public function getStorage()
+    public function getStorage() : StorageInterface
     {
         if (!$this->storage) {
             $this->storage = $this->createStorage();
@@ -326,10 +327,10 @@ class FlexDirectory
 
     /**
      * @param array|null $keys  Array of keys.
-     * @return FlexIndex
+     * @return FlexIndex|FlexCollection
      * @internal
      */
-    public function getIndex(array $keys = null)
+    public function getIndex(array $keys = null) : CollectionInterface
     {
         $index = clone $this->loadIndex();
 
@@ -346,7 +347,7 @@ class FlexDirectory
      * @param bool $validate
      * @return FlexObject
      */
-    public function createObject(array $data, $key, $validate = false)
+    public function createObject(array $data, string $key, bool $validate = false) : FlexObject
     {
         $className = $this->objectClassName ?: $this->getObjectClass();
 
@@ -357,7 +358,7 @@ class FlexDirectory
      * @param array $entries
      * @return FlexCollection
      */
-    public function createCollection(array $entries)
+    public function createCollection(array $entries) : FlexCollection
     {
         $className = $this->collectionClassName ?: $this->getCollectionClass();
 
@@ -367,7 +368,7 @@ class FlexDirectory
     /**
      * @return string
      */
-    public function getObjectClass()
+    public function getObjectClass() : string
     {
         if (!$this->objectClassName) {
             $this->objectClassName = $this->getConfig('data.object', 'Grav\\Plugin\\FlexObjects\\FlexObject');
@@ -379,7 +380,7 @@ class FlexDirectory
     /**
      * @return string
      */
-    public function getCollectionClass()
+    public function getCollectionClass() : string
     {
         if (!$this->collectionClassName) {
             $this->collectionClassName = $this->getConfig('data.collection', 'Grav\\Plugin\\FlexObjects\\FlexCollection');
@@ -391,7 +392,7 @@ class FlexDirectory
      * @param array $entries
      * @return FlexCollection
      */
-    public function loadCollection(array $entries)
+    public function loadCollection(array $entries) : FlexCollection
     {
         return $this->createCollection($this->loadObjects($entries));
     }
@@ -400,7 +401,7 @@ class FlexDirectory
      * @param array $entries
      * @return FlexObject[]
      */
-    public function loadObjects(array $entries)
+    public function loadObjects(array $entries) : array
     {
         /** @var Debugger $debugger */
         $debugger = Grav::instance()['debugger'];
@@ -462,7 +463,7 @@ class FlexDirectory
     /**
      * @return StorageInterface
      */
-    protected function createStorage()
+    protected function createStorage() : StorageInterface
     {
         $this->collection = $this->createCollection([]);
 
@@ -479,9 +480,9 @@ class FlexDirectory
     }
 
     /**
-     * @return FlexIndex
+     * @return FlexIndex|FlexCollection
      */
-    protected function loadIndex()
+    protected function loadIndex() : CollectionInterface
     {
         static $i = 0;
 

@@ -1,4 +1,22 @@
 {
+  "name": "grav-plugin-flex-objects",
+  "type": "grav-plugin",
+  "description": "Flex Objects plugin for Grav CMS",
+  "keywords": ["flex-objects"],
+  "homepage": "https://github.com/trilbymedia/grav-plugin-flex-objects",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Team Grav",
+      "email": "devs@getgrav.org",
+      "homepage": "http://getgrav.org",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.3",
+    "ext-json": "*"
+  },
   "autoload": {
     "psr-4": {
       "Grav\\Plugin\\FlexObjects\\": "classes/"

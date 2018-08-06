@@ -8,13 +8,13 @@ use Grav\Framework\Object\Interfaces\ObjectInterface;
 use Grav\Plugin\FlexObjects\Collections\ArrayIndex;
 use PSR\SimpleCache\InvalidArgumentException;
 
-class FlexIndex extends ArrayIndex // implements ObjectCollectionInterface
+class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
 {
     /** @var FlexDirectory */
     private $flexDirectory;
 
     /**
-     * Initializes a new IndexCollection.
+     * Initializes a new FlexIndex.
      *
      * @param array $entries
      * @param FlexDirectory $flexDirectory

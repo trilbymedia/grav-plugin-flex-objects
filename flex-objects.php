@@ -1,6 +1,7 @@
 <?php
 namespace Grav\Plugin;
 
+use Composer\Autoload\ClassLoader;
 use Grav\Common\Plugin;
 use Grav\Plugin\FlexObjects\Controllers\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
@@ -44,9 +45,9 @@ class FlexObjectsPlugin extends Plugin
     /**
      * [onPluginsInitialized:100000] Composer autoload.
      *
-     * @return \Composer\Autoload\ClassLoader
+     * @return ClassLoader
      */
-    public function autoload()
+    public function autoload() : ClassLoader
     {
         return require __DIR__ . '/vendor/autoload.php';
     }

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Grav\Plugin\FlexObjects\Storage;
 
 /**
@@ -7,14 +9,13 @@ namespace Grav\Plugin\FlexObjects\Storage;
  */
 class FileStorage extends FolderStorage
 {
-    /** @var array */
-    protected $dataPattern = '%1s/%2s';
-
     /**
      * {@inheritdoc}
      */
     public function __construct(array $options)
     {
+        $this->dataPattern = '%1s/%2s';
+
         if (!isset($options['formatter']) && isset($options['pattern'])) {
             $options['formatter'] = $this->detectDataFormatter($options['pattern']);
         }
@@ -25,23 +26,23 @@ class FileStorage extends FolderStorage
     /**
      * {@inheritdoc}
      */
-    public function getMediaPath($key = null)
+    public function getMediaPath(string $key = null) : string
     {
-        return $key ? dirname($this->getStoragePath($key)) . '/' . $key : $this->getStoragePath();
+        return $key ? \dirname($this->getStoragePath($key)) . '/' . $key : $this->getStoragePath();
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function getKeyFromPath($path)
+    protected function getKeyFromPath(string $path) : string
     {
-        return basename($path, $this->dataFormatter->getFileExtension());
+        return basename($path, $this->dataFormatter->getDefaultFileExtension());
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function findAllKeys()
+    protected function findAllKeys() : array
     {
         $flags = \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
         $iterator = new \FilesystemIterator($this->getStoragePath(), $flags);

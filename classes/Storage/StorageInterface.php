@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Grav\Plugin\FlexObjects\Storage;
 
 /**
@@ -18,7 +20,7 @@ interface StorageInterface
      *
      * @return  array
      */
-    public function getExistingKeys();
+    public function getExistingKeys() : array;
 
     /**
      * Check if storage has a row for the key.
@@ -26,7 +28,7 @@ interface StorageInterface
      * @param string $key
      * @return bool
      */
-    public function hasKey($key);
+    public function hasKey(string $key) : bool;
 
     /**
      * Create new rows. New keys will be assigned when the objects are created.
@@ -34,7 +36,7 @@ interface StorageInterface
      * @param  array  $rows  Array of rows.
      * @return array  Returns created rows. Note that existing rows will fail to save and have null value.
      */
-    public function createRows(array $rows);
+    public function createRows(array $rows) : array;
 
     /**
      * Read rows. If you pass object or array as value, that value will be used to save I/O.
@@ -43,7 +45,7 @@ interface StorageInterface
      * @param  array  $fetched  Optional variable for storing only fetched items.
      * @return array  Returns rows. Note that non-existing rows have null value.
      */
-    public function readRows(array $rows, &$fetched = null);
+    public function readRows(array $rows, array &$fetched = null) : array;
 
     /**
      * Update existing rows.
@@ -51,7 +53,7 @@ interface StorageInterface
      * @param  array  $rows  Array of [key => row] pairs.
      * @return array  Returns updated rows. Note that non-existing rows will fail to save and have null value.
      */
-    public function updateRows(array $rows);
+    public function updateRows(array $rows) : array;
 
     /**
      * Delete rows.
@@ -59,7 +61,7 @@ interface StorageInterface
      * @param  array  $rows  Array of [key => row] pairs.
      * @return array  Returns deleted rows. Note that non-existing rows have null value.
      */
-    public function deleteRows(array $rows);
+    public function deleteRows(array $rows) : array;
 
     /**
      * Replace rows regardless if they exist or not.
@@ -69,14 +71,14 @@ interface StorageInterface
      * @param  array $rows  Array of [key => row] pairs.
      * @return array  Returns both created and updated rows.
      */
-    public function replaceRows(array $rows);
+    public function replaceRows(array $rows) : array;
 
     /**
      * @param string $src
      * @param string $dst
      * @return bool
      */
-    public function renameRow($src, $dst);
+    public function renameRow(string $src, string $dst) : bool;
 
     /**
      * Get filesystem path for the collection or object storage.
@@ -84,7 +86,7 @@ interface StorageInterface
      * @param  string|null $key
      * @return string
      */
-    public function getStoragePath($key = null);
+    public function getStoragePath(string $key = null) : string;
 
     /**
      * Get filesystem path for the collection or object media.
@@ -92,5 +94,5 @@ interface StorageInterface
      * @param  string|null $key
      * @return string
      */
-    public function getMediaPath($key = null);
+    public function getMediaPath(string $key = null) : string;
 }
