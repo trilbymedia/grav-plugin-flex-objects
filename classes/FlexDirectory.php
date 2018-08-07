@@ -274,6 +274,9 @@ class FlexDirectory
 
                 $this->cache[$namespace] = new MemoryCache('flex-objects-' . $this->getType());
             }
+
+            // Disable cache key validation.
+            $this->cache[$namespace]->setValidation(false);
         }
 
         return $this->cache[$namespace];
