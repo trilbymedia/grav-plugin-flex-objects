@@ -119,7 +119,7 @@ class FlexDirectory
             }
             $this->blueprint->init();
             if (empty($this->blueprint->fields())) {
-                throw new RuntimeException(sprintf('Blueprint for %s is missing', $this->type));
+                throw new RuntimeException(sprintf('Flex: Blueprint for %s is missing', $this->type));
             }
         }
 
@@ -258,7 +258,7 @@ class FlexDirectory
                 $gravCache = $grav['cache'];
                 $config = $this->getConfig('cache.' . $namespace);
                 if (empty($config['enabled'])) {
-                    throw new \RuntimeException('Cache not enabled');
+                    throw new \RuntimeException(sprintf('Flex: %s %s cache not enabled', $this->type, $namespace));
                 }
                 $timeout = $config['timeout'] ?? 60;
 
@@ -286,7 +286,7 @@ class FlexDirectory
     {
         /** @var Debugger $debugger */
         $debugger = Grav::instance()['debugger'];
-        $debugger->addMessage('Flex: Clearing all cache', 'debug');
+        $debugger->addMessage(sprintf('Flex: Clearing all %s cache', $this->type), 'debug');
 
         $this->getCache('index')->clear();
         $this->getCache('object')->clear();
@@ -405,23 +405,25 @@ class FlexDirectory
     {
         /** @var Debugger $debugger */
         $debugger = Grav::instance()['debugger'];
-        $debugger->startTimer('flex-objects', sprintf('Initializing %d Flex Objects', \count($entries)));
+        $debugger->startTimer('flex-objects', sprintf('Flex: Initializing %d %s', \count($entries), $this->type));
 
         $storage = $this->getStorage();
         $cache = $this->getCache('object');
 
         // Get storage keys for the objects.
         $keys = [];
+        $rows = [];
         foreach ($entries as $key => $value) {
-            $keys[\is_array($value) ? $value[0] : $key] = $key;
+            $k = \is_array($value) ? $value[0] : $key;
+            $keys[$k] = $key;
+            $rows[$k] = null;
         }
 
         // Fetch rows from the cache.
         try {
-            $rows = $cache->getMultiple(array_keys($keys));
+            $rows = $cache->getMultiple(array_keys($rows));
         } catch (InvalidArgumentException $e) {
             $debugger->addException($e);
-            $rows = [];
         }
 
         // Read missing rows from the storage.
@@ -431,7 +433,7 @@ class FlexDirectory
         // Store updated rows to the cache.
         if ($updated) {
             try {
-                $debugger->addMessage('Flex: Caching objects ' . implode(', ', array_keys($updated)), 'debug');
+                $debugger->addMessage(sprintf('Flex: Caching %d %s: %s', \count($updated), $this->type, implode(', ', array_keys($updated))), 'debug');
                 $cache->setMultiple($updated);
             } catch (InvalidArgumentException $e) {
                 $debugger->addException($e);
@@ -444,6 +446,7 @@ class FlexDirectory
         $list = [];
         foreach ($rows as $storageKey => $row) {
             if ($row === null) {
+                $debugger->addMessage(sprintf('Flex: Object %s was not found from %s storage', $storageKey, $this->type), 'debug');
                 continue;
             }
             $row += [
@@ -473,8 +476,8 @@ class FlexDirectory
             $storage = ['options' => ['folder' => $storage]];
         }
 
-        $className = isset($storage['class']) ? $storage['class'] : SimpleStorage::class;
-        $options = isset($storage['options']) ? $storage['options'] : [];
+        $className = $storage['class'] ?? SimpleStorage::class;
+        $options = $storage['options'] ?? [];
 
         return new $className($options);
     }
@@ -490,7 +493,7 @@ class FlexDirectory
             $i++; $j = $i;
             /** @var Debugger $debugger */
             $debugger = Grav::instance()['debugger'];
-            $debugger->startTimer('flex-keys-' . $this->type . $j, "Loading Flex Index {$this->type}");
+            $debugger->startTimer('flex-keys-' . $this->type . $j, "Flex: Loading {$this->type} index");
 
             $storage = $this->getStorage();
             $cache = $this->getCache('index');
@@ -503,10 +506,10 @@ class FlexDirectory
             }
 
             if (null === $keys) {
-                $debugger->addMessage("Flex: Caching index {$this->type}", 'debug');
                 /** @var FlexObject $className */
                 $className = $this->getObjectClass();
                 $keys = $className::createIndex($storage->getExistingKeys());
+                $debugger->addMessage(sprintf('Flex: Caching %s index of %d objects', $this->type, \count($keys)), 'debug');
                 try {
                     $cache->set('__keys', $keys);
                 } catch (InvalidArgumentException $e) {

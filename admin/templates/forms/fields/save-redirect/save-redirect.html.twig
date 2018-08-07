@@ -2,7 +2,7 @@
 
 {% set originalValue = value %}
 {% set value = (value is null ? field.default : value) %}
-{% set isNew = uri.param('id') ? false : true %}
+{% set isNew = key ? false : true %}
 {% set savedOption = grav.session.post_entries_save|default('create-new') %}
 
 {% if isNew %}

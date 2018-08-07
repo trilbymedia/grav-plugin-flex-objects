@@ -1,6 +1,6 @@
-{% set entry_url =  base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '/id' ~ separator %}
+{% set entry_url =  base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '/' %}
 {% set fields = directory.config('admin.list.fields') %}
-{% set fields_count = count(fields) %}
+{% set fields_count = fields ? count(fields) : 0 %}
 {% set fields_width = 8 %}
 {% set fields_set = 0 %}
 {% set title_field = directory.config('admin.list.title') %}
@@ -40,7 +40,7 @@
         <thead>
         <tr>
             {% for key,options in fields %}
-            <th>{{ schema.get(key).label|tu }}</th>
+            <th>{{ (options.field.label ?? schema.get(options.alias ?? key).label)|tu }}</th>
             {% endfor %}
             <th>Actions</th>
         </tr>
@@ -49,7 +49,7 @@
         {% for id,entry in collection %}
             <tr>
                 {% for key,options in fields %}
-                    {% set field = schema.get(key) %}
+                    {% set field = options.field ?? schema.get(options.alias ?? key) %}
                     <td>
                         {% if options.link == 'edit' %}
                             <a href="{{ entry_url ~ id }}">{{ entry.value(key) }}</a>
@@ -116,7 +116,7 @@
                 widgets: ['zebra', 'filter', 'pager'],
                 headers: {
                     {% for key,options in fields %}
-                    {% set field = schema.get(key) %}
+                    {% set field = options.field ?? schema.get(options.alias ?? key) %}
                     {% if field.type not in ['toggle', 'text', 'textarea', 'url', 'selectize', 'email'] %}
                     {{ loop.index - 1 }}: { sorter: false, filter: false },
                     {% else %}

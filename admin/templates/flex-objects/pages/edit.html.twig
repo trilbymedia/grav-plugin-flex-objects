@@ -1,7 +1,7 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
-{% set id = uri.param('id') %}
+{% set id = key %}
 {% set flex = grav.flex_objects %}
 {% set directory = flex.directory(target) %}
 {% set entry = directory.collection[id] %}

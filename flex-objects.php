@@ -158,6 +158,7 @@ class FlexObjectsPlugin extends Plugin
             $this->grav['twig']->twig_vars['action'] = $this->controller->getAction();
             $this->grav['twig']->twig_vars['task'] = $this->controller->getTask();
             $this->grav['twig']->twig_vars['target'] = $this->controller->getTarget();
+            $this->grav['twig']->twig_vars['key'] = $this->controller->getId();
 
             // CSS / JS Assets
             $this->grav['assets']->addCss('plugin://flex-objects/css/admin.css');

@@ -18,7 +18,7 @@ class AdminController extends SimpleController
     public function taskDelete()
     {
         $type = $this->target;
-        $id = Grav::instance()['uri']->param('id');
+        $id = $this->id;
 
         $directory = $this->getDirectory($type);
         $object = $directory->remove($id);
@@ -37,7 +37,7 @@ class AdminController extends SimpleController
     public function taskSave()
     {
         $type = $this->target;
-        $id = Grav::instance()['uri']->param('id') ?: null;
+        $id = $this->id;
 
         $directory = $this->getDirectory($type);
 
@@ -48,7 +48,7 @@ class AdminController extends SimpleController
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect && !$id) {
-                $edit_page = $this->location . '/' . $this->target . '/id:' . $object->getKey();
+                $edit_page = $this->location . '/' . $this->target . '/' . ltrim($object->getKey(), '/');
                 $this->setRedirect($edit_page);
             }
 
@@ -73,9 +73,9 @@ class AdminController extends SimpleController
                 break;
             case 'edit':
             default:
-                $id = Grav::instance()['uri']->param('id');
+                $id = $this->id;
                 if ($id) {
-                    $this->setRedirect($this->location . '/' . $this->target . '/id:' . $id);
+                    $this->setRedirect($this->location . '/' . $this->target . '/' . ltrim($id, '/'));
                 }
                 $saved_option = 'edit';
                 break;

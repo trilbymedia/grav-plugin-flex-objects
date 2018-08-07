@@ -33,12 +33,12 @@ abstract class SimpleController extends AdminBaseController
 
         $uri = $this->grav['uri'];
 
-        $post = !empty($_POST) ? $_POST : [];
+        $post = $_POST ?? [];
         if (isset($post['data'])) {
             $this->data = $this->getPost($post['data']);
             unset($post['data']);
         }
-        $this->post  = $this->getPost($post);
+        $this->post = $this->getPost($post);
 
         // Ensure the controller should be running
         if (Utils::isAdminPlugin()) {
@@ -48,16 +48,21 @@ abstract class SimpleController extends AdminBaseController
             if ($location !== $plugin->name)  {
                 return;
             }
+
+            $array = explode('/', $target, 2);
+            $target = array_shift($array) ?: null;
+            $id = array_shift($array) ?: null;
+
             $this->location = $location;
-            $this->action = !empty($this->post['action']) ? $this->post['action'] : $uri->param('action');
-            $this->id = !empty($this->post['id']) ? $this->post['id'] : $uri->param('id');
+            $this->action = $this->post['action'] ?? $uri->param('action');
+            $this->id = $this->post['id'] ?? $id;
             $this->target = $target;
             $this->active = true;
             $this->admin = Grav::instance()['admin'];
         }
 
-        $task = !empty($post['task']) ? $post['task'] : $uri->param('task');
-        if ($task && ($this->location === $plugin->name)) {
+        $task = $post['task'] ?? $uri->param('task');
+        if ($task && $this->location === $plugin->name) {
             $this->task = $task;
             $this->active = true;
         }
@@ -102,13 +107,13 @@ abstract class SimpleController extends AdminBaseController
         }
 
         try {
-            $success = call_user_func_array([$this, $method], $params);
+            $success = $this->{$method}(...$params);
         } catch (\RuntimeException $e) {
             $this->setMessage($e->getMessage(), 'error');
         }
 
         // Grab redirect parameter.
-        $redirect = isset($this->post['_redirect']) ? $this->post['_redirect'] : null;
+        $redirect = $this->post['_redirect'] ?? null;
         unset($this->post['_redirect']);
 
         // Redirect if requested.
@@ -151,7 +156,7 @@ abstract class SimpleController extends AdminBaseController
 
     protected function handlePostProcesses()
     {
-        if (is_array($this->data)) {
+        if (\is_array($this->data)) {
             foreach ($this->data as $key => $value) {
                 if (Utils::startsWith($key, '_')) {
                     $method = 'process' . $this->grav['inflector']->camelize($key);
@@ -219,5 +224,15 @@ abstract class SimpleController extends AdminBaseController
     public function getTarget()
     {
         return $this->target;
+    }
+
+    public function setId($target)
+    {
+        $this->id = $target;
+    }
+
+    public function getId()
+    {
+        return $this->id;
     }
 }
