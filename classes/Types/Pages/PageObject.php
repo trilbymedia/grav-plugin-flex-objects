@@ -10,53 +10,21 @@ use Grav\Common\Media\Traits\MediaTrait;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
 use Grav\Plugin\FlexObjects\FlexObject;
-
-class_exists('Grav\\Common\\Page\\Page', true);
+use Grav\Plugin\FlexObjects\Types\Pages\Interfaces\PageContentInterface;
+use Grav\Plugin\FlexObjects\Types\Pages\Traits\PageContentTrait;
 
 /**
  * Class BuildObject
  * @package Grav\Plugin\RevKit\Repositories\Builds
  */
-class PageObject extends FlexObject implements PageInterface, MediaInterface
+class PageObject extends FlexObject implements PageContentInterface, MediaInterface
 {
+    use PageContentTrait;
     use MediaTrait;
 
-    static protected $headerProperties = [
-        'slug'              => 'trim',          // Page doesn't do trim.
-        'routes'            => 'array',
-        'title'             => 'trim',
-        'summary'           => 'array',         // Oops, not in Page.
-        'language'          => 'trim',
-        'template'          => 'trim',
-        'menu'              => 'trim',
-        'routable'          => 'bool',
-        'visible'           => 'bool',
-        'redirect'          => 'trim',
-        'external_url'      => 'trim',
-        'order_dir'         => 'trim',
-        'order_by'          => 'trim',
-        'order_manual'      => 'array',
-        'dateformat'        => 'dateformat()',
-        'date'              => 'date()',
-        'markdown'          => 'array',         // Oops, not in Page.
-        'markdown_extra'    => 'bool',
-        'taxonomy'          => 'array[array]',
-        'max_count'         => 'int',
-        'process'           => 'array[bool]',
-        'published'         => 'bool',
-        'publish_date'      => 'string',
-        'unpublish_date'    => 'string',
-        'expires'           => 'int',
-        'cache_control'     => 'raw',
-        'etag'              => 'bool',
-        'last_modified'     => 'bool',
-        'ssl'               => 'bool',
-        'template_format'   => 'raw',
-        'debugger'          => 'bool'
-    ];
-
-    protected $summary;
-    protected $content;
+    const ORDER_PREFIX_REGEX = PAGE_ORDER_PREFIX_REGEX;
+    const ORDER_LIST_REGEX = '/(\/\d+)\.[^\/]+/u';
+    const PAGE_ROUTE_REGEX = '/\/\d+\./u';
 
     /**
      * @return array
@@ -64,29 +32,39 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
     public static function getCachedMethods()
     {
         return [
-            'title' => true,
-            'menu' => true,
-            'folder' => true,
-            'folderExists' => true,
-            'slug' => true,
-            'order' => true,
+            // Page Content Interface
+            'header' => false,
             'summary' => true,
             'content' => true,
+            'value' => false,
+            'media' => false,
+            'title' => true,
+            'menu' => true,
             'visible' => true,
             'published' => true,
             'publishDate' => true,
             'unpublishDate' => true,
             'process' => true,
+            'slug' => true,
+            'order' => true,
             'id' => true,
             'modified' => true,
             'lastModified' => true,
+            'folder' => true,
             'date' => true,
             'dateformat' => true,
             'taxonomy' => true,
             'shouldProcess' => true,
             'isPage' => true,
-            'isDir' => true
+            'isDir' => true,
 
+            // Page
+            'isPublished' => true,
+            'isVisible' => true,
+
+            'path' => true,
+            'folderExists' => true,
+            'full_order' => true
         ] + parent::getCachedMethods();
     }
 
@@ -98,9 +76,26 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
     {
         $list = [];
         foreach ($index as $key => $timestamp) {
-            $slug = static::adjustRouteCase(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $key));
+            if ($key === '') {
+                continue;
+            }
+            if (!\is_array($timestamp)) {
+                // General Storage.
+                $slug = static::adjustRouteCase(preg_replace(static::ORDER_PREFIX_REGEX, '', $key));
 
-            $list[$slug] = [$key, $timestamp];
+                $list[$slug] = [$key, $timestamp];
+            } else {
+                // Page Storage.
+                if (!empty($timestamp[2])) {
+                    $first = reset($timestamp[2]) ?: [];
+
+                    $timestamp[0] = ltrim($timestamp[0] . '/' .  reset($first), '/');
+                } else {
+                    // TODO: Folders do not show up yet in the list.
+                    $timestamp[0] = ltrim($timestamp[0] . '/folder.md', '/');
+                }
+                $list[$key] = $timestamp;
+            }
         }
 
         return $list;
@@ -111,82 +106,39 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
      */
     public function isPublished()
     {
-        return (bool)$this->getNestedProperty('header.published', true) === true;
-    }
-
-    // Page Interface.
-
-    public function header($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('header', $var);
-        }
-
-        return (object)$this->getProperty('header', []);
+        return $this->published();
     }
 
     /**
-     * Get value from a page variable (used mostly for creating edit forms).
-     *
-     * @param string $name Variable name.
-     * @param mixed $default
-     *
-     * @return mixed
+     * @return bool
+     */
+    public function isVisible()
+    {
+        return $this->isPublished() && $this->visible();
+    }
+
+    /**
+     * @inheritdoc PageInterface
      */
     public function value($name, $default = null)
     {
-        if ($name === 'content') {
-            return $this->getElement('markdown');
-        }
-        if ($name === 'order') {
-            $order = $this->order();
+        $test = new \stdClass();
 
-            return $order ? (int)$this->order() : '';
+        $value = $this->pageContentValue($name, $test);
+        if ($value !== $test) {
+            return $value;
         }
-        if ($name === 'ordering') {
-            return (bool)$this->order();
-        }
-        if ($name === 'folder') {
-            return preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder());
-        }
-        if ($name === 'slug') {
-            return $this->slug();
-        }
-        if ($name === 'media') {
-            return $this->media()->all();
-        }
-        if ($name === 'media.file') {
-            return $this->media()->files();
-        }
-        if ($name === 'media.video') {
-            return $this->media()->videos();
-        }
-        if ($name === 'media.image') {
-            return $this->media()->images();
-        }
-        if ($name === 'media.audio') {
-            return $this->media()->audios();
+
+        switch ($name) {
+            case 'name':
+                return basename($this->getStorageKey());
+            case 'route':
+                return '/' . $this->getKey();
+            case 'full_order':
+                return $this->full_order();
         }
 
         return parent::value($name, $default);
-    }
-
-    public function title($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('title', $var);
-        }
-
-        return $this->getProperty('title') ?: ucfirst($this->slug());
-    }
-
-    public function menu($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('menu', $var);
-        }
-
-        return $this->getProperty('menu') ?: $this->title();
     }
 
     public function folder($var = null)
@@ -195,170 +147,38 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
             throw new \RuntimeException('Not Implemented');
         }
 
-        return $this->getStorageKey();
+        $parts = explode('/', '/' . $this->getStorageKey());
+        // TODO: Not quite as there is a case without file.
+        array_pop($parts);
+
+        return end($parts);
+    }
+
+    public function path($var = null)
+    {
+        if (null !== $var) {
+            throw new \RuntimeException('Not Implemented');
+        }
+
+        $parts = explode('/', '/' . $this->getStorageKey());
+        // TODO: Not quite as there is a case without file.
+        array_pop($parts);
+        array_pop($parts);
+
+        return '/' . implode('/', $parts);
     }
 
     public function folderExists()
     {
+        // TODO: also check folder
         return $this->exists();
     }
 
-    public function slug($var = null)
+    public function full_order()
     {
-        if (null !== $var) {
-            $this->setProperty('slug', $var);
-        }
+        $path = $this->path();
 
-        return $this->getProperty('slug') ?: static::adjustRouteCase(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder()));
-    }
-
-    public function order($var = null)
-    {
-        if (null !== $var) {
-            throw new \RuntimeException('Not Implemented');
-        }
-
-        preg_match(PAGE_ORDER_PREFIX_REGEX, $this->folder(), $order);
-
-        return $order[0] ?? false;
-    }
-
-    public function summary($size = null, $textOnly = false)
-    {
-        return $this->processSummary($size, $textOnly);
-    }
-
-    public function content($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('content', $var);
-        }
-
-        return $this->getProperty('content');
-    }
-
-    public function visible($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('visible', $var);
-        }
-
-        return $this->published() && $this->getProperty('visible') ?? preg_match(PAGE_ORDER_PREFIX_REGEX, $this->folder());
-    }
-
-    public function published($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('published', $var);
-        }
-
-        return (bool)$this->getProperty('published', true);
-    }
-
-    public function publishDate($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('publish_date', $var);
-        }
-
-        return Utils::date2timestamp($this->getProperty('publish_date'), $this->getProperty('dateformat'));
-    }
-
-    public function unpublishDate($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('unpublish_date', $var);
-        }
-
-        return Utils::date2timestamp($this->getProperty('unpublish_date'), $this->getProperty('dateformat'));
-    }
-
-    public function process($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('process', $var);
-        }
-
-        return (array)($this->getProperty('process') ?? Grav::instance()['config']->get('system.pages.process'));
-    }
-
-    public function media($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('media', $var);
-        }
-
-        return $this->getProperty('media');
-    }
-
-    public function id($var = null)
-    {
-        if (null !== $var) {
-            throw new \RuntimeException('Not Implemented');
-        }
-
-        return $this->modified() . md5( 'flex-' . $this->getType() . '-' . $this->getKey());
-    }
-
-    public function modified($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('modified', $var);
-        }
-
-        // TODO: Initialize in the blueprints.
-        return $this->getProperty('modified');
-    }
-
-    public function lastModified($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('last_modified', $var);
-        }
-
-        return (bool)($this->getProperty('last_modified') ?? Grav::instance()['config']->get('system.pages.last_modified'));
-    }
-
-    public function date($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('date', $var);
-        }
-
-        return Utils::date2timestamp($this->getProperty('date'), $this->getProperty('dateformat')) ?: $this->modified();
-    }
-
-    public function dateformat($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('dateformat', $var);
-        }
-
-        return $this->getProperty('dateformat');
-    }
-
-    public function taxonomy($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('taxonomy', $var);
-        }
-
-        return $this->getProperty('taxonomy', []);
-    }
-
-    public function shouldProcess($process)
-    {
-        return (bool)$this->getNestedProperty("process.{$process}", false);
-    }
-
-    public function isPage()
-    {
-        return true;
-    }
-
-    public function isDir()
-    {
-        return false;
+        return preg_replace(static::ORDER_LIST_REGEX, '\\1', $path . '/' . $this->folder());
     }
 
     /**
@@ -390,6 +210,8 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
     {
         if (isset(static::$headerProperties[$property])) {
             $property = "header.{$property}";
+
+            return $this->hasNestedProperty($property);
         }
 
         return parent::hasProperty($property);
@@ -406,6 +228,8 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
     {
         if (isset(static::$headerProperties[$property])) {
             $property = "header.{$property}";
+
+            return $this->getNestedProperty($property, $default);
         }
 
         return parent::getProperty($property, $default);
@@ -422,6 +246,8 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
     {
         if (isset(static::$headerProperties[$property])) {
             $property = "header.{$property}";
+
+            return $this->setNestedProperty($property, $value);
         }
 
         return parent::setProperty($property, $value);
@@ -434,6 +260,8 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
     {
         if (isset(static::$headerProperties[$property])) {
             $property = "header.{$property}";
+
+            $this->unsetNestedProperty($property);
         }
 
         parent::unsetProperty($property);
@@ -604,8 +432,9 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
     /**
      * @param string $route
      * @return string
+     * @internal
      */
-    static protected function adjustRouteCase($route)
+    static public function adjustRouteCase($route)
     {
         $case_insensitive = Grav::instance()['config']->get('system.force_lowercase_urls');
 
@@ -657,6 +486,7 @@ class PageObject extends FlexObject implements PageInterface, MediaInterface
 
         if ($folder) {
             $order = !empty($elements['order']) ? (int)$elements['order'] : null;
+            // TODO: broken
             $elements['storage_key'] = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
         }
 

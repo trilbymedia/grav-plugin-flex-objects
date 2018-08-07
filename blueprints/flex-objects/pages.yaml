@@ -6,14 +6,23 @@ config:
   admin:
     list:
       fields:
-        header.published:
+        published:
           width: 8
-        order:
+          alias: header.published
+        visible:
           width: 8
-        folder:
+          field:
+            label: Visible
+            type: toggle
+        menu:
           link: edit
-        header.title:
+          alias: header.menu
+        route:
+          field:
+            label: Route
+            type: text
           link: edit
+
 
   site:
     filter:
@@ -23,14 +32,13 @@ config:
     object: 'Grav\Plugin\FlexObjects\Types\Pages\PageObject'
     collection: 'Grav\Plugin\FlexObjects\Types\Pages\PageCollection'
     storage:
-      class: 'Grav\Plugin\FlexObjects\Storage\FolderStorage'
+      class: 'Grav\Plugin\FlexObjects\Types\Pages\PageStorage'
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\MarkdownFormatter'
-        folder: 'user://data/pages'
-        pattern: '%s/%s/page.md'
+        folder: 'user://pages'
     ordering:
-      storage_key: ASC
+      full_order: ASC
 
 form:
   validation: loose

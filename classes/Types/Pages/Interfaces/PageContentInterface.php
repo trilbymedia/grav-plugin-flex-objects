@@ -1,12 +1,12 @@
 <?php
-namespace Grav\Plugin\FlexObjects\Types\Pages;
+namespace Grav\Plugin\FlexObjects\Types\Pages\Interfaces;
 
 use Grav\Common\Page\Media;
 
 /**
  * Methods currently implemented in Flex Page emulation layer.
  */
-interface PageInterface
+interface PageContentInterface
 {
     /**
      * Gets and Sets the header based on the YAML configuration at the top of the .md file
@@ -36,6 +36,29 @@ interface PageInterface
      * @return string      Content
      */
     public function content($var = null);
+
+    /**
+     * Needed by the onPageContentProcessed event to get the raw page content
+     *
+     * @return string   the current page content
+     */
+    public function getRawContent();
+
+    /**
+     * Needed by the onPageContentProcessed event to set the raw page content
+     *
+     * @param $content
+     */
+    public function setRawContent($content);
+
+    /**
+     * Gets and Sets the Page raw content
+     *
+     * @param null $var
+     *
+     * @return null
+     */
+    public function rawMarkdown($var = null);
 
     /**
      * Get value from a page variable (used mostly for creating edit forms).

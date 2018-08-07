@@ -9,7 +9,6 @@ use Grav\Plugin\FlexObjects\FlexCollection;
  */
 class PageCollection extends FlexCollection
 {
-
     /**
      * @return FlexCollection|PageCollection
      */

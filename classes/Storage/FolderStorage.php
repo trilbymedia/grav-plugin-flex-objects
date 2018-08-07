@@ -15,7 +15,7 @@ class FolderStorage extends AbstractFilesystemStorage
 {
     /** @var string */
     protected $dataFolder;
-    /** @var array */
+    /** @var string */
     protected $dataPattern = '%1s/%2s/item';
 
     /**
@@ -26,17 +26,9 @@ class FolderStorage extends AbstractFilesystemStorage
         if (!isset($options['folder'])) {
             throw new InvalidArgumentException("Argument \$options is missing 'folder'");
         }
-        if (!isset($options['pattern'])) {
-            throw new InvalidArgumentException("Argument \$options is missing 'pattern'");
-        }
 
         $this->initDataFormatter($options['formatter'] ?? []);
-
-        $extension = $this->dataFormatter->getDefaultFileExtension();
-        $pattern = !empty($options['pattern']) ? $options['pattern'] : $this->dataPattern;
-
-        $this->dataPattern = \dirname($pattern) . '/' . basename($pattern, $extension) . $extension;
-        $this->dataFolder = $options['folder'];
+        $this->initOptions($options);
 
         // Make sure that the data folder exists.
         $folder = $this->resolvePath($this->dataFolder);
@@ -303,5 +295,17 @@ class FolderStorage extends AbstractFilesystemStorage
         } while (file_exists($this->getPathFromKey($key)));
 
         return $key;
+    }
+
+    /**
+     * @param array $options
+     */
+    protected function initOptions(array $options) : void
+    {
+        $extension = $this->dataFormatter->getDefaultFileExtension();
+        $pattern = !empty($options['pattern']) ? $options['pattern'] : $this->dataPattern;
+
+        $this->dataPattern = \dirname($pattern) . '/' . basename($pattern, $extension) . $extension;
+        $this->dataFolder = $options['folder'];
     }
 }
