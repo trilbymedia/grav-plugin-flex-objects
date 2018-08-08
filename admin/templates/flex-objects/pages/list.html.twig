@@ -1,17 +1,14 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/list.html.twig' %}
 
-{% set flex = grav.flex_objects %}
-{% set directory = flex.directory(target) %}
 {% set collection = directory.collection %}
 
 {% block content_top %}
-    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>.{{ url(directory.storageFolder()) }}</b></div>
+    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(directory.storageFolder())|trim('/') }}</b></div>
 {% endblock %}
 
 {% block content %}
 <div id="directory">
-    {% set path = directory.config('admin.list.template')|default('flex-objects/types/' ~ target ~ '/list.html.twig') %}
-    {% include [path, 'flex-objects/types/default/list.html.twig'] %}
+    {% block list %}{% endblock %}
 </div>
 {% endblock %}

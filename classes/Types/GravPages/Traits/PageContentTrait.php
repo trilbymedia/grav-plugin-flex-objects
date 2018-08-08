@@ -1,5 +1,5 @@
 <?php
-namespace Grav\Plugin\FlexObjects\Types\Pages\Traits;
+namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
 use Grav\Common\Grav;
 use Grav\Common\Page\Media;
@@ -357,6 +357,8 @@ trait PageContentTrait
 
     abstract public function getProperty($property, $default = null);
     abstract public function setProperty($property, $value);
+    abstract public function getArrayProperty($property, $default = null);
+    abstract public function setArrayProperty($property, $value);
 
     /**
      * @param string $name

@@ -1,8 +1,8 @@
 {% block titlebar %}
     <div class="button-bar">
         <a class="button" href="{{ base_url ~ '/flex-objects/' ~ target }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
-        {% if uri.param('action') != 'add' %}
-            <a href="{{ url(uri.param('id'), true) }}" class="button" target="_blank"><i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}</a>
+        {% if entry.exits and entry.route %}
+            <a href="{{ url(entry.route, true) }}" class="button" target="_blank"><i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}</a>
         {% endif %}
         <button class="button" type="submit" name="task" value="save" form="blueprints"><i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}</button>
     </div>

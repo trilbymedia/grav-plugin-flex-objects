@@ -26,8 +26,8 @@ class FlexDirectory
     protected $type;
     /** @var string */
     protected $blueprint_file;
-    /** @var Blueprint */
-    protected $blueprint;
+    /** @var Blueprint[] */
+    protected $blueprints;
     /** @var FlexIndex */
     protected $index;
     /** @var FlexCollection */
@@ -55,6 +55,7 @@ class FlexDirectory
     public function __construct(string $type, string $blueprint_file, array $defaults = [])
     {
         $this->type = $type;
+        $this->blueprints = [];
         $this->blueprint_file = $blueprint_file;
         $this->defaults = $defaults;
         $this->enabled = !empty($defaults['enabled']);
@@ -107,23 +108,27 @@ class FlexDirectory
     }
 
     /**
+     * @param string $type
      * @return Blueprint
      */
-    public function getBlueprint() : Blueprint
+    public function getBlueprint(string $type = '') : Blueprint
     {
-        if (null === $this->blueprint) {
-            $this->blueprint = (new Blueprint($this->blueprint_file))->load();
-            if ($this->blueprint->get('type') === 'flex-objects') {
+        if (!isset($this->blueprints[$type])) {
+            $blueprint = new Blueprint($this->blueprint_file);
+            $blueprint->load($type ?: null);
+            if ($blueprint->get('type') === 'flex-objects') {
                 $blueprintBase = (new Blueprint('plugin://flex-objects/blueprints/flex-objects.yaml'))->load();
-                $this->blueprint->extend($blueprintBase, true);
+                $blueprint->extend($blueprintBase, true);
             }
-            $this->blueprint->init();
-            if (empty($this->blueprint->fields())) {
+            $blueprint->init();
+            if (empty($blueprint->fields())) {
                 throw new RuntimeException(sprintf('Flex: Blueprint for %s is missing', $this->type));
             }
+
+            $this->blueprints[$type] = $blueprint;
         }
 
-        return $this->blueprint;
+        return $this->blueprints[$type];
     }
 
     /**

@@ -1,15 +1,15 @@
-{% set entry_url = base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '/' %}
-{% set file_url_add = base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '.json/id' ~ separator ~ uri.param('id') %}
-{% set file_url_remove = base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '.json/id' ~ separator ~ uri.param('id') %}
+{% extends 'flex-objects/pages/edit.html.twig' %}
 
-{% include 'partials/blueprints.html.twig' with { context: entry, data: entry, blueprints: directory.blueprint } %}
+{% block edit %}
+    {% include 'partials/blueprints.html.twig' with { context: entry, data: entry, blueprints: blueprint } %}
 
-{% if id %}
-    <div class="button-bar danger">
-        <span class="danger-zone"></span>
-        <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
-    </div>
-    {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
-{% endif %}
+    {% if id %}
+        <div class="button-bar danger">
+            <span class="danger-zone"></span>
+            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
+        </div>
+        {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
+    {% endif %}
 
-{% include 'partials/modal-changes-detected.html.twig' %}
+    {% include 'partials/modal-changes-detected.html.twig' %}
+{% endblock %}

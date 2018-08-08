@@ -1,3 +1,5 @@
+{% extends 'flex-objects/pages/list.html.twig' %}
+
 {% set entry_url =  base_url_relative ~ '/' ~ location ~ '/' ~ target ~ '/' %}
 {% set fields = directory.config('admin.list.fields') %}
 {% set fields_count = fields ? count(fields) : 0 %}
@@ -13,8 +15,10 @@
 {% endfor %}
 {% set schema = directory.blueprint.schema %}
 
+{% block list %}
+
 {% if not fields %}
-    <div class="no-entries">
+<div class="no-entries">
     <p>Blueprint for '{{ target }}' does not define displayed fields or list page override.</p>
     <ul>
         <li>
@@ -144,3 +148,5 @@
 {% endif %}
 
 {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
+
+{% endblock %}

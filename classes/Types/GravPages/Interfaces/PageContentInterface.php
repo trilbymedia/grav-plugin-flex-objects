@@ -1,5 +1,5 @@
 <?php
-namespace Grav\Plugin\FlexObjects\Types\Pages\Interfaces;
+namespace Grav\Plugin\FlexObjects\Types\GravPages\Interfaces;
 
 use Grav\Common\Page\Media;
 

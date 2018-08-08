@@ -1,0 +1,47 @@
+title: Grav Pages
+description: Manage your Grav Pages in Flex.
+type: flex-objects
+
+extends@: blueprints://pages/default.yaml
+
+config:
+  admin:
+    list:
+      fields:
+        published:
+          width: 8
+          alias: header.published
+        visible:
+          width: 8
+          field:
+            label: Visible
+            type: toggle
+        menu:
+          link: edit
+          alias: header.menu
+        route:
+          field:
+            label: Route
+            type: text
+          link: edit
+        name:
+          field:
+            label: Type
+            type: text
+
+
+  site:
+    filter:
+      - withPublished
+
+  data:
+    object: 'Grav\Plugin\FlexObjects\Types\GravPages\GravPageObject'
+    collection: 'Grav\Plugin\FlexObjects\Types\GravPages\GravPageCollection'
+    storage:
+      class: 'Grav\Plugin\FlexObjects\Types\GravPages\GravPageStorage'
+      options:
+        formatter:
+          class: 'Grav\Framework\File\Formatter\MarkdownFormatter'
+        folder: 'page://'
+    ordering:
+      full_order: ASC

@@ -1,5 +1,8 @@
 {% set template = (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: 'types' %}
-{% extends 'flex-objects/pages/' ~ template ~ '.html.twig' %}
 
+{% extends target ? ['flex-objects/types/' ~ target ~ '/' ~ template ~ '.html.twig', 'flex-objects/types/default/' ~ template ~ '.html.twig']: 'flex-objects/pages/' ~ template ~ '.html.twig' %}
+
+{% set flex = grav.flex_objects %}
+{% set directory = flex.directory(target) %}
 {% set base_route = location %}
 {% set separator = config.system.param_sep %}

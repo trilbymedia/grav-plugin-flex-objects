@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Grav\Plugin\FlexObjects\Types\Pages;
+namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
@@ -9,10 +9,10 @@ use Grav\Plugin\FlexObjects\Storage\FolderStorage;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
- * Class FolderStorage
- * @package Grav\Plugin\FlexObjects\Storage
+ * Class GravPageStorage
+ * @package Grav\Plugin\FlexObjects\Types\GravPages
  */
-class PageStorage extends FolderStorage
+class GravPageStorage extends FolderStorage
 {
     /** @var string */
     protected $dataFolder;
@@ -154,7 +154,7 @@ class PageStorage extends FolderStorage
             }
         }
 
-        $path = trim(PageObject::adjustRouteCase(preg_replace(PageObject::PAGE_ROUTE_REGEX, '/', $prefix)), '/');
+        $path = trim(GravPageObject::adjustRouteCase(preg_replace(GravPageObject::PAGE_ROUTE_REGEX, '/', $prefix)), '/');
 
         if (isset($list[$path])) {
             $debugger = Grav::instance()['debugger'];
