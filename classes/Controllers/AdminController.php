@@ -48,7 +48,7 @@ class AdminController extends SimpleController
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect && !$id) {
-                $edit_page = $this->location . '/' . $this->target . '/' . ltrim($object->getKey(), '/');
+                $edit_page = $this->location . '/' . $this->target . '/' . $object->getKey();
                 $this->setRedirect($edit_page);
             }
 
@@ -75,7 +75,7 @@ class AdminController extends SimpleController
             default:
                 $id = $this->id;
                 if ($id) {
-                    $this->setRedirect($this->location . '/' . $this->target . '/' . ltrim($id, '/'));
+                    $this->setRedirect($this->location . '/' . $this->target . '/' . $id);
                 }
                 $saved_option = 'edit';
                 break;

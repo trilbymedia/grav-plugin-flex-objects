@@ -109,12 +109,16 @@ class FlexDirectory
 
     /**
      * @param string $type
+     * @param string $context
      * @return Blueprint
      */
-    public function getBlueprint(string $type = '') : Blueprint
+    public function getBlueprint(string $type = '', string $context = '') : Blueprint
     {
         if (!isset($this->blueprints[$type])) {
             $blueprint = new Blueprint($this->blueprint_file);
+            if ($context) {
+                $blueprint->setContext($context);
+            }
             $blueprint->load($type ?: null);
             if ($blueprint->get('type') === 'flex-objects') {
                 $blueprintBase = (new Blueprint('plugin://flex-objects/blueprints/flex-objects.yaml'))->load();

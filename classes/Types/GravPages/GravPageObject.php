@@ -228,6 +228,6 @@ class GravPageObject extends FlexPageObject
         $types = Pages::getTypes();
         $type = $types[$this->template()][0] ?? '';
 
-        return $this->getFlexDirectory()->getBlueprint($type);
+        return $this->getFlexDirectory()->getBlueprint($type, 'blueprints://pages');
     }
 }

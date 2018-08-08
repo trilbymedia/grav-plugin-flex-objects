@@ -2,7 +2,9 @@ title: Grav Pages
 description: Manage your Grav Pages in Flex.
 type: flex-objects
 
-extends@: blueprints://pages/default.yaml
+extends@:
+  type: default
+  context: blueprints://pages
 
 config:
   admin:
@@ -28,7 +30,6 @@ config:
           field:
             label: Type
             type: text
-
 
   site:
     filter:
