@@ -119,17 +119,19 @@ class FlexDirectory
             if ($context) {
                 $blueprint->setContext($context);
             }
+
             $blueprint->load($type ?: null);
             if ($blueprint->get('type') === 'flex-objects') {
                 $blueprintBase = (new Blueprint('plugin://flex-objects/blueprints/flex-objects.yaml'))->load();
                 $blueprint->extend($blueprintBase, true);
             }
+
+            $this->blueprints[$type] = $blueprint;
+
             $blueprint->init();
             if (empty($blueprint->fields())) {
                 throw new RuntimeException(sprintf('Flex: Blueprint for %s is missing', $this->type));
             }
-
-            $this->blueprints[$type] = $blueprint;
         }
 
         return $this->blueprints[$type];
