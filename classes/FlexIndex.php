@@ -158,7 +158,7 @@ class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
         $cachedMethods = $className::getCachedMethods();
 
         if (!empty($cachedMethods[$name])) {
-            $key = $this->getType(true) . '.' . $name . '.' . sha1($name . json_encode($arguments) . $this->getCacheKey());
+            $key = $this->getType(true) . '.' . sha1($name . '.' . json_encode($arguments) . $this->getCacheKey());
 
             $cache = $this->flexDirectory->getCache('object');
 
