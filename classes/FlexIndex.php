@@ -195,7 +195,7 @@ class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
             $collection = $this->loadCollection();
             $result = $collection->{$name}(...$arguments);
             $class = get_class($collection);
-            $debugger->addMessage("Call '{$class}:{$name}()' cannot be cached", 'debug');
+            $debugger->addMessage("Call '{$class}:{$name}()' isn't cached", 'debug');
         }
 
         return $result;

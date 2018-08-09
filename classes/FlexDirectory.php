@@ -28,6 +28,8 @@ class FlexDirectory
     protected $blueprint_file;
     /** @var Blueprint[] */
     protected $blueprints;
+    /** @var bool[] */
+    protected $blueprints_init;
     /** @var FlexIndex */
     protected $index;
     /** @var FlexCollection */
@@ -82,7 +84,7 @@ class FlexDirectory
      */
     public function getTitle() : string
     {
-        return $this->getBlueprint()->get('title', ucfirst($this->getType()));
+        return $this->getBlueprintInternal()->get('title', ucfirst($this->getType()));
     }
 
     /**
@@ -90,7 +92,7 @@ class FlexDirectory
      */
     public function getDescription() : string
     {
-        return $this->getBlueprint()->get('description', '');
+        return $this->getBlueprintInternal()->get('description', '');
     }
 
     /**
@@ -101,7 +103,7 @@ class FlexDirectory
     public function getConfig(string $name = null, $default = null)
     {
         if (null === $this->config) {
-            $this->config = new Config(array_merge_recursive($this->getBlueprint()->get('config'), $this->defaults));
+            $this->config = new Config(array_merge_recursive($this->getBlueprintInternal()->get('config'), $this->defaults));
         }
 
         return $this->config->get($name, $default);
@@ -114,19 +116,10 @@ class FlexDirectory
      */
     public function getBlueprint(string $type = '', string $context = '') : Blueprint
     {
-        if (!isset($this->blueprints[$type])) {
-            $blueprint = new Blueprint($this->blueprint_file);
-            if ($context) {
-                $blueprint->setContext($context);
-            }
+        $blueprint = $this->getBlueprintInternal($type, $context);
 
-            $blueprint->load($type ?: null);
-            if ($blueprint->get('type') === 'flex-objects') {
-                $blueprintBase = (new Blueprint('plugin://flex-objects/blueprints/flex-objects.yaml'))->load();
-                $blueprint->extend($blueprintBase, true);
-            }
-
-            $this->blueprints[$type] = $blueprint;
+        if (empty($this->blueprints_init[$type])) {
+            $this->blueprints_init[$type] = true;
 
             $blueprint->init();
             if (empty($blueprint->fields())) {
@@ -134,7 +127,7 @@ class FlexDirectory
             }
         }
 
-        return $this->blueprints[$type];
+        return $blueprint;
     }
 
     /**
@@ -475,6 +468,31 @@ class FlexDirectory
         $debugger->stopTimer('flex-objects');
 
         return $list;
+    }
+
+    /**
+     * @param string $type
+     * @param string $context
+     * @return Blueprint
+     */
+    protected function getBlueprintInternal(string $type = '', string $context = '') : Blueprint
+    {
+        if (!isset($this->blueprints[$type])) {
+            $blueprint = new Blueprint($this->blueprint_file);
+            if ($context) {
+                $blueprint->setContext($context);
+            }
+
+            $blueprint->load($type ?: null);
+            if ($blueprint->get('type') === 'flex-objects') {
+                $blueprintBase = (new Blueprint('plugin://flex-objects/blueprints/flex-objects.yaml'))->load();
+                $blueprint->extend($blueprintBase, true);
+            }
+
+            $this->blueprints[$type] = $blueprint;
+        }
+
+        return $this->blueprints[$type];
     }
 
     /**
