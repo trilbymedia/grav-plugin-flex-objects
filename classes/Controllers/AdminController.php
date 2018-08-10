@@ -113,12 +113,8 @@ class AdminController extends SimpleController
      */
     public function data($type)
     {
-        $uri = Grav::instance()['uri'];
-        $post = $uri->post();
-
         $type = explode('/', $type, 2)[1] ?? null;
-        $params = json_decode($post['params'], true);
-        $id = $params['id'] ?? null;
+        $id = $this->id;
 
         $directory = $this->getDirectory($type);
 
