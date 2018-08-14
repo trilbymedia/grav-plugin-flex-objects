@@ -5,6 +5,8 @@ use Composer\Autoload\ClassLoader;
 use Grav\Common\Plugin;
 use Grav\Plugin\FlexObjects\Controllers\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Nyholm\Psr7Server\ServerRequestCreator;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -85,6 +87,18 @@ class FlexObjectsPlugin extends Plugin
             }
 
             return new Flex($list, $config);
+        };
+
+        // TODO: move later into Grav 1.6 (PHP 7.1+)
+        $this->grav['server_request'] = function () {
+            $psr17Factory = new Psr17Factory();
+            $creator = new ServerRequestCreator(
+                $psr17Factory, // ServerRequestFactory
+                $psr17Factory, // UriFactory
+                $psr17Factory, // UploadedFileFactory
+                $psr17Factory  // StreamFactory
+            );
+            return $creator->fromGlobals();
         };
     }
 

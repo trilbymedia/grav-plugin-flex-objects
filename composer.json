@@ -15,11 +15,18 @@
   ],
   "require": {
     "php": ">=7.1.3",
-    "ext-json": "*"
+    "ext-json": "*",
+    "nyholm/psr7-server": "^0.2.1",
+    "nyholm/psr7": "^1.0"
   },
   "autoload": {
     "psr-4": {
       "Grav\\Plugin\\FlexObjects\\": "classes/"
+    }
+  },
+  "config": {
+    "platform": {
+      "php": "7.1.3"
     }
   }
 }

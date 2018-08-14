@@ -484,7 +484,7 @@ class FlexDirectory
             }
 
             $blueprint->load($type ?: null);
-            if ($blueprint->get('type') === 'flex-objects') {
+            if ($blueprint->get('type') === 'flex-objects' && isset(Grav::instance()['admin'])) {
                 $blueprintBase = (new Blueprint('plugin://flex-objects/blueprints/flex-objects.yaml'))->load();
                 $blueprint->extend($blueprintBase, true);
             }

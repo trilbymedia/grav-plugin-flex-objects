@@ -4,7 +4,6 @@ namespace Grav\Plugin\FlexObjects;
 use Grav\Common\Data\ValidationException;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
-use Grav\Common\Media\Interfaces\MediaInterface;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Twig\Twig;
@@ -27,6 +26,8 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     private $storageKey;
     /** @var int */
     private $timestamp = 0;
+    /** @var FlexForm[] */
+    private $forms = [];
 
     /**
      * @return array
@@ -130,6 +131,19 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     public function getFlexDirectory()
     {
         return $this->flexDirectory;
+    }
+
+    /**
+     * @param string $name
+     * @return FlexForm
+     */
+    public function getForm($name = 'default')
+    {
+        if (!isset($this->forms[$name])) {
+            $this->forms[$name] = new FlexForm($name, $this);
+        }
+
+        return $this->forms[$name];
     }
 
     /**
@@ -347,6 +361,106 @@ class FlexObject extends LazyObject implements FlexObjectInterface
     }
 
     /**
+     * Create new object into storage.
+     *
+     * @param string|null $key Optional new key.
+     * @return $this
+     */
+    public function create($key = null)
+    {
+        if ($key) {
+            $this->setStorageKey($key);
+        }
+
+        if ($this->exists()) {
+            throw new \RuntimeException('Cannot create new object (Already exists)');
+        }
+
+        return $this->save();
+    }
+
+    /**
+     * @return $this
+     */
+    public function save()
+    {
+        $this->getFlexDirectory()->getStorage()->replaceRows([$this->getStorageKey() => $this->prepareStorage()]);
+
+        try {
+            $this->getFlexDirectory()->clearCache();
+            if (method_exists($this, 'clearMediaCache')) {
+                $this->clearMediaCache();
+            }
+        } catch (InvalidArgumentException $e) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->addException($e);
+
+            // Caching failed, but we can ignore that for now.
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function delete()
+    {
+        $this->getFlexDirectory()->getStorage()->deleteRows([$this->getStorageKey() => $this->prepareStorage()]);
+
+        try {
+            $this->getFlexDirectory()->clearCache();
+            if (method_exists($this, 'clearMediaCache')) {
+                $this->clearMediaCache();
+            }
+        } catch (InvalidArgumentException $e) {
+            /** @var Debugger $debugger */
+            $debugger = Grav::instance()['debugger'];
+            $debugger->addException($e);
+
+            // Caching failed, but we can ignore that for now.
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    protected function doSerialize()
+    {
+        return $this->jsonSerialize() + ['storage_key' => $this->getStorageKey(), 'storage_timestamp' => $this->getTimestamp()];
+    }
+
+    /**
+     * @param array $serialized
+     */
+    protected function doUnserialize(array $serialized)
+    {
+        $type = $serialized['type'] ?? 'unknown';
+
+        if (!isset($serialized['key'], $serialized['type'], $serialized['elements'])) {
+            $type = $serialized['type'] ?? 'unknown';
+            throw new \InvalidArgumentException("Cannot unserialize '{$type}': Bad data");
+        }
+
+        $grav = Grav::instance();
+        /** @var Flex $flex */
+        $flex = $grav['flex_directory'];
+        $directory = $flex->getDirectory($type);
+        if (!$directory) {
+            throw new \InvalidArgumentException("Cannot unserialize '{$type}': Not found");
+        }
+        $this->flexDirectory = $directory;
+        $this->storageKey = $serialized['storage_key'];
+        $this->timestamp = $serialized['storage_timestamp'];
+
+        $this->setKey($serialized['key']);
+        $this->setElements($serialized['elements']);
+    }
+
+    /**
      * @param string $uri
      * @return Medium|null
      */
@@ -417,71 +531,6 @@ class FlexObject extends LazyObject implements FlexObjectInterface
 
             return $twig->twig()->resolveTemplate(["flex-objects/layouts/404.html.twig"]);
         }
-    }
-
-    /**
-     * Create new object into storage.
-     *
-     * @param string|null $key Optional new key.
-     * @return $this
-     */
-    protected function create($key = null)
-    {
-        if ($key) {
-            $this->setStorageKey($key);
-        }
-
-        if ($this->exists()) {
-            throw new \RuntimeException('Cannot create new object (Already exists)');
-        }
-
-        return $this->save();
-    }
-
-    /**
-     * @return $this
-     */
-    protected function save()
-    {
-        $this->getFlexDirectory()->getStorage()->replaceRows([$this->getStorageKey() => $this->prepareStorage()]);
-
-        try {
-            $this->getFlexDirectory()->clearCache();
-            if (method_exists($this, 'clearMediaCache')) {
-                $this->clearMediaCache();
-            }
-        } catch (InvalidArgumentException $e) {
-            /** @var Debugger $debugger */
-            $debugger = Grav::instance()['debugger'];
-            $debugger->addException($e);
-
-            // Caching failed, but we can ignore that for now.
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    protected function delete()
-    {
-        $this->getFlexDirectory()->getStorage()->deleteRows([$this->getStorageKey() => $this->prepareStorage()]);
-
-        try {
-            $this->getFlexDirectory()->clearCache();
-            if (method_exists($this, 'clearMediaCache')) {
-                $this->clearMediaCache();
-            }
-        } catch (InvalidArgumentException $e) {
-            /** @var Debugger $debugger */
-            $debugger = Grav::instance()['debugger'];
-            $debugger->addException($e);
-
-            // Caching failed, but we can ignore that for now.
-        }
-
-        return $this;
     }
 
     /**
