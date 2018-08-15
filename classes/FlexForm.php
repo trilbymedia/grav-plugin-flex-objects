@@ -69,7 +69,7 @@ class FlexForm implements \Serializable
     {
         return [
             [
-                'type' => 'button',
+                'type' => 'submit',
                 'value' => 'Save'
             ]
         ];
