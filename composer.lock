@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aa1c3b71107cd24dfa4c25bcc3d33cd7",
+    "content-hash": "24338b89d055f357ea41403310046558",
     "packages": [
         {
             "name": "nyholm/psr7",
@@ -283,5 +283,8 @@
         "php": ">=7.1.3",
         "ext-json": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "7.1.3"
+    }
 }

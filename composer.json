@@ -21,7 +21,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Grav\\Plugin\\FlexObjects\\": "classes/"
+      "Grav\\Plugin\\FlexObjects\\": "classes/",
+      "Grav\\Framework\\": "Grav/Framework/"
     }
   },
   "config": {

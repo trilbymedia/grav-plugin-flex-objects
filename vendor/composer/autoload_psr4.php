@@ -11,4 +11,5 @@ return array(
     'Nyholm\\Psr7Server\\' => array($vendorDir . '/nyholm/psr7-server/src'),
     'Http\\Message\\' => array($vendorDir . '/php-http/message-factory/src'),
     'Grav\\Plugin\\FlexObjects\\' => array($baseDir . '/classes'),
+    'Grav\\Framework\\' => array($baseDir . '/Grav/Framework'),
 );

@@ -23,6 +23,7 @@ class ComposerStaticInit69fc28174abe912f71ebf710ee161e8f
         'G' => 
         array (
             'Grav\\Plugin\\FlexObjects\\' => 24,
+            'Grav\\Framework\\' => 15,
         ),
     );
 
@@ -47,6 +48,10 @@ class ComposerStaticInit69fc28174abe912f71ebf710ee161e8f
         'Grav\\Plugin\\FlexObjects\\' => 
         array (
             0 => __DIR__ . '/../..' . '/classes',
+        ),
+        'Grav\\Framework\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/Grav/Framework',
         ),
     );
 
