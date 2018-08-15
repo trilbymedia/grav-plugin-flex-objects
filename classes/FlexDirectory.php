@@ -103,7 +103,7 @@ class FlexDirectory
     public function getConfig(string $name = null, $default = null)
     {
         if (null === $this->config) {
-            $this->config = new Config(array_merge_recursive($this->getBlueprintInternal()->get('config'), $this->defaults));
+            $this->config = new Config(array_merge_recursive($this->getBlueprintInternal()->get('config', []), $this->defaults));
         }
 
         return $this->config->get($name, $default);
@@ -478,6 +478,9 @@ class FlexDirectory
     protected function getBlueprintInternal(string $type = '', string $context = '') : Blueprint
     {
         if (!isset($this->blueprints[$type])) {
+            if (!file_exists($this->blueprint_file)) {
+                throw new RuntimeException(sprintf('Flex: Blueprint file for %s is missing', $this->type));
+            }
             $blueprint = new Blueprint($this->blueprint_file);
             if ($context) {
                 $blueprint->setContext($context);
