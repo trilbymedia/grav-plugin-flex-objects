@@ -90,8 +90,6 @@ class FlexObject extends LazyObject implements FlexObjectInterface
      */
     public function update(array $data, $isFullUpdate = false)
     {
-        $this->filterElements($data);
-
         $blueprint = $this->getFlexDirectory()->getBlueprint();
 
         if (!$isFullUpdate) {
@@ -100,8 +98,10 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         }
 
         $blueprint->validate($data + ['storage_key' => $this->getStorageKey()]);
+        $data = $blueprint->filter($data);
 
-        $this->setElements($blueprint->filter($data));
+        $this->filterElements($data);
+        $this->setElements($data);
 
         return $this;
     }

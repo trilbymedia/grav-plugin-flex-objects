@@ -1,6 +1,7 @@
 <?php
 namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
+use Grav\Common\Grav;
 use Grav\Common\Page\Pages;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
 
@@ -87,6 +88,8 @@ class GravPageObject extends FlexPageObject
 
                 return $this->modular() ? 'modular/' . $name_val : $name_val;
             case 'route':
+                return \dirname('/' . $this->getKey());
+            case 'full_route':
                 return '/' . $this->getKey();
             case 'full_order':
                 return $this->full_order();
@@ -102,7 +105,6 @@ class GravPageObject extends FlexPageObject
         }
 
         $parts = explode('/', '/' . $this->getStorageKey());
-        // TODO: Not quite as there is a case without file.
         array_pop($parts);
 
         return end($parts);
@@ -115,11 +117,43 @@ class GravPageObject extends FlexPageObject
         }
 
         $parts = explode('/', '/' . $this->getStorageKey());
-        // TODO: Not quite as there is a case without file.
         array_pop($parts);
         array_pop($parts);
 
         return '/' . implode('/', $parts);
+    }
+
+    protected function location()
+    {
+        $parts = explode('/', '/' . $this->getStorageKey());
+        array_pop($parts);
+
+        return '/' . implode('/', $parts);
+    }
+
+    public function parent()
+    {
+        $parentKey = \dirname($this->getKey());
+
+        return $this->getFlexDirectory()->getObject($parentKey);
+    }
+
+    /**
+     * @return \Grav\Common\Page\Collection
+     */
+    public function children()
+    {
+        // TODO: may need better solution.
+
+         /** @var Pages $pages */
+        $pages = Grav::instance()['pages'];
+
+        return $pages->children($this->path());
+    }
+
+    public function rawRoute()
+    {
+        return '/' . $this->getKey();
     }
 
     /**
@@ -229,5 +263,52 @@ class GravPageObject extends FlexPageObject
         $type = $types[$this->template()][0] ?? '';
 
         return $this->getFlexDirectory()->getBlueprint($type, 'blueprints://pages');
+    }
+
+    /**
+     * @param array $elements
+     */
+    protected function filterElements(array &$elements)
+    {
+        // FIXME: need better logic here.
+        if (isset($elements['route'], $elements['folder'], $elements['name'])) {
+            $parts = [];
+            $route = $elements['route'];
+
+            // Make sure page isn't being moved under itself.
+            if (strpos($route, '/' . $this->getKey() . '/') === 0) {
+                throw new \RuntimeException(sprintf('Page %s cannot be moved to %s', '/' . $this->getKey(), $route));
+            }
+
+            // Figure out storage path to the new route.
+            if ($route !== '/') {
+                $parentKey = trim($route, '/');
+                $parent = $this->getKey() !== $parentKey ? $this->getFlexDirectory()->getObject($parentKey) : $this;
+                if ($parent) {
+                    $path =  trim($parent->getKey() === $this->getKey() ? $this->path() : $parent->location(), '/');
+                    if ($path) {
+                        $parts[] = $path;
+                    }
+                } else {
+                    // Page cannot be moved to non-existing location.
+                    throw new \RuntimeException(sprintf('Parent page %s not found', $route));
+                }
+            }
+
+            // Get the folder name.
+            $folder = !empty($elements['folder']) ? trim($elements['folder']) : $this->folder();
+            $order = !empty($elements['ordering']) ? (int)$elements['ordering'] : null;
+            $parts[] = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
+
+            // Get the template name.
+            $parts[] = isset($elements['name']) ? $elements['name'] . '.md' : $this->name();
+
+            // Finally update the storage key.
+            $elements['storage_key'] = implode('/', $parts);
+        }
+
+        unset($elements['order'], $elements['folder']);
+
+        parent::filterElements($elements);
     }
 }

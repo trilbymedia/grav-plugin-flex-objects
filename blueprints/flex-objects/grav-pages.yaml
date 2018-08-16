@@ -21,7 +21,7 @@ config:
         menu:
           link: edit
           alias: header.menu
-        route:
+        full_route:
           field:
             label: Route
             type: text
