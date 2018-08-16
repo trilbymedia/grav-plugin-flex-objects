@@ -4,6 +4,7 @@
     data-grav-array-name="{{ (scope ~ field.name)|fieldName }}"
     data-grav-array-keyname="{{ field.placeholder_key|e|tu }}"
     data-grav-array-valuename="{{ field.placeholder_value|e|tu }}"
+    data-grav-array-textarea="{{ field.value_type == 'textarea' }}"
     {{ parent() }}
 {% endblock %}
 
