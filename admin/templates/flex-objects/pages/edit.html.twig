@@ -1,8 +1,9 @@
 {% extends 'partials/base.html.twig' %}
-{% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
 {% set id = key %}
 {% set entry = directory.collection[id] %}
+
+{% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
 {% if not entry and uri.param('action') != 'add' %}{% do grav.redirect(current_route) %}{% endif %}
 

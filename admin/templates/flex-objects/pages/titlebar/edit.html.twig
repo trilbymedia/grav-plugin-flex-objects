@@ -6,5 +6,5 @@
         {% endif %}
         <button class="button" type="submit" name="task" value="save" form="blueprints"><i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}</button>
     </div>
-    <h1><i class="fa fa-fw fa-file-text-o"></i> {{ "PLUGIN_FLEX_OBJECTS.TITLE"|tu }}</h1>
+    <h1><i class="fa fa-fw fa-file-text-o"></i> {{ entry.title ?? entry.key ?? '[NEW]' }}</small></h1>
 {% endblock %}
