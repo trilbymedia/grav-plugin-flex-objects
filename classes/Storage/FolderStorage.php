@@ -33,7 +33,11 @@ class FolderStorage extends AbstractFilesystemStorage
         // Make sure that the data folder exists.
         $folder = $this->resolvePath($this->dataFolder);
         if (!file_exists($folder)) {
-            Folder::create($folder);
+            try {
+                Folder::create($folder);
+            } catch (\RuntimeException $e) {
+                throw new \RuntimeException(sprintf('Flex: %s', $e->getMessage()));
+            }
         }
     }
 
@@ -180,7 +184,7 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     public function getMediaPath(string $key = null) : string
     {
-        return null !== $key ? dirname($this->getStoragePath($key)) : $this->getStoragePath();
+        return null !== $key ? \dirname($this->getStoragePath($key)) : $this->getStoragePath();
     }
 
     /**
@@ -210,7 +214,11 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     protected function saveFile(File $file, array $data) : array
     {
-        $file->save($data);
+        try {
+            $file->save($data);
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException(sprintf('Flex saveFile(%s): %s', $file->filename(), $e->getMessage()));
+        }
 
         return $data;
     }
@@ -221,8 +229,12 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     protected function deleteFile(File $file)
     {
-        $data = $file->content();
-        $file->delete();
+        try {
+            $data = $file->content();
+            $file->delete();
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException(sprintf('Flex deleteFile(%s): %s', $file->filename(), $e->getMessage()));
+        }
 
         return $data;
     }
@@ -234,7 +246,11 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     protected function moveFolder(string $src, string $dst) : bool
     {
-        Folder::move($this->resolvePath($src), $this->resolvePath($dst));
+        try {
+            Folder::move($this->resolvePath($src), $this->resolvePath($dst));
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException(sprintf('Flex moveFolder(%s, %s): %s', $src, $dst, $e->getMessage()));
+        }
 
         return true;
     }
@@ -246,7 +262,11 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     protected function deleteFolder(string $path, bool $include_target = false) : bool
     {
-        return Folder::delete($this->resolvePath($path), $include_target);
+        try {
+            return Folder::delete($this->resolvePath($path), $include_target);
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException(sprintf('Flex deleteFolder(%s): %s', $path, $e->getMessage()));
+        }
     }
 
     /**

@@ -39,7 +39,11 @@ class SimpleStorage extends AbstractFilesystemStorage
 
         // Make sure that the data folder exists.
         if (!file_exists($this->dataFolder)) {
-            Folder::create($this->dataFolder);
+            try {
+                Folder::create($this->dataFolder);
+            } catch (\RuntimeException $e) {
+                throw new \RuntimeException(sprintf('Flex: %s', $e->getMessage()));
+            }
         }
     }
 
@@ -187,9 +191,13 @@ class SimpleStorage extends AbstractFilesystemStorage
 
     protected function save() : void
     {
-        $file = $this->getFile($this->getStoragePath());
-        $file->save($this->data);
-        $file->free();
+        try {
+            $file = $this->getFile($this->getStoragePath());
+            $file->save($this->data);
+            $file->free();
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException(sprintf('Flex save(): %s', $e->getMessage()));
+        }
     }
 
     /**
