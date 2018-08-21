@@ -357,7 +357,7 @@ trait PageContentTrait
 
     abstract public function getProperty($property, $default = null);
     abstract public function setProperty($property, $value);
-    abstract public function getArrayProperty($property, $default = null);
+    abstract public function &getArrayProperty($property, $default = null, $doCreate = false);
     abstract public function setArrayProperty($property, $value);
 
     /**
