@@ -64,7 +64,9 @@ class GravPageStorage extends FolderStorage
         if (null === $key) {
             $path = $this->dataFolder;
         } else {
-            $path = sprintf($this->dataPattern, $this->dataFolder, $key);
+            $dataFolder = substr($this->dataFolder, -1) === '/' ? substr($this->dataFolder, 0, -1) : $this->dataFolder;
+
+            $path = sprintf($this->dataPattern, $dataFolder, $key);
         }
 
         return $path;
@@ -78,7 +80,9 @@ class GravPageStorage extends FolderStorage
      */
     public function getPathFromKey(string $key) : string
     {
-        return sprintf($this->dataPattern, $this->dataFolder, $key);
+        $dataFolder = substr($this->dataFolder, -1) === '/' ? substr($this->dataFolder, 0, -1) : $this->dataFolder;
+
+        return sprintf($this->dataPattern, $dataFolder, $key);
     }
 
     /**

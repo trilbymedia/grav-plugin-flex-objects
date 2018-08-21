@@ -134,6 +134,14 @@ class GravPageObject extends FlexPageObject
     public function parent()
     {
         $parentKey = \dirname($this->getKey());
+        if ($parentKey === '.') {
+            // FIXME: needs a proper solution
+
+            /** @var Pages $pages */
+            $pages = Grav::instance()['pages'];
+
+            return $pages->root();
+        }
 
         return $this->getFlexDirectory()->getObject($parentKey);
     }
@@ -143,7 +151,7 @@ class GravPageObject extends FlexPageObject
      */
     public function children()
     {
-        // TODO: may need better solution.
+        // FIXME: needs a proper solution
 
          /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
@@ -228,7 +236,7 @@ class GravPageObject extends FlexPageObject
     public function modularTwig($var = null)
     {
         if ($var !== null) {
-            $this->modular_twig = (bool)$var;
+            $this->setProperty('modular_twig', (bool)$var);
             if ($var) {
                 $this->visible(false);
                 // some routable logic
@@ -238,13 +246,12 @@ class GravPageObject extends FlexPageObject
             }
         }
 
-        return $this->modular_twig;
+        return $this->getProperty('modular_twig');
     }
 
     public function folderExists()
     {
-        // TODO: also check folder
-        return $this->exists();
+        return $this->exists() || is_dir($this->getMediaFolder());
     }
 
     public function full_order()
@@ -297,8 +304,18 @@ class GravPageObject extends FlexPageObject
 
             // Get the folder name.
             $folder = !empty($elements['folder']) ? trim($elements['folder']) : $this->folder();
-            $order = !empty($elements['ordering']) ? (int)$elements['ordering'] : null;
-            $parts[] = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
+            $ordering = (bool)($elements['ordering'] ?? false);
+            if ($ordering) {
+                $list = !empty($elements['order']) ? explode(',', $elements['order']) : [];
+                $order = array_search($folder, $list, true);
+                if ($order === false) {
+                    $order = (int)$this->order() - 1;
+                }
+
+                $parts[] = $ordering ? sprintf('%02d.%s', $order + 1, $folder) : $folder;
+            } else {
+                $parts[] = $folder;
+            }
 
             // Get the template name.
             $parts[] = isset($elements['name']) ? $elements['name'] . '.md' : $this->name();
