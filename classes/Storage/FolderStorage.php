@@ -4,8 +4,10 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Storage;
 
 use Grav\Common\Filesystem\Folder;
+use Grav\Common\Grav;
 use RocketTheme\Toolbox\File\File;
 use InvalidArgumentException;
+use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
  * Class FolderStorage
@@ -216,6 +218,12 @@ class FolderStorage extends AbstractFilesystemStorage
     {
         try {
             $file->save($data);
+
+            /** @var UniformResourceLocator $locator */
+            $locator = Grav::instance()['locator'];
+            if ($locator->isStream($file->filename())) {
+                $locator->clearCache($file->filename());
+            }
         } catch (\RuntimeException $e) {
             throw new \RuntimeException(sprintf('Flex saveFile(%s): %s', $file->filename(), $e->getMessage()));
         }
@@ -232,6 +240,12 @@ class FolderStorage extends AbstractFilesystemStorage
         try {
             $data = $file->content();
             $file->delete();
+
+            /** @var UniformResourceLocator $locator */
+            $locator = Grav::instance()['locator'];
+            if ($locator->isStream($file->filename())) {
+                $locator->clearCache($file->filename());
+            }
         } catch (\RuntimeException $e) {
             throw new \RuntimeException(sprintf('Flex deleteFile(%s): %s', $file->filename(), $e->getMessage()));
         }
@@ -248,6 +262,12 @@ class FolderStorage extends AbstractFilesystemStorage
     {
         try {
             Folder::move($this->resolvePath($src), $this->resolvePath($dst));
+
+            /** @var UniformResourceLocator $locator */
+            $locator = Grav::instance()['locator'];
+            if ($locator->isStream($src) || $locator->isStream($dst)) {
+                $locator->clearCache();
+            }
         } catch (\RuntimeException $e) {
             throw new \RuntimeException(sprintf('Flex moveFolder(%s, %s): %s', $src, $dst, $e->getMessage()));
         }
@@ -263,7 +283,15 @@ class FolderStorage extends AbstractFilesystemStorage
     protected function deleteFolder(string $path, bool $include_target = false) : bool
     {
         try {
-            return Folder::delete($this->resolvePath($path), $include_target);
+            $success = Folder::delete($this->resolvePath($path), $include_target);
+
+            /** @var UniformResourceLocator $locator */
+            $locator = Grav::instance()['locator'];
+            if ($locator->isStream($path)) {
+                $locator->clearCache();
+            }
+
+            return $success;
         } catch (\RuntimeException $e) {
             throw new \RuntimeException(sprintf('Flex deleteFolder(%s): %s', $path, $e->getMessage()));
         }
