@@ -16,7 +16,8 @@
     resizeQuality: pagemedia.resize_quality ?: 0.8
 } %}
 
-{% if context.folderExists %}
+
+{% set route = admin ? admin.route : grav.uri.route() %}
 <div class="form-field grid vertical {% if field.classes is defined %}{{ field.classes }}{% endif %}">
     <div class="form-label">
         <label>{{ field.label|tu }}</label>
@@ -26,24 +27,15 @@
         {% set dropzoneSettings = { maxFileSize: uploadLimit }|merge(pagemedia_settings) %}
         <div id="grav-dropzone"
              class="dropzone"
-             data-media-url="{{ base_url }}/media/{{ admin.route|trim('/') }}.json"
-             data-media-local="{{ base_url_relative_frontend|rtrim('/') }}/{{ admin.route|trim('/') }}"
+             data-media-url="{{ base_url }}/media/{{ route|trim('/') }}.json"
+             data-media-local="{{ base_url_relative_frontend|rtrim('/') }}/{{ route|trim('/') }}"
              data-media-path="{{ url(context.relativePagePath) }}"
              data-media-uri="{{ context.mediaUri }}"
              data-dropzone-options="{{ dropzoneSettings|json_encode|e('html_attr') }}"
              data-dropzone-field="{{ (scope ~ field.name)|fieldName }}"></div>
 
-        {% if admin.session.expert == '0' %}
+        {% if not admin or admin.session.expert == '0' %}
         <input type="hidden" name="{{ (scope ~ field.name)|fieldName }}" value="{{ value|e }}" />
         {% endif %}
     </div>
 </div>
-{% else %}
-<div class="form-tab">
-    <div class="form-field">
-        <div class="form-label">
-            {{ "PLUGIN_ADMIN.CANNOT_ADD_MEDIA_FILES_PAGE_NOT_SAVED"|tu }}
-        </div>
-    </div>
-</div>
-{% endif %}
