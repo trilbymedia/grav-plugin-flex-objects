@@ -46,3 +46,10 @@
         {% endif %}
     </div>
 </div>
+
+{% if not config.flex.pagemedia.dropzone.template %}
+    {% do config.set('flex.pagemedia.dropzone.template', true) %}
+    <div id="dropzone-media-template" style="display:none;">
+        {% include 'forms/fields/pagemedia/template.html.twig' %}
+    </div>
+{% endif %}
