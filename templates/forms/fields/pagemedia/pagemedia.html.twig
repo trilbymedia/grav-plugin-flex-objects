@@ -27,12 +27,19 @@
         {% set dropzoneSettings = { maxFileSize: uploadLimit }|merge(pagemedia_settings) %}
         <div id="grav-dropzone"
              class="dropzone"
-             data-media-url="{{ base_url }}/media/{{ route|trim('/') }}.json"
-             data-media-local="{{ base_url_relative_frontend|rtrim('/') }}/{{ route|trim('/') }}"
-             data-media-path="{{ url(context.relativePagePath) }}"
-             data-media-uri="{{ context.mediaUri }}"
-             data-dropzone-options="{{ dropzoneSettings|json_encode|e('html_attr') }}"
-             data-dropzone-field="{{ (scope ~ field.name)|fieldName }}"></div>
+             {% if admin %}
+                 data-media-url="{{ base_url }}/media/{{ route|trim('/') }}.json"
+                 data-media-local="{{ base_url_relative_frontend|rtrim('/') }}/{{ route|trim('/') }}"
+                 data-media-path="{{ url(context.relativePagePath) }}"
+                 data-media-uri="{{ context.mediaUri }}"
+                 data-dropzone-options="{{ dropzoneSettings|json_encode|e('html_attr') }}"
+                 data-dropzone-field="{{ (scope ~ field.name)|fieldName }}"
+            {% else %}
+                data-media-url="{{ base_url }}/{{ route|trim('/') }}.json"
+                data-dropzone-options="{{ dropzoneSettings|json_encode|e('html_attr') }}"
+                data-dropzone-field="{{ (scope ~ field.name)|fieldName }}"
+            {% endif %}
+        ></div>
 
         {% if not admin or admin.session.expert == '0' %}
         <input type="hidden" name="{{ (scope ~ field.name)|fieldName }}" value="{{ value|e }}" />
