@@ -108,6 +108,16 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaIn
         return parent::value($name, $default);
     }
 
+    /**
+     * Get unknown header variables.
+     *
+     * @return array
+     */
+    public function extra()
+    {
+        return $this->getBlueprint()->extra($this->prepareStorage()['header'], 'header.');
+    }
+
     public function folder($var = null)
     {
         if (null !== $var) {
@@ -423,6 +433,11 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaIn
      */
     protected function filterElements(array &$elements)
     {
+        if (isset($elements['content'])) {
+            $elements['markdown'] = $elements['content'];
+            unset($elements['content']);
+        }
+
         $folder = !empty($elements['folder']) ? trim($elements['folder']) : '';
 
         if ($folder) {
