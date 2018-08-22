@@ -51,7 +51,7 @@ class ComposerStaticInit69fc28174abe912f71ebf710ee161e8f
         ),
         'Grav\\Framework\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/Grav/Framework',
+            0 => __DIR__ . '/../..' . '/src/Grav/Framework',
         ),
     );
 
