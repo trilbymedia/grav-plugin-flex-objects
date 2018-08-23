@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
+use Grav\Common\Language\Language;
 use Grav\Framework\Psr7\Response;
 use Grav\Framework\Route\Route;
 use Grav\Plugin\FlexObjects\Interfaces\FlexObjectInterface;
@@ -124,8 +125,12 @@ abstract class AbstractController
      */
     protected function translate(string $string) : string
     {
-        // TODO
-        return $string;
+        $grav = Grav::instance();
+
+        /** @var Language $language */
+        $language = $grav['language'];
+
+        return $language->translate($string);
     }
 
     protected function setMessage($msg, $type = 'info')

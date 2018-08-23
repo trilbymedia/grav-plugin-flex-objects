@@ -22,17 +22,11 @@ class MediaController extends AbstractController
     public function taskListmedia(ServerRequestInterface $request) : Response
     {
         if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            return $this->createJsonResponse([
-                'code' => 401,
-                'message' => 'Access Denied'
-            ]);
+            throw new \RuntimeException('Access Denied', 401);
         }
 
         if (!$this->object instanceof FlexMediaInterface) {
-            return $this->createJsonResponse([
-                'code' => 501,
-                'message' => 'Object does not support media'
-            ]);
+            throw new \RuntimeException('Object does not support media', 501);
         }
 
         $media = $this->object->getMedia()->all();
@@ -80,29 +74,17 @@ class MediaController extends AbstractController
     public function taskAddmedia(ServerRequestInterface $request) : Response
     {
         if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            return $this->createJsonResponse([
-                'code' => 401,
-                'message' => 'Access Denied'
-            ]);
+            throw new \RuntimeException('Access Denied', 401);
         }
 
         if (!$this->object instanceof FlexMediaInterface) {
-            return $this->createJsonResponse([
-                'code' => 501,
-                'message' => 'Object does not support media'
-            ]);
+            throw new \RuntimeException('Object does not support media', 501);
         }
 
         $files = $request->getUploadedFiles();
 
         if (!isset($files['file']) || \is_array($files['file'])) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => 400,
-                    'status'  => 'error',
-                    'message' => $this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS')
-                ]
-            );
+            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
         }
 
         /** @var UploadedFileInterface $file */
@@ -111,13 +93,7 @@ class MediaController extends AbstractController
         try {
             $this->object->uploadMediaFile($file);
         } catch (\Exception $e) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => $e->getCode() ?: 500,
-                    'status'  => 'error',
-                    'message' => $e->getMessage()
-                ]
-            );
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
         $filename = $file->getClientFilename();
@@ -164,42 +140,24 @@ class MediaController extends AbstractController
     public function taskDelmedia(ServerRequestInterface $request) : Response
     {
         if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            return $this->createJsonResponse([
-                'code' => 401,
-                'message' => 'Access Denied'
-            ]);
+            throw new \RuntimeException('Access Denied', 401);
         }
 
         if (!$this->object instanceof FlexMediaInterface) {
-            return $this->createJsonResponse([
-                'code' => 501,
-                'message' => 'Object does not support media'
-            ]);
+            throw new \RuntimeException('Object does not support media', 501);
         }
 
         $post = $request->getParsedBody();
         $filename = $post['filename'] ?? '';
 
         if (!$filename) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => 400,
-                    'status'  => 'error',
-                    'message' => $this->translate('PLUGIN_ADMIN.NO_FILE_FOUND')
-                ]
-            );
+            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
         try {
             $this->object->deleteMediaFile($filename);
         } catch (\Exception $e) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => $e->getCode() ?: 500,
-                    'status'  => 'error',
-                    'message' => $e->getMessage()
-                ]
-            );
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
         /*
