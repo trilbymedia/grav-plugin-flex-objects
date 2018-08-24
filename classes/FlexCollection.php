@@ -111,8 +111,14 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
         $debugger->startTimer('flex-collection-' . ($debugKey =  uniqid($this->getType(false), false)), 'Render Collection ' . $this->getType(false));
 
         $cache = $key = null;
-        if (!$context) {
-            $key = $this->getCacheKey() . '.' . $layout;
+        foreach ($context as $value) {
+            if (!\is_scalar($value)) {
+                $key = false;
+            }
+        }
+
+        if ($key !== false) {
+            $key = $this->getCacheKey() . '.' . md5($layout . json_encode($context));
             $cache = $this->flexDirectory->getCache('render');
         }
 

@@ -241,8 +241,14 @@ class FlexObject extends LazyObject implements FlexObjectInterface
         $debugger->startTimer('flex-object-' . ($debugKey =  uniqid($this->getType(false), false)), 'Render Object ' . $this->getType(false));
 
         $cache = $key = null;
-        if (!$context) {
-            $key = $this->getCacheKey() . '.' . $layout;
+        foreach ($context as $value) {
+            if (!\is_scalar($value)) {
+                $key = false;
+            }
+        }
+
+        if ($key !== false) {
+            $key = $this->getCacheKey() . '.' . md5($layout . json_encode($context));
             $cache = $this->flexDirectory->getCache('render');
         }
 

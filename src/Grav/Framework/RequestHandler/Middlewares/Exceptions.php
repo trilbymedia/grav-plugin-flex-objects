@@ -19,7 +19,7 @@ class Exceptions implements MiddlewareInterface
         } catch (\Exception $e) {
             $response = [
                 'error' => [
-                    'type' => get_class($e),
+                    'type' => \get_class($e),
                     'message' => $e->getMessage(),
                     'file' => $e->getFile(),
                     'line' => $e->getLine()
