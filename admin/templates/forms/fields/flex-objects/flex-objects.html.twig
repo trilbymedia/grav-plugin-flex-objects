@@ -1,11 +1,13 @@
 {% extends "forms/field.html.twig" %}
 
-{% set value = (value is null ? field.default : value) %}
-
 {% macro spanToggle(input, length) %}
     {% set space = repeat('&nbsp;&nbsp;', (length - input|length) / 2) %}
     {{ (space ~ input ~ space)|raw }}
 {% endmacro %}
+
+{% import _self as macro %}
+
+{% set value = (value is null ? field.default : value) %}
 
 {% block global_attributes %}
     {{ parent() }}
@@ -39,7 +41,7 @@
             />
             {% set text = 'PLUGIN_ADMIN.ENABLED' %}
             {% set translation = (grav.twig.twig.filters['tu'] is defined ? text|tu : text|t)|trim %}
-            <label for="{{ id ~ '_yes' }}">{{ (_self.spanToggle(translation, maxLen)|trim)|raw }}</label>
+            <label for="{{ id ~ '_yes' }}">{{ (macro.spanToggle(translation, maxLen)|trim)|raw }}</label>
             <input type="radio"
                    value=""
                    name="{{ (scope ~ field.name)|fieldName }}[{{ loop.index0 }}]"
@@ -50,7 +52,7 @@
             />
             {% set text = 'PLUGIN_ADMIN.DISABLED' %}
             {% set translation = (grav.twig.twig.filters['tu'] is defined ? text|tu : text|t)|trim %}
-            <label for="{{ id ~ '_no' }}">{{ (_self.spanToggle(translation, maxLen)|trim)|raw }}</label>
+            <label for="{{ id ~ '_no' }}">{{ (macro.spanToggle(translation, maxLen)|trim)|raw }}</label>
         </div>
         <span>{{ directory.title }}</span>
         </div>
