@@ -121,7 +121,11 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onAdminMenu()
     {
-        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_OBJECTS.TITLE'] = ['route' => $this->name, 'icon' => 'fa-list'];
+        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_OBJECTS.TITLE'] = [
+            'route' => $this->name,
+            'icon' => 'fa-list',
+            'authorize' => ['admin.flex-objects', 'admin.super']
+        ];
     }
 
     /**
@@ -129,7 +133,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onDataTypeExcludeFromDataManagerPluginHook()
     {
-        $this->grav['admin']->dataTypesExcludedFromDataManagerPlugin[] = 'directory';
+        $this->grav['admin']->dataTypesExcludedFromDataManagerPlugin[] = 'flex-objects';
     }
 
     /**
