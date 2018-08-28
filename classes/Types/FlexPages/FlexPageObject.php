@@ -5,11 +5,11 @@ use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Markdown\Parsedown;
 use Grav\Common\Markdown\ParsedownExtra;
-use Grav\Common\Media\Interfaces\MediaInterface;
-use Grav\Common\Media\Traits\MediaTrait;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
 use Grav\Plugin\FlexObjects\FlexObject;
+use Grav\Plugin\FlexObjects\Interfaces\FlexMediaInterface;
+use Grav\Plugin\FlexObjects\Traits\FlexMediaTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Interfaces\PageContentInterface;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
 
@@ -17,10 +17,10 @@ use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
  * Class FlexPageObject
  * @package Grav\Plugin\FlexObjects\Types\FlexPages
  */
-class FlexPageObject extends FlexObject implements PageContentInterface, MediaInterface
+class FlexPageObject extends FlexObject implements PageContentInterface, FlexMediaInterface
 {
     use PageContentTrait;
-    use MediaTrait;
+    use FlexMediaTrait;
 
     const ORDER_PREFIX_REGEX = PAGE_ORDER_PREFIX_REGEX;
 

@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Controllers;
 
-use Grav\Common\Config\Config;
 use Grav\Common\Grav;
-use Grav\Common\Media\Interfaces\MediaInterface;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Framework\Psr7\Response;
+use Grav\Plugin\FlexObjects\Interfaces\FlexMediaInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 class MediaController extends AbstractController
 {
@@ -24,17 +22,11 @@ class MediaController extends AbstractController
     public function taskListmedia(ServerRequestInterface $request) : Response
     {
         if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            return $this->createJsonResponse([
-                'code' => 401,
-                'message' => 'Access Denied'
-            ]);
+            throw new \RuntimeException('Access Denied', 401);
         }
 
-        if (!$this->object instanceof MediaInterface) {
-            return $this->createJsonResponse([
-                'code' => 501,
-                'message' => 'Object does not support media'
-            ]);
+        if (!$this->object instanceof FlexMediaInterface) {
+            throw new \RuntimeException('Object does not support media', 501);
         }
 
         $media = $this->object->getMedia()->all();
@@ -82,124 +74,30 @@ class MediaController extends AbstractController
     public function taskAddmedia(ServerRequestInterface $request) : Response
     {
         if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            return $this->createJsonResponse([
-                'code' => 401,
-                'message' => 'Access Denied'
-            ]);
+            throw new \RuntimeException('Access Denied', 401);
         }
 
-        if (!$this->object instanceof MediaInterface) {
-            return $this->createJsonResponse([
-                'code' => 501,
-                'message' => 'Object does not support media'
-            ]);
+        if (!$this->object instanceof FlexMediaInterface) {
+            throw new \RuntimeException('Object does not support media', 501);
         }
-
-        /** @var Config $config */
-        $config = $this->grav['config'];
 
         $files = $request->getUploadedFiles();
 
         if (!isset($files['file']) || \is_array($files['file'])) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => 400,
-                    'status'  => 'error',
-                    'message' => $this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS')
-                ]
-            );
+            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
         }
 
         /** @var UploadedFileInterface $file */
         $file = $files['file'];
 
-        switch ($file->getError()) {
-            case UPLOAD_ERR_OK:
-                break;
-            case UPLOAD_ERR_NO_FILE:
-                return $this->createJsonResponse(
-                    [
-                        'code'    => 400,
-                        'status'  => 'error',
-                        'message' => $this->translate('PLUGIN_ADMIN.NO_FILES_SENT')
-                    ]
-                );
-            case UPLOAD_ERR_INI_SIZE:
-            case UPLOAD_ERR_FORM_SIZE:
-                return $this->createJsonResponse(
-                    [
-                        'code'    => 400,
-                        'status'  => 'error',
-                        'message' => $this->translate('PLUGIN_ADMIN.EXCEEDED_FILESIZE_LIMIT')
-                    ]
-                );
-            case UPLOAD_ERR_NO_TMP_DIR:
-                return $this->createJsonResponse(
-                    [
-                        'code'    => 400,
-                        'status'  => 'error',
-                        'message' => $this->translate('PLUGIN_ADMIN.UPLOAD_ERR_NO_TMP_DIR')
-                    ]
-                );
-            default:
-                return $this->createJsonResponse(
-                    [
-                        'code'    => 400,
-                        'status'  => 'error',
-                        'message' => $this->translate('PLUGIN_ADMIN.UNKNOWN_ERRORS')
-                    ]
-                );
+        try {
+            $this->object->uploadMediaFile($file);
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $grav_limit = $config->get('system.media.upload_limit', 0);
-
-        if ($grav_limit > 0 && $file->getSize() > $grav_limit) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => 400,
-                    'status'  => 'error',
-                    'message' => $this->translate('PLUGIN_ADMIN.EXCEEDED_GRAV_FILESIZE_LIMIT')
-                ]
-            );
-        }
-
-        // Check extension
         $filename = $file->getClientFilename();
         $fileParts = pathinfo($filename);
-        $extension = isset($fileParts['extension']) ? strtolower($fileParts['extension']) : '';
-
-        // If not a supported type, return
-        if (!$extension || !$config->get("media.types.{$extension}")) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => 400,
-                    'status'  => 'error',
-                    'message' => $this->translate('PLUGIN_ADMIN.UNSUPPORTED_FILE_TYPE') . ': ' . $extension
-                ]
-            );
-        }
-
-        $media = $this->object->getMedia();
-
-        /** @var UniformResourceLocator $locator */
-        $locator = $this->grav['locator'];
-        $path = $media->path();
-        if ($locator->isStream($path)) {
-            $path = $locator->findResource($path, true, true);
-        }
-
-        // Upload it
-        try {
-            $file->moveTo(sprintf('%s/%s', $path, $filename));
-        } catch (\Exception $e) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => 500,
-                    'status'  => 'error',
-                    'message' => $this->translate('PLUGIN_ADMIN.FAILED_TO_MOVE_UPLOADED_FILE')
-                ]
-            );
-        }
 
         // Add metadata if needed
         $include_metadata = Grav::instance()['config']->get('system.media.auto_metadata_exif', false);
@@ -207,6 +105,7 @@ class MediaController extends AbstractController
         $filename = str_replace(['@3x', '@2x'], '', $filename);
 
         $metadata = [];
+        $media = $this->object->getMedia();
 
         if ($include_metadata && isset($media[$filename])) {
             $img_metadata = $media[$filename]->metadata();
@@ -241,93 +140,24 @@ class MediaController extends AbstractController
     public function taskDelmedia(ServerRequestInterface $request) : Response
     {
         if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            return $this->createJsonResponse([
-                'code' => 401,
-                'message' => 'Access Denied'
-            ]);
+            throw new \RuntimeException('Access Denied', 401);
         }
 
-        if (!$this->object instanceof MediaInterface) {
-            return $this->createJsonResponse([
-                'code' => 501,
-                'message' => 'Object does not support media'
-            ]);
+        if (!$this->object instanceof FlexMediaInterface) {
+            throw new \RuntimeException('Object does not support media', 501);
         }
 
         $post = $request->getParsedBody();
-        $filename = $post['filename'] ?? null;
+        $filename = $post['filename'] ?? '';
 
         if (!$filename) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => 400,
-                    'status'  => 'error',
-                    'message' => $this->translate('PLUGIN_ADMIN.NO_FILE_FOUND')
-                ]
-            );
+            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
-        $media = $this->object->getMedia();
-
-        /** @var UniformResourceLocator $locator */
-        $locator = $this->grav['locator'];
-
-        $targetPath = $media->path() . '/' . $filename;
-        if ($locator->isStream($targetPath)) {
-            $targetPath = $locator->findResource($targetPath, true, true);
-        }
-        $fileParts  = pathinfo($filename);
-
-        $found = false;
-
-        if (file_exists($targetPath)) {
-            $found  = true;
-            $result = unlink($targetPath);
-
-            if (!$result) {
-                return $this->createJsonResponse(
-                    [
-                        'code'    => 500,
-                        'status'  => 'error',
-                        'message' => $this->translate('PLUGIN_ADMIN.FILE_COULD_NOT_BE_DELETED') . ': ' . $filename
-                    ]
-                );
-            }
-        }
-
-        // Remove Extra Files
-        foreach (scandir($media->path(), SCANDIR_SORT_NONE) as $file) {
-            if (preg_match("/{$fileParts['filename']}@\d+x\.{$fileParts['extension']}(?:\.meta\.yaml)?$|{$filename}\.meta\.yaml$/", $file)) {
-
-                $targetPath = $media->path() . '/' . $file;
-                if ($locator->isStream($targetPath)) {
-                    $targetPath = $locator->findResource($targetPath, true, true);
-                }
-
-                $result = unlink($targetPath);
-
-                if (!$result) {
-                    return $this->createJsonResponse(
-                        [
-                            'code'    => 500,
-                            'status'  => 'error',
-                            'message' => $this->translate('PLUGIN_ADMIN.FILE_COULD_NOT_BE_DELETED') . ': ' . $filename
-                        ]
-                    );
-                }
-
-                $found = true;
-            }
-        }
-
-        if (!$found) {
-            return $this->createJsonResponse(
-                [
-                    'code'    => 400,
-                    'status'  => 'error',
-                    'message' => $this->translate('PLUGIN_ADMIN.FILE_NOT_FOUND') . ': ' . $filename
-                ]
-            );
+        try {
+            $this->object->deleteMediaFile($filename);
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
         /*

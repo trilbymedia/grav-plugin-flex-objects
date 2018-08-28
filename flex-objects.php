@@ -2,6 +2,7 @@
 namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
+use Grav\Common\Page\Page;
 use Grav\Common\Plugin;
 use Grav\Plugin\FlexObjects\Controllers\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
@@ -40,7 +41,7 @@ class FlexObjectsPlugin extends Plugin
                 ['onPluginsInitialized', 0]
             ],
             'onTwigSiteVariables'  => ['onTwigSiteVariables', 0],
-            'onPageInitialized'    => ['onPageInitialized', 0],
+            'onPageInitialized'    => ['onPageInitialized', -100],
         ];
     }
 
@@ -105,6 +106,14 @@ class FlexObjectsPlugin extends Plugin
     public function onPageInitialized()
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
+            $page = new Page();
+            $page->expires(0);
+            $page->init(new \SplFileInfo(__DIR__ . '/admin/pages/flex-objects.md'));
+            $page->slug($this->controller->getLocation());
+
+            unset($this->grav['page']);
+            $this->grav['page'] = $page;
+
             $this->controller->execute();
             $this->controller->redirect();
         }
@@ -116,12 +125,29 @@ class FlexObjectsPlugin extends Plugin
         $eventController->blacklist_views[] = $this->name;
     }
 
+    public function getAdminMenu()
+    {
+        $config = $this->config();
+
+        return $config['admin']['menu'] ?? ['flex-objects' => []];
+    }
+
     /**
      * Add Flex Directory to admin menu
      */
     public function onAdminMenu()
     {
-        $this->grav['twig']->plugins_hooked_nav['PLUGIN_FLEX_OBJECTS.TITLE'] = ['route' => $this->name, 'icon' => 'fa-list'];
+        foreach ($this->getAdminMenu() as $route => $item) {
+            $title = $item['title'] ?? 'PLUGIN_FLEX_OBJECTS.TITLE';
+            $icon = $item['icon'] ?? 'fa-list';
+            $authorize = $item['authorize'] ?? ['admin.flex-objects', 'admin.super'];
+
+            $this->grav['twig']->plugins_hooked_nav[$title] = [
+                'route' => $route,
+                'icon' => $icon,
+                'authorize' => $authorize
+            ];
+        }
     }
 
     /**
@@ -129,7 +155,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onDataTypeExcludeFromDataManagerPluginHook()
     {
-        $this->grav['admin']->dataTypesExcludedFromDataManagerPlugin[] = 'directory';
+        $this->grav['admin']->dataTypesExcludedFromDataManagerPlugin[] = 'flex-objects';
     }
 
     /**
