@@ -31,40 +31,51 @@ abstract class SimpleController extends AdminBaseController
         $this->grav = Grav::instance();
         $this->active = false;
 
-        $uri = $this->grav['uri'];
-
-        $post = $_POST ?? [];
-        if (isset($post['data'])) {
-            $this->data = $this->getPost($post['data']);
-            unset($post['data']);
-        }
-        $this->post = $this->getPost($post);
-
         // Ensure the controller should be running
         if (Utils::isAdminPlugin()) {
-            list($base, $location, $target) = $this->grav['admin']->getRouteDetails();
+            list(, $location, $target) = $this->grav['admin']->getRouteDetails();
+
+            $menu = $plugin->getAdminMenu();
 
             // return null if this is not running
-            if ($location !== $plugin->name)  {
+            if (!isset($menu[$location]))  {
                 return;
             }
 
-            $array = explode('/', $target, 2);
-            $target = array_shift($array) ?: null;
-            $id = array_shift($array) ?: null;
+            $directory = $menu[$location]['directory'] ?? '';
+            $location = 'flex-objects';
+            if ($directory) {
+                $id = $target;
+                $target = $directory;
+            } else {
+                $array = explode('/', $target, 2);
+                $target = array_shift($array) ?: null;
+                $id = array_shift($array) ?: null;
+            }
+
+            $uri = $this->grav['uri'];
 
             $this->location = $location;
-            $this->action = $this->post['action'] ?? $uri->param('action');
-            $this->id = $this->post['id'] ?? $id;
             $this->target = $target;
+            $this->id = $this->post['id'] ?? $id;
+            $this->action = $this->post['action'] ?? $uri->param('action');
             $this->active = true;
             $this->admin = Grav::instance()['admin'];
-        }
 
-        $task = $post['task'] ?? $uri->param('task');
-        if ($task && $this->location === $plugin->name) {
-            $this->task = $task;
-            $this->active = true;
+            // Task
+            $task = $post['task'] ?? $uri->param('task');
+            if ($task) {
+                $this->task = $task;
+                $this->active = true;
+            }
+
+            // Post
+            $post = $_POST ?? [];
+            if (isset($post['data'])) {
+                $this->data = $this->getPost($post['data']);
+                unset($post['data']);
+            }
+            $this->post = $this->getPost($post);
         }
     }
 
