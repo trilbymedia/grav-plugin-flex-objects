@@ -26,7 +26,7 @@
         {% set uploadLimit = grav.config.system.media.upload_limit / 1024 / 1024 %}
         {% set dropzoneSettings = { maxFileSize: uploadLimit }|merge(pagemedia_settings) %}
         <div id="grav-dropzone"
-             class="dropzone"
+             class="form-input-file dropzone"
              {% if admin %}
                  data-media-url="{{ base_url }}/media/{{ route|trim('/') }}.json"
                  data-media-local="{{ base_url_relative_frontend|rtrim('/') }}/{{ route|trim('/') }}"
