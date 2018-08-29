@@ -41,7 +41,7 @@ class FlexObjectsPlugin extends Plugin
                 ['onPluginsInitialized', 0]
             ],
             'onTwigSiteVariables'  => ['onTwigSiteVariables', 0],
-            'onPageInitialized'    => ['onPageInitialized', -100],
+            'onPageInitialized'    => ['onPageInitialized', 100],
         ];
     }
 
@@ -64,6 +64,7 @@ class FlexObjectsPlugin extends Plugin
             $this->enable([
                 'onTwigTemplatePaths'                        => ['onTwigAdminTemplatePaths', 0],
                 'onAdminMenu'                                => ['onAdminMenu', 0],
+                'onAdminPage'                                => ['onAdminPage', 0],
                 'onDataTypeExcludeFromDataManagerPluginHook' => ['onDataTypeExcludeFromDataManagerPluginHook', 0],
                 'onAdminControllerInit'                      => ['onAdminControllerInit', 0],
             ]);
@@ -103,17 +104,18 @@ class FlexObjectsPlugin extends Plugin
         };
     }
 
+    public function onAdminPage(Event $event)
+    {
+        if ($this->controller->isActive()) {
+            $page = $event['page'];
+            $page->init(new \SplFileInfo(__DIR__ . '/admin/pages/flex-objects.md'));
+            $page->slug($this->controller->getLocation());
+        }
+    }
+
     public function onPageInitialized()
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
-            $page = new Page();
-            $page->expires(0);
-            $page->init(new \SplFileInfo(__DIR__ . '/admin/pages/flex-objects.md'));
-            $page->slug($this->controller->getLocation());
-
-            unset($this->grav['page']);
-            $this->grav['page'] = $page;
-
             $this->controller->execute();
             $this->controller->redirect();
         }
