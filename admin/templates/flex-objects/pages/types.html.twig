@@ -1,11 +1,9 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/types.html.twig' %}
 
-{% set directory_url =  base_url_relative ~ '/' ~ location %}
-
 {% block head %}
     {% if flex.count == 1 %}
-        {{ redirect_me(base_url ~ '/flex-objects/' ~ flex.directory.type) }}
+        {{ redirect_me(flex.editRoute(flex.directory.collection)) }}
     {% endif %}
     {{ parent() }}
 {% endblock %}
@@ -15,10 +13,11 @@
     <h1>{{ 'PLUGIN_FLEX_OBJECTS.TYPES_TITLE'|tu }}</h1>
 
     <div id="types" class="card-row grid fixed-blocks pure-g">
-        {% for type,directory in flex.directories %}
+        {% for directory in flex.directories %}
+            {% set collection = directory.collection %}
             <div class="card-item pure-u-1-3">
 
-                <h2><a href="{{ directory_url ~ '/' ~ type }}">{{ directory.title|tu }}</a> <span class="badge">{{ directory.collection.count }}</span></h2>
+                <h2><a href="{{ flex.editRoute(collection) }}">{{ directory.title|tu }}</a> <span class="badge">{{ collection.count }}</span></h2>
                 <p>
                     {{ directory.description }}
                 </p>

@@ -6,7 +6,7 @@
     {% if id %}
         <div class="button-bar danger">
             <span class="danger-zone"></span>
-            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(entry_url ~ id  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
+            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(flex.editRoute(entry)  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
         </div>
         {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
     {% endif %}

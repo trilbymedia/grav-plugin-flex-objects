@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Filesystem\Folder;
+use Grav\Common\Grav;
 
 /**
  * Class Flex
@@ -11,11 +12,18 @@ use Grav\Common\Filesystem\Folder;
  */
 class Flex implements \Countable
 {
+    /** @var array */
+    protected $config;
+
+    /** @var array */
+    protected $adminRoutes;
+
     /** @var array|FlexDirectory[] */
     protected $types = [];
 
     public function __construct(array $types, array $config)
     {
+        $this->config = $config;
         $defaults = ['enabled' => true] + $config['object'];
 
         foreach ($types as $type => $blueprint) {
@@ -76,5 +84,53 @@ class Flex implements \Countable
     public function count() : int
     {
         return \count($this->types);
+    }
+
+    /**
+     * Route to admin edit.
+     *
+     * @param $object
+     * @return string
+     */
+    public function editRoute($object = null) : string
+    {
+        $routes = $this->getAdminRoutes();
+        $type = $object ? $object->getType(false) : '';
+
+        $grav = Grav::instance();
+        $base = $grav['base_url'] . '/admin';
+
+        if (isset($routes[$type])) {
+            $route = $base . '/' .  $routes[$type];
+        } elseif ($type) {
+            $route = $base . '/' .  $routes[''] . '/' . $type;
+        }
+
+        if ($object instanceof FlexObject) {
+            $route .= '/' . $object->getKey();
+        }
+
+        return $route;
+    }
+
+    protected function getAdminRoutes()
+    {
+        if (null === $this->adminRoutes) {
+            $routes = [];
+
+            $menu = (array)($this->config['admin']['menu'] ?? null);
+            foreach ($menu as $slug => $menuItem) {
+                $directory = $menuItem['directory'] ?? '';
+                $routes[$directory] = $slug;
+            }
+
+            if (empty($routes)) {
+                $routes[''] = 'flex-objects';
+            }
+
+            $this->adminRoutes = $routes;
+        }
+
+        return $this->adminRoutes;
     }
 }
