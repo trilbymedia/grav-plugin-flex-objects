@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects\Types\FlexPages;
 
 use Grav\Plugin\FlexObjects\FlexCollection;

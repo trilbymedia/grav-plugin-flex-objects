@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Cache;

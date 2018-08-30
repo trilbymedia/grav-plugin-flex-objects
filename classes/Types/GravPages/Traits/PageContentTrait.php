@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
 use Grav\Common\Grav;

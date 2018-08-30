@@ -1,12 +1,14 @@
 {% extends 'flex-objects/pages/edit.html.twig' %}
 
 {% block edit %}
-    {% include 'partials/blueprints.html.twig' with { context: entry, data: entry, blueprints: blueprint } %}
+    {% include 'partials/blueprints.html.twig' with { context: object, data: object, blueprints: blueprint } %}
 
     {% if id %}
         <div class="button-bar danger">
             <span class="danger-zone"></span>
-            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(flex.editRoute(entry)  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
+            {% if object.authorize('delete') %}
+            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(flex.editRoute(object)  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
+            {% endif %}
         </div>
         {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
     {% endif %}

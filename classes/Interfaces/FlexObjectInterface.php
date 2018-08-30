@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects\Interfaces;
 
 use Grav\Framework\Object\Interfaces\NestedObjectInterface;

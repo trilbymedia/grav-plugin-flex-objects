@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Data\ValidationException;
@@ -9,7 +10,9 @@ use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Twig\Twig;
 use Grav\Framework\ContentBlock\HtmlBlock;
 use Grav\Framework\Object\LazyObject;
+use Grav\Plugin\FlexObjects\Interfaces\FlexAclInterface;
 use Grav\Plugin\FlexObjects\Interfaces\FlexObjectInterface;
+use Grav\Plugin\FlexObjects\Traits\FlexAclTrait;
 use Psr\SimpleCache\InvalidArgumentException;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
@@ -18,8 +21,10 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
  * Class FlexObject
  * @package Grav\Plugin\FlexObjects
  */
-class FlexObject extends LazyObject implements FlexObjectInterface
+class FlexObject extends LazyObject implements FlexObjectInterface, FlexAclInterface
 {
+    use FlexAclTrait;
+
     /** @var FlexDirectory */
     private $flexDirectory;
     /** @var string */
@@ -45,6 +50,9 @@ class FlexObject extends LazyObject implements FlexObjectInterface
             'exists' => true,
             'hasProperty' => true,
             'getProperty' => true,
+
+            // FlexAclTrait
+            'authorize' => true,
         ];
     }
 

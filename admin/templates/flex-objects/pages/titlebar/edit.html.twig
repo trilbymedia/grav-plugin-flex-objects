@@ -1,10 +1,12 @@
 {% block titlebar %}
     <div class="button-bar">
         <a class="button" href="{{ flex.editRoute(directory) }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
-        {% if entry.exits and entry.route %}
-            <a href="{{ url(entry.route, true) }}" class="button" target="_blank"><i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}</a>
+        {% if object.exits and object.route %}
+            <a href="{{ url(object.route, true) }}" class="button" target="_blank"><i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}</a>
         {% endif %}
+        {% if object.authorize('save') %}
         <button class="button" type="submit" name="task" value="save" form="blueprints"><i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}</button>
+        {% endif %}
     </div>
-    <h1><i class="fa fa-fw fa-file-text-o"></i> {{ entry.title ?? entry.key ?? '[NEW]' }}</small></h1>
+    <h1><i class="fa fa-fw fa-file-text-o"></i> {{ object.title ?? object.key ?? '[NEW]' }}</small></h1>
 {% endblock %}

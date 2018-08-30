@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
@@ -21,9 +22,15 @@ class AdminController extends SimpleController
         $id = $this->id;
 
         $directory = $this->getDirectory($type);
-        $object = $directory->remove($id);
+        $object = null !== $id ? $directory->getIndex()->get($id) : null;
 
         if ($object) {
+            if (!$object->authorize('delete')) {
+                throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
+            }
+
+            $object = $directory->remove($id);
+
             $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
             $list_page = $this->location . '/' . $type;
             $this->setRedirect($list_page);
@@ -40,6 +47,21 @@ class AdminController extends SimpleController
         $id = $this->id;
 
         $directory = $this->getDirectory($type);
+
+        $object = $id ? $directory->getIndex()->get($id) : null;
+        if (null === $object) {
+            $object = $directory->createObject($this->data, $id, true);
+        }
+
+        if ($object->exists()) {
+            if (!$object->authorize('update')) {
+                throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
+            }
+        } else {
+            if (!$object->authorize('create')) {
+                throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
+            }
+        }
 
         // if no id param, assume new, generate an ID
         $object = $directory->update($this->data, $id, true);

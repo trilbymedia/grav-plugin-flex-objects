@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Debugger;
@@ -194,7 +195,7 @@ class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
         } else {
             $collection = $this->loadCollection();
             $result = $collection->{$name}(...$arguments);
-            $class = get_class($collection);
+            $class = \get_class($collection);
             $debugger->addMessage("Call '{$class}:{$name}()' isn't cached", 'debug');
         }
 

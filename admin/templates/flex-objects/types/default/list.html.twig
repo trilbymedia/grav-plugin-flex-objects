@@ -49,15 +49,19 @@
         </tr>
         </thead>
         <tbody>
-        {% for id,entry in collection %}
+        {% for id,object in collection.authorize('list') %}
             <tr>
                 {% for key,options in fields %}
                     {% set field = options.field ?? schema.get(options.alias ?? key) %}
                     <td>
                         {% if options.link == 'edit' %}
-                            <a href="{{ flex.editRoute(entry) }}">{{ entry.value(key) }}</a>
+                            {% if object.authorize('read') %}
+                            <a href="{{ flex.editRoute(object) }}">{{ object.value(key) }}</a>
+                            {% else %}
+                            {{ object.value(key) }}
+                            {% endif %}
                         {% elseif field.type == 'toggle' %}
-                            {% if entry.value(key) %}
+                            {% if object.value(key) %}
                                 <span style="display: none;">1</span>
                                 <i class="published fa fa-check-circle"></i>
                             {% else %}
@@ -65,24 +69,28 @@
                                 <i class="unpublished fa fa-times-circle"></i>
                             {% endif %}
                         {% elseif field.type == 'url' %}
-                            <a href="{{ entry[key] }}" target="_blank"><i class="fa fa-link"></i> {{ entry.value(key) }}</a>
+                            <a href="{{ object[key] }}" target="_blank"><i class="fa fa-link"></i> {{ object.value(key) }}</a>
                         {% elseif field.type == 'selectize' %}
-                            {{ entry.value(key)|join(',') }}
+                            {{ object.value(key)|join(',') }}
                         {% else %}
-                            {{ entry.value(key) }}
+                            {{ object.value(key) }}
                         {% endif %}
                     </td>
                 {% endfor %}
                 <td>
-                    {% set entry_title = title_field ? "'" ~ entry[title_field]|join(' ') ~ "'" : 'Item' %}
-                    <a href="{{ flex.editRoute(entry) }}"
-                       title="Edit {{ entry_title }}"
+                    {% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
+                    {% if object.authorize('read') %}
+                    <a href="{{ flex.editRoute(object) }}"
+                       title="Edit {{ object_title }}"
                        class="edit-action"><i class="fa fa-pencil"></i></a>
+                    {% endif %}
+                    {% if object.authorize('delete') %}
                     <a href="#delete"
                        class="page-delete delete-action"
-                       title="Delete {{ entry_title }}"
+                       title="Delete {{ object_title }}"
                        data-remodal-target="delete"
-                       data-delete-url="{{ uri.addNonce(flex.editRoute(entry)  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
+                       data-delete-url="{{ uri.addNonce(flex.editRoute(object)  ~ '/action' ~ separator ~ 'delete', 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
+                    {% endif %}
                 </td>
             </tr>
         {% endfor %}

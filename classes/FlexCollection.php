@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects;
 
 use Doctrine\Common\Collections\Criteria;
@@ -37,6 +38,8 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
             'hasNestedProperty' => true,
             'getNestedProperty' => true,
             'orderBy' => true,
+
+            'authorize' => true
         ];
     }
 
@@ -208,6 +211,19 @@ class FlexCollection extends ObjectCollection implements FlexCollectionInterface
     public function getTimestamps()
     {
         return $this->call('getTimestamp');
+    }
+
+    /**
+     * @param string $action
+     * @param string|null $scope
+     * @return FlexCollection
+     */
+    public function authorize(string $action, string $scope = null)
+    {
+        $list = $this->call('authorize', [$action, $scope]);
+        $list = \array_filter($list);
+
+        return $this->select(array_keys($list));
     }
 
     /**

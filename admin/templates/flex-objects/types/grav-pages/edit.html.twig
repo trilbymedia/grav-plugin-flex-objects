@@ -1,5 +1,5 @@
 {% extends 'flex-objects/types/default/edit.html.twig' %}
 
 {% block content_top %}
-    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(entry.storageFolder() ?? directory.getStorageFolder())|trim('/') }} {{ not entry ? '[NEW]' }}</b> (type: <b>{{ (entry.template ?? 'default') }}</b>)</div>
+    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(object.storageFolder() ?? directory.getStorageFolder())|trim('/') }} {{ not object ? '[NEW]' }}</b> (type: <b>{{ (object.template ?? 'default') }}</b>)</div>
 {% endblock %}

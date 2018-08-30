@@ -1,4 +1,5 @@
 <?php
+
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
