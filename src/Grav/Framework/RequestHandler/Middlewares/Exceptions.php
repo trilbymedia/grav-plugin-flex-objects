@@ -16,17 +16,19 @@ class Exceptions implements MiddlewareInterface
     {
         try {
             return $handler->handle($request);
-        } catch (\Exception $e) {
+        } catch (\Throwable $exception) {
             $response = [
                 'error' => [
-                    'type' => \get_class($e),
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine()
+                    'type' => \get_class($exception),
+                    'code' => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine(),
+                    'trace' => explode("\n", $exception->getTraceAsString()),
                 ]
             ];
 
-            return new Response($e->getCode() ?: 500, [], json_encode($response));
+            return new Response($exception->getCode() ?: 500, [], json_encode($response));
         }
     }
 }
