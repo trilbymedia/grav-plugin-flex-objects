@@ -139,16 +139,25 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onAdminMenu()
     {
+        /** @var Flex $flex */
+        $flex = $this->grav['flex_objects'];
+
         foreach ($this->getAdminMenu() as $route => $item) {
+            $directory = $item['directory'] ? $flex->getDirectory($item['directory']) : null;
+
             $title = $item['title'] ?? 'PLUGIN_FLEX_OBJECTS.TITLE';
             $icon = $item['icon'] ?? 'fa-list';
-            $authorize = $item['authorize'] ?? ['admin.flex-objects', 'admin.super'];
+            $authorize = $item['authorize'] ?? ($directory ? null : ['admin.flex-objects', 'admin.super']);
+            if (null === $authorize && $directory->authorize('list', 'admin')) {
+                continue;
+            }
+            $badge = $directory ? ['badge' => ['count' => $directory->getCollection()->authorize('list')->count()]] : [];
 
             $this->grav['twig']->plugins_hooked_nav[$title] = [
                 'route' => $route,
                 'icon' => $icon,
                 'authorize' => $authorize
-            ];
+            ] + $badge;
         }
     }
 
