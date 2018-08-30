@@ -12,8 +12,10 @@ use Grav\Framework\Cache\Adapter\DoctrineCache;
 use Grav\Framework\Cache\Adapter\MemoryCache;
 use Grav\Framework\Cache\CacheInterface;
 use Grav\Framework\Collection\CollectionInterface;
+use Grav\Plugin\FlexObjects\Interfaces\FlexAclInterface;
 use Grav\Plugin\FlexObjects\Storage\SimpleStorage;
 use Grav\Plugin\FlexObjects\Storage\StorageInterface;
+use Grav\Plugin\FlexObjects\Traits\FlexAclTrait;
 use Psr\SimpleCache\InvalidArgumentException;
 use RuntimeException;
 
@@ -21,8 +23,10 @@ use RuntimeException;
  * Class FlexDirectory
  * @package Grav\Plugin\FlexObjects
  */
-class FlexDirectory
+class FlexDirectory implements FlexAclInterface
 {
+    use FlexAclTrait;
+
     /** @var string */
     protected $type;
     /** @var string */
