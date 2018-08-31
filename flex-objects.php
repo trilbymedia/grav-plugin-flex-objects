@@ -143,7 +143,7 @@ class FlexObjectsPlugin extends Plugin
         $flex = $this->grav['flex_objects'];
 
         foreach ($this->getAdminMenu() as $route => $item) {
-            $directory = $item['directory'] ? $flex->getDirectory($item['directory']) : null;
+            $directory = isset($item['directory']) ? $flex->getDirectory($item['directory']) : null;
 
             $title = $item['title'] ?? 'PLUGIN_FLEX_OBJECTS.TITLE';
             $icon = $item['icon'] ?? 'fa-list';
