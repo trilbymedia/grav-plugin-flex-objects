@@ -256,7 +256,7 @@ class FlexObject extends LazyObject implements FlexObjectInterface, FlexAclInter
         }
 
         if ($key !== false) {
-            $key = $this->getCacheKey() . '.' . md5($layout . json_encode($context));
+            $key = md5($this->getCacheKey() . '.' . $layout . json_encode($context));
             $cache = $this->flexDirectory->getCache('render');
         }
 
