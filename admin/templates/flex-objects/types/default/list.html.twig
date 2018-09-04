@@ -72,6 +72,12 @@
                             <a href="{{ object[key] }}" target="_blank"><i class="fa fa-link"></i> {{ object.value(key) }}</a>
                         {% elseif field.type == 'selectize' %}
                             {{ object.value(key)|join(',') }}
+                        {% elseif field.type == 'datetime' %}
+                            {{ object.value(key)|date('m/d/Y \\a\\t g:i A') }}
+                        {% elseif field.type == 'date' %}
+                            {{ object.value(key)|date('m/d/Y') }}
+                        {% elseif field.type == 'time' %}
+                            {{ object.value(key)|date('g:i A') }}
                         {% else %}
                             {{ object.value(key) }}
                         {% endif %}
