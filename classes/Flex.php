@@ -105,6 +105,8 @@ class Flex implements \Countable
             $route = $base . '/' .  $routes[$type];
         } elseif ($type) {
             $route = $base . '/' .  $routes[''] . '/' . $type;
+        } else {
+            $route = $base;
         }
 
         if ($object instanceof FlexObject) {
