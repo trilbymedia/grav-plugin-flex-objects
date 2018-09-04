@@ -1,12 +1,9 @@
 {% extends 'partials/base.html.twig' %}
+{% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
 {% set id = key %}
 {% set object = directory.collection[id] %}
-
-{% use 'flex-objects/pages/titlebar/edit.html.twig' %}
-
 {% if not object and uri.param('action') != 'add' %}{% do grav.redirect(current_route) %}{% endif %}
-
 {% set blueprint = object.blueprint ?? directory.blueprint %}
 
 {% block content_top %}
