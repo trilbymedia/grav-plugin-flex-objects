@@ -23,6 +23,8 @@ class GravPageStorage extends FolderStorage
     protected $ignore_files;
     protected $ignore_folders;
     protected $ignore_hidden;
+    protected $recurse;
+    protected $base_route;
 
     protected $page_extensions;
     protected $flags;
@@ -36,6 +38,8 @@ class GravPageStorage extends FolderStorage
         $this->ignore_hidden = (bool)$config->get('system.pages.ignore_hidden');
         $this->ignore_files = (array)$config->get('system.pages.ignore_files');
         $this->ignore_folders = (array)$config->get('system.pages.ignore_folders');
+        $this->recurse = $options['recurse'] ?? true;
+        $this->base_route = $options['base_route'] ?? '';
 
         /** @var Language $language */
         $language = $grav['language'];
@@ -79,6 +83,10 @@ class GravPageStorage extends FolderStorage
      */
     public function getPathFromKey(string $key) : string
     {
+        if ($this->base_route) {
+            $key = substr($key,  \strlen($this->base_route) + 1);
+        }
+
         $dataFolder = substr($this->dataFolder, -1) === '/' ? substr($this->dataFolder, 0, -1) : $this->dataFolder;
 
         return sprintf($this->dataPattern, $dataFolder, $key);
@@ -92,6 +100,10 @@ class GravPageStorage extends FolderStorage
      */
     protected function getKeyFromPath(string $path) : string
     {
+        if ($this->base_route) {
+            $path = $this->base_route . '/' . $path;
+        }
+
         return $path;
     }
 
@@ -149,7 +161,9 @@ class GravPageStorage extends FolderStorage
 
             $updated = $info->getMTime();
 
-            $list += $this->recurseKeys($folder, $prefix . '/' . $key, $updated);
+            if ($this->recurse) {
+                $list += $this->recurseKeys($folder, $prefix . '/' . $key, $updated);
+            }
 
             if ($key[0] === '_') {
                 // Update modified only for modular pages.
@@ -166,7 +180,14 @@ class GravPageStorage extends FolderStorage
 
         ksort($markdown, SORT_NATURAL);
 
-        $list[$path] = [$prefix, $modified, $markdown];
+        if ($this->base_route) {
+            $path = ($path ? $path . '/' : $path) . $this->base_route;
+            $name = $prefix ? '/'. $this->base_route . '/' . $prefix : '/'. $this->base_route;
+        } else {
+            $name = $prefix;
+        }
+
+        $list[$path] = [$name, $modified, $markdown];
 
         return $list;
     }

@@ -111,7 +111,7 @@ class FlexDirectory implements FlexAclInterface
             $this->config = new Config(array_merge_recursive($this->getBlueprintInternal()->get('config', []), $this->defaults));
         }
 
-        return $this->config->get($name, $default);
+        return null === $name ? $this->config : $this->config->get($name, $default);
     }
 
     /**
