@@ -316,6 +316,10 @@ class FolderStorage extends AbstractFilesystemStorage
      */
     protected function findAllKeys() : array
     {
+        if (!file_exists($this->getStoragePath())) {
+            return [];
+        }
+
         $flags = \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
         $iterator = new \FilesystemIterator($this->getStoragePath(), $flags);
         $list = [];
