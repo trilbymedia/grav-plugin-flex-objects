@@ -3,7 +3,7 @@
 
 {% block head %}
     {% if flex.count == 1 %}
-        {{ redirect_me(flex.editRoute(flex.directory.collection)) }}
+        {{ redirect_me(flex.adminRoute(flex.directory.collection)) }}
     {% endif %}
     {{ parent() }}
 {% endblock %}
@@ -17,7 +17,7 @@
             {% set collection = directory.collection %}
             <div class="card-item pure-u-1-3">
 
-                <h2><a href="{{ flex.editRoute(collection) }}">{{ directory.title|tu }}</a> <span class="badge">{{ collection.count }}</span></h2>
+                <h2><a href="{{ flex.adminRoute(collection) }}">{{ directory.title|tu }}</a> <span class="badge">{{ collection.authorize('list').count }}</span></h2>
                 <p>
                     {{ directory.description }}
                 </p>

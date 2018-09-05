@@ -3,6 +3,7 @@
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
+use Grav\Plugin\FlexObjects\Flex;
 use Grav\Plugin\FlexObjects\FlexDirectory;
 use Grav\Plugin\FlexObjects\FlexObject;
 use RocketTheme\Toolbox\Event\Event;
@@ -32,8 +33,8 @@ class AdminController extends SimpleController
             $object = $directory->remove($id);
 
             $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
-            $list_page = $this->location . '/' . $type;
-            $this->setRedirect($list_page);
+
+            $this->setRedirect($this->getFlex()->adminRoute($directory));
 
             $grav = Grav::instance();
             $grav->fireEvent('onAdminAfterDelete', new Event(['object' => $object]));
@@ -70,8 +71,7 @@ class AdminController extends SimpleController
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect && !$id) {
-                $edit_page = $this->location . '/' . $this->target . '/' . $object->getKey();
-                $this->setRedirect($edit_page);
+                $this->setRedirect($this->getFlex()->adminRoute($object));
             }
 
             $grav = Grav::instance();
@@ -86,18 +86,18 @@ class AdminController extends SimpleController
     {
         switch ($var) {
             case 'create-new':
-                $this->setRedirect($this->location . '/' . $this->target . '/action:add');
+                $this->setRedirect($this->getFlex()->adminRoute($this->target) . '/action:add');
                 $saved_option = $var;
                 break;
             case 'list':
-                $this->setRedirect($this->location . '/' . $this->target);
+                $this->setRedirect($this->getFlex()->adminRoute($this->target));
                 $saved_option = $var;
                 break;
             case 'edit':
             default:
                 $id = $this->id;
                 if ($id) {
-                    $this->setRedirect($this->location . '/' . $this->target . '/' . $id);
+                    $this->setRedirect($this->getFlex()->adminRoute($this->target) . '/' . $id);
                 }
                 $saved_option = 'edit';
                 break;
@@ -127,6 +127,14 @@ class AdminController extends SimpleController
     protected function getDirectory($type)
     {
         return Grav::instance()['flex_objects']->getDirectory($type);
+    }
+
+    /**
+     * @return Flex
+     */
+    protected function getFlex()
+    {
+        return Grav::instance()['flex_objects'];
     }
 
     /**

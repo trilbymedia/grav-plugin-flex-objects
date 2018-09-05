@@ -88,32 +88,41 @@ class Flex implements \Countable
     }
 
     /**
-     * Route to admin edit.
-     *
-     * @param $object
+     * @param string|object|null $type
+     * @param array $params
      * @return string
      */
-    public function editRoute($object = null) : string
+    public function adminRoute($type = null, array $params = []) : string
     {
+        if (\is_object($type)) {
+            $object = $type;
+            $type = $type->getType(false);
+        } else {
+            $object = null;
+        }
+
         $routes = $this->getAdminRoutes();
-        $type = $object ? $object->getType(false) : '';
 
         $grav = Grav::instance();
-        $base = $grav['base_url'] . '/admin';
+        $route = $grav['base_url'] . '/admin';
 
-        if (isset($routes[$type])) {
-            $route = $base . '/' .  $routes[$type];
+        if ($type && isset($routes[$type])) {
+            $route .= '/' .  $routes[$type];
         } elseif ($type) {
-            $route = $base . '/' .  $routes[''] . '/' . $type;
-        } else {
-            $route = $base;
+            $route .= '/' .  $routes[''] . '/' . $type;
         }
 
         if ($object instanceof FlexObject) {
             $route .= '/' . $object->getKey();
         }
 
-        return $route;
+        $p = [];
+        foreach ($params as $key => $val) {
+            // FIXME: use config
+            $p[] = $key . ':' . $val;
+        }
+
+        return $route . ($p ? '/' . implode('/', $p) : '');
     }
 
     protected function getAdminRoutes()

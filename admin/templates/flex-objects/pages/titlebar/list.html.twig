@@ -1,9 +1,9 @@
 {% block titlebar %}
-    {% set back_url = flex.count > 1 ? flex.editRoute() : base_url %}
+    {% set back_url = flex.count > 1 ? flex.adminRoute() : base_url %}
     <div class="button-bar">
         <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
         {% if directory.authorize('create') %}
-        <a class="button" href="{{ flex.editRoute(directory) ~ '/action:add' }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
+        <a class="button" href="{{ flex.adminRoute(directory, {action: 'add'}) }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
         {% endif %}
     </div>
     <h1><i class="fa fa-fw fa-file-text-o"></i> {{ directory.title|tu }}</h1>

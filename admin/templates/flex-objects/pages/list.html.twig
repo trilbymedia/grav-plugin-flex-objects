@@ -1,7 +1,7 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/list.html.twig' %}
 
-{% set collection = directory.collection %}
+{% set collection = directory.collection.authorize('list') %}
 
 {% block content_top %}
     <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(directory.storageFolder())|trim('/') }}</b></div>
@@ -9,6 +9,158 @@
 
 {% block content %}
 <div id="directory">
-    {% block list %}{% endblock %}
+    {% block list %}
+
+        {% if not fields %}
+            <div class="no-entries">
+                <p>Blueprint for '{{ target }}' does not define displayed fields or list page override.</p>
+                <ul>
+                    <li>
+                        Please add list of fields to blueprints file.
+                    </li>
+                    <li>
+                        Please create template file for the type in <strong>flex-objects/types/{{ target }}/list.html.twig</strong>
+                    </li>
+                </ul>
+            </div>
+            {% elseif not collection.count %}
+            <div class="no-entries">
+                {% if directory.authorize('create') %}
+                    There are currently no entries, click the <a href="{{ flex.adminRoute(collection, {action: 'add'}) }}">Add</a> button to create a new one...
+                {% else %}
+                    There are currently no entries.
+                {% endif %}
+            </div>
+        {% else %}
+            <table id="data-table" class="tablesorter tablesorter-default">
+                <colgroup>
+                    {% for key,options in fields %}
+                        <col width="{{ options.width ?: ((100-fields_width) / ((fields_count-fields_set) ?: 1))|round(3) }}" />
+                    {% endfor %}
+                    <col width="8" />
+                </colgroup>
+                <thead>
+                <tr>
+                    {% for key,options in fields %}
+                        <th>{{ (options.field.label ?? schema.get(options.alias ?? key).label)|tu }}</th>
+                    {% endfor %}
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for id,object in collection %}
+                    <tr>
+                        {% for key,options in fields %}
+                            {% set field = options.field ?? schema.get(options.alias ?? key) %}
+                            <td>
+                                {% if options.link == 'edit' %}
+                                    {% if object.authorize('read') %}
+                                        <a href="{{ flex.adminRoute(object) }}">{{ object.value(key) }}</a>
+                                    {% else %}
+                                        {{ object.value(key) }}
+                                    {% endif %}
+                                {% elseif field.type == 'toggle' %}
+                                    {% if object.value(key) %}
+                                        <span style="display: none;">1</span>
+                                        <i class="published fa fa-check-circle"></i>
+                                    {% else %}
+                                        <span style="display: none;">0</span>
+                                        <i class="unpublished fa fa-times-circle"></i>
+                                    {% endif %}
+                                {% elseif field.type == 'url' %}
+                                    <a href="{{ object[key] }}" target="_blank"><i class="fa fa-link"></i> {{ object.value(key) }}</a>
+                                {% elseif field.type == 'selectize' %}
+                                    {{ object.value(key)|join(',') }}
+                                {% elseif field.type == 'datetime' %}
+                                    {{ object.value(key)|date('m/d/Y \\a\\t g:i A') }}
+                                {% elseif field.type == 'date' %}
+                                    {{ object.value(key)|date('m/d/Y') }}
+                                {% elseif field.type == 'time' %}
+                                    {{ object.value(key)|date('g:i A') }}
+                                {% else %}
+                                    {{ object.value(key) }}
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                        <td>
+                            {% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
+                            {% if object.authorize('read') %}
+                                <a href="{{ flex.adminRoute(object) }}"
+                                   title="Edit {{ object_title }}"
+                                   class="edit-action"><i class="fa fa-pencil"></i></a>
+                            {% endif %}
+                            {% if object.authorize('delete') %}
+                                <a href="#delete"
+                                   class="page-delete delete-action"
+                                   title="Delete {{ object_title }}"
+                                   data-remodal-target="delete"
+                                   data-delete-url="{{ uri.addNonce(flex.adminRoute(object, {action: 'delete'}), 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <div id="pager" class="pager">
+                <form>
+                    <button class="button first"><i class="fa fa-fw fa-angle-double-left"></i></button>
+                    <button class="button prev"><i class="fa fa-fw fa-chevron-left"></i></button>
+
+                    <span class="pagedisplay"></span>
+
+                    <button class="button next"><i class="fa fa-fw fa-chevron-right"></i></button>
+                    <button class="button last"><i class="fa fa-fw fa-angle-double-right"></i></button>
+
+                    <select data-grav-selectize class="pagesize">
+                        <option selected="selected" value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">All</option>
+                    </select>
+                </form>
+            </div>
+
+            <script>
+                ((function($) {
+                    var list = $('#data-table');
+
+                    list.tablesorter({
+                        theme: 'blue',
+                        cssChildRow: 'tablesorter-childRow',
+                        widgets: ['zebra', 'filter', 'pager'],
+                        headers: {
+                    {% for key,options in fields %}
+                    {% set field = options.field ?? schema.get(options.alias ?? key) %}
+                    {% if field.type not in ['toggle', 'text', 'textarea', 'url', 'selectize', 'email'] %}
+                    {{ loop.index - 1 }}: { sorter: false, filter: false },
+                    {% else %}
+                    {% endif %}
+                    {% endfor %}
+                    {{ fields_count }}: { sorter: false, filter: false },
+                },
+                    widgetOptions: {
+                        pager_output: '{startRow} - {endRow} / {filteredRows} ({totalRows})',
+                            pager_removeRows: false,
+                            pager_size: 10,
+                            filter_childRows: false,
+                            filter_cssFilter: 'tablesorter-filter',
+                            filter_startsWith: false,
+                            filter_ignoreCase: true
+                    }
+                });
+
+                    list.find('.tablesorter-childRow td').addClass('hidden');
+
+                    $('#pager button').on('click', function(e) { e.preventDefault(); });
+                })(jQuery));
+            </script>
+
+        {% endif %}
+
+        {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
+
+    {% endblock %}
 </div>
 {% endblock %}
