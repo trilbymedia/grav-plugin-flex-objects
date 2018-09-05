@@ -1,17 +1,17 @@
 [
     {
         "name": "nyholm/psr7",
-        "version": "1.0.0",
-        "version_normalized": "1.0.0.0",
+        "version": "1.0.1",
+        "version_normalized": "1.0.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Nyholm/psr7.git",
-            "reference": "0f68d7130e5fe0a76704ba62a9131e66620a698e"
+            "reference": "02a20d5e9241daefd68935f7a43d9a7a8b4b6277"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Nyholm/psr7/zipball/0f68d7130e5fe0a76704ba62a9131e66620a698e",
-            "reference": "0f68d7130e5fe0a76704ba62a9131e66620a698e",
+            "url": "https://api.github.com/repos/Nyholm/psr7/zipball/02a20d5e9241daefd68935f7a43d9a7a8b4b6277",
+            "reference": "02a20d5e9241daefd68935f7a43d9a7a8b4b6277",
             "shasum": ""
         },
         "require": {
@@ -29,7 +29,7 @@
             "php-http/psr7-integration-tests": "dev-master",
             "phpunit/phpunit": "^7.0"
         },
-        "time": "2018-08-02T13:49:19+00:00",
+        "time": "2018-09-02T11:50:33+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {

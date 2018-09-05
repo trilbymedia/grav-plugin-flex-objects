@@ -18,8 +18,11 @@ A super lightweight PSR-7 implementation. Very strict and very fast.
 | PSR-7* | 66% | 92% | 75% | 100% |
 | PSR-17 | No | No | No | Yes |
 | HTTPlug | No | No | No | Yes |
+| Performance** | 1.49x | 1x | 1.17x | 1.69x |
 
 \* Percent of completed tests in https://github.com/php-http/psr7-integration-tests
+
+\** See benchmark at https://github.com/Nyholm/http-client-benchmark (higher is better)
 
 ## Installation
 
@@ -41,7 +44,7 @@ Use the PSR-17 factory to create requests, streams, URIs etc.
 ```php
 $factory = new \Nyholm\Psr7\Factory\Psr17Factory();
 $request = $factory->createRequest('GET', 'http://tnyholm.se');
-$steam = $factory->createStream('foobar');
+$stream = $factory->createStream('foobar');
 ```
 
 ### Sending a request
