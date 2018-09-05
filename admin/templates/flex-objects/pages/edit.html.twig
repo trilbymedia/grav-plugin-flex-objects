@@ -3,7 +3,7 @@
 
 {% set id = key %}
 {% set object = directory.collection[id] %}
-{% if not object and uri.param('action') != 'add' %}{% do grav.redirect(current_route) %}{% endif %}
+{% if not object and uri.param('action') != 'add' %}{% throw 404 directory.type|capitalize ~ ' object not found' %}{% endif %}
 {% set blueprint = object.blueprint ?? directory.blueprint %}
 
 {% block content_top %}
