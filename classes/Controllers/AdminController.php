@@ -70,7 +70,7 @@ class AdminController extends SimpleController
         if ($object) {
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
-            if (!$this->redirect && !$id) {
+            if (!$this->redirect) {
                 $this->setRedirect($this->getFlex()->adminRoute($object));
             }
 

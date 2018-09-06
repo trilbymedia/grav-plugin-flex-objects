@@ -41,6 +41,7 @@ abstract class AbstractController
         /** @var FlexObjectInterface $object */
         $this->object = $context['object'];
 
+        // FIXME:
         /*
         if (!$this->validateNonce()) {
             return false;

@@ -56,27 +56,26 @@ abstract class SimpleController extends AdminBaseController
 
             $uri = $this->grav['uri'];
 
-            $this->location = $location;
-            $this->target = $target;
-            $this->id = $this->post['id'] ?? $id;
-            $this->action = $this->post['action'] ?? $uri->param('action');
-            $this->active = true;
-            $this->admin = Grav::instance()['admin'];
-
-            // Task
-            $task = $post['task'] ?? $uri->param('task');
-            if ($task) {
-                $this->task = $task;
-                $this->active = true;
-            }
-
             // Post
             $post = $_POST ?? [];
             if (isset($post['data'])) {
                 $this->data = $this->getPost($post['data']);
                 unset($post['data']);
             }
+
+            // Task
+            $task = $post['task'] ?? $uri->param('task');
+            if ($task) {
+                $this->task = $task;
+            }
+
             $this->post = $this->getPost($post);
+            $this->location = $location;
+            $this->target = $target;
+            $this->id = $this->post['id'] ?? $id;
+            $this->action = $this->post['action'] ?? $uri->param('action');
+            $this->active = true;
+            $this->admin = Grav::instance()['admin'];
         }
     }
 
@@ -136,10 +135,10 @@ abstract class SimpleController extends AdminBaseController
         return $success;
     }
 
-    protected function prepareData(array $data)
+    public function prepareData(array $data = null)
     {
         $type = trim("{$this->location}/{$this->target}", '/');
-        $data = $this->data($type, $data);
+        $data = $this->data($type, $data ?? $_POST);
 
         return $data;
     }
