@@ -202,7 +202,8 @@ class FlexDirectory implements FlexAclInterface
                 // TODO: media support.
             }
 
-            $rows = $storage->updateRows([$newKey => $object->triggerEvent('onSave')->prepareStorage()]);
+            $object->save();
+            //$rows = $storage->updateRows([$newKey => $object->triggerEvent('onSave')->prepareStorage()]);
         }
 
         try {
@@ -216,11 +217,11 @@ class FlexDirectory implements FlexAclInterface
         }
 
         /** @var FlexObject $class */
-        $class = $this->getObjectClass();
-
-        $row = reset($rows);
-        $index = $class::createIndex([key($rows) => time()]);
-        $object = $this->createObject($row, key($index), false);
+        //$class = $this->getObjectClass();
+        //
+        //$row = $object;
+        //$index = $class::createIndex([key($rows) => time()]);
+        //$object = $this->createObject($row, key($index), false);
 
         return $object;
     }
