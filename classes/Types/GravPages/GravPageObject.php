@@ -252,7 +252,7 @@ class GravPageObject extends FlexPageObject
 
     public function folderExists()
     {
-        return $this->exists() || is_dir($this->getMediaFolder());
+        return $this->exists() || is_dir($this->getStorageFolder());
     }
 
     public function full_order()
