@@ -6,8 +6,8 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
 use Grav\Common\Page\Medium\Medium;
+use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Framework\Psr7\Response;
-use Grav\Plugin\FlexObjects\Interfaces\FlexMediaInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -25,8 +25,8 @@ class MediaController extends AbstractController
             throw new \RuntimeException('Access Denied', 401);
         }
 
-        if (!$this->object instanceof FlexMediaInterface) {
-            throw new \RuntimeException('Object does not support media', 501);
+        if (!$this->object instanceof MediaManipulationInterface) {
+            throw new \RuntimeException('Object does not support media manipulation', 501);
         }
 
         $media = $this->object->getMedia()->all();
@@ -77,8 +77,8 @@ class MediaController extends AbstractController
             throw new \RuntimeException('Access Denied', 401);
         }
 
-        if (!$this->object instanceof FlexMediaInterface) {
-            throw new \RuntimeException('Object does not support media', 501);
+        if (!$this->object instanceof MediaManipulationInterface) {
+            throw new \RuntimeException('Object does not support media manipulation', 501);
         }
 
         $files = $request->getUploadedFiles();
@@ -143,8 +143,8 @@ class MediaController extends AbstractController
             throw new \RuntimeException('Access Denied', 401);
         }
 
-        if (!$this->object instanceof FlexMediaInterface) {
-            throw new \RuntimeException('Object does not support media', 501);
+        if (!$this->object instanceof MediaManipulationInterface) {
+            throw new \RuntimeException('Object does not support media manipulation', 501);
         }
 
         $post = $request->getParsedBody();

@@ -8,8 +8,8 @@ use Grav\Common\Markdown\Parsedown;
 use Grav\Common\Markdown\ParsedownExtra;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
+use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Plugin\FlexObjects\FlexObject;
-use Grav\Plugin\FlexObjects\Interfaces\FlexMediaInterface;
 use Grav\Plugin\FlexObjects\Traits\FlexMediaTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Interfaces\PageContentInterface;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
@@ -18,7 +18,7 @@ use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
  * Class FlexPageObject
  * @package Grav\Plugin\FlexObjects\Types\FlexPages
  */
-class FlexPageObject extends FlexObject implements PageContentInterface, FlexMediaInterface
+class FlexPageObject extends FlexObject implements PageContentInterface, MediaManipulationInterface
 {
     use PageContentTrait;
     use FlexMediaTrait;
