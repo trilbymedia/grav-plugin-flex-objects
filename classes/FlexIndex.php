@@ -4,12 +4,14 @@ namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
+use Grav\Framework\Collection\CollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectCollectionInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
-use Grav\Plugin\FlexObjects\Collections\ArrayIndex;
+use Grav\Framework\Object\ObjectIndex;
+use Grav\Plugin\FlexObjects\Interfaces\FlexObjectInterface;
 use PSR\SimpleCache\InvalidArgumentException;
 
-class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
+class FlexIndex extends ObjectIndex // implements FlexCollectionInterface
 {
     /** @var FlexDirectory */
     private $flexDirectory;
@@ -244,7 +246,7 @@ class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
      * @param mixed $value
      * @return ObjectInterface|null
      */
-    protected function loadObject($key, $value)
+    protected function loadElement($key, $value) : ?ObjectInterface
     {
         $objects = $this->flexDirectory->loadObjects([$key => $value]);
 
@@ -255,7 +257,7 @@ class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
      * @param array|null $entries
      * @return ObjectInterface[]
      */
-    protected function loadObjects(array $entries = null)
+    protected function loadElements(array $entries = null) : array
     {
         return $this->flexDirectory->loadObjects($entries ?? $this->getEntries());
     }
@@ -264,7 +266,7 @@ class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
      * @param array|null $entries
      * @return ObjectCollectionInterface
      */
-    protected function loadCollection(array $entries = null)
+    protected function loadCollection(array $entries = null) : CollectionInterface
     {
         return $this->flexDirectory->loadCollection($entries ?? $this->getEntries());
     }
@@ -273,8 +275,17 @@ class FlexIndex extends ArrayIndex // implements FlexCollectionInterface
      * @param mixed $value
      * @return bool
      */
-    protected function isAllowedObject($value)
+    protected function isAllowedElement($value) : bool
     {
         return $value instanceof FlexObject;
+    }
+
+    /**
+     * @param FlexObjectInterface $object
+     * @return mixed
+     */
+    protected function getElementMeta($object)
+    {
+        return $object->getTimestamp();
     }
 }
