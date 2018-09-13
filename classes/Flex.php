@@ -11,26 +11,10 @@ use Grav\Common\Grav;
  * Class Flex
  * @package Grav\Plugin\FlexObjects
  */
-class Flex implements \Countable
+class Flex extends \Grav\Framework\Flex\Flex
 {
     /** @var array */
-    protected $config;
-
-    /** @var array */
     protected $adminRoutes;
-
-    /** @var array|FlexDirectory[] */
-    protected $types = [];
-
-    public function __construct(array $types, array $config)
-    {
-        $this->config = $config;
-        $defaults = ['enabled' => true] + $config['object'];
-
-        foreach ($types as $type => $blueprint) {
-            $this->types[$type] = new FlexDirectory($type, $blueprint, $defaults);
-        }
-    }
 
     /**
      * @return array
@@ -56,35 +40,6 @@ class Flex implements \Countable
         ksort($directories);
 
         return $directories;
-    }
-
-    /**
-     * @return array
-     */
-    public function getDirectories() : array
-    {
-        return $this->types;
-    }
-
-    /**
-     * @param string|null $type
-     * @return FlexDirectory|null
-     */
-    public function getDirectory($type = null) : ?FlexDirectory
-    {
-        if (!$type) {
-            return reset($this->types) ?: null;
-        }
-
-        return $this->types[$type] ?? null;
-    }
-
-    /**
-     * @return int
-     */
-    public function count() : int
-    {
-        return \count($this->types);
     }
 
     /**
@@ -125,7 +80,10 @@ class Flex implements \Countable
         return $route . ($p ? '/' . implode('/', $p) : '');
     }
 
-    protected function getAdminRoutes()
+    /**
+     * @return array
+     */
+    protected function getAdminRoutes() : array
     {
         if (null === $this->adminRoutes) {
             $routes = [];
