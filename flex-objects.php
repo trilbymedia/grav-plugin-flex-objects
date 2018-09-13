@@ -123,7 +123,10 @@ class FlexObjectsPlugin extends Plugin
     public function onAdminControllerInit(Event $event)
     {
         $eventController = $event['controller'];
-        $eventController->blacklist_views[] = $this->name;
+
+        foreach ($this->getAdminMenu() as $route => $item) {
+            $eventController->blacklist_views[] = $route;
+        }
     }
 
     public function getAdminMenu()
