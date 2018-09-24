@@ -1,3 +1,6 @@
+{% extends "forms/field.html.twig" %}
+
+{% block field %}
 {% if field.security is empty or authorize(array(field.security)) %}
 
     {% if field.title or field.underline %}
@@ -10,13 +13,14 @@
 
     {% if field.fields %}
         <div class="form-section {{ field.field_classes }}">
-        {% for field in field.fields %}
-            {% if field.type %}
-                {% set value = field.name ? data.value(field.name) : data.toArray %}
-                {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
+        {% for child in field.fields %}
+            {% if child.type %}
+                {% set value = child.name ? data.value(child.name) : data.toArray %}
+                {% include ["forms/fields/#{child.type}/#{child.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
             {% endif %}
         {% endfor %}
         </div>
     {% endif %}
 
 {% endif %}
+{% endblock %}

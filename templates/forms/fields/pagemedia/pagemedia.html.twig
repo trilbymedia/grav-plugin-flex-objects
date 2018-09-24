@@ -1,3 +1,6 @@
+{% extends "forms/field.html.twig" %}
+
+{% block field %}
 {% set value = (value is null ? field.default : value) %}
 {% set pagemedia = config.get('plugins.admin.pagemedia') %}
 {% set pagemedia_settings = {
@@ -80,3 +83,4 @@
         {% include 'forms/fields/pagemedia/template.html.twig' %}
     </div>
 {% endif %}
+{% endblock %}

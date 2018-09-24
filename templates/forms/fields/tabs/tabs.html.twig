@@ -1,3 +1,6 @@
+{% extends "forms/field.html.twig" %}
+
+{% block field %}
 <div class="form-tabs {{ field.class }} {{ field.classes }}">
 
 {% if field.fields %}
@@ -35,22 +38,26 @@
 
         <div class="tabs-nav">
             {% for tab in tabs %}
-            <a class="tab__link {{ (storedTab == scope ~ tab.name) or active == loop.index ? 'active' : '' }}" data-tabid="tab-{{ tabsKey ~ loop.index }}" data-tabkey="tab-{{ tabsKey }}" data-scope="{{ scope ~ tab.name }}">
+                {% if child.type == 'tab' and not tab.validate.ignore %}
+                <a class="tab__link {{ (storedTab == scope ~ tab.name) or active == loop.index ? 'active' : '' }}" data-tabid="tab-{{ tabsKey ~ loop.index }}" data-tabkey="tab-{{ tabsKey }}" data-scope="{{ scope ~ tab.name }}">
                 <span>
                 {% if grav.twig.twig.filters['tu'] is defined %}{{ tab.title|tu }}{% else %}{{ tab.title|t }}{% endif %}
                 </span>
+                {% endif %}
             </a>
         {% endfor %}
         </div>
         <div class="tabs-content">
-            {% for field in tabs %}
-                {% set value = field.name ? data.value(field.name) : data.toArray %}
-                <div id="tab-{{ tabsKey ~ loop.index }}" class="tab__content {{ (storedTab == scope ~ field.name) or active == loop.index ? 'active' : '' }}">
-                    {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
+            {% for child in tabs %}
+                {% if child.type == 'tab' and not tab.validate.ignore %}
+                {% set value = child.name ? data.value(child.name) : data.toArray %}
+                <div id="tab-{{ tabsKey ~ loop.index }}" class="tab__content {{ (storedTab == scope ~ child.name) or active == loop.index ? 'active' : '' }}">
+                    {% include ["forms/fields/#{child.type}/#{child.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
                 </div>
+                {% endif %}
             {% endfor %}
         </div>
     {% endif %}
 {% endif %}
 </div>
-
+{% endblock %}
