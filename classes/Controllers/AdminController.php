@@ -37,7 +37,7 @@ class AdminController extends SimpleController
             $this->setRedirect($this->getFlex()->adminRoute($directory));
 
             $grav = Grav::instance();
-            $grav->fireEvent('onAdminAfterDelete', new Event(['object' => $object]));
+            $grav->fireEvent('onAdminAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
             $grav->fireEvent('gitsync');
         }
     }
@@ -75,7 +75,7 @@ class AdminController extends SimpleController
             }
 
             $grav = Grav::instance();
-            $grav->fireEvent('onAdminAfterSave', new Event(['object' => $object]));
+            $grav->fireEvent('onAdminAfterSave', new Event(['type' => 'flex', 'object' => $object]));
             $grav->fireEvent('gitsync');
         }
 
