@@ -126,10 +126,8 @@ abstract class AbstractController
      */
     protected function translate(string $string) : string
     {
-        $grav = Grav::instance();
-
         /** @var Language $language */
-        $language = $grav['language'];
+        $language = $this->grav['language'];
 
         return $language->translate($string);
     }

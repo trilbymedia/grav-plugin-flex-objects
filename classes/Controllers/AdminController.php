@@ -17,6 +17,23 @@ class AdminController extends SimpleController
     /**
      * Delete Directory
      */
+    public function taskEdit()
+    {
+        $type = $this->target;
+        $id = $this->id;
+
+        $directory = $this->getDirectory($type);
+        $object = null !== $id ? $directory->getIndex()->get($id) : null;
+
+        if ($object) {
+            $grav = Grav::instance();
+            $grav->fireEvent('onFlexEdit', new Event(['type' => 'flex', 'object' => $object]));
+        }
+    }
+
+    /**
+     * Delete Directory
+     */
     public function taskDelete()
     {
         $type = $this->target;
@@ -37,7 +54,7 @@ class AdminController extends SimpleController
             $this->setRedirect($this->getFlex()->adminRoute($directory));
 
             $grav = Grav::instance();
-            $grav->fireEvent('onAdminAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
+            $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
             $grav->fireEvent('gitsync');
         }
     }
@@ -75,7 +92,7 @@ class AdminController extends SimpleController
             }
 
             $grav = Grav::instance();
-            $grav->fireEvent('onAdminAfterSave', new Event(['type' => 'flex', 'object' => $object]));
+            $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
             $grav->fireEvent('gitsync');
         }
 
