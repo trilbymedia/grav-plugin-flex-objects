@@ -97,7 +97,9 @@ abstract class SimpleController extends AdminBaseController
             }
             $method = $this->task_prefix . ucfirst($this->task);
 
-            $this->handlePostProcesses();
+            if (!method_exists($this, $method)) {
+                $method = $this->task_prefix . 'Default';
+            }
 
         } elseif ($this->target) {
             if (!$this->action) {
@@ -108,7 +110,11 @@ abstract class SimpleController extends AdminBaseController
                     $this->action = 'list';
                 }
             }
-            $method = 'task' . ucfirst(strtolower($this->action));
+            $method = 'action' . ucfirst(strtolower($this->action));
+
+            if (!method_exists($this, $method)) {
+                $method = $this->action_prefix . 'Default';
+            }
         } else {
             return null;
         }
@@ -163,26 +169,6 @@ abstract class SimpleController extends AdminBaseController
         }
 
         return false;
-    }
-
-    protected function handlePostProcesses()
-    {
-        if (\is_array($this->data)) {
-            foreach ($this->data as $key => $value) {
-                if (Utils::startsWith($key, '_')) {
-                    $method = 'process' . $this->grav['inflector']->camelize($key);
-
-                    if (method_exists($this, $method)) {
-                        try {
-                            $this->{$method}($value);
-                        } catch (\RuntimeException $e) {
-                            $this->setMessage($e->getMessage(), 'error');
-                        }
-                    }
-                    unset ($this->data[$key]);
-                }
-            }
-        }
     }
 
     public function setMessage($msg, $type = 'info')

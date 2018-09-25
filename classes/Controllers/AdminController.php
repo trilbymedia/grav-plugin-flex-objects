@@ -17,7 +17,7 @@ class AdminController extends SimpleController
     /**
      * Delete Directory
      */
-    public function taskEdit()
+    public function taskDefault()
     {
         $type = $this->target;
         $id = $this->id;
@@ -27,7 +27,24 @@ class AdminController extends SimpleController
 
         if ($object) {
             $grav = Grav::instance();
-            $grav->fireEvent('onFlexEdit', new Event(['type' => 'flex', 'object' => $object]));
+            $grav->fireEvent('onFlexTask' . ucfirst($this->task), new Event(['type' => 'flex', 'object' => $object]));
+        }
+    }
+
+    /**
+     * Delete Directory
+     */
+    public function actionDefault()
+    {
+        $type = $this->target;
+        $id = $this->id;
+
+        $directory = $this->getDirectory($type);
+        $object = null !== $id ? $directory->getIndex()->get($id) : null;
+
+        if ($object) {
+            $grav = Grav::instance();
+            $grav->fireEvent('onFlexAction' . ucfirst($this->action), new Event(['type' => 'flex', 'object' => $object]));
         }
     }
 
