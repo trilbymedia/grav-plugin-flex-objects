@@ -24,6 +24,7 @@ class GravPageStorage extends FolderStorage
     protected $ignore_folders;
     protected $ignore_hidden;
     protected $recurse;
+    protected $base_path;
     protected $base_route;
 
     protected $page_extensions;
@@ -39,7 +40,8 @@ class GravPageStorage extends FolderStorage
         $this->ignore_files = (array)$config->get('system.pages.ignore_files');
         $this->ignore_folders = (array)$config->get('system.pages.ignore_folders');
         $this->recurse = $options['recurse'] ?? true;
-        $this->base_route = $options['base_route'] ?? '';
+        $this->base_path = $options['base_path'] ?? '';
+        $this->base_route = trim(GravPageObject::adjustRouteCase(preg_replace(GravPageObject::PAGE_ROUTE_REGEX, '/', '/' . $this->base_path)), '/');
 
         /** @var Language $language */
         $language = $grav['language'];
@@ -53,10 +55,6 @@ class GravPageStorage extends FolderStorage
 
         $this->regex = '/^[^\.]*(' . implode('|', $exts) . ')$/sD';
 
-        //$extension = $this->dataFormatter->getDefaultFileExtension();
-        //$pattern = !empty($options['pattern']) ? $options['pattern'] : $this->dataPattern;
-
-        //$this->dataPattern = $pattern . '/' . $extension;
         $this->dataFolder = $options['folder'];
     }
 
@@ -69,10 +67,18 @@ class GravPageStorage extends FolderStorage
         if (null === $key) {
             $path = $this->dataFolder;
         } else {
-            $path = \dirname($this->getPathFromKey($key));
+            $path = $this->getPathFromKey($key);
         }
 
         return $path;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getMediaPath(string $key = null) : string
+    {
+        return \dirname($this->getStoragePath($key));
     }
 
     /**
@@ -83,8 +89,8 @@ class GravPageStorage extends FolderStorage
      */
     public function getPathFromKey(string $key) : string
     {
-        if ($this->base_route) {
-            $key = substr($key,  \strlen($this->base_route) + 1);
+        if ($this->base_path) {
+            $key = substr($key,  \strlen($this->base_path) + 1);
         }
 
         $dataFolder = substr($this->dataFolder, -1) === '/' ? substr($this->dataFolder, 0, -1) : $this->dataFolder;
@@ -100,8 +106,8 @@ class GravPageStorage extends FolderStorage
      */
     protected function getKeyFromPath(string $path) : string
     {
-        if ($this->base_route) {
-            $path = $this->base_route . '/' . $path;
+        if ($this->base_path) {
+            $path = $this->base_path . '/' . $path;
         }
 
         return $path;
@@ -172,7 +178,6 @@ class GravPageStorage extends FolderStorage
         }
 
         $path = trim(GravPageObject::adjustRouteCase(preg_replace(GravPageObject::PAGE_ROUTE_REGEX, '/', $prefix)), '/');
-
         if (isset($list[$path])) {
             $debugger = Grav::instance()['debugger'];
             $debugger->addMessage('Page name conflict: ' . $path);
@@ -180,9 +185,9 @@ class GravPageStorage extends FolderStorage
 
         ksort($markdown, SORT_NATURAL);
 
-        if ($this->base_route) {
+        if ($this->base_path) {
             $path = ($path ? $path . '/' : $path) . $this->base_route;
-            $name = $prefix ? '/'. $this->base_route . '/' . $prefix : '/'. $this->base_route;
+            $name = $prefix ? '/'. $this->base_path . '/' . $prefix : '/'. $this->base_path;
         } else {
             $name = $prefix;
         }
