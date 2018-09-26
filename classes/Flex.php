@@ -6,6 +6,7 @@ namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
+use Grav\Common\Utils;
 
 /**
  * Class Flex
@@ -59,7 +60,7 @@ class Flex extends \Grav\Framework\Flex\Flex
         $routes = $this->getAdminRoutes();
 
         $grav = Grav::instance();
-        $route = $grav['base_url'] . '/admin';
+        $route = Utils::isAdminPlugin() ? '' : $grav['base_url'] . '/admin';
 
         if ($type && isset($routes[$type])) {
             $route .= '/' .  $routes[$type];
