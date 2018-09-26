@@ -26,7 +26,7 @@
             {% elseif not collection.count %}
             <div class="no-entries">
                 {% if directory.authorize('create') %}
-                    There are currently no entries, click the <a href="{{ flex.adminRoute(collection, {action: 'add'}) }}">Add</a> button to create a new one...
+                    There are currently no entries, click the <a href="{{ base_url ~ flex.adminRoute(collection, {action: 'add'}) }}">Add</a> button to create a new one...
                 {% else %}
                     There are currently no entries.
                 {% endif %}
@@ -55,7 +55,7 @@
                             <td>
                                 {% if options.link == 'edit' %}
                                     {% if object.authorize('read') %}
-                                        <a href="{{ flex.adminRoute(object) }}">{{ object.value(key) }}</a>
+                                        <a href="{{ base_url ~ flex.adminRoute(object) }}">{{ object.value(key) }}</a>
                                     {% else %}
                                         {{ object.value(key) }}
                                     {% endif %}
@@ -85,7 +85,7 @@
                         <td>
                             {% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
                             {% if object.authorize('read') %}
-                                <a href="{{ flex.adminRoute(object) }}"
+                                <a href="{{ base_url ~ flex.adminRoute(object) }}"
                                    title="Edit {{ object_title }}"
                                    class="edit-action"><i class="fa fa-pencil"></i></a>
                             {% endif %}
@@ -94,7 +94,7 @@
                                    class="page-delete delete-action"
                                    title="Delete {{ object_title }}"
                                    data-remodal-target="delete"
-                                   data-delete-url="{{ uri.addNonce(flex.adminRoute(object, {action: 'delete'}), 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
+                                   data-delete-url="{{ uri.addNonce(base_url ~ flex.adminRoute(object, {action: 'delete'}), 'admin-form', 'admin-nonce') }}"><i class="fa fa-close"></i></a>
                             {% endif %}
                         </td>
                     </tr>
