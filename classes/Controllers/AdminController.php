@@ -20,17 +20,19 @@ class AdminController extends SimpleController
     public function taskDefault()
     {
         $type = $this->target;
-        $id = $this->id;
+        $key = $this->id;
 
         $directory = $this->getDirectory($type);
-        $object = null !== $id ? $directory->getIndex()->get($id) : null;
+        $object = null !== $key ? $directory->getIndex()->get($key) : null;
 
         if ($object) {
             $event = new Event(
                 [
-                    'type' => 'flex',
+                    'type' => $type,
+                    'key' => $key,
                     'admin' => $this->admin,
                     'flex' => $this->getFlex(),
+                    'directory' => $directory,
                     'object' => $object,
                     'data' => $this->data,
                     'redirect' => $this->redirect
@@ -61,17 +63,19 @@ class AdminController extends SimpleController
     public function actionDefault()
     {
         $type = $this->target;
-        $id = $this->id;
+        $key = $this->id;
 
         $directory = $this->getDirectory($type);
-        $object = null !== $id ? $directory->getIndex()->get($id) : null;
+        $object = null !== $key ? $directory->getIndex()->get($key) : null;
 
         if ($object) {
             $event = new Event(
                 [
-                    'type' => 'flex',
+                    'type' => $type,
+                    'key' => $key,
                     'admin' => $this->admin,
                     'flex' => $this->getFlex(),
+                    'directory' => $directory,
                     'object' => $object,
                     'redirect' => $this->redirect
                 ]
@@ -101,17 +105,17 @@ class AdminController extends SimpleController
     public function taskDelete()
     {
         $type = $this->target;
-        $id = $this->id;
+        $key = $this->id;
 
         $directory = $this->getDirectory($type);
-        $object = null !== $id ? $directory->getIndex()->get($id) : null;
+        $object = null !== $key ? $directory->getIndex()->get($key) : null;
 
         if ($object) {
             if (!$object->authorize('delete')) {
                 throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
             }
 
-            $object = $directory->remove($id);
+            $object = $directory->remove($key);
 
             $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
 
@@ -128,13 +132,13 @@ class AdminController extends SimpleController
     public function taskSave()
     {
         $type = $this->target;
-        $id = $this->id;
+        $key = $this->id;
 
         $directory = $this->getDirectory($type);
 
-        $object = $id ? $directory->getIndex()->get($id) : null;
+        $object = $key ? $directory->getIndex()->get($key) : null;
         if (null === $object) {
-            $object = $directory->createObject($this->data, $id, true);
+            $object = $directory->createObject($this->data, $key, true);
         }
 
         if ($object->exists()) {
@@ -148,7 +152,7 @@ class AdminController extends SimpleController
         }
 
         // if no id param, assume new, generate an ID
-        $object = $directory->update($this->data, $id, false);
+        $object = $directory->update($this->data, $key, false);
 
         if ($object) {
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');

@@ -1,4 +1,4 @@
-{% set template = (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: 'types' %}
+{% set template = (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: task ?: 'types' %}
 
 {% extends target ? ['flex-objects/types/' ~ target ~ '/' ~ template ~ '.html.twig', 'flex-objects/types/default/' ~ template ~ '.html.twig']: 'flex-objects/pages/' ~ template ~ '.html.twig' %}
 

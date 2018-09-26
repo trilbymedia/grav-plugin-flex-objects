@@ -3,7 +3,7 @@
 {% block edit %}
     {% include 'partials/blueprints.html.twig' with { context: object, data: object, blueprints: blueprint } %}
 
-    {% if id %}
+    {% if key %}
         <div class="button-bar danger">
             <span class="danger-zone"></span>
             {% if object.authorize('delete') %}
