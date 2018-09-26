@@ -26,9 +26,33 @@ class AdminController extends SimpleController
         $object = null !== $id ? $directory->getIndex()->get($id) : null;
 
         if ($object) {
-            $grav = Grav::instance();
-            $grav->fireEvent('onFlexTask' . ucfirst($this->task), new Event(['type' => 'flex', 'object' => $object]));
+            $event = new Event(
+                [
+                    'type' => 'flex',
+                    'admin' => $this->admin,
+                    'flex' => $this->getFlex(),
+                    'object' => $object,
+                    'data' => $this->data,
+                    'redirect' => $this->redirect
+                ]
+            );
+
+            try {
+                $grav = Grav::instance();
+                $grav->fireEvent('onFlexTask' . ucfirst($this->task), $event);
+            } catch (\Exception $e) {
+                $this->admin->setMessage($e->getMessage(), 'error');
+            }
+
+            $redirect = $event['redirect'];
+            if ($redirect) {
+                $this->setRedirect($redirect);
+            }
+
+            return $event->isPropagationStopped();
         }
+
+        return false;
     }
 
     /**
@@ -43,9 +67,32 @@ class AdminController extends SimpleController
         $object = null !== $id ? $directory->getIndex()->get($id) : null;
 
         if ($object) {
-            $grav = Grav::instance();
-            $grav->fireEvent('onFlexAction' . ucfirst($this->action), new Event(['type' => 'flex', 'object' => $object]));
+            $event = new Event(
+                [
+                    'type' => 'flex',
+                    'admin' => $this->admin,
+                    'flex' => $this->getFlex(),
+                    'object' => $object,
+                    'redirect' => $this->redirect
+                ]
+            );
+
+            try {
+                $grav = Grav::instance();
+                $grav->fireEvent('onFlexAction' . ucfirst($this->action), $event);
+            } catch (\Exception $e) {
+                $this->admin->setMessage($e->getMessage(), 'error');
+            }
+
+            $redirect = $event['redirect'];
+            if ($redirect) {
+                $this->setRedirect($redirect);
+            }
+
+            return $event->isPropagationStopped();
         }
+
+        return false;
     }
 
     /**
@@ -74,6 +121,8 @@ class AdminController extends SimpleController
             $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
             $grav->fireEvent('gitsync');
         }
+
+        return $object ? true : false;
     }
 
     public function taskSave()
