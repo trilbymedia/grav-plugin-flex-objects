@@ -206,7 +206,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onTwigSiteVariables()
     {
-        if ($this->isAdmin()) {
+        if ($this->isAdmin() && $this->controller->isActive()) {
             // Twig shortcuts
             $this->grav['twig']->twig_vars['location'] = $this->controller->getLocation();
             $this->grav['twig']->twig_vars['action'] = $this->controller->getAction();
