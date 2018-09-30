@@ -147,10 +147,11 @@ class FlexObjectsPlugin extends Plugin
         foreach ($this->getAdminMenu() as $route => $item) {
             $directory = isset($item['directory']) ? $flex->getDirectory($item['directory']) : null;
 
+            $hidden = $item['hidden'] ?? false;
             $title = $item['title'] ?? 'PLUGIN_FLEX_OBJECTS.TITLE';
             $icon = $item['icon'] ?? 'fa-list';
             $authorize = $item['authorize'] ?? ($directory ? null : ['admin.flex-objects', 'admin.super']);
-            if (null === $authorize && $directory->authorize('list', 'admin')) {
+            if ($hidden || (null === $authorize && $directory->authorize('list', 'admin'))) {
                 continue;
             }
             $badge = $directory ? ['badge' => ['count' => $directory->getCollection()->authorize('list')->count()]] : [];
