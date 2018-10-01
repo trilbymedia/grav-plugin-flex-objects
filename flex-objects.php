@@ -91,16 +91,14 @@ class FlexObjectsPlugin extends Plugin
         };
 
         // TODO: move later into Grav 1.6 (PHP 7.1+)
-        $this->grav['server_request'] = function () {
-            $psr17Factory = new Psr17Factory();
-            $creator = new ServerRequestCreator(
-                $psr17Factory, // ServerRequestFactory
-                $psr17Factory, // UriFactory
-                $psr17Factory, // UploadedFileFactory
-                $psr17Factory  // StreamFactory
-            );
-            return $creator->fromGlobals();
-        };
+        $psr17Factory = new Psr17Factory();
+        $creator = new ServerRequestCreator(
+            $psr17Factory, // ServerRequestFactory
+            $psr17Factory, // UriFactory
+            $psr17Factory, // UploadedFileFactory
+            $psr17Factory  // StreamFactory
+        );
+        $this->grav['server_request'] =  $creator->fromGlobals();
     }
 
     public function onAdminPage(Event $event)
