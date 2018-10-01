@@ -63,8 +63,14 @@ class Flex extends \Grav\Framework\Flex\Flex
         $route = Utils::isAdminPlugin() ? '' : $grav['base_url'] . '/admin';
 
         if ($type && isset($routes[$type])) {
+            if ($routes[$type] === null) {
+                return '';
+            }
             $route .= '/' .  $routes[$type];
         } elseif ($type) {
+            if (!isset($routes[''])) {
+                return '';
+            }
             $route .= '/' .  $routes[''] . '/' . $type;
         }
 
@@ -92,7 +98,7 @@ class Flex extends \Grav\Framework\Flex\Flex
             $menu = (array)($this->config['admin']['menu'] ?? null);
             foreach ($menu as $slug => $menuItem) {
                 $directory = $menuItem['directory'] ?? '';
-                $routes[$directory] = $slug;
+                $routes[$directory] = isset($menuItem['disabled']) && $menuItem['disabled'] === true ? $slug : null;
             }
 
             if (empty($routes)) {
