@@ -98,7 +98,7 @@ class Flex extends \Grav\Framework\Flex\Flex
             $menu = (array)($this->config['admin']['menu'] ?? null);
             foreach ($menu as $slug => $menuItem) {
                 $directory = $menuItem['directory'] ?? '';
-                $routes[$directory] = isset($menuItem['disabled']) && $menuItem['disabled'] === true ? $slug : null;
+                $routes[$directory] = !isset($menuItem['disabled']) || $menuItem['disabled'] !== true ? $slug : null;
             }
 
             if (empty($routes)) {
