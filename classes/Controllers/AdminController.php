@@ -3,9 +3,11 @@
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
+use Grav\Common\Uri;
 use Grav\Plugin\FlexObjects\Flex;
 use Grav\Plugin\FlexObjects\FlexDirectory;
 use Grav\Plugin\FlexObjects\FlexObject;
+use Nyholm\Psr7\ServerRequest;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -167,6 +169,58 @@ class AdminController extends SimpleController
         }
 
         return $object ? true : false;
+    }
+
+    public function taskListmedia()
+    {
+        $response = $this->forwardMediaTask('action', 'media.list');
+
+        $this->admin->json_response = json_decode($response->getBody());
+
+        return true;
+    }
+
+    public function taskAddmedia()
+    {
+        $response = $this->forwardMediaTask('task', 'media.create');
+
+        $this->admin->json_response = json_decode($response->getBody());
+
+        return true;
+    }
+
+    public function taskDelmedia()
+    {
+        $response = $this->forwardMediaTask('task', 'media.delete');
+
+        $this->admin->json_response = json_decode($response->getBody());
+
+        return true;
+    }
+
+    public function taskGetFilesInFolder()
+    {
+        $response = $this->forwardMediaTask('action', 'media.picker');
+
+        $this->admin->json_response = json_decode($response->getBody());
+
+        return true;
+    }
+
+    protected function forwardMediaTask(string $type, string $name)
+    {
+        $route = Uri::getCurrentRoute()->withGravParam('task', null)->withGravParam($type, $name);
+
+        /** @var ServerRequest $request */
+        $request = $this->grav['server_request'];
+        $request = $request
+            ->withAttribute('type', $this->target)
+            ->withAttribute('key', $this->id)
+            ->withAttribute('route', $route);
+
+        $controller = new MediaController();
+
+        return $controller->execute($request);
     }
 
     protected function processPostEntriesSave($var)

@@ -32,7 +32,7 @@ class FlexObjectsPlugin extends Plugin
      *     callable (or function) as well as the priority. The
      *     higher the number the higher the priority.
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents() : array
     {
         return [
             'onPluginsInitialized' => [
@@ -57,11 +57,11 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Initialize the plugin
      */
-    public function onPluginsInitialized()
+    public function onPluginsInitialized() : void
     {
         if ($this->isAdmin()) {
             $this->enable([
-                'onTwigTemplatePaths'                        => ['onTwigAdminTemplatePaths', 0],
+                'onAdminTwigTemplatePaths'                   => ['onAdminTwigTemplatePaths', 10],
                 'onAdminMenu'                                => ['onAdminMenu', 0],
                 'onAdminPage'                                => ['onAdminPage', 0],
                 'onDataTypeExcludeFromDataManagerPluginHook' => ['onDataTypeExcludeFromDataManagerPluginHook', 0],
@@ -101,7 +101,7 @@ class FlexObjectsPlugin extends Plugin
         $this->grav['server_request'] =  $creator->fromGlobals();
     }
 
-    public function onAdminPage(Event $event)
+    public function onAdminPage(Event $event) : void
     {
         if ($this->controller->isActive()) {
             $page = $event['page'];
@@ -110,7 +110,7 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
-    public function onPageInitialized()
+    public function onPageInitialized() : void
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
             $this->controller->execute();
@@ -118,7 +118,7 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
-    public function onAdminControllerInit(Event $event)
+    public function onAdminControllerInit(Event $event) : void
     {
         $eventController = $event['controller'];
 
@@ -173,7 +173,7 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Add current directory to twig lookup paths.
      */
-    public function onTwigTemplatePaths()
+    public function onTwigTemplatePaths() : void
     {
         $extra_site_twig_path = $this->config->get('plugins.flex-objects.extra_site_twig_path');
         $extra_path = $extra_site_twig_path ? $this->grav['locator']->findResource($extra_site_twig_path) : null;
@@ -187,22 +187,24 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Add plugin templates path
      */
-    public function onTwigAdminTemplatePaths()
+    public function onAdminTwigTemplatePaths(Event $event) : void
     {
         $extra_admin_twig_path = $this->config->get('plugins.flex-objects.extra_admin_twig_path');
         $extra_path = $extra_admin_twig_path ? $this->grav['locator']->findResource($extra_admin_twig_path) : null;
+
+        $paths = $event['paths'];
         if ($extra_path) {
-            $this->grav['twig']->twig_paths[] = $extra_path;
+            $paths[] = $extra_path;
         }
 
-        $this->grav['twig']->twig_paths[] = __DIR__ . '/admin/templates';
-
+        $paths[] = __DIR__ . '/admin/templates';
+        $event['paths'] = $paths;
     }
 
     /**
      * Set needed variables to display direcotry.
      */
-    public function onTwigSiteVariables()
+    public function onTwigSiteVariables() : void
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
             // Twig shortcuts

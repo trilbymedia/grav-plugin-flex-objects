@@ -1,7 +1,7 @@
 {% extends 'flex-objects/pages/edit.html.twig' %}
 
 {% block edit %}
-    {% include 'partials/blueprints.html.twig' with { context: object, data: object, blueprints: blueprint } %}
+    {% include 'partials/blueprints.html.twig' with { form: object.form, context: object, data: object, blueprints: blueprint } %}
 
     {% if key %}
         <div class="button-bar danger">

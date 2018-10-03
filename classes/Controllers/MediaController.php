@@ -4,54 +4,40 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Controllers;
 
-use Grav\Common\Grav;
 use Grav\Common\Page\Medium\Medium;
+use Grav\Common\Utils;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Framework\Psr7\Response;
-use Psr\Http\Message\ServerRequestInterface;
+use Grav\Plugin\FlexObjects\FlexObject;
+use Grav\Plugin\FlexObjects\Interfaces\FlexAclInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
+// TODO: taskFilesUpload() ?
+// TODO: taskFilesSessionRemove() ?
 class MediaController extends AbstractController
 {
     /**
-     * Determines the file types allowed to be uploaded
-     *
-     * @param ServerRequestInterface $request
      * @return Response
      */
-    public function taskListmedia(ServerRequestInterface $request) : Response
+    public function actionMediaList() : Response
     {
-        if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            throw new \RuntimeException('Access Denied', 401);
-        }
+        $this->checkAuthorization('media.list');
 
-        if (!$this->object instanceof MediaManipulationInterface) {
-            throw new \RuntimeException('Object does not support media manipulation', 501);
-        }
-
-        $media = $this->object->getMedia()->all();
-
+        /** @var MediaManipulationInterface $object */
+        $object = $this->getObject();
+        $media = $object->getMedia();
         $media_list = [];
+
         /**
          * @var string $name
          * @var Medium $medium
          */
-        foreach ($media as $name => $medium) {
-
-            $metadata = [];
-            $img_metadata = $medium->metadata();
-            if ($img_metadata) {
-                $metadata = $img_metadata;
-            }
-
-            // Get original name
-            $source = $medium->higherQualityAlternative();
-
+        foreach ($media->all() as $name => $medium) {
             $media_list[$name] = [
                 'url' => $medium->display($medium->get('extension') === 'svg' ? 'source' : 'thumbnail')->cropZoom(400, 300)->url(),
                 'size' => $medium->get('size'),
-                'metadata' => $metadata,
-                'original' => $source->get('filename')
+                'metadata' => $medium->metadata() ?: [],
+                'original' => $medium->higherQualityAlternative()->get('filename')
             ];
         }
 
@@ -66,22 +52,16 @@ class MediaController extends AbstractController
 
 
     /**
-     * Handles adding a media file to a page
-     *
-     * @param ServerRequestInterface $request
      * @return Response
      */
-    public function taskAddmedia(ServerRequestInterface $request) : Response
+    public function taskMediaCreate() : Response
     {
-        if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            throw new \RuntimeException('Access Denied', 401);
-        }
+        $this->checkAuthorization('media.create');
 
-        if (!$this->object instanceof MediaManipulationInterface) {
-            throw new \RuntimeException('Object does not support media manipulation', 501);
-        }
+        /** @var MediaManipulationInterface $object */
+        $object = $this->getObject();
 
-        $files = $request->getUploadedFiles();
+        $files = $this->getRequest()->getUploadedFiles();
 
         if (!isset($files['file']) || \is_array($files['file'])) {
             throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
@@ -91,88 +71,192 @@ class MediaController extends AbstractController
         $file = $files['file'];
 
         try {
-            $this->object->uploadMediaFile($file);
+            $object->uploadMediaFile($file);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $filename = $file->getClientFilename();
-        $fileParts = pathinfo($filename);
+        $filename = str_replace(['@3x', '@2x'], '', pathinfo($file->getClientFilename(), PATHINFO_BASENAME));
+        $media = $object->getMedia();
 
         // Add metadata if needed
-        $include_metadata = Grav::instance()['config']->get('system.media.auto_metadata_exif', false);
-        $filename = $fileParts['basename'];
-        $filename = str_replace(['@3x', '@2x'], '', $filename);
+        $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
 
         $metadata = [];
-        $media = $this->object->getMedia();
-
         if ($include_metadata && isset($media[$filename])) {
-            $img_metadata = $media[$filename]->metadata();
-            if ($img_metadata) {
-                $metadata = $img_metadata;
-            }
+            $metadata = $media[$filename]->metadata() ?: [];
         }
 
-        /*
-        // TODO
-        if ($page) {
-            $this->grav->fireEvent('onAdminAfterAddMedia', new Event(['page' => $page]));
-        }
-        */
+        $response = [
+            'code'    => 200,
+            'status'  => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
+            'filename' => $filename,
+            'metadata' => $metadata
+        ];
 
-        return $this->createJsonResponse(
-            [
-                'code'    => 200,
-                'status'  => 'success',
-                'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
-                'metadata' => $metadata,
-            ]
-        );
+        return $this->createJsonResponse($response);
     }
 
     /**
-     * Handles deleting a media file from a page
-     *
-     * @param ServerRequestInterface $request
      * @return Response
      */
-    public function taskDelmedia(ServerRequestInterface $request) : Response
+    public function taskMediaDelete() : Response
     {
-        if (0 && !$this->grav['user']->authorize(['admin.pages', 'admin.super'])) {
-            throw new \RuntimeException('Access Denied', 401);
-        }
+        $this->checkAuthorization('media.delete');
 
-        if (!$this->object instanceof MediaManipulationInterface) {
-            throw new \RuntimeException('Object does not support media manipulation', 501);
-        }
+        /** @var MediaManipulationInterface $object */
+        $object = $this->getObject();
 
-        $post = $request->getParsedBody();
-        $filename = $post['filename'] ?? '';
-
+        $filename = $this->getPost('filename');
         if (!$filename) {
             throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
         try {
-            $this->object->deleteMediaFile($filename);
+            $object->deleteMediaFile($filename);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        /*
-        // TODO
-        if ($page) {
-            $this->grav->fireEvent('onAdminAfterDelMedia', new Event(['page' => $page]));
-        }
-        */
+        $response = [
+            'code'    => 200,
+            'status'  => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FILE_DELETED') . ': ' . $filename
+        ];
 
-        return $this->createJsonResponse(
-            [
-                'code'    => 200,
-                'status'  => 'success',
-                'message' => $this->translate('PLUGIN_ADMIN.FILE_DELETED') . ': ' . $filename
-            ]
-        );
+        return $this->createJsonResponse($response);
+    }
+
+    /**
+     * Used by the filepicker field to get a list of files in a folder.
+     *
+     * @return Response
+     */
+    protected function actionMediaPicker() : Response
+    {
+        $this->checkAuthorization('media.list');
+
+        /** @var FlexObject|MediaManipulationInterface $object */
+        $object = $this->getObject();
+
+        $name = $this->getPost('name');
+        $settings = $object->getBlueprint()->schema()->getProperty($name);
+
+        $media = $object->getMedia();
+        $folder = $settings['folder'] ?? trim(Utils::url($media->path()), '/');
+
+        $available_files = [];
+        $metadata = [];
+        $thumbs = [];
+
+        /**
+         * @var string $name
+         * @var Medium $medium
+         */
+        foreach ($media->all() as $name => $medium) {
+            $available_files[] = $name;
+
+            if (isset($settings['include_metadata'])) {
+                $img_metadata = $medium->metadata();
+                if ($img_metadata) {
+                    $metadata[$name] = $img_metadata;
+                }
+            }
+
+        }
+
+        // Peak in the flashObject for optimistic filepicker updates
+        $pending_files = [];
+        $sessionField  = base64_encode($this->getGrav()['uri']->url());
+        $flash         = $this->getSession()->getFlashObject('files-upload');
+
+        if ($flash && isset($flash[$sessionField])) {
+            foreach ($flash[$sessionField] as $field => $data) {
+                foreach ($data as $file) {
+                    if (\dirname($file['path']) === $folder) {
+                        $pending_files[] = $file['name'];
+                    }
+                }
+            }
+        }
+
+        $this->getSession()->setFlashObject('files-upload', $flash);
+
+        // Handle Accepted file types
+        // Accept can only be file extensions (.pdf|.jpg)
+        if (isset($settings['accept'])) {
+            $available_files = array_filter($available_files, function ($file) use ($settings) {
+                return $this->filterAcceptedFiles($file, $settings);
+            });
+
+            $pending_files = array_filter($pending_files, function ($file) use ($settings) {
+                return $this->filterAcceptedFiles($file, $settings);
+            });
+        }
+
+        // Generate thumbs if needed
+        if (isset($settings['preview_images']) && $settings['preview_images'] === true) {
+            foreach ($available_files as $filename) {
+                $thumbs[$filename] = $media[$filename]->zoomCrop(100,100)->url();
+            }
+        }
+
+        $response = [
+            'code' => 200,
+            'status' => 'success',
+            'files' => array_values($available_files),
+            'pending' => array_values($pending_files),
+            'folder' => $folder,
+            'metadata' => $metadata,
+            'thumbs' => $thumbs
+        ];
+
+        return $this->createJsonResponse($response);
+    }
+
+    protected function filterAcceptedFiles(string $file, array $settings)
+    {
+        $valid = false;
+
+        foreach ((array)$settings['accept'] as $type) {
+            $find = str_replace('*', '.*', $type);
+            $valid |= preg_match('#' . $find . '$#', $file);
+        }
+
+        return $valid;
+    }
+
+    /**
+     * @param string $action
+     * @throws \LogicException
+     * @throws \RuntimeException
+     */
+    protected function checkAuthorization(string $action)
+    {
+        switch ($action) {
+            case 'media.list':
+                $action = 'read';
+                break;
+
+            case 'media.create':
+            case 'media.delete':
+                $action = 'update';
+                break;
+
+            default:
+                throw new \LogicException(sprintf('Unsupported authorize action %s', $action), 500);
+        }
+
+        /** @var FlexAclInterface $object */
+        $object = $this->getObject();
+
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if (!$object->authorize($action)) {
+            throw new \RuntimeException('Forbitten', 403);
+        }
     }
 }
