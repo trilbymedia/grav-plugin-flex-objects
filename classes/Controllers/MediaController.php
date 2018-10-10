@@ -70,21 +70,27 @@ class MediaController extends AbstractController
         /** @var UploadedFileInterface $file */
         $file = $files['file'];
 
+        // Handle bad filenames.
+        $filename = $file->getClientFilename();
+        if (!Utils::checkFilename($filename)) {
+            throw new \RuntimeException(sprintf($this->translate('PLUGIN_ADMIN.FILEUPLOAD_UNABLE_TO_UPLOAD'), $filename, 'Bad filename'), 400);
+        }
+
         try {
             $object->uploadMediaFile($file);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $filename = str_replace(['@3x', '@2x'], '', pathinfo($file->getClientFilename(), PATHINFO_BASENAME));
+        $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
         $media = $object->getMedia();
 
         // Add metadata if needed
         $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
 
         $metadata = [];
-        if ($include_metadata && isset($media[$filename])) {
-            $metadata = $media[$filename]->metadata() ?: [];
+        if ($include_metadata && isset($media[$basename])) {
+            $metadata = $media[$basename]->metadata() ?: [];
         }
 
         $response = [
@@ -109,6 +115,12 @@ class MediaController extends AbstractController
         $object = $this->getObject();
 
         $filename = $this->getPost('filename');
+
+        // Handle bad filenames.
+        if (!Utils::checkFilename($filename)) {
+            $filename = '';
+        }
+
         if (!$filename) {
             throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
