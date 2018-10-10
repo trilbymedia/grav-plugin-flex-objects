@@ -23,13 +23,13 @@ class FlexRouter implements MiddlewareInterface
             case 'listmedia':
             case 'addmedia':
             case 'delmedia':
-                return (new MediaController())->execute($request);
+                return (new MediaController())->handle($request);
             case 'save':
             case 'create':
             case 'update':
             case 'move':
             case 'delete':
-                return (new ObjectController())->execute($request);
+                return (new ObjectController())->handle($request);
         }
 
         // No handler found.

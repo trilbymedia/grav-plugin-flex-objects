@@ -14,11 +14,13 @@ use Grav\Framework\Psr7\Response;
 use Grav\Framework\Route\Route;
 use Grav\Plugin\FlexObjects\Flex;
 use Grav\Plugin\FlexObjects\FlexDirectory;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
 
-abstract class AbstractController
+abstract class AbstractController implements RequestHandlerInterface
 {
     /** @var ServerRequestInterface */
     protected $request;
@@ -39,14 +41,14 @@ abstract class AbstractController
     protected $object;
 
     /**
-     * Execute controller.
+     * Handle request.
      *
      * Fires event: flex.[directory].[task|action].[command]
      *
      * @param ServerRequestInterface $request
      * @return Response
      */
-    public function execute(ServerRequestInterface $request) : Response
+    public function handle(ServerRequestInterface $request) : ResponseInterface
     {
         $attributes = $request->getAttributes();
         $this->request = $request;
@@ -193,7 +195,7 @@ abstract class AbstractController
      * @param array $content
      * @return Response
      */
-    public function createJsonResponse(array $content) : Response
+    public function createJsonResponse(array $content) : ResponseInterface
     {
         return new Response($content['code'] ?? 200, [], json_encode($content));
     }
@@ -203,7 +205,7 @@ abstract class AbstractController
      * @param int $code
      * @return Response
      */
-    public function createRedirectResponse(string $url, int $code = null) : Response
+    public function createRedirectResponse(string $url, int $code = null) : ResponseInterface
     {
         if (null === $code || $code < 301 || $code > 307) {
             $code = $this->grav['config']->get('system.pages.redirect_default_code', 302);
@@ -216,7 +218,7 @@ abstract class AbstractController
      * @param \Exception $e
      * @return Response
      */
-    public function createErrorResponse(\Exception $e) : Response
+    public function createErrorResponse(\Exception $e) : ResponseInterface
     {
         $response = [
             'code' => $e->getCode() ?: 500,
@@ -224,7 +226,7 @@ abstract class AbstractController
             'message' => $e->getMessage()
         ];
 
-        return new Response($response['code'], $response);
+        return new Response($response['code'], json_encode($response));
     }
 
     /**
@@ -239,11 +241,18 @@ abstract class AbstractController
         return $language->translate($string);
     }
 
+    /**
+     * @param string $message
+     * @param string $type
+     * @return $this
+     */
     public function setMessage(string $message, string $type = 'info')
     {
         /** @var Message $messages */
         $messages = $this->grav['messages'];
         $messages->add($message, $type);
+
+        return $this;
     }
 
     /**
