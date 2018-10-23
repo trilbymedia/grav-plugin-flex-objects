@@ -7,57 +7,16 @@ namespace Composer\Autoload;
 class ComposerStaticInit69fc28174abe912f71ebf710ee161e8f
 {
     public static $prefixLengthsPsr4 = array (
-        'P' => 
-        array (
-            'Psr\\Http\\Server\\' => 16,
-            'Psr\\Http\\Message\\' => 17,
-        ),
-        'N' => 
-        array (
-            'Nyholm\\Psr7\\' => 12,
-            'Nyholm\\Psr7Server\\' => 18,
-        ),
-        'H' => 
-        array (
-            'Http\\Message\\' => 13,
-        ),
         'G' => 
         array (
             'Grav\\Plugin\\FlexObjects\\' => 24,
-            'Grav\\Framework\\' => 15,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Psr\\Http\\Server\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-server-handler/src',
-            1 => __DIR__ . '/..' . '/psr/http-server-middleware/src',
-        ),
-        'Psr\\Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
-        ),
-        'Nyholm\\Psr7\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/nyholm/psr7/src',
-        ),
-        'Nyholm\\Psr7Server\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/nyholm/psr7-server/src',
-        ),
-        'Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/php-http/message-factory/src',
-        ),
         'Grav\\Plugin\\FlexObjects\\' => 
         array (
             0 => __DIR__ . '/../..' . '/classes',
-        ),
-        'Grav\\Framework\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src/Grav/Framework',
         ),
     );
 

@@ -11,6 +11,9 @@ use Grav\Common\Session;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Psr7\Response;
+use Grav\Framework\RequestHandler\Exception\NotFoundException;
+use Grav\Framework\RequestHandler\Exception\PageExpiredException;
+use Grav\Framework\RequestHandler\Exception\RequestException;
 use Grav\Framework\Route\Route;
 use Grav\Plugin\FlexObjects\Flex;
 use Grav\Plugin\FlexObjects\FlexDirectory;
@@ -22,6 +25,9 @@ use RocketTheme\Toolbox\Session\Message;
 
 abstract class AbstractController implements RequestHandlerInterface
 {
+    /** @var string */
+    protected $nonce = 'admin-nonce';
+
     /** @var ServerRequestInterface */
     protected $request;
 
@@ -65,25 +71,25 @@ abstract class AbstractController implements RequestHandlerInterface
         /** @var Route $route */
         $route = $attributes['route'];
 
-        $task = $route->getParam('task');
-        if ($task) {
-            $this->checkNonce($task);
-            $type = 'task';
-            $command = $task;
-        } else {
-            $type = 'action';
-            $command = $route->getParam('action') ?? 'display';
-        }
-        $command = strtolower($command);
-
-        $event = new Event(
-            [
-                'controller' => $this,
-                'response' => null
-            ]
-        );
-
         try {
+            $task = $route->getParam('task');
+            if ($task) {
+                $this->checkNonce($task);
+                $type = 'task';
+                $command = $task;
+            } else {
+                $type = 'action';
+                $command = $route->getParam('action') ?? 'display';
+            }
+            $command = strtolower($command);
+
+            $event = new Event(
+                [
+                    'controller' => $this,
+                    'response' => null
+                ]
+            );
+
             $this->grav->fireEvent("flex.{$this->type}.{$type}.{$command}", $event);
 
             $response = $event['response'];
@@ -94,10 +100,7 @@ abstract class AbstractController implements RequestHandlerInterface
                 if ($method && method_exists($this, $method)) {
                     $response = $this->{$method}();
                 } else {
-                    if (\in_array(strtoupper($this->request->getMethod()), ['PUT', 'PATCH', 'DELETE'])) {
-                        throw new \RuntimeException('Method Not Allowed', 405);
-                    }
-                    throw new \RuntimeException('Not Found', 404);
+                    throw new NotFoundException($request);
                 }
             }
         } catch (\Exception $e) {
@@ -220,13 +223,21 @@ abstract class AbstractController implements RequestHandlerInterface
      */
     public function createErrorResponse(\Exception $e) : ResponseInterface
     {
+        if ($e instanceof RequestException) {
+            $code = $e->getHttpCode();
+            $reason = $e->getHttpReason();
+        } else {
+            $code = $e->getCode();
+            $reason = null;
+        }
+
         $response = [
-            'code' => $e->getCode() ?: 500,
+            'code' => $e->getCode(),
             'status' => 'error',
             'message' => $e->getMessage()
         ];
 
-        return new Response($response['code'], json_encode($response));
+        return new Response($code, [], json_encode($response), '1.1', $reason);
     }
 
     /**
@@ -257,20 +268,22 @@ abstract class AbstractController implements RequestHandlerInterface
 
     /**
      * @param string $task
-     * @throws \RuntimeException
+     * @throws PageExpiredException
      */
     protected function checkNonce(string $task)
     {
-        if (\in_array(strtoupper($this->request->getMethod()), ['POST', 'PUT', 'PATCH'])) {
-            $nonce = $this->getPost('admin-nonce');
+        $nonce = null;
+
+        if (\in_array(strtoupper($this->request->getMethod()), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+            $nonce = $this->getPost($this->nonce);
         }
 
         if ($nonce === null) {
-            $nonce = $this->grav['uri']->param('admin-nonce');
+            $nonce = $this->grav['uri']->param($this->nonce);
         }
 
-        if (!$nonce || !Utils::verifyNonce($nonce, 'admin-form')) {
-            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_SECURITY_TOKEN'), 400);
+        if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce)) {
+            throw new PageExpiredException($this->request);
         }
     }
 }

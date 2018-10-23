@@ -212,7 +212,7 @@ class AdminController extends SimpleController
         $route = Uri::getCurrentRoute()->withGravParam('task', null)->withGravParam($type, $name);
 
         /** @var ServerRequest $request */
-        $request = $this->grav['server_request'];
+        $request = $this->grav['request'];
         $request = $request
             ->withAttribute('type', $this->target)
             ->withAttribute('key', $this->id)
