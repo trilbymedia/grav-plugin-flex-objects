@@ -2,7 +2,7 @@
 
 namespace Grav\Plugin\FlexObjects\Types\FlexPages;
 
-use Grav\Plugin\FlexObjects\FlexCollection;
+use Grav\Framework\Flex\FlexCollection;
 
 /**
  * Class FlexPageCollection

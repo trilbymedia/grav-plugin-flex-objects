@@ -8,9 +8,9 @@ use Grav\Common\Markdown\Parsedown;
 use Grav\Common\Markdown\ParsedownExtra;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
+use Grav\Framework\Flex\FlexObject;
+use Grav\Framework\Flex\Traits\FlexMediaTrait;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
-use Grav\Plugin\FlexObjects\FlexObject;
-use Grav\Plugin\FlexObjects\Traits\FlexMediaTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Interfaces\PageContentInterface;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
 

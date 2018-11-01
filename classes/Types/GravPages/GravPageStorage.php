@@ -6,7 +6,7 @@ namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
-use Grav\Plugin\FlexObjects\Storage\FolderStorage;
+use Grav\Framework\Flex\Storage\FolderStorage;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**

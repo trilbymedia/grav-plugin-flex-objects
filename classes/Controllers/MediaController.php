@@ -6,10 +6,10 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Utils;
+use Grav\Framework\Flex\FlexObject;
+use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Framework\Psr7\Response;
-use Grav\Plugin\FlexObjects\FlexObject;
-use Grav\Plugin\FlexObjects\Interfaces\FlexAclInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
 // TODO: taskFilesUpload() ?
@@ -260,7 +260,7 @@ class MediaController extends AbstractController
                 throw new \LogicException(sprintf('Unsupported authorize action %s', $action), 500);
         }
 
-        /** @var FlexAclInterface $object */
+        /** @var FlexAuthorizeInterface $object */
         $object = $this->getObject();
 
         if (!$object) {

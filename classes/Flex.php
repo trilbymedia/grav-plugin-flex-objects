@@ -7,6 +7,8 @@ namespace Grav\Plugin\FlexObjects;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
 use Grav\Common\Utils;
+use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\FlexObject;
 
 /**
  * Class Flex

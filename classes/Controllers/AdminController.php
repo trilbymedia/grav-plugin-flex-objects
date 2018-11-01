@@ -4,9 +4,9 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
 use Grav\Common\Uri;
+use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\FlexObject;
 use Grav\Plugin\FlexObjects\Flex;
-use Grav\Plugin\FlexObjects\FlexDirectory;
-use Grav\Plugin\FlexObjects\FlexObject;
 use Nyholm\Psr7\ServerRequest;
 use RocketTheme\Toolbox\Event\Event;
 
