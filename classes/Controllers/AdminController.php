@@ -220,7 +220,7 @@ class AdminController extends SimpleController
 
         $controller = new MediaController();
 
-        return $controller->execute($request);
+        return $controller->handle($request);
     }
 
     protected function processPostEntriesSave($var)
