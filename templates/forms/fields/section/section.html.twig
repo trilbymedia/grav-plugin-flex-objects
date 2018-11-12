@@ -2,9 +2,9 @@
 
 {% block field %}
 {% if field.security is empty or authorize(array(field.security)) %}
-
+<div class="{{ field.classes }}">
     {% if field.title or field.underline %}
-    <h1 {% if not field.underline %}class="no_underline"{% endif %}>{% if grav.twig.twig.filters['tu'] is defined %}{{ field.title|tu }}{% else %}{{ field.title|t }}{% endif %}</h1>
+    <h1 class="{% if not field.underline %}no_underline{% endif %}">{% if grav.twig.twig.filters['tu'] is defined %}{{ field.title|tu }}{% else %}{{ field.title|t }}{% endif %}</h1>
     {% endif %}
 
     {% if field.text %}
@@ -12,7 +12,7 @@
     {% endif %}
 
     {% if field.fields %}
-        <div class="form-section {{ field.field_classes }}">
+        <div class="form-section">
         {% for child in field.fields %}
             {% if child.type %}
                 {% set value = child.name ? data.value(child.name) : data.toArray %}
@@ -22,6 +22,6 @@
         {% endfor %}
         </div>
     {% endif %}
-
+</div>
 {% endif %}
 {% endblock %}
