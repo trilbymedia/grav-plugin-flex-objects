@@ -33,12 +33,18 @@ class FlexObjectsPlugin extends Plugin
     public static function getSubscribedEvents() : array
     {
         return [
+            'onCliInitialize' => [
+                ['autoload', 100000],
+                ['initializeFlex', 0]
+            ],
             'onPluginsInitialized' => [
                 ['autoload', 100000],
-                ['onPluginsInitialized', 0]
+                ['onPluginsInitialized', 0],
+                ['initializeFlex', 0]
             ],
-            'onTwigSiteVariables'  => ['onTwigSiteVariables', 0],
-            'onPageInitialized'    => ['onPageInitialized', 100],
+            'onTwigSiteVariables' => [
+                ['onTwigSiteVariables', 0]
+            ]
         ];
     }
 
@@ -64,6 +70,7 @@ class FlexObjectsPlugin extends Plugin
                 'onAdminPage'                                => ['onAdminPage', 0],
                 'onDataTypeExcludeFromDataManagerPluginHook' => ['onDataTypeExcludeFromDataManagerPluginHook', 0],
                 'onAdminControllerInit'                      => ['onAdminControllerInit', 0],
+                'onPageInitialized'                          => ['onPageInitialized', 100],
             ]);
             /** @var AdminController controller */
             $this->controller = new AdminController($this);
@@ -73,7 +80,10 @@ class FlexObjectsPlugin extends Plugin
                 'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
             ]);
         }
+    }
 
+    public function initializeFlex()
+    {
         $config = $this->config->get('plugins.flex-objects');
 
         // Add to DI container
