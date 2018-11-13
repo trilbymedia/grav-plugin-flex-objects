@@ -16,8 +16,6 @@ class FlexObjectsPlugin extends Plugin
     /** @var AdminController */
     protected $controller;
 
-    protected $version;
-
     protected $directory;
 
     /**
@@ -65,19 +63,33 @@ class FlexObjectsPlugin extends Plugin
     {
         if ($this->isAdmin()) {
             $this->enable([
-                'onAdminTwigTemplatePaths'                   => ['onAdminTwigTemplatePaths', 10],
-                'onAdminMenu'                                => ['onAdminMenu', 0],
-                'onAdminPage'                                => ['onAdminPage', 0],
-                'onDataTypeExcludeFromDataManagerPluginHook' => ['onDataTypeExcludeFromDataManagerPluginHook', 0],
-                'onAdminControllerInit'                      => ['onAdminControllerInit', 0],
-                'onPageInitialized'                          => ['onPageInitialized', 100],
+                'onAdminTwigTemplatePaths' => [
+                    ['onAdminTwigTemplatePaths', 10]
+                ],
+                'onAdminMenu' => [
+                    ['onAdminMenu', 0]
+                ],
+                'onAdminPage' => [
+                    ['onAdminPage', 0]
+                ],
+                'onDataTypeExcludeFromDataManagerPluginHook' => [
+                    ['onDataTypeExcludeFromDataManagerPluginHook', 0]
+                ],
+                'onAdminControllerInit' => [
+                    ['onAdminControllerInit', 0]
+                ],
+                'onPageInitialized' => [
+                    ['onAdminPageInitialized', 100]
+                ],
             ]);
             /** @var AdminController controller */
             $this->controller = new AdminController($this);
 
         } else {
             $this->enable([
-                'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
+                'onTwigTemplatePaths' => [
+                    ['onTwigTemplatePaths', 0]
+                ],
             ]);
         }
     }
@@ -108,7 +120,7 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
-    public function onPageInitialized() : void
+    public function onAdminPageInitialized() : void
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
             $this->controller->execute();
