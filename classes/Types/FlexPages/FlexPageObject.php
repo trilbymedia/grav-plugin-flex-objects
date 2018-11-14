@@ -9,6 +9,7 @@ use Grav\Common\Markdown\ParsedownExtra;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexObject;
+use Grav\Framework\Flex\Interfaces\FlexStorageInterface;
 use Grav\Framework\Flex\Traits\FlexMediaTrait;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Plugin\FlexObjects\Types\GravPages\Interfaces\PageContentInterface;
@@ -62,13 +63,14 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
             'folderExists' => true
         ] + parent::getCachedMethods();
     }
-
     /**
-     * @param array $index
+     * @param FlexStorageInterface $storage
      * @return array
      */
-    public static function createIndex(array $index)
+    public static function createIndex(FlexStorageInterface $storage)
     {
+        $index = parent::createIndex($storage);
+
         $list = [];
         foreach ($index as $key => $timestamp) {
             $slug = static::adjustRouteCase(preg_replace(static::ORDER_PREFIX_REGEX, '', $key));

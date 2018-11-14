@@ -4,6 +4,7 @@ namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
 use Grav\Common\Grav;
 use Grav\Common\Page\Pages;
+use Grav\Framework\Flex\Interfaces\FlexStorageInterface;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
 
 /**
@@ -29,11 +30,13 @@ class GravPageObject extends FlexPageObject
     }
 
     /**
-     * @param array $index
+     * @param FlexStorageInterface $storage
      * @return array
      */
-    public static function createIndex(array $index)
+    public static function createIndex(FlexStorageInterface $storage)
     {
+        $index = parent::createIndex($storage);
+
         $list = [];
         foreach ($index as $key => $timestamp) {
             if ($key === '') {
