@@ -2,9 +2,9 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
+use Grav\Common\Data\Blueprint;
 use Grav\Common\Grav;
 use Grav\Common\Page\Pages;
-use Grav\Framework\Flex\Interfaces\FlexStorageInterface;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
 
 /**
@@ -13,10 +13,6 @@ use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
  */
 class GravPageObject extends FlexPageObject
 {
-    const ORDER_PREFIX_REGEX = PAGE_ORDER_PREFIX_REGEX;
-    const ORDER_LIST_REGEX = '/(\/\d+)\.[^\/]+/u';
-    const PAGE_ROUTE_REGEX = '/\/\d+\./u';
-
     /**
      * @return array
      */
@@ -27,41 +23,6 @@ class GravPageObject extends FlexPageObject
             'path' => true,
             'full_order' => true
         ] + parent::getCachedMethods();
-    }
-
-    /**
-     * @param FlexStorageInterface $storage
-     * @return array
-     */
-    public static function createIndex(FlexStorageInterface $storage)
-    {
-        $index = parent::createIndex($storage);
-
-        $list = [];
-        foreach ($index as $key => $timestamp) {
-            if ($key === '') {
-                continue;
-            }
-            if (!\is_array($timestamp)) {
-                // General Storage.
-                $slug = static::adjustRouteCase(preg_replace(static::ORDER_PREFIX_REGEX, '', $key));
-
-                $list[$slug] = [$key, $timestamp];
-            } else {
-                // Page Storage.
-                if (!empty($timestamp[2])) {
-                    $first = reset($timestamp[2]) ?: [];
-
-                    $timestamp[0] = ltrim($timestamp[0] . '/' .  reset($first), '/');
-                } else {
-                    // TODO: Folders do not show up yet in the list.
-                    $timestamp[0] = ltrim($timestamp[0] . '/folder.md', '/');
-                }
-                $list[$key] = $timestamp;
-            }
-        }
-
-        return $list;
     }
 
     /**
@@ -262,13 +223,14 @@ class GravPageObject extends FlexPageObject
     {
         $path = $this->path();
 
-        return preg_replace(static::ORDER_LIST_REGEX, '\\1', $path . '/' . $this->folder());
+        return preg_replace(GravPageIndex::ORDER_LIST_REGEX, '\\1', $path . '/' . $this->folder());
     }
 
     /**
-     * @return \Grav\Common\Data\Blueprint
+     * @param string|null $name
+     * @return Blueprint
      */
-    public function getBlueprint()
+    public function getBlueprint(string $name = null)
     {
         // Make sure that pages has been initialized.
         Pages::getTypes();

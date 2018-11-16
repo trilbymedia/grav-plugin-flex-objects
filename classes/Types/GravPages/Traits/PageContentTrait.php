@@ -51,6 +51,18 @@ trait PageContentTrait
     protected $content;
 
     /**
+     * @param string $route
+     * @return string
+     * @internal
+     */
+    static public function adjustRouteCase($route)
+    {
+        $case_insensitive = Grav::instance()['config']->get('system.force_lowercase_urls');
+
+        return $case_insensitive ? mb_strtolower($route) : $route;
+    }
+
+    /**
      * @inheritdoc
      */
     public function header($var = null)

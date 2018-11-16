@@ -30,13 +30,14 @@ config:
   data:
     object: 'Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject'
     collection: 'Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageCollection'
+    index: 'Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageIndex'
     storage:
       class: 'Grav\Plugin\FlexObjects\Storage\FolderStorage'
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\MarkdownFormatter'
         folder: 'user://data/pages'
-        pattern: '%s/%s/page.md'
+        pattern: '{FOLDER}/{KEY}/page.md'
     ordering:
       storage_key: ASC
 

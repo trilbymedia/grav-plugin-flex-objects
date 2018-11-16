@@ -9,7 +9,6 @@ use Grav\Common\Markdown\ParsedownExtra;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexObject;
-use Grav\Framework\Flex\Interfaces\FlexStorageInterface;
 use Grav\Framework\Flex\Traits\FlexMediaTrait;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Plugin\FlexObjects\Types\GravPages\Interfaces\PageContentInterface;
@@ -23,8 +22,6 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
 {
     use PageContentTrait;
     use FlexMediaTrait;
-
-    const ORDER_PREFIX_REGEX = PAGE_ORDER_PREFIX_REGEX;
 
     /**
      * @return array
@@ -62,23 +59,6 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
             'isPublished' => true,
             'folderExists' => true
         ] + parent::getCachedMethods();
-    }
-    /**
-     * @param FlexStorageInterface $storage
-     * @return array
-     */
-    public static function createIndex(FlexStorageInterface $storage)
-    {
-        $index = parent::createIndex($storage);
-
-        $list = [];
-        foreach ($index as $key => $timestamp) {
-            $slug = static::adjustRouteCase(preg_replace(static::ORDER_PREFIX_REGEX, '', $key));
-
-            $list[$slug] = [$key, $timestamp];
-        }
-
-        return $list;
     }
 
     /**
@@ -381,18 +361,6 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
         }
 
         return $content;
-    }
-
-    /**
-     * @param string $route
-     * @return string
-     * @internal
-     */
-    static public function adjustRouteCase($route)
-    {
-        $case_insensitive = Grav::instance()['config']->get('system.force_lowercase_urls');
-
-        return $case_insensitive ? mb_strtolower($route) : $route;
     }
 
     /**

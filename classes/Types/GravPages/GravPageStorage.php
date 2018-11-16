@@ -41,7 +41,7 @@ class GravPageStorage extends FolderStorage
         $this->ignore_folders = (array)$config->get('system.pages.ignore_folders');
         $this->recurse = $options['recurse'] ?? true;
         $this->base_path = $options['base_path'] ?? '';
-        $this->base_route = trim(GravPageObject::adjustRouteCase(preg_replace(GravPageObject::PAGE_ROUTE_REGEX, '/', '/' . $this->base_path)), '/');
+        $this->base_route = trim(GravPageIndex::adjustRouteCase(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', '/' . $this->base_path)), '/');
 
         /** @var Language $language */
         $language = $grav['language'];
@@ -177,7 +177,7 @@ class GravPageStorage extends FolderStorage
             }
         }
 
-        $path = trim(GravPageObject::adjustRouteCase(preg_replace(GravPageObject::PAGE_ROUTE_REGEX, '/', $prefix)), '/');
+        $path = trim(GravPageIndex::adjustRouteCase(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', $prefix)), '/');
         if (isset($list[$path])) {
             $debugger = Grav::instance()['debugger'];
             $debugger->addMessage('Page name conflict: ' . $path);
@@ -192,7 +192,7 @@ class GravPageStorage extends FolderStorage
             $name = $prefix;
         }
 
-        $list[$path] = [$name, $modified, $markdown];
+        $list[$path] = ['storage_key' => $name, 'storage_timestamp' => $modified, 'markdown' => $markdown];
 
         return $list;
     }

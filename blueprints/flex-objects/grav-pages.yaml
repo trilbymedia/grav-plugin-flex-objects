@@ -38,6 +38,7 @@ config:
   data:
     object: 'Grav\Plugin\FlexObjects\Types\GravPages\GravPageObject'
     collection: 'Grav\Plugin\FlexObjects\Types\GravPages\GravPageCollection'
+    index: 'Grav\Plugin\FlexObjects\Types\GravPages\GravPageIndex'
     storage:
       class: 'Grav\Plugin\FlexObjects\Types\GravPages\GravPageStorage'
       options:
