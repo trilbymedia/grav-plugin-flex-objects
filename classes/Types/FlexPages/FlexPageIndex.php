@@ -5,6 +5,9 @@ namespace Grav\Plugin\FlexObjects\Types\FlexPages;
 use Grav\Common\Grav;
 use Grav\Framework\Flex\FlexIndex;
 use Grav\Framework\Flex\Interfaces\FlexStorageInterface;
+
+class_exists('Grav\\Common\\Page\\Page', true);
+
 /**
  * Class FlexPageObject
  * @package Grav\Plugin\FlexObjects\Types\FlexPages
@@ -22,15 +25,16 @@ class FlexPageIndex extends FlexIndex
         $index = parent::loadEntriesFromStorage($storage);
 
         $entries = [];
-        foreach ($index as $key => $timestamp) {
-            $slug = static::adjustRouteCase(preg_replace(static::ORDER_PREFIX_REGEX, '', $key));
-            if (!\is_array($timestamp)) {
+        foreach ($index as $key => $entry) {
+            $slug = preg_replace(self::ORDER_PREFIX_REGEX, '', static::adjustRouteCase($key));
+
+            if (!\is_array($entry)) {
                 $entries[$slug] = [
                     'storage_key' => $key,
-                    'storage_timestamp' => $timestamp
+                    'storage_timestamp' => (int)$entry
                 ];
             } else {
-                $entries[$slug] = $timestamp;
+                $entries[$slug] = $entry;
             }
         }
 
@@ -44,7 +48,11 @@ class FlexPageIndex extends FlexIndex
      */
     static public function adjustRouteCase($route)
     {
-        $case_insensitive = Grav::instance()['config']->get('system.force_lowercase_urls');
+        static $case_insensitive;
+
+        if (null === $case_insensitive) {
+            $case_insensitive = Grav::instance()['config']->get('system.force_lowercase_urls', false);
+        }
 
         return $case_insensitive ? mb_strtolower($route) : $route;
     }
