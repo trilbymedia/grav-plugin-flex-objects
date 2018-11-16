@@ -1,5 +1,0 @@
-title: Flex Pages (old)
-description: Compatibility layer, to be removed.
-type: flex-objects
-
-extends@: blueprints://flex-objects/flex-pages.yaml
