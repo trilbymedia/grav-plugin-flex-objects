@@ -171,7 +171,7 @@ class GravPageStorage extends FolderStorage
                 $list += $this->recurseKeys($folder, $prefix . '/' . $key, $updated);
             }
 
-            if ($key[0] === '_') {
+            if (strpos($key[0], '_') === 0) {
                 // Update modified only for modular pages.
                 $modified = max($modified, $updated);
             }
@@ -192,7 +192,11 @@ class GravPageStorage extends FolderStorage
             $name = $prefix;
         }
 
-        $list[$path] = ['storage_key' => $name, 'storage_timestamp' => $modified, 'markdown' => $markdown];
+        $list[$path] = [
+            'storage_key' => $name,
+            'storage_timestamp' => $modified,
+            'markdown' => $markdown
+        ];
 
         return $list;
     }
