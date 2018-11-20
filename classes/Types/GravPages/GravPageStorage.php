@@ -192,9 +192,10 @@ class GravPageStorage extends FolderStorage
             $name = $prefix;
         }
 
-        $list[$path] = [
+        $list[$name] = [
             'storage_key' => $name,
             'storage_timestamp' => $modified,
+            'key' => $path,
             'markdown' => $markdown
         ];
 
