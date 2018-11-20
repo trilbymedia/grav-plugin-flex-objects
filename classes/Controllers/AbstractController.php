@@ -26,7 +26,8 @@ use RocketTheme\Toolbox\Session\Message;
 abstract class AbstractController implements RequestHandlerInterface
 {
     /** @var string */
-    protected $nonce = 'admin-nonce';
+    protected $nonce_type = 'admin-form';
+    protected $nonce_name = 'admin-nonce';
 
     /** @var ServerRequestInterface */
     protected $request;
@@ -275,14 +276,14 @@ abstract class AbstractController implements RequestHandlerInterface
         $nonce = null;
 
         if (\in_array(strtoupper($this->request->getMethod()), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-            $nonce = $this->getPost($this->nonce);
+            $nonce = $this->getPost($this->nonce_name);
         }
 
         if ($nonce === null) {
-            $nonce = $this->grav['uri']->param($this->nonce);
+            $nonce = $this->grav['uri']->param($this->nonce_name);
         }
 
-        if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce)) {
+        if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce_type)) {
             throw new PageExpiredException($this->request);
         }
     }
