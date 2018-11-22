@@ -27,6 +27,7 @@ abstract class AbstractController implements RequestHandlerInterface
 {
     /** @var string */
     protected $nonce_type = 'admin-form';
+    /** @var string */
     protected $nonce_name = 'admin-nonce';
 
     /** @var ServerRequestInterface */
