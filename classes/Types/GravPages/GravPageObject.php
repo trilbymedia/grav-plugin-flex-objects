@@ -36,7 +36,7 @@ class GravPageObject extends FlexPageObject
     /**
      * @inheritdoc PageInterface
      */
-    public function value($name, $default = null)
+    public function value($name, $default = null, $separator = null)
     {
         $test = new \stdClass();
 
@@ -60,7 +60,7 @@ class GravPageObject extends FlexPageObject
                 return $this->full_order();
         }
 
-        return parent::value($name, $default);
+        return parent::value($name, $default, $separator);
     }
 
     public function folder($var = null)

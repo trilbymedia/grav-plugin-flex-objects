@@ -72,7 +72,7 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
     /**
      * @inheritdoc PageInterface
      */
-    public function value($name, $default = null)
+    public function value($name, $default = null, $separator = null)
     {
         $test = new \stdClass();
 
@@ -88,7 +88,7 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
                 return '/' . $this->getKey();
         }
 
-        return parent::value($name, $default);
+        return parent::value($name, $default, $separator);
     }
 
     /**
