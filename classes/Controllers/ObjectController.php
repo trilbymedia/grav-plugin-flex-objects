@@ -13,6 +13,8 @@ class ObjectController extends AbstractController
     public function taskSave(ServerRequestInterface $request) : Response
     {
         $data = $this->getPost('data');
+        print_r($data);
+        die('SAVE');
 
         $object = $this->getObject();
         $oldKey = $object->getStorageKey();
@@ -34,6 +36,13 @@ class ObjectController extends AbstractController
         $this->setMessage($this->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
         return $this->createRedirectResponse($redirect, 303);
+    }
+
+    public function taskPreview(ServerRequestInterface $request) : Response
+    {
+        $data = $this->getPost('data');
+        print_r($data);
+        die('PREVIEW');
     }
 
     /*

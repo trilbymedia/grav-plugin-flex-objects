@@ -72,11 +72,12 @@ abstract class AbstractController implements RequestHandlerInterface
 
         /** @var Route $route */
         $route = $attributes['route'];
+        $post = $this->getPost();
 
         try {
-            $task = $route->getParam('task');
+            $task = $post['task'] ?? $route->getParam('task');
             if ($task) {
-                $this->checkNonce($task);
+                //$this->checkNonce($task);
                 $type = 'task';
                 $command = $task;
             } else {
@@ -100,7 +101,7 @@ abstract class AbstractController implements RequestHandlerInterface
                 $inflector = $this->grav['inflector'];
                 $method = $type . $inflector->camelize($command);
                 if ($method && method_exists($this, $method)) {
-                    $response = $this->{$method}();
+                    $response = $this->{$method}($request);
                 } else {
                     throw new NotFoundException($request);
                 }
