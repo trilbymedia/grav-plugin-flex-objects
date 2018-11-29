@@ -49,14 +49,17 @@
         {% endif %}
     </div>
 </div>
-{% do assets.addJs('jquery', 101) %}
+    {% if grav.browser.browser == 'msie' and grav.browser.version < 12 %}
+        {% do assets.addJs('plugin://form/assets/object.assign.polyfill.js') %}
+    {% endif %}
+    {% do assets.addJs('jquery', 101) %}
     {% do assets.addJs('plugin://form/assets/form.vendor.js', { 'loading': 'defer', 'group': 'bottom'  }) %}
     {% do assets.addJs('plugin://form/assets/form.min.js', { 'loading': 'defer', 'group': 'bottom'  }) %}
     {% do assets.addCss('plugin://form/assets/dropzone.min.css', { 'group': 'form'}) %}
     {{ assets.css('form')|raw }}
     {% do assets.addInlineJs("
     window.GravForm = window.GravForm || {};
-    window.GravForm = jQuery.extend({}, window.GravForm, {
+    window.GravForm = Object.assign({}, window.GravForm, {
         translations: {
             PLUGIN_FORM: {
                 'DROPZONE_CANCEL_UPLOAD': " ~ 'PLUGIN_FORM.DROPZONE_CANCEL_UPLOAD'|t|json_encode ~ ",
