@@ -36,7 +36,7 @@ config:
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\MarkdownFormatter'
-        folder: 'user://data/pages'
+        folder: 'user-data://pages'
         pattern: '{FOLDER}/{KEY}/page.md'
     ordering:
       storage_key: ASC

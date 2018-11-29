@@ -109,7 +109,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
             website:
             tags:
       data:
-        storage: user://data/flex-objects/contacts.json
+        storage: user-data://flex-objects/contacts.json
     
     form:
       validation: loose
