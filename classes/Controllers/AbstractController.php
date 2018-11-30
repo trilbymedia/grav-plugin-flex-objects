@@ -285,6 +285,10 @@ abstract class AbstractController implements RequestHandlerInterface
             $nonce = $this->grav['uri']->param($this->nonce_name);
         }
 
+        if ($nonce === null) {
+            $nonce = $this->grav['uri']->query($this->nonce_name);
+        }
+
         if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce_type)) {
             throw new PageExpiredException($this->request);
         }
