@@ -12,37 +12,59 @@ class ObjectController extends AbstractController
 {
     public function taskSave(ServerRequestInterface $request) : Response
     {
-        $data = $this->getPost('data');
-        print_r($data);
-        die('SAVE');
-
         $object = $this->getObject();
-        $oldKey = $object->getStorageKey();
-        $object->update($data);
-        $newKey = $object->getStorageKey();
-
-        // TODO: add support for moving as well.
-        if ($oldKey !== $newKey) {
-            throw new \RuntimeException('You cannot move object while saving it', 400);
+        if (!$object) {
+            throw new \RuntimeException('No object found!');
         }
 
-        $object->save($object);
+        $form = $object->getForm('edit');
+        $form->handleRequest($request);
+        $errors = $form->getErrors();
+        if ($errors) {
+            foreach ($errors as $error) {
+                $this->setMessage($error, 'error');
+            }
 
-        $redirect = method_exists($object, 'url') ? $object->url() : '';
+            return $this->createRedirectResponse((string)$request->getUri(), 303);
+        }
+        $object = $form->getObject();
 
+        // TODO: better way?
         $this->grav->fireEvent('onAdminAfterSave', new Event(['object' => $object]));
         $this->grav->fireEvent('gitsync');
 
         $this->setMessage($this->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+
+        $redirect = method_exists($object, 'url') ? $object->url() : (string)$request->getUri();
 
         return $this->createRedirectResponse($redirect, 303);
     }
 
     public function taskPreview(ServerRequestInterface $request) : Response
     {
-        $data = $this->getPost('data');
-        print_r($data);
-        die('PREVIEW');
+        $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('No object found!');
+        }
+
+        // TODO: do not save but use temporary object.
+        $form = $object->getForm('edit');
+        $form->handleRequest($request);
+        $errors = $form->getErrors();
+        if ($errors) {
+            foreach ($errors as $error) {
+                $this->setMessage($error, 'error');
+            }
+
+            return $this->createRedirectResponse((string)$request->getUri(), 303);
+        }
+        $object = $form->getObject();
+
+        $this->setMessage($this->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+
+        $redirect = method_exists($object, 'url') ? $object->url() : (string)$request->getUri();
+
+        return $this->createRedirectResponse($redirect, 303);
     }
 
     /*
