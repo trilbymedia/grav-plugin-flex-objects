@@ -35,7 +35,8 @@ class ObjectController extends AbstractController
 
         $this->setMessage($this->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
-        $redirect = method_exists($object, 'url') ? $object->url() : (string)$request->getUri();
+//        $redirect = method_exists($object, 'url') ? $object->url() : (string)$request->getUri();
+        $redirect = (string)$request->getUri();
 
         return $this->createRedirectResponse($redirect, 303);
     }
