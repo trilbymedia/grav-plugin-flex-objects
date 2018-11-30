@@ -26,9 +26,9 @@ use RocketTheme\Toolbox\Session\Message;
 abstract class AbstractController implements RequestHandlerInterface
 {
     /** @var string */
-    protected $nonce_type = 'admin-form';
+    protected $nonce_type = 'flex-object';
     /** @var string */
-    protected $nonce_name = 'admin-nonce';
+    protected $nonce_name = 'nonce';
 
     /** @var ServerRequestInterface */
     protected $request;
@@ -77,7 +77,7 @@ abstract class AbstractController implements RequestHandlerInterface
         try {
             $task = $post['task'] ?? $route->getParam('task');
             if ($task) {
-                //$this->checkNonce($task);
+                $this->checkNonce($task);
                 $type = 'task';
                 $command = $task;
             } else {
