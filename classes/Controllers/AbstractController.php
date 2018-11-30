@@ -281,11 +281,11 @@ abstract class AbstractController implements RequestHandlerInterface
             $nonce = $this->getPost($this->nonce_name);
         }
 
-        if ($nonce === null) {
+        if (!$nonce) {
             $nonce = $this->grav['uri']->param($this->nonce_name);
         }
 
-        if ($nonce === null) {
+        if (!$nonce) {
             $nonce = $this->grav['uri']->query($this->nonce_name);
         }
 
