@@ -26,7 +26,7 @@ use RocketTheme\Toolbox\Session\Message;
 abstract class AbstractController implements RequestHandlerInterface
 {
     /** @var string */
-    protected $nonce_type = 'flex-object';
+    protected $nonce_action = 'flex-object';
     /** @var string */
     protected $nonce_name = 'nonce';
 
@@ -75,14 +75,15 @@ abstract class AbstractController implements RequestHandlerInterface
         $post = $this->getPost();
 
         try {
-            $task = $post['task'] ?? $route->getParam('task');
+            $task = $request->getAttribute('task') ?? $post['task'] ?? $route->getParam('task');
             if ($task) {
-                $this->checkNonce($task);
+                // FIXME: put back
+                //$this->checkNonce($task);
                 $type = 'task';
                 $command = $task;
             } else {
                 $type = 'action';
-                $command = $route->getParam('action') ?? 'display';
+                $command = $request->getAttribute('action') ?? $post['action'] ?? $route->getParam('action') ?? 'display';
             }
             $command = strtolower($command);
 
@@ -289,7 +290,7 @@ abstract class AbstractController implements RequestHandlerInterface
             $nonce = $this->grav['uri']->query($this->nonce_name);
         }
 
-        if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce_type)) {
+        if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce_action)) {
             throw new PageExpiredException($this->request);
         }
     }

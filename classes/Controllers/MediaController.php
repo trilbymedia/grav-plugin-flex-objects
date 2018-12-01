@@ -12,14 +12,12 @@ use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Framework\Psr7\Response;
 use Psr\Http\Message\UploadedFileInterface;
 
-// TODO: taskFilesUpload() ?
-// TODO: taskFilesSessionRemove() ?
 class MediaController extends AbstractController
 {
     /**
      * @return Response
      */
-    public function actionMediaList() : Response
+    public function actionMediaList(): Response
     {
         $this->checkAuthorization('media.list');
 
@@ -50,11 +48,10 @@ class MediaController extends AbstractController
         return $this->createJsonResponse($response);
     }
 
-
     /**
      * @return Response
      */
-    public function taskMediaCreate() : Response
+    public function taskMediaUpload(): Response
     {
         $this->checkAuthorization('media.create');
 
@@ -63,21 +60,26 @@ class MediaController extends AbstractController
 
         $files = $this->getRequest()->getUploadedFiles();
 
-        if (!isset($files['file']) || \is_array($files['file'])) {
+        /** @var UploadedFileInterface $file */
+        $field = $this->getPost('name');
+        // TODO: handle also nested fields.
+        $file = $field ? $files['data'][$field][0] ?? null : $files['file'] ?? null;
+
+        if (!$file instanceof UploadedFileInterface) {
             throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
         }
 
-        /** @var UploadedFileInterface $file */
-        $file = $files['file'];
+        $filename = $file->getClientFilename();
 
         // Handle bad filenames.
-        $filename = $file->getClientFilename();
         if (!Utils::checkFilename($filename)) {
             throw new \RuntimeException(sprintf($this->translate('PLUGIN_ADMIN.FILEUPLOAD_UNABLE_TO_UPLOAD'), $filename, 'Bad filename'), 400);
         }
 
         try {
-            $object->uploadMediaFile($file);
+            // TODO: handle crop task.
+            // TODO: delay storing file.
+            $object->uploadMediaFile($file, $filename, $field);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
@@ -98,7 +100,8 @@ class MediaController extends AbstractController
             'status'  => 'success',
             'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
             'filename' => $filename,
-            'metadata' => $metadata
+            'metadata' => $metadata,
+            'session' => null
         ];
 
         return $this->createJsonResponse($response);
@@ -107,13 +110,14 @@ class MediaController extends AbstractController
     /**
      * @return Response
      */
-    public function taskMediaDelete() : Response
+    public function taskMediaDelete(): Response
     {
         $this->checkAuthorization('media.delete');
 
         /** @var MediaManipulationInterface $object */
         $object = $this->getObject();
 
+        $field = $this->getPost('name');
         $filename = $this->getPost('filename');
 
         // Handle bad filenames.
@@ -126,7 +130,8 @@ class MediaController extends AbstractController
         }
 
         try {
-            $object->deleteMediaFile($filename);
+            // TODO: delay deleting file.
+            $object->deleteMediaFile($filename, $field);
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
@@ -145,7 +150,7 @@ class MediaController extends AbstractController
      *
      * @return Response
      */
-    protected function actionMediaPicker() : Response
+    protected function actionMediaPicker(): Response
     {
         $this->checkAuthorization('media.list');
 
@@ -244,7 +249,7 @@ class MediaController extends AbstractController
      * @throws \LogicException
      * @throws \RuntimeException
      */
-    protected function checkAuthorization(string $action)
+    protected function checkAuthorization(string $action): void
     {
         switch ($action) {
             case 'media.list':
