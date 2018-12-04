@@ -118,19 +118,19 @@ class GravPageStorage extends FolderStorage
      *
      * @return array
      */
-    protected function findAllKeys() : array
+    protected function buildIndex() : array
     {
         $folder = $this->getStoragePath();
         $this->flags = \FilesystemIterator::KEY_AS_FILENAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
 
-        $list = $this->recurseKeys($folder, '', $modified);
+        $list = $this->buildIndexRrecurse($folder, '', $modified);
 
         ksort($list, SORT_NATURAL);
 
         return $list;
     }
 
-    protected function recurseKeys(string $folder, string $prefix, &$modified)
+    protected function buildIndexRrecurse(string $folder, string $prefix, &$modified)
     {
         $iterator = new \FilesystemIterator($folder . $prefix, $this->flags);
 
@@ -168,7 +168,7 @@ class GravPageStorage extends FolderStorage
             $updated = $info->getMTime();
 
             if ($this->recurse) {
-                $list += $this->recurseKeys($folder, $prefix . '/' . $key, $updated);
+                $list += $this->buildIndexRrecurse($folder, $prefix . '/' . $key, $updated);
             }
 
             if (strpos($key[0], '_') === 0) {
