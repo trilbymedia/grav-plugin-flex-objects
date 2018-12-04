@@ -56,7 +56,7 @@ abstract class AbstractController implements RequestHandlerInterface
      * @param ServerRequestInterface $request
      * @return Response
      */
-    public function handle(ServerRequestInterface $request) : ResponseInterface
+    public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $attributes = $request->getAttributes();
         $this->request = $request;
@@ -121,7 +121,7 @@ abstract class AbstractController implements RequestHandlerInterface
     /**
      * @return ServerRequestInterface
      */
-    public function getRequest() : ServerRequestInterface
+    public function getRequest(): ServerRequestInterface
     {
         return $this->request;
     }
@@ -145,7 +145,7 @@ abstract class AbstractController implements RequestHandlerInterface
     /**
      * @return Grav
      */
-    public function getGrav() : Grav
+    public function getGrav(): Grav
     {
         return $this->grav;
     }
@@ -153,7 +153,7 @@ abstract class AbstractController implements RequestHandlerInterface
     /**
      * @return Session
      */
-    public function getSession() : Session
+    public function getSession(): Session
     {
         return $this->grav['session'];
     }
@@ -161,7 +161,7 @@ abstract class AbstractController implements RequestHandlerInterface
     /**
      * @return Flex
      */
-    public function getFlex() : Flex
+    public function getFlex(): Flex
     {
         return $this->grav['flex_objects'];
     }
@@ -169,7 +169,7 @@ abstract class AbstractController implements RequestHandlerInterface
     /**
      * @return string
      */
-    public function getDirectoryType() : string
+    public function getDirectoryType(): string
     {
         return $this->type;
     }
@@ -177,7 +177,7 @@ abstract class AbstractController implements RequestHandlerInterface
     /**
      * @return string
      */
-    public function getObjectKey() : string
+    public function getObjectKey(): string
     {
         return $this->key;
     }
@@ -185,7 +185,7 @@ abstract class AbstractController implements RequestHandlerInterface
     /**
      * @return FlexDirectory|null
      */
-    public function getDirectory() : ?FlexDirectory
+    public function getDirectory(): ?FlexDirectory
     {
         return $this->directory;
     }
@@ -193,16 +193,26 @@ abstract class AbstractController implements RequestHandlerInterface
     /**
      * @return FlexObjectInterface|null
      */
-    public function getObject() : ?FlexObjectInterface
+    public function getObject(): ?FlexObjectInterface
     {
         return $this->object;
+    }
+
+    /**
+     * @param string $content
+     * @param int $code
+     * @return Response
+     */
+    public function createHtmlResponse(string $content, int $code = null): ResponseInterface
+    {
+        return new Response($code ?: 200, [], $content);
     }
 
     /**
      * @param array $content
      * @return Response
      */
-    public function createJsonResponse(array $content) : ResponseInterface
+    public function createJsonResponse(array $content): ResponseInterface
     {
         return new Response($content['code'] ?? 200, [], json_encode($content));
     }
@@ -212,7 +222,7 @@ abstract class AbstractController implements RequestHandlerInterface
      * @param int $code
      * @return Response
      */
-    public function createRedirectResponse(string $url, int $code = null) : ResponseInterface
+    public function createRedirectResponse(string $url, int $code = null): ResponseInterface
     {
         if (null === $code || $code < 301 || $code > 307) {
             $code = $this->grav['config']->get('system.pages.redirect_default_code', 302);
@@ -225,7 +235,7 @@ abstract class AbstractController implements RequestHandlerInterface
      * @param \Exception $e
      * @return Response
      */
-    public function createErrorResponse(\Exception $e) : ResponseInterface
+    public function createErrorResponse(\Exception $e): ResponseInterface
     {
         if ($e instanceof RequestException) {
             $code = $e->getHttpCode();
@@ -248,7 +258,7 @@ abstract class AbstractController implements RequestHandlerInterface
      * @param string $string
      * @return string
      */
-    public function translate(string $string) : string
+    public function translate(string $string): string
     {
         /** @var Language $language */
         $language = $this->grav['language'];
@@ -261,7 +271,7 @@ abstract class AbstractController implements RequestHandlerInterface
      * @param string $type
      * @return $this
      */
-    public function setMessage(string $message, string $type = 'info')
+    public function setMessage(string $message, string $type = 'info'): self
     {
         /** @var Message $messages */
         $messages = $this->grav['messages'];
@@ -274,7 +284,7 @@ abstract class AbstractController implements RequestHandlerInterface
      * @param string $task
      * @throws PageExpiredException
      */
-    protected function checkNonce(string $task)
+    protected function checkNonce(string $task): void
     {
         $nonce = null;
 

@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Controllers;
 
+use Grav\Common\Grav;
 use Grav\Framework\Psr7\Response;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
 
 class ObjectController extends AbstractController
 {
-    public function taskSave(ServerRequestInterface $request) : Response
+    public function taskSave(ServerRequestInterface $request): Response
     {
         $object = $this->getObject();
         if (!$object) {
-            throw new \RuntimeException('No object found!');
+            throw new \RuntimeException('No object found!', 404);
         }
 
         $form = $object->getForm('edit');
@@ -41,14 +42,15 @@ class ObjectController extends AbstractController
         return $this->createRedirectResponse($redirect, 303);
     }
 
-    public function taskPreview(ServerRequestInterface $request) : Response
+    public function taskPreview(ServerRequestInterface $request): Response
     {
         $object = $this->getObject();
         if (!$object) {
-            throw new \RuntimeException('No object found!');
+            throw new \RuntimeException('No object found!', 404);
         }
 
         // TODO: do not save but use temporary object.
+        /*
         $form = $object->getForm('edit');
         $form->handleRequest($request);
         $errors = $form->getErrors();
@@ -59,13 +61,39 @@ class ObjectController extends AbstractController
 
             return $this->createRedirectResponse((string)$request->getUri(), 303);
         }
-        $object = $form->getObject();
+        $this->object = $form->getObject();
+        */
 
-        $this->setMessage($this->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+        return $this->actionDisplay();
+    }
 
-        $redirect = method_exists($object, 'url') ? $object->url() : (string)$request->getUri();
+    public function actionDisplay(): Response
+    {
+        $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('No object found!', 404);
+        }
 
-        return $this->createRedirectResponse($redirect, 303);
+        $grav = Grav::instance();
+
+        $grav['twig']->init();
+        $grav['theme'];
+        $content = [
+            'code' => 200,
+            'id' => $object->getKey(),
+            'exists' => $object->exists(),
+            'html' => (string)$object->render('preview', ['nocache' => []])
+        ];
+
+        $accept = $this->getAccept(['text/html', 'application/json']);
+        if ($accept === 'text/html') {
+            return $this->createHtmlResponse($content['html']);
+        }
+        if ($accept === 'application/json') {
+            return $this->createJsonResponse($content);
+        }
+
+        throw new \RuntimeException('Not found', 404);
     }
 
     /*
@@ -74,4 +102,27 @@ class ObjectController extends AbstractController
     public function taskMove(ServerRequestInterface $request) : Response
     public function taskDelete(ServerRequestInterface $request) : Response
     */
+
+    protected function getAccept(array $compare)
+    {
+        $list = [];
+        foreach ($this->request->getHeader('Accept') as $accept) {
+            foreach (explode(',', $accept) as $item) {
+                if (!$item) {
+                    continue;
+                }
+
+                $split = explode(';q=', $item);
+                $mime = array_shift($split);
+                $priority = array_shift($split) ?? 1.0;
+
+                $list[$mime] = $priority;
+            }
+        }
+
+        arsort($list);
+        $list = array_intersect($compare, array_keys($list));
+
+        return reset($list);
+    }
 }
