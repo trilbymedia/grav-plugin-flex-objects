@@ -182,7 +182,7 @@ class AdminController extends SimpleController
 
     public function taskAddmedia()
     {
-        $response = $this->forwardMediaTask('task', 'media.create');
+        $response = $this->forwardMediaTask('task', 'media.upload');
 
         $this->admin->json_response = json_decode($response->getBody());
 

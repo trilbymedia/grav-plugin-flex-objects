@@ -64,7 +64,7 @@ abstract class SimpleController extends AdminBaseController
             }
 
             // Task
-            $task = $post['task'] ?? $uri->param('task');
+            $task = $this->grav['task'];
             if ($task) {
                 $this->task = $task;
             }

@@ -62,6 +62,9 @@ class MediaController extends AbstractController
 
         /** @var UploadedFileInterface $file */
         $field = $this->getPost('name');
+        if ($field === 'undefined') {
+            $field = null;
+        }
         // TODO: handle also nested fields.
         $file = $field ? $files['data'][$field][0] ?? null : $files['file'] ?? null;
 
