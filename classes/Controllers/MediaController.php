@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Controllers;
 
+use Grav\Common\Form\FormFlash;
+use Grav\Common\Grav;
 use Grav\Common\Page\Medium\Medium;
+use Grav\Common\Session;
+use Grav\Common\Uri;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
+use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Framework\Psr7\Response;
 use Psr\Http\Message\UploadedFileInterface;
@@ -55,17 +60,21 @@ class MediaController extends AbstractController
     {
         $this->checkAuthorization('media.create');
 
-        /** @var MediaManipulationInterface $object */
+        /** @var FlexObjectInterface|MediaManipulationInterface|null $object */
         $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
 
-        $files = $this->getRequest()->getUploadedFiles();
-
-        /** @var UploadedFileInterface $file */
         $field = $this->getPost('name');
         if ($field === 'undefined') {
             $field = null;
         }
+
+        $files = $this->getRequest()->getUploadedFiles();
+
         // TODO: handle also nested fields.
+        /** @var UploadedFileInterface $file */
         $file = $field ? $files['data'][$field][0] ?? null : $files['file'] ?? null;
 
         if (!$file instanceof UploadedFileInterface) {
@@ -80,13 +89,33 @@ class MediaController extends AbstractController
         }
 
         try {
-            // TODO: handle crop task.
-            // TODO: delay storing file.
-            $object->uploadMediaFile($file, $filename, $field);
+            $grav = Grav::instance();
+
+            /** @var Uri $uri */
+            $uri = $grav['uri'];
+
+            /** @var Session $session */
+            $session = $grav['session'];
+
+            $formName = $this->getPost('__form-name__');
+            $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
+
+            $crop = $this->getPost('crop');
+            if (\is_string($crop)) {
+                $crop = json_decode($crop, true);
+            }
+
+            $flash = new FormFlash($session->getId(), $uniqueId, $formName);
+            $flash->setUrl($uri->url)->setUser($grav['user']);
+            $flash->addUploadedFile($file, $field, $crop);
+            $flash->save();
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
+        // TODO: add metadata support.
+        $metadata = [];
+        /*
         $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
         $media = $object->getMedia();
 
@@ -97,6 +126,7 @@ class MediaController extends AbstractController
         if ($include_metadata && isset($media[$basename])) {
             $metadata = $media[$basename]->metadata() ?: [];
         }
+        */
 
         $response = [
             'code'    => 200,
@@ -117,24 +147,35 @@ class MediaController extends AbstractController
     {
         $this->checkAuthorization('media.delete');
 
-        /** @var MediaManipulationInterface $object */
+        /** @var FlexObjectInterface|MediaManipulationInterface|null $object */
         $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
 
-        $field = $this->getPost('name');
         $filename = $this->getPost('filename');
 
         // Handle bad filenames.
         if (!Utils::checkFilename($filename)) {
-            $filename = '';
-        }
-
-        if (!$filename) {
             throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
         try {
-            // TODO: delay deleting file.
-            $object->deleteMediaFile($filename, $field);
+            $grav = Grav::instance();
+
+            /** @var Uri $uri */
+            $uri = $grav['uri'];
+
+            /** @var Session $session */
+            $session = $grav['session'];
+
+            $formName = $this->getPost('__form-name__');
+            $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
+            $field = $this->getPost('name');
+
+            $flash = new FormFlash($session->getId(), $uniqueId, $formName);
+            $flash->removeFile($filename, $field);
+            $flash->save();
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }

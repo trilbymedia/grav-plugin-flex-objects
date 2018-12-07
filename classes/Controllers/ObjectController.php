@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
+use Grav\Common\Uri;
 use Grav\Framework\Psr7\Response;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
@@ -13,12 +14,21 @@ class ObjectController extends AbstractController
 {
     public function taskSave(ServerRequestInterface $request): Response
     {
+        $grav = Grav::instance();
+
+        /** @var Uri $uri */
+        $uri = $grav['uri'];
+
+        $formName = $this->getPost('__form-name__');
+        $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
+
         $object = $this->getObject();
         if (!$object) {
             throw new \RuntimeException('No object found!', 404);
         }
 
         $form = $object->getForm('edit');
+        $form->setUniqueId($uniqueId);
         $form->handleRequest($request);
         $errors = $form->getErrors();
         if ($errors) {
@@ -36,7 +46,6 @@ class ObjectController extends AbstractController
 
         $this->setMessage($this->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
-//        $redirect = method_exists($object, 'url') ? $object->url() : (string)$request->getUri();
         $redirect = (string)$request->getUri();
 
         return $this->createRedirectResponse($redirect, 303);
@@ -44,6 +53,14 @@ class ObjectController extends AbstractController
 
     public function taskPreview(ServerRequestInterface $request): Response
     {
+        $grav = Grav::instance();
+
+        /** @var Uri $uri */
+        $uri = $grav['uri'];
+
+        $formName = $this->getPost('__form-name__');
+        $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
+
         $object = $this->getObject();
         if (!$object) {
             throw new \RuntimeException('No object found!', 404);

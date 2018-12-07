@@ -154,7 +154,7 @@ class AdminController extends SimpleController
         }
 
         // if no id param, assume new, generate an ID
-        $object = $directory->update($this->data, $key, false);
+        $object = $directory->update($this->data, $key);
 
         if ($object) {
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
