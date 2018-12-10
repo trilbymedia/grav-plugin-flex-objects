@@ -4,10 +4,13 @@
 {% set collection = directory.collection.authorize('list') %}
 
 {% block content_top %}
+{% if directory %}
     <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(directory.storageFolder())|trim('/') }}</b></div>
+{% endif %}
 {% endblock %}
 
 {% block content %}
+{% if directory %}
 <div id="directory">
     {% block list %}
 
@@ -163,4 +166,15 @@
 
     {% endblock %}
 </div>
+{% else %}
+    {% do page.modifyHeader('http_response_code', 404) %}
+    <div class="error-block">
+        <h1>Error 404</h1>
+        <div class="padding">
+            <p>
+                Woops! Looks like this page doesn't exist.
+            </p>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}

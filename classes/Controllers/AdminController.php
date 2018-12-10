@@ -25,7 +25,7 @@ class AdminController extends SimpleController
         $key = $this->id;
 
         $directory = $this->getDirectory($type);
-        $object = null !== $key ? $directory->getIndex()->get($key) : null;
+        $object = $directory && null !== $key ? $directory->getIndex()->get($key) : null;
 
         if ($object) {
             $event = new Event(
@@ -68,7 +68,7 @@ class AdminController extends SimpleController
         $key = $this->id;
 
         $directory = $this->getDirectory($type);
-        $object = null !== $key ? $directory->getIndex()->get($key) : null;
+        $object = $directory && null !== $key ? $directory->getIndex()->get($key) : null;
 
         if ($object) {
             $event = new Event(
@@ -110,7 +110,7 @@ class AdminController extends SimpleController
         $key = $this->id;
 
         $directory = $this->getDirectory($type);
-        $object = null !== $key ? $directory->getIndex()->get($key) : null;
+        $object = $directory && null !== $key ? $directory->getIndex()->get($key) : null;
 
         if ($object) {
             if (!$object->authorize('delete')) {
@@ -137,6 +137,9 @@ class AdminController extends SimpleController
         $key = $this->id;
 
         $directory = $this->getDirectory($type);
+        if (!$directory) {
+            throw new \RuntimeException('Not Found', 404);
+        }
 
         $object = $key ? $directory->getIndex()->get($key) : null;
         if (null === $object) {

@@ -1,7 +1,15 @@
 {% set template = (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: task ?: 'types' %}
 
-{% extends target ? ['flex-objects/types/' ~ target ~ '/' ~ template ~ '.html.twig', 'flex-objects/types/default/' ~ template ~ '.html.twig']: 'flex-objects/pages/' ~ template ~ '.html.twig' %}
-
 {% set flex = grav.flex_objects %}
 {% set directory = flex.directory(target) %}
 {% set separator = config.system.param_sep %}
+
+{% extends target ? [
+        'flex-objects/types/' ~ target ~ '/' ~ template ~ '.html.twig',
+        'flex-objects/types/default/' ~ template ~ '.html.twig',
+        'flex-objects/layouts/404.html.twig'
+    ] : [
+        'flex-objects/pages/' ~ template ~ '.html.twig',
+        'flex-objects/layouts/404.html.twig'
+    ] %}
+

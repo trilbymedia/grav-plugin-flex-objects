@@ -3,15 +3,28 @@
 
 {% set id = key %}
 {% set object = directory.collection[id] %}
-{% if not object and uri.param('action') != 'add' %}{% throw 404 directory.type|capitalize ~ ' object not found' %}{% endif %}
 {% set blueprint = object.blueprint ?? directory.blueprint %}
 
 {% block content_top %}
+{% if directory and object or uri.param('action') == 'add' %}
     <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(object.storageFolder ?? directory.getStorageFolder())|trim('/') }} {{ not object ? '[NEW]' }}</b></div>
+{% endif %}
 {% endblock %}
 
 {% block content %}
+{% if directory and object or uri.param('action') == 'add' %}
 <div id="directory">
     {% block edit %}{% endblock %}
 </div>
+{% else %}
+    {% do page.modifyHeader('http_response_code', 404) %}
+    <div class="error-block">
+        <h1>Error 404</h1>
+        <div class="padding">
+            <p>
+                Woops! Looks like this page doesn't exist.
+            </p>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}
