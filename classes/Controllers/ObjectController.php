@@ -6,6 +6,7 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
 use Grav\Common\Uri;
+use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Psr7\Response;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
@@ -14,6 +15,8 @@ class ObjectController extends AbstractController
 {
     public function taskSave(ServerRequestInterface $request): Response
     {
+        $this->checkAuthorization('save');
+
         $grav = Grav::instance();
 
         /** @var Uri $uri */
@@ -53,6 +56,8 @@ class ObjectController extends AbstractController
 
     public function taskPreview(ServerRequestInterface $request): Response
     {
+        $this->checkAuthorization('save');
+
         $grav = Grav::instance();
 
         /** @var Uri $uri */
@@ -86,6 +91,8 @@ class ObjectController extends AbstractController
 
     public function actionDisplay(): Response
     {
+        $this->checkAuthorization('read');
+
         $object = $this->getObject();
         if (!$object) {
             throw new \RuntimeException('No object found!', 404);
@@ -141,5 +148,24 @@ class ObjectController extends AbstractController
         $list = array_intersect($compare, array_keys($list));
 
         return reset($list);
+    }
+
+    /**
+     * @param string $action
+     * @throws \LogicException
+     * @throws \RuntimeException
+     */
+    protected function checkAuthorization(string $action): void
+    {
+        /** @var FlexAuthorizeInterface $object */
+        $object = $this->getObject();
+
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if (!$object->authorize($action)) {
+            throw new \RuntimeException('Forbitten', 403);
+        }
     }
 }
