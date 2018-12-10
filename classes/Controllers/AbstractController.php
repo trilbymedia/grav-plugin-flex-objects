@@ -245,11 +245,28 @@ abstract class AbstractController implements RequestHandlerInterface
             $reason = null;
         }
 
+        $message = $e->getMessage();
         $response = [
-            'code' => $e->getCode(),
+            'code' => $e->getCode() ?: 500,
             'status' => 'error',
-            'message' => $e->getMessage()
+            'message' => $message
         ];
+
+        $accept = $this->getAccept(['text/html', 'application/json']);
+
+        if ($accept === 'text/html') {
+            $method = $this->getRequest()->getMethod();
+
+            // On POST etc, redirect back to the previous page.
+            if ($method !== 'GET' && $method !== 'HEAD') {
+                $this->setMessage($message, 'error');
+                $referer = $this->request->getHeaderLine('Referer');
+                return $this->createRedirectResponse($referer, 303);
+            }
+
+            // TODO: improve error page
+            return $this->createHtmlResponse($response['message']);
+        }
 
         return new Response($code, [], json_encode($response), '1.1', $reason);
     }
@@ -303,5 +320,29 @@ abstract class AbstractController implements RequestHandlerInterface
         if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce_action)) {
             throw new PageExpiredException($this->request);
         }
+    }
+
+
+    protected function getAccept(array $compare)
+    {
+        $list = [];
+        foreach ($this->request->getHeader('Accept') as $accept) {
+            foreach (explode(',', $accept) as $item) {
+                if (!$item) {
+                    continue;
+                }
+
+                $split = explode(';q=', $item);
+                $mime = array_shift($split);
+                $priority = array_shift($split) ?? 1.0;
+
+                $list[$mime] = $priority;
+            }
+        }
+
+        arsort($list);
+        $list = array_intersect($compare, array_keys($list));
+
+        return reset($list);
     }
 }

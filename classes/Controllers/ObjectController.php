@@ -127,29 +127,6 @@ class ObjectController extends AbstractController
     public function taskDelete(ServerRequestInterface $request) : Response
     */
 
-    protected function getAccept(array $compare)
-    {
-        $list = [];
-        foreach ($this->request->getHeader('Accept') as $accept) {
-            foreach (explode(',', $accept) as $item) {
-                if (!$item) {
-                    continue;
-                }
-
-                $split = explode(';q=', $item);
-                $mime = array_shift($split);
-                $priority = array_shift($split) ?? 1.0;
-
-                $list[$mime] = $priority;
-            }
-        }
-
-        arsort($list);
-        $list = array_intersect($compare, array_keys($list));
-
-        return reset($list);
-    }
-
     /**
      * @param string $action
      * @throws \LogicException
