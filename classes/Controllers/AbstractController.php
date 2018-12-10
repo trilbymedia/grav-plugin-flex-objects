@@ -214,7 +214,7 @@ abstract class AbstractController implements RequestHandlerInterface
      */
     public function createJsonResponse(array $content): ResponseInterface
     {
-        return new Response($content['code'] ?? 200, [], json_encode($content));
+        return new Response($content['code'] ?? 200, ['Content-Type' => 'application/json'], json_encode($content));
     }
 
     /**
@@ -268,7 +268,7 @@ abstract class AbstractController implements RequestHandlerInterface
             return $this->createHtmlResponse($response['message']);
         }
 
-        return new Response($code, [], json_encode($response), '1.1', $reason);
+        return new Response($code, ['Content-Type' => 'application/json'], json_encode($response), '1.1', $reason);
     }
 
     /**
