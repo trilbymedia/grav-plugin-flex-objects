@@ -252,7 +252,7 @@ abstract class AbstractController implements RequestHandlerInterface
             'message' => $message
         ];
 
-        $accept = $this->getAccept(['text/html', 'application/json']);
+        $accept = $this->getAccept(['application/json', 'text/html']);
 
         if ($accept === 'text/html') {
             $method = $this->getRequest()->getMethod();
@@ -325,7 +325,7 @@ abstract class AbstractController implements RequestHandlerInterface
 
     protected function getAccept(array $compare)
     {
-        $list = [];
+        $accepted = [];
         foreach ($this->request->getHeader('Accept') as $accept) {
             foreach (explode(',', $accept) as $item) {
                 if (!$item) {
@@ -336,12 +336,17 @@ abstract class AbstractController implements RequestHandlerInterface
                 $mime = array_shift($split);
                 $priority = array_shift($split) ?? 1.0;
 
-                $list[$mime] = $priority;
+                $accepted[$mime] = $priority;
             }
         }
 
-        arsort($list);
-        $list = array_intersect($compare, array_keys($list));
+        arsort($accepted);
+
+        // TODO: add support for image/* etc
+        $list = array_intersect($compare, array_keys($accepted));
+        if (!$list && (isset($accepted['*/*']) || isset($accepted['*']))) {
+            return reset($compare);
+        }
 
         return reset($list);
     }

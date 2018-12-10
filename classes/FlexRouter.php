@@ -18,8 +18,11 @@ class FlexRouter implements MiddlewareInterface
 
         /** @var Route $route */
         $route = $context['route'];
+        $post = $request->getParsedBody();
 
-        switch ($route->getParam('task')) {
+        $task = $post['task'] ?? $route->getParam('task');
+
+        switch ($task) {
             case 'listmedia':
             case 'addmedia':
             case 'delmedia':
@@ -29,6 +32,7 @@ class FlexRouter implements MiddlewareInterface
             case 'update':
             case 'move':
             case 'delete':
+            case 'preview':
                 return (new ObjectController())->handle($request);
         }
 

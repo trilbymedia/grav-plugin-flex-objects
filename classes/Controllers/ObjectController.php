@@ -109,7 +109,7 @@ class ObjectController extends AbstractController
             'html' => (string)$object->render('preview', ['nocache' => []])
         ];
 
-        $accept = $this->getAccept(['text/html', 'application/json']);
+        $accept = $this->getAccept(['application/json', 'text/html']);
         if ($accept === 'text/html') {
             return $this->createHtmlResponse($content['html']);
         }
