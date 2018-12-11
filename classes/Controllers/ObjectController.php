@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
-use Grav\Common\Uri;
+use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Psr7\Response;
 use Psr\Http\Message\ServerRequestInterface;
@@ -15,23 +15,17 @@ class ObjectController extends AbstractController
 {
     public function taskSave(ServerRequestInterface $request): Response
     {
-        $this->checkAuthorization('save');
+        $form = $this->getForm();
+        $object = $form->getObject();
 
-        $grav = Grav::instance();
+        return $object->exists() ? $this->taskUpdate($request) : $this->taskCreate($request);
+    }
 
-        /** @var Uri $uri */
-        $uri = $grav['uri'];
+    public function taskCreate(ServerRequestInterface $request): Response
+    {
+        $this->checkAuthorization('create');
 
-        $formName = $this->getPost('__form-name__');
-        $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
-
-        $object = $this->getObject();
-        if (!$object) {
-            throw new \RuntimeException('No object found!', 404);
-        }
-
-        $form = $object->getForm('edit');
-        $form->setUniqueId($uniqueId);
+        $form = $this->getForm();
         $form->handleRequest($request);
         $errors = $form->getErrors();
         if ($errors) {
@@ -43,37 +37,23 @@ class ObjectController extends AbstractController
         }
         $object = $form->getObject();
 
-        // TODO: better way?
-        $this->grav->fireEvent('onAdminAfterSave', new Event(['object' => $object]));
-        $this->grav->fireEvent('gitsync');
+        // TODO: is there a better way to do this?
+        $grav = $this->grav;
+        $grav->fireEvent('onFlexAfterSave', new Event(['object' => $object]));
+        $grav->fireEvent('gitsync');
 
-        $this->setMessage($this->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.CREATED_SUCCESSFULLY'), 'info');
 
         $redirect = (string)$request->getUri();
 
         return $this->createRedirectResponse($redirect, 303);
     }
 
-    public function taskPreview(ServerRequestInterface $request): Response
+    public function taskUpdate(ServerRequestInterface $request): Response
     {
-        $this->checkAuthorization('save');
+        $this->checkAuthorization('update');
 
-        $grav = Grav::instance();
-
-        /** @var Uri $uri */
-        $uri = $grav['uri'];
-
-        $formName = $this->getPost('__form-name__');
-        $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
-
-        $object = $this->getObject();
-        if (!$object) {
-            throw new \RuntimeException('No object found!', 404);
-        }
-
-        // TODO: do not save but use temporary object.
-        /*
-        $form = $object->getForm('edit');
+        $form = $this->getForm();
         $form->handleRequest($request);
         $errors = $form->getErrors();
         if ($errors) {
@@ -83,13 +63,63 @@ class ObjectController extends AbstractController
 
             return $this->createRedirectResponse((string)$request->getUri(), 303);
         }
-        $this->object = $form->getObject();
-        */
+        $object = $form->getObject();
 
-        return $this->actionDisplay();
+        // TODO: is there a better way to do this?
+        $grav = $this->grav;
+        $grav->fireEvent('onFlexAfterSave', new Event(['object' => $object]));
+        $grav->fireEvent('gitsync');
+
+        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.UPDATED_SUCCESSFULLY'), 'info');
+
+        $redirect = (string)$request->getUri();
+
+        return $this->createRedirectResponse($redirect, 303);
     }
 
-    public function actionDisplay(): Response
+    public function taskDelete(ServerRequestInterface $request): Response
+    {
+        $this->checkAuthorization('delete');
+
+        $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $object->delete();
+
+        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.DELETED_SUCCESSFULLY'), 'info');
+
+        $grav = $this->grav;
+        $grav->fireEvent('onFlexAfterDelete', new Event(['object' => $object]));
+        $grav->fireEvent('gitsync');
+
+        $redirect = $this->getFlex()->adminRoute($this->getDirectory());
+
+        return $this->createRedirectResponse($redirect, 303);
+    }
+
+    public function taskPreview(ServerRequestInterface $request): Response
+    {
+        $this->checkAuthorization('save');
+
+        /** @var FlexForm $form */
+        $form = $this->getForm('edit');
+        $form->setRequest($request);
+        if (!$form->validate()) {
+            $errors = $form->getErrors();
+            foreach ($errors as $error) {
+                $this->setMessage($error, 'error');
+            }
+
+            return $this->createRedirectResponse((string)$request->getUri(), 303);
+        }
+        $this->object = $form->updateObject();
+
+        return $this->actionDisplayPreview();
+    }
+
+    protected function actionDisplayPreview(): Response
     {
         $this->checkAuthorization('read');
 
@@ -120,29 +150,22 @@ class ObjectController extends AbstractController
         throw new \RuntimeException('Not found', 404);
     }
 
-    /*
-    public function taskCreate(ServerRequestInterface $request) : Response
-    public function taskUpdate(ServerRequestInterface $request) : Response
-    public function taskMove(ServerRequestInterface $request) : Response
-    public function taskDelete(ServerRequestInterface $request) : Response
-    */
-
     /**
      * @param string $action
-     * @throws \LogicException
      * @throws \RuntimeException
      */
     protected function checkAuthorization(string $action): void
     {
-        /** @var FlexAuthorizeInterface $object */
         $object = $this->getObject();
 
         if (!$object) {
             throw new \RuntimeException('Not Found', 404);
         }
 
-        if (!$object->authorize($action)) {
-            throw new \RuntimeException('Forbitten', 403);
+        if ($object instanceof FlexAuthorizeInterface) {
+            if (!$object->authorize($action)) {
+                throw new \RuntimeException('Forbitten', 403);
+            }
         }
     }
 }

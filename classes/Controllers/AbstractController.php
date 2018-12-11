@@ -10,6 +10,7 @@ use Grav\Common\Language\Language;
 use Grav\Common\Session;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Psr7\Response;
 use Grav\Framework\RequestHandler\Exception\NotFoundException;
@@ -140,6 +141,24 @@ abstract class AbstractController implements RequestHandlerInterface
         }
 
         return $body;
+    }
+
+    public function getForm(string $type = null): FlexFormInterface
+    {
+        $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $formName = $this->getPost('__form-name__');
+        $uniqueId = $this->getPost('__unique_form_id__') ?: $formName;
+
+        $form = $object->getForm($type ?? 'edit');
+        if ($uniqueId) {
+            $form->setUniqueId($uniqueId);
+        }
+
+        return $form;
     }
 
     /**

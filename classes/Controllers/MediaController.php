@@ -22,40 +22,6 @@ class MediaController extends AbstractController
     /**
      * @return Response
      */
-    public function actionMediaList(): Response
-    {
-        $this->checkAuthorization('media.list');
-
-        /** @var MediaManipulationInterface $object */
-        $object = $this->getObject();
-        $media = $object->getMedia();
-        $media_list = [];
-
-        /**
-         * @var string $name
-         * @var Medium $medium
-         */
-        foreach ($media->all() as $name => $medium) {
-            $media_list[$name] = [
-                'url' => $medium->display($medium->get('extension') === 'svg' ? 'source' : 'thumbnail')->cropZoom(400, 300)->url(),
-                'size' => $medium->get('size'),
-                'metadata' => $medium->metadata() ?: [],
-                'original' => $medium->higherQualityAlternative()->get('filename')
-            ];
-        }
-
-        $response = [
-            'code' => 200,
-            'status' => 'success',
-            'results' => $media_list
-        ];
-
-        return $this->createJsonResponse($response);
-    }
-
-    /**
-     * @return Response
-     */
     public function taskMediaUpload(): Response
     {
         $this->checkAuthorization('media.create');
@@ -184,6 +150,40 @@ class MediaController extends AbstractController
             'code'    => 200,
             'status'  => 'success',
             'message' => $this->translate('PLUGIN_ADMIN.FILE_DELETED') . ': ' . $filename
+        ];
+
+        return $this->createJsonResponse($response);
+    }
+
+    /**
+     * @return Response
+     */
+    public function actionMediaList(): Response
+    {
+        $this->checkAuthorization('media.list');
+
+        /** @var MediaManipulationInterface $object */
+        $object = $this->getObject();
+        $media = $object->getMedia();
+        $media_list = [];
+
+        /**
+         * @var string $name
+         * @var Medium $medium
+         */
+        foreach ($media->all() as $name => $medium) {
+            $media_list[$name] = [
+                'url' => $medium->display($medium->get('extension') === 'svg' ? 'source' : 'thumbnail')->cropZoom(400, 300)->url(),
+                'size' => $medium->get('size'),
+                'metadata' => $medium->metadata() ?: [],
+                'original' => $medium->higherQualityAlternative()->get('filename')
+            ];
+        }
+
+        $response = [
+            'code' => 200,
+            'status' => 'success',
+            'results' => $media_list
         ];
 
         return $this->createJsonResponse($response);
