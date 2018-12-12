@@ -2,7 +2,9 @@
 
 namespace Grav\Plugin\FlexObjects\Controllers;
 
+use Grav\Common\Form\FormFlash;
 use Grav\Common\Grav;
+use Grav\Common\Session;
 use Grav\Common\Uri;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
@@ -164,20 +166,35 @@ class AdminController extends SimpleController
                 }
             }
 
-            // if no id param, assume new, generate an ID
-            $object = $directory->update($this->data, $key);
+            // Handle uploads.
+            $grav = Grav::instance();
 
-            if ($object) {
-                $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+            /** @var Uri $uri */
+            $uri = $grav['uri'];
 
-                if (!$this->redirect) {
-                    $this->setRedirect($this->getFlex()->adminRoute($object));
-                }
+            /** @var Session $session */
+            $session = $grav['session'];
 
-                $grav = Grav::instance();
-                $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
-                $grav->fireEvent('gitsync');
+            $uniqueId = sha1($uri->url);
+            $flash = new FormFlash($session->getId(), $uniqueId);
+            $flash->setUrl($uri->url)->setUser($grav['user']);
+
+            // Update and save object
+            $object->update($this->data, $flash->getFilesByFields());
+            $object->save();
+
+            // Delete form flash
+            $flash->delete();
+
+            $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+
+            if (!$this->redirect) {
+                $this->setRedirect($this->getFlex()->adminRoute($object));
             }
+
+            $grav = Grav::instance();
+            $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
+            $grav->fireEvent('gitsync');
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
             $this->setRedirect($this->getFlex()->adminRoute($object ?? $directory ?? null), 302);
