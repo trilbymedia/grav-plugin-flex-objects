@@ -109,23 +109,28 @@ class AdminController extends SimpleController
         $type = $this->target;
         $key = $this->id;
 
-        $directory = $this->getDirectory($type);
-        $object = $directory && null !== $key ? $directory->getIndex()->get($key) : null;
+        try {
+            $directory = $this->getDirectory($type);
+            $object = $directory && null !== $key ? $directory->getIndex()->get($key) : null;
 
-        if ($object) {
-            if (!$object->authorize('delete')) {
-                throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
+            if ($object) {
+                if (!$object->authorize('delete')) {
+                    throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
+                }
+
+                $object = $directory->remove($key);
+
+                $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
+
+                $this->setRedirect($this->getFlex()->adminRoute($directory));
+
+                $grav = Grav::instance();
+                $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
+                $grav->fireEvent('gitsync');
             }
-
-            $object = $directory->remove($key);
-
-            $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
-
-            $this->setRedirect($this->getFlex()->adminRoute($directory));
-
-            $grav = Grav::instance();
-            $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
-            $grav->fireEvent('gitsync');
+        } catch (\RuntimeException $e) {
+            $this->admin->setMessage('Delete Failed: ' . $e->getMessage(), 'error');
+            $this->setRedirect($this->getFlex()->adminRoute($object ?? $directory ?? null), 302);
         }
 
         return $object ? true : false;
@@ -136,39 +141,46 @@ class AdminController extends SimpleController
         $type = $this->target;
         $key = $this->id;
 
-        $directory = $this->getDirectory($type);
-        if (!$directory) {
-            throw new \RuntimeException('Not Found', 404);
-        }
-
-        $object = $key ? $directory->getIndex()->get($key) : null;
-        if (null === $object) {
-            $object = $directory->createObject($this->data, $key, true);
-        }
-
-        if ($object->exists()) {
-            if (!$object->authorize('update')) {
-                throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
-            }
-        } else {
-            if (!$object->authorize('create')) {
-                throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
-            }
-        }
-
-        // if no id param, assume new, generate an ID
-        $object = $directory->update($this->data, $key);
-
-        if ($object) {
-            $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
-
-            if (!$this->redirect) {
-                $this->setRedirect($this->getFlex()->adminRoute($object));
+        try {
+            $directory = $this->getDirectory($type);
+            if (!$directory) {
+                throw new \RuntimeException('Not Found', 404);
             }
 
-            $grav = Grav::instance();
-            $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
-            $grav->fireEvent('gitsync');
+            $object = $key ? $directory->getIndex()->get($key) : null;
+            if (null === $object) {
+                $object = $directory->createObject($this->data, $key, true);
+            }
+
+            if ($object->exists()) {
+                if (!$object->authorize('update')) {
+                    throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
+                        403);
+                }
+            } else {
+                if (!$object->authorize('create')) {
+                    throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
+                        403);
+                }
+            }
+
+            // if no id param, assume new, generate an ID
+            $object = $directory->update($this->data, $key);
+
+            if ($object) {
+                $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+
+                if (!$this->redirect) {
+                    $this->setRedirect($this->getFlex()->adminRoute($object));
+                }
+
+                $grav = Grav::instance();
+                $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
+                $grav->fireEvent('gitsync');
+            }
+        } catch (\RuntimeException $e) {
+            $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
+            $this->setRedirect($this->getFlex()->adminRoute($object ?? $directory ?? null), 302);
         }
 
         return $object ? true : false;
