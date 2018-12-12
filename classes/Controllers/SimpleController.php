@@ -90,7 +90,7 @@ abstract class SimpleController extends AdminBaseController
         $params = [];
 
         // Handle Task & Action
-        if ($this->post && $this->task) {
+        if ($this->task) {
             // validate nonce
             if (!$this->validateNonce()) {
                 return false;

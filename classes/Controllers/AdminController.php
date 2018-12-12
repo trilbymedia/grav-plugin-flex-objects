@@ -118,7 +118,7 @@ class AdminController extends SimpleController
                     throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
                 }
 
-                $object = $directory->remove($key);
+                $object->delete();
 
                 $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
 
