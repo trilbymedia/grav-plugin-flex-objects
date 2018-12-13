@@ -9,7 +9,6 @@ use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Psr7\Response;
 use Psr\Http\Message\ServerRequestInterface;
-use RocketTheme\Toolbox\Event\Event;
 
 class ObjectController extends AbstractController
 {
@@ -39,12 +38,11 @@ class ObjectController extends AbstractController
 
         // TODO: is there a better way to do this?
         $grav = $this->grav;
-        $grav->fireEvent('onFlexAfterSave', new Event(['object' => $object]));
         $grav->fireEvent('gitsync');
 
         $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.CREATED_SUCCESSFULLY'), 'info');
 
-        $redirect = (string)$request->getUri();
+        $redirect = $request->getAttribute('redirect', (string)$request->getUri());
 
         return $this->createRedirectResponse($redirect, 303);
     }
@@ -67,12 +65,11 @@ class ObjectController extends AbstractController
 
         // TODO: is there a better way to do this?
         $grav = $this->grav;
-        $grav->fireEvent('onFlexAfterSave', new Event(['object' => $object]));
         $grav->fireEvent('gitsync');
 
         $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.UPDATED_SUCCESSFULLY'), 'info');
 
-        $redirect = (string)$request->getUri();
+        $redirect = $request->getAttribute('redirect', (string)$request->getUri());
 
         return $this->createRedirectResponse($redirect, 303);
     }
@@ -91,10 +88,9 @@ class ObjectController extends AbstractController
         $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.DELETED_SUCCESSFULLY'), 'info');
 
         $grav = $this->grav;
-        $grav->fireEvent('onFlexAfterDelete', new Event(['object' => $object]));
         $grav->fireEvent('gitsync');
 
-        $redirect = $this->getFlex()->adminRoute($this->getDirectory());
+        $redirect = $request->getAttribute('redirect', $this->getFlex()->adminRoute($this->getDirectory()));
 
         return $this->createRedirectResponse($redirect, 303);
     }
