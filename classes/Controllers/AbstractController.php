@@ -233,7 +233,12 @@ abstract class AbstractController implements RequestHandlerInterface
      */
     public function createJsonResponse(array $content): ResponseInterface
     {
-        return new Response($content['code'] ?? 200, ['Content-Type' => 'application/json'], json_encode($content));
+        $code = $content['code'] ?? 200;
+        if ($code >= 301 && $code <= 307) {
+            $code = 200;
+        }
+
+        return new Response($code, ['Content-Type' => 'application/json'], json_encode($content));
     }
 
     /**
@@ -245,6 +250,12 @@ abstract class AbstractController implements RequestHandlerInterface
     {
         if (null === $code || $code < 301 || $code > 307) {
             $code = $this->grav['config']->get('system.pages.redirect_default_code', 302);
+        }
+
+        $accept = $this->getAccept(['application/json', 'text/html']);
+
+        if ($accept === 'application/json') {
+            return $this->createJsonResponse(['code' => $code, 'status' => 'redirect', 'redirect' => $url]);
         }
 
         return new Response($code, ['Location' => $url]);
