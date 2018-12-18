@@ -30,6 +30,10 @@ class FlexObjectsPlugin extends Plugin
      */
     public static function getSubscribedEvents() : array
     {
+        if (version_compare(GRAV_VERSION, '1.6', '<')) {
+            return [];
+        }
+
         return [
             'onCliInitialize' => [
                 ['autoload', 100000],
