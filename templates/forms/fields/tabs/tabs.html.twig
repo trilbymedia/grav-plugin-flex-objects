@@ -38,7 +38,7 @@
 
         <div class="tabs-nav">
             {% for tab in tabs %}
-                {% if child.type == 'tab' and not tab.validate.ignore %}
+                {% if tab.type == 'tab' and not tab.validate.ignore %}
                 <a class="tab__link {{ (storedTab == scope ~ tab.name) or active == loop.index ? 'active' : '' }}" data-tabid="tab-{{ tabsKey ~ loop.index }}" data-tabkey="tab-{{ tabsKey }}" data-scope="{{ scope ~ tab.name }}">
                 <span>
                 {% if grav.twig.twig.filters['tu'] is defined %}{{ tab.title|tu }}{% else %}{{ tab.title|t }}{% endif %}
