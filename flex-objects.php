@@ -3,6 +3,8 @@ namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Plugin;
+use Grav\Plugin\FlexObjects\FlexFormFactory;
+use Grav\Plugin\Form\Forms;
 use Grav\Plugin\FlexObjects\Controllers\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
 use RocketTheme\Toolbox\Event\Event;
@@ -19,6 +21,14 @@ class FlexObjectsPlugin extends Plugin
     protected $directory;
 
     /**
+     * @return bool
+     */
+    public static function checkRequirements(): bool
+    {
+        return version_compare(GRAV_VERSION, '1.6', '>');
+    }
+
+    /**
      * @return array
      *
      * The getSubscribedEvents() gives the core a list of events
@@ -28,9 +38,9 @@ class FlexObjectsPlugin extends Plugin
      *     callable (or function) as well as the priority. The
      *     higher the number the higher the priority.
      */
-    public static function getSubscribedEvents() : array
+    public static function getSubscribedEvents(): array
     {
-        if (version_compare(GRAV_VERSION, '1.6', '<')) {
+        if (!static::checkRequirements()) {
             return [];
         }
 
@@ -44,6 +54,9 @@ class FlexObjectsPlugin extends Plugin
                 ['onPluginsInitialized', 0],
                 ['initializeFlex', 0]
             ],
+            'onFormRegisterTypes' => [
+                ['onFormRegisterTypes', 0],
+            ],
             'onTwigSiteVariables' => [
                 ['onTwigSiteVariables', 0]
             ]
@@ -55,7 +68,7 @@ class FlexObjectsPlugin extends Plugin
      *
      * @return ClassLoader
      */
-    public function autoload() : ClassLoader
+    public function autoload(): ClassLoader
     {
         return require __DIR__ . '/vendor/autoload.php';
     }
@@ -63,7 +76,7 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Initialize the plugin
      */
-    public function onPluginsInitialized() : void
+    public function onPluginsInitialized(): void
     {
         if ($this->isAdmin()) {
             $this->enable([
@@ -115,7 +128,14 @@ class FlexObjectsPlugin extends Plugin
         };
     }
 
-    public function onAdminPage(Event $event) : void
+    public function onFormRegisterTypes(Event $event): void
+    {
+        /** @var Forms $forms */
+        $forms = $event['forms'];
+        $forms->registerType('flex', new FlexFormFactory());
+    }
+
+    public function onAdminPage(Event $event): void
     {
         if ($this->controller->isActive()) {
             $page = $event['page'];
@@ -124,7 +144,7 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
-    public function onAdminPageInitialized() : void
+    public function onAdminPageInitialized(): void
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
             $this->controller->execute();
@@ -132,7 +152,7 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
-    public function onAdminControllerInit(Event $event) : void
+    public function onAdminControllerInit(Event $event): void
     {
         $eventController = $event['controller'];
 
@@ -187,7 +207,7 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Add current directory to twig lookup paths.
      */
-    public function onTwigTemplatePaths() : void
+    public function onTwigTemplatePaths(): void
     {
         $extra_site_twig_path = $this->config->get('plugins.flex-objects.extra_site_twig_path');
         $extra_path = $extra_site_twig_path ? $this->grav['locator']->findResource($extra_site_twig_path) : null;
@@ -201,7 +221,7 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Add plugin templates path
      */
-    public function onAdminTwigTemplatePaths(Event $event) : void
+    public function onAdminTwigTemplatePaths(Event $event): void
     {
         $extra_admin_twig_path = $this->config->get('plugins.flex-objects.extra_admin_twig_path');
         $extra_path = $extra_admin_twig_path ? $this->grav['locator']->findResource($extra_admin_twig_path) : null;
@@ -218,7 +238,7 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Set needed variables to display direcotry.
      */
-    public function onTwigSiteVariables() : void
+    public function onTwigSiteVariables(): void
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
             // Twig shortcuts
