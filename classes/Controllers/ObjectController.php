@@ -110,6 +110,7 @@ class ObjectController extends AbstractController
 
             return $this->createRedirectResponse((string)$request->getUri(), 303);
         }
+
         $this->object = $form->updateObject();
 
         return $this->actionDisplayPreview();

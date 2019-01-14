@@ -31,7 +31,7 @@ class GravPageStorage extends FolderStorage
     protected $flags;
     protected $regex;
 
-    protected function initOptions(array $options) : void
+    protected function initOptions(array $options): void
     {
         $grav = Grav::instance();
 
@@ -62,7 +62,7 @@ class GravPageStorage extends FolderStorage
     /**
      * {@inheritdoc}
      */
-    public function getStoragePath(string $key = null) : string
+    public function getStoragePath(string $key = null): string
     {
         if (null === $key) {
             $path = $this->dataFolder;
@@ -76,7 +76,7 @@ class GravPageStorage extends FolderStorage
     /**
      * {@inheritdoc}
      */
-    public function getMediaPath(string $key = null) : string
+    public function getMediaPath(string $key = null): string
     {
         return \dirname($this->getStoragePath($key));
     }
@@ -87,7 +87,7 @@ class GravPageStorage extends FolderStorage
      * @param string $key
      * @return string
      */
-    public function getPathFromKey(string $key) : string
+    public function getPathFromKey(string $key): string
     {
         if ($this->base_path) {
             $key = substr($key,  \strlen($this->base_path) + 1);
@@ -104,7 +104,7 @@ class GravPageStorage extends FolderStorage
      * @param  string $path
      * @return string
      */
-    protected function getKeyFromPath(string $path) : string
+    protected function getKeyFromPath(string $path): string
     {
         if ($this->base_path) {
             $path = $this->base_path . '/' . $path;
@@ -118,7 +118,7 @@ class GravPageStorage extends FolderStorage
      *
      * @return array
      */
-    protected function buildIndex() : array
+    protected function buildIndex(): array
     {
         $folder = $this->getStoragePath();
         $this->flags = \FilesystemIterator::KEY_AS_FILENAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
@@ -205,7 +205,7 @@ class GravPageStorage extends FolderStorage
     /**
      * @return string
      */
-    protected function getNewKey() : string
+    protected function getNewKey(): string
     {
         throw new \RuntimeException('Generating random key is disabled for pages');
     }
@@ -214,7 +214,7 @@ class GravPageStorage extends FolderStorage
      * @param string $path
      * @return string
      */
-    protected function resolvePath(string $path) : string
+    protected function resolvePath(string $path): string
     {
         /** @var UniformResourceLocator $locator
          */

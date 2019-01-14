@@ -22,7 +22,7 @@ class Flex extends \Grav\Framework\Flex\Flex
     /**
      * @return array
      */
-    public function getAll() : array
+    public function getAll(): array
     {
         $params = [
             'pattern' => '|\.yaml|',
@@ -50,7 +50,7 @@ class Flex extends \Grav\Framework\Flex\Flex
      * @param array $params
      * @return string
      */
-    public function adminRoute($type = null, array $params = []) : string
+    public function adminRoute($type = null, array $params = []): string
     {
         if (\is_object($type)) {
             $object = $type;
@@ -92,7 +92,7 @@ class Flex extends \Grav\Framework\Flex\Flex
     /**
      * @return array
      */
-    protected function getAdminRoutes() : array
+    protected function getAdminRoutes(): array
     {
         if (null === $this->adminRoutes) {
             $routes = [];

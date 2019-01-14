@@ -18,7 +18,7 @@ class GravPageIndex extends FlexPageIndex
      * @param FlexStorageInterface $storage
      * @return array
      */
-    public static function loadEntriesFromStorage(FlexStorageInterface $storage) : array
+    public static function loadEntriesFromStorage(FlexStorageInterface $storage): array
     {
         $entries = parent::loadEntriesFromStorage($storage);
         unset($entries['']);
