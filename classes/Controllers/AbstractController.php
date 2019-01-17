@@ -218,6 +218,16 @@ abstract class AbstractController implements RequestHandlerInterface
     }
 
     /**
+     * Display the current page.
+     *
+     * @return Response
+     */
+    public function createDisplayResponse(): ResponseInterface
+    {
+        return new Response(418);
+    }
+
+    /**
      * @param string $content
      * @param int $code
      * @return Response

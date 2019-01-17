@@ -32,7 +32,7 @@ class ObjectController extends AbstractController
                 $this->setMessage($error, 'error');
             }
 
-            return $this->createRedirectResponse((string)$request->getUri(), 303);
+            return $this->createDisplayResponse();
         }
         $object = $form->getObject();
 
@@ -59,7 +59,7 @@ class ObjectController extends AbstractController
                 $this->setMessage($error, 'error');
             }
 
-            return $this->createRedirectResponse((string)$request->getUri(), 303);
+            return $this->createDisplayResponse();
         }
         $object = $form->getObject();
 
