@@ -9,6 +9,11 @@
 #directory .no-entries {
   padding: 3rem; }
 
+#directory .search-wrapper {
+  margin: .5rem 1rem; }
+  #directory .search-wrapper input.search {
+    border: 1px solid #d6d6d6; }
+
 #directory #pager .selectize-control {
   vertical-align: middle;
   display: inline-block; }
@@ -29,9 +34,13 @@
 
 #directory thead {
   display: table-header-group; }
+  #directory thead tr {
+    background: #e4e4e4; }
 
 #directory tbody {
   display: table-row-group; }
+  #directory tbody tr:nth-child(even) {
+    background: #f4f4f4; }
 
 #directory tr {
   display: table-row;
@@ -77,5 +86,24 @@
     width: auto; }
   #directory #pager select {
     vertical-align: middle; }
+
+#directory .flex-objects-pagination {
+  margin: 1rem auto 0;
+  text-align: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none; }
+  #directory .flex-objects-pagination .button {
+    color: #333;
+    border-radius: 4px;
+    background: transparent; }
+    #directory .flex-objects-pagination .button.active {
+      color: white;
+      background: #0090D9; }
+    #directory .flex-objects-pagination .button.disabled {
+      color: #aaa; }
+      #directory .flex-objects-pagination .button.disabled:active {
+        margin: 0; }
 
 /*# sourceMappingURL=../css/admin.css.map */

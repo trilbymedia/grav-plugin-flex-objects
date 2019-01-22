@@ -19,6 +19,13 @@
         padding: 3rem;
     }
 
+    .search-wrapper {
+        margin: .5rem 1rem;
+        input.search {
+            border: 1px solid #d6d6d6;
+        }
+    }
+
     #pager .selectize-control {
         vertical-align: middle;
         display: inline-block;
@@ -44,10 +51,18 @@
 
     thead {
         display: table-header-group;
+
+        tr {
+            background: #e4e4e4;
+        }
     }
 
     tbody {
         display: table-row-group;
+
+        tr:nth-child(even) {
+            background: #f4f4f4;
+        }
     }
 
     tr {
@@ -113,4 +128,32 @@
         }
     }
 
+    .flex-objects-pagination {
+        margin: 1rem auto 0;
+        text-align: center;
+
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -khtml-user-select: none;
+        -ms-user-select: none;
+
+        .button {
+            color: #333;
+            border-radius: 4px;
+            background: transparent;
+
+            &.active {
+                color: white;
+                background: #0090D9;
+            }
+
+            &.disabled {
+                color: #aaa;
+
+                &:active {
+                    margin: 0;
+                }
+            }
+        }
+    }
 }

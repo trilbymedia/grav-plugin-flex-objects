@@ -1,0 +1,39 @@
+{
+    "name": "flex-objects",
+    "description": "A Vue.js project",
+    "author": "Djamil Legato <djamil@trilby.media>",
+    "private": true,
+    "scripts": {
+        "watch": "cross-env NODE_ENV=development webpack --watch --progress --colors --mode development --config webpack.conf.js",
+        "dev": "cross-env NODE_ENV=development webpack --progress --colors --config webpack.conf.js",
+        "prod": "cross-env NODE_ENV=production-wip webpack --mode development --config webpack.conf.js"
+    },
+    "dependencies": {
+        "axios": "^0.18.0",
+        "lodash": "^4.17.11",
+        "vue": "^2.0.1",
+        "vue-events": "^3.1.0",
+        "vue-template-compiler": "^2.5.21",
+        "vuetable-2": "^1.7.5"
+    },
+    "devDependencies": {
+        "babel-core": "^6.26.3",
+        "babel-eslint": "^8.2.6",
+        "babel-loader": "^7.1.5",
+        "babel-polyfill": "^6.26.0",
+        "babel-preset-es2015": "^6.24.1",
+        "babel-preset-stage-3": "^6.24.1",
+        "cross-env": "^5.2.0",
+        "css-loader": "^1.0.0",
+        "eslint": "^5.4.0",
+        "eslint-loader": "^2.1.1",
+        "exports-loader": "^0.7.0",
+        "imports-loader": "^0.8.0",
+        "json-loader": "^0.5.7",
+        "style-loader": "^0.22.1",
+        "uglifyjs-webpack-plugin": "^2.1.1",
+        "vue-loader": "^15.5.1",
+        "webpack": "^4.17.1",
+        "webpack-cli": "^3.1.2"
+    }
+}

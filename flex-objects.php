@@ -251,22 +251,6 @@ class FlexObjectsPlugin extends Plugin
             // CSS / JS Assets
             $this->grav['assets']->addCss('plugin://flex-objects/css/admin.css');
             $this->grav['assets']->addCss('plugin://admin/themes/grav/css/codemirror/codemirror.css');
-
-            if ($this->controller->getLocation() === 'flex-objects' && $this->controller->getAction() === 'list') {
-                $this->grav['assets']->addCss('plugin://flex-objects/css/filter.formatter.css');
-                $this->grav['assets']->addCss('plugin://flex-objects/css/theme.default.css');
-                $this->grav['assets']->addJs('plugin://flex-objects/js/jquery.tablesorter.min.js');
-                $this->grav['assets']->addJs('plugin://flex-objects/js/widgets/widget-storage.min.js');
-                $this->grav['assets']->addJs('plugin://flex-objects/js/widgets/widget-filter.min.js');
-                $this->grav['assets']->addJs('plugin://flex-objects/js/widgets/widget-pager.min.js');
-            }
         }
-
-        /* else {
-            if ($this->config->get('plugins.flex-objects.built_in_css')) {
-                $this->grav['assets']->addCss('plugin://flex-objects/css/site.css');
-            }
-            $this->grav['assets']->addJs('plugin://flex-objects/js/list.min.js');
-        }*/
     }
 }
