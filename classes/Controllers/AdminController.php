@@ -9,6 +9,7 @@ use Grav\Common\Uri;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Plugin\FlexObjects\Flex;
+use Grav\Plugin\FlexObjects\Table\DataTable;
 use Nyholm\Psr7\ServerRequest;
 use RocketTheme\Toolbox\Event\Event;
 
@@ -101,6 +102,35 @@ class AdminController extends SimpleController
         }
 
         return false;
+    }
+
+    public function actionList()
+    {
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        if ($uri->extension() === 'json') {
+            $type = $this->target;
+
+            $directory = $this->getDirectory($type);
+            if (!$directory) {
+                throw new \RuntimeException('Not Found', 404);
+            }
+            $collection = $directory->getCollection();
+
+            $options = [
+                'url' => $uri->path(),
+                'page' => $uri->query('page'),
+                'limit' => $uri->query('per_page'),
+                'sort' => $uri->query('sort')
+            ];
+
+            $table = new DataTable($options);
+            $table->setCollection($collection);
+
+            header('Content-Type: application/json');
+            echo json_encode($table);
+            die();
+        }
     }
 
     /**
