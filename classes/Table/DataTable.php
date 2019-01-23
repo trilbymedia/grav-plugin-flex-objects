@@ -113,9 +113,13 @@ class DataTable implements \JsonSerializable
         $to = $page * $limit;
         $from = $to - $limit + 1;
 
+        if ($from < 1 || $from > $this->getTotal()) {
+            return [];
+        }
+
         $collection = $this->getCollection();
 
-        $array = $collection ? $collection->slice($from, $limit) : [];
+        $array = $collection ? $collection->slice($from-1, $limit) : [];
 
         $list = [];
         foreach ($array as $object) {
@@ -135,6 +139,9 @@ class DataTable implements \JsonSerializable
         $to = $page * $limit;
         $from = $to - $limit + 1;
 
+        $data = $this->getData();
+        $empty = empty($data);
+
         return [
             'links' => [
                 'pagination' => [
@@ -144,8 +151,8 @@ class DataTable implements \JsonSerializable
                     'last_page' => $this->getLastPage(),
                     'next_page_url' => $this->getUrl($page+1),
                     'prev_page_url' => $this->getUrl($page-1),
-                    'from' => min($from, $total) ?: null,
-                    'to' => min($to, $total) ?: null,
+                    'from' => $empty ? null : $from,
+                    'to' => $empty ? null : min($to, $total),
                 ]
             ],
             'data' => $this->getData()
