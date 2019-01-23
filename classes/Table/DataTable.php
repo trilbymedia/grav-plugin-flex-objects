@@ -125,7 +125,7 @@ class DataTable implements \JsonSerializable
         foreach ($array as $object) {
             $list[] = [
                 'id' => $object->getKey()
-            ];
+            ] + $object->jsonSerialize();
         }
 
         return $list;
