@@ -111,21 +111,15 @@ class AdminController extends SimpleController
         if ($uri->extension() === 'json') {
             $type = $this->target;
 
-            $directory = $this->getDirectory($type);
-            if (!$directory) {
-                throw new \RuntimeException('Not Found', 404);
-            }
-            $collection = $directory->getCollection();
-
             $options = [
                 'url' => $uri->path(),
                 'page' => $uri->query('page'),
                 'limit' => $uri->query('per_page'),
-                'sort' => $uri->query('sort')
+                'sort' => $uri->query('sort'),
+                'search' => $uri->query('filter'),
             ];
 
-            $table = new DataTable($options);
-            $table->setCollection($collection);
+            $table = $this->getFlex()->getDataTable($type, $options);
 
             header('Content-Type: application/json');
             echo json_encode($table);

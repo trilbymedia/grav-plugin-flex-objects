@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Table;
 
+use Grav\Common\Grav;
 use Grav\Framework\Collection\CollectionInterface;
+use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
+use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 
 /**
  * Class DataTable
@@ -23,8 +26,16 @@ class DataTable implements \JsonSerializable
     private $page;
     /** @var array */
     private $sort;
-    /** @var CollectionInterface */
+    /** @var string */
+    private $search;
+    /** @var FlexCollectionInterface */
     private $collection;
+    /** @var FlexCollectionInterface */
+    private $filteredCollection;
+    /** @var \Twig_Environment */
+    private $twig;
+    /** @var array */
+    private $twig_context;
 
     public function __construct(array $params)
     {
@@ -32,6 +43,7 @@ class DataTable implements \JsonSerializable
         $this->setLimit((int)($params['limit'] ?? 10));
         $this->setPage((int)($params['page'] ?? 1));
         $this->setSort($params['sort'] ?? ['id' => 'asc']);
+        $this->setSearch($params['search'] ?? '');
     }
 
     public function setUrl(string $url): void
@@ -60,9 +72,15 @@ class DataTable implements \JsonSerializable
         $this->sort = $sort;
     }
 
+    public function setSearch(string $search): void
+    {
+        $this->search = $search;
+    }
+
     public function setCollection(CollectionInterface $collection): void
     {
         $this->collection = $collection;
+        $this->filteredCollection = null;
     }
 
     public function getLimit(): int
@@ -82,7 +100,7 @@ class DataTable implements \JsonSerializable
 
     public function getTotal(): int
     {
-        $collection = $this->getCollection();
+        $collection = $this->filteredCollection ?? $this->getCollection();
 
         return $collection ? $collection->count() : 0;
     }
@@ -92,7 +110,7 @@ class DataTable implements \JsonSerializable
         return $this->sort;
     }
 
-    public function getCollection(): ?CollectionInterface
+    public function getCollection(): ?FlexCollectionInterface
     {
         return $this->collection;
     }
@@ -108,6 +126,20 @@ class DataTable implements \JsonSerializable
 
     public function getData()
     {
+        $collection = $this->getCollection();
+        if (!$collection) {
+            return [];
+        }
+        if ($this->search !== '') {
+            $collection = $collection->search($this->search);
+        }
+
+        $columns = $this->getColumns();
+
+        $collection = $collection->sort($this->getSort());
+
+        $this->filteredCollection = $collection;
+
         $limit = $this->getLimit();
         $page = $this->getPage();
         $to = $page * $limit;
@@ -117,15 +149,28 @@ class DataTable implements \JsonSerializable
             return [];
         }
 
-        $collection = $this->getCollection();
+        $array = $collection->slice($from-1, $limit);
 
-        $array = $collection ? $collection->slice($from-1, $limit) : [];
+        $grav = Grav::instance();
+        $twig = $grav['twig'];
+        $grav->fireEvent('onTwigSiteVariables');
+
+        $this->twig = $twig->twig;
+        $this->twig_context = $twig->twig_vars;
 
         $list = [];
+        /** @var FlexObjectInterface $object */
         foreach ($array as $object) {
-            $list[] = [
-                'id' => $object->getKey()
-            ] + $object->jsonSerialize();
+            $item = [
+                'id' => $object->getKey(),
+                'timestamp' => $object->getTimestamp()
+            ];
+            foreach ($columns as $name => $column) {
+                $item[str_replace('.', '__', $name)] = $this->renderColumn($name, $column, $object);
+            }
+            $item['_actions_'] = $this->renderActions($object);
+
+            $list[] = $item;
         }
 
         return $list;
@@ -133,13 +178,13 @@ class DataTable implements \JsonSerializable
 
     public function jsonSerialize()
     {
+        $data = $this->getData();
         $total = $this->getTotal();
         $limit = $this->getLimit();
         $page = $this->getPage();
         $to = $page * $limit;
         $from = $to - $limit + 1;
 
-        $data = $this->getData();
         $empty = empty($data);
 
         return [
@@ -157,6 +202,58 @@ class DataTable implements \JsonSerializable
             ],
             'data' => $this->getData()
         ];
+    }
+
+    protected function renderColumn(string $name, array $column, FlexObjectInterface $object)
+    {
+        $grav = Grav::instance();
+        $flex = $grav['flex_objects'];
+
+        $value = $object->value($name, $column['field']['default'] ?? null);
+        $type = $column['field']['type'] ?? 'text';
+
+        $template = $this->twig->resolveTemplate(["forms/fields/{$type}/edit_list.html.twig", 'forms/fields/text/edit_list.html.twig']);
+
+        return $this->twig->load($template)->render([
+            'value' => $value,
+            'link' => $flex->adminRoute($object),
+            'field' => $column['field'],
+            'object' => $object,
+            'flex' => $flex
+        ] + $this->twig_context);
+    }
+
+    protected function renderActions(FlexObjectInterface $object)
+    {
+        $grav = Grav::instance();
+        $type = $object->getType(false);
+        $template = $this->twig->resolveTemplate(["flex-objects/types/{$type}/list_actions.html.twig", 'flex-objects/types/default/list_actions.html.twig']);
+
+        return $this->twig->load($template)->render([
+            'object' => $object,
+            'flex' => $grav['flex_objects']
+        ] + $this->twig_context);
+    }
+
+    protected function getColumns()
+    {
+        $collection = $this->getCollection();
+        if (!$collection) {
+            return [];
+        }
+
+        $blueprint = $collection->getFlexDirectory()->getBlueprint();
+        $schema = $blueprint->schema();
+
+        $list = [];
+        foreach ($blueprint->get('config/admin/list/fields') as $key => $options) {
+            $list[$key] = $options;
+            if (!isset($options['field'])) {
+                $list[$key]['field'] = $schema->get($options['alias'] ?? $key);
+            }
+        }
+
+        return $list;
     }
 
     protected function decodeSort(string $sort, $fieldSeparator = ',', $orderSeparator = '|')

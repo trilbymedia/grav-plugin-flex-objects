@@ -4,6 +4,7 @@
 {% do assets.addJs('plugin://flex-objects/js/flex-objects.js', { 'group': 'bottom', 'loading': 'defer' }) %}
 
 {% set collection = directory.collection.authorize('list') %}
+{% set table = flex.dataTable(collection.type(false)) %}
 
 {% block content_top %}
 {% if directory %}
@@ -43,7 +44,7 @@
             {% set searchFields = [] %}
             {% for key, options in fields %}
                 {% set name = key %}
-                {% set sortField = key %}
+                {% set sortField = options.sort.field ?? key %}
                 {% set title = (options.field.label ?? schema.get(options.alias ?? key).label)|tu %}
                 {% set width = options.width ?: ((100-fields_width) / ((fields_count-fields_set) ?: 1))|round(3) %}
 
@@ -51,7 +52,7 @@
                 {% set tableFields = tableFields|merge([
                     {
                         name: name|replace('.', '__'),
-                        sortField: sortField|replace('.', '__'),
+                        sortField: sortField,
                         title: title,
                         width: width ~ '%'
                     }
@@ -63,66 +64,7 @@
             {% set tableFields = tableFields|merge([{ name: '_actions_', title: 'Actions' }]) %}
 
 
-            {% set list = [] %}
-            {% for id, object in collection %}
-                {% set item = [] %}
-                {% for key, options in fields %}
-                    {% set field = options.field ?? schema.get(options.alias ?? key) %}
-                    {% set cleanKey = key %}
-
-                    {# Vuetable doesn't like field names with `.` in them, so we convert the key to `_` #}
-                    {% if '.' in cleanKey %}
-                        {% set cleanKey = cleanKey|replace('.', '__') %}
-                    {% endif %}
-
-                    {% if options.link == 'edit' %}
-                        {% if object.authorize('read') %}
-                            {% set display_value = '<a href="' ~ base_url ~ flex.adminRoute(object) ~ '">' ~ object.value(key) ~ '</a>' %}
-                        {% else %}
-                            {% set display_value = object.value(key) %}
-                        {% endif %}
-                    {% elseif field.type == 'toggle' %}
-                        {% if object.value(key) %}
-                            {% set display_value = '<span><span style="display: none;">1</span><i class="published fa fa-check-circle"></i></span>' %}
-                        {% else %}
-                            {% set display_value = '<span><span style="display: none;">0</span><i class="unpublished fa fa-times-circle"></i>' %}
-                        {% endif %}
-                    {% elseif field.type == 'url' %}
-                        {% set display_value = '<a href="' ~ object[key] ~ '" target="_blank"><i class="fa fa-link"></i> ' ~ object.value(key) ~'</a>' %}
-                    {% elseif field.type == 'selectize' %}
-                        {% set display_value = object.value(key)|join(',') %}
-                    {% elseif field.type == 'datetime' %}
-                        {% set display_value = object.value(key)|date('m/d/Y \\a\\t g:i A') %}
-                    {% elseif field.type == 'date' %}
-                        {% set display_value = object.value(key)|date('m/d/Y') %}
-                    {% elseif field.type == 'time' %}
-                        {% set display_value = object.value(key)|date('g:i A') %}
-                    {% else %}
-                        {% set display_value = object.value(key) %}
-                    {% endif %}
-
-                    {% set item = item|merge({ (cleanKey): display_value }) %}
-                {% endfor %}
-
-                {% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
-                {% set actions = '' %}
-
-                {% if object.authorize('read') %}
-                    {% set actions = actions ~ ' ' ~ '<a href="' ~ base_url ~ flex.adminRoute(object) ~ '"
-                       title="Edit ' ~ object_title ~ '"
-                       class="edit-action"><i class="fa fa-pencil"></i></a>' %}
-                {% endif %}
-                {% if object.authorize('delete') %}
-                    {% set actions = actions ~ ' ' ~ '<a href="#delete"
-                       class="page-delete delete-action"
-                       title="Delete ' ~ object_title ~ '"
-                       data-remodal-target="delete"
-                       data-delete-url="' ~ uri.addNonce(base_url ~ flex.adminRoute(object, {task: 'delete'}), 'admin-form', 'admin-nonce') ~ '"><i class="fa fa-close"></i></a>' %}
-                {% endif %}
-
-                {% set item = item|merge({ '_actions_': actions }) %}
-                {% set list = list|merge([item]) %}
-            {% endfor %}
+            {% set list = table.jsonSerialize %}
 
             <div
                 id="flex-objects-list"

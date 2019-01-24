@@ -9,6 +9,7 @@ use Grav\Common\Grav;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
+use Grav\Plugin\FlexObjects\Table\DataTable;
 
 /**
  * Class Flex
@@ -43,6 +44,19 @@ class Flex extends \Grav\Framework\Flex\Flex
         ksort($directories);
 
         return $directories;
+    }
+
+    public function getDataTable(string $type, array $options = [])
+    {
+        $directory = $this->getDirectory($type);
+        if (!$directory) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $table = new DataTable($options);
+        $table->setCollection($directory->getCollection());
+
+        return $table;
     }
 
     /**

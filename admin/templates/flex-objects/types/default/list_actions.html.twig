@@ -1,0 +1,17 @@
+{% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
+
+{% if object.authorize('read') %}
+    <a href="{{ base_url ~ flex.adminRoute(object) }}" title="Edit {{ object_title }}" class="edit-action">
+        <i class="fa fa-pencil"></i>
+    </a>
+{% endif %}
+{% if object.authorize('delete') %}
+    <a href="#delete"
+       class="page-delete delete-action"
+       title="Delete {{ object_title }}"
+       data-remodal-target="delete"
+       data-delete-url="{{ grav.uri.addNonce(base_url ~ flex.adminRoute(object, {task: 'delete'}), 'admin-form', 'admin-nonce') }}"
+    >
+       <i class="fa fa-close"></i>
+   </a>
+{% endif %}
