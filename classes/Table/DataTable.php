@@ -166,7 +166,7 @@ class DataTable implements \JsonSerializable
                 'timestamp' => $object->getTimestamp()
             ];
             foreach ($columns as $name => $column) {
-                $item[str_replace('.', '__', $name)] = $this->renderColumn($name, $column, $object);
+                $item[str_replace('.', '_', $name)] = $this->renderColumn($name, $column, $object);
             }
             $item['_actions_'] = $this->renderActions($object);
 
@@ -209,7 +209,7 @@ class DataTable implements \JsonSerializable
         $grav = Grav::instance();
         $flex = $grav['flex_objects'];
 
-        $value = $object->value($name, $column['field']['default'] ?? null);
+        $value = $object->value($name) ?? $object->getNestedProperty($name, $column['field']['default'] ?? null);
         $type = $column['field']['type'] ?? 'text';
 
         $template = $this->twig->resolveTemplate(["forms/fields/{$type}/edit_list.html.twig", 'forms/fields/text/edit_list.html.twig']);

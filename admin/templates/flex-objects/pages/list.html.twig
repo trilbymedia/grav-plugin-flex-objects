@@ -72,7 +72,7 @@
                 data-initial-store="{{
                     {
                         data: list,
-                        api: grav.uri.currentRoute().withExtension('json').uri() ~ '',
+                        api: grav.uri.currentRoute().withExtension('json').uri()|string,
                         perPage: perPage,
                         fields: tableFields,
                         searchFields: searchFields,
