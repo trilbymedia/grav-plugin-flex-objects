@@ -87,23 +87,31 @@
   #directory #pager select {
     vertical-align: middle; }
 
-#directory .flex-objects-pagination {
-  margin: 1rem auto 0;
-  text-align: center;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -khtml-user-select: none;
-  -ms-user-select: none; }
-  #directory .flex-objects-pagination .button {
-    color: #333;
-    border-radius: 4px;
-    background: transparent; }
-    #directory .flex-objects-pagination .button.active {
-      color: white;
-      background: #0090D9; }
-    #directory .flex-objects-pagination .button.disabled {
-      color: #aaa; }
-      #directory .flex-objects-pagination .button.disabled:active {
-        margin: 0; }
+#directory .flex-list-pagination {
+  margin: 1rem 0 -1rem;
+  padding: .5rem 1rem;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #ddd; }
+  #directory .flex-list-pagination .vuetable-pagination-info, #directory .flex-list-pagination .flex-objects-pagination {
+    flex: 1; }
+  #directory .flex-list-pagination .flex-objects-pagination {
+    text-align: right;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -ms-user-select: none; }
+    #directory .flex-list-pagination .flex-objects-pagination .button {
+      color: #333;
+      border-radius: 4px;
+      background: transparent; }
+      #directory .flex-list-pagination .flex-objects-pagination .button.active {
+        color: white;
+        background: #0090D9; }
+      #directory .flex-list-pagination .flex-objects-pagination .button.disabled {
+        color: #aaa; }
+        #directory .flex-list-pagination .flex-objects-pagination .button.disabled:active {
+          margin: 0; }
 
 /*# sourceMappingURL=../css/admin.css.map */

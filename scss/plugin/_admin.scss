@@ -128,30 +128,42 @@
         }
     }
 
-    .flex-objects-pagination {
-        margin: 1rem auto 0;
-        text-align: center;
+    .flex-list-pagination {
+        margin: 1rem 0 -1rem;
+        padding: .5rem 1rem;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        border-top: 1px solid #ddd;
 
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -khtml-user-select: none;
-        -ms-user-select: none;
+        .vuetable-pagination-info, .flex-objects-pagination {
+            flex: 1;
+        }
 
-        .button {
-            color: #333;
-            border-radius: 4px;
-            background: transparent;
+        .flex-objects-pagination {
+            text-align: right;
 
-            &.active {
-                color: white;
-                background: #0090D9;
-            }
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -ms-user-select: none;
 
-            &.disabled {
-                color: #aaa;
+            .button {
+                color: #333;
+                border-radius: 4px;
+                background: transparent;
 
-                &:active {
-                    margin: 0;
+                &.active {
+                    color: white;
+                    background: #0090D9;
+                }
+
+                &.disabled {
+                    color: #aaa;
+
+                    &:active {
+                        margin: 0;
+                    }
                 }
             }
         }

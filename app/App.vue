@@ -1,53 +1,63 @@
 <template>
     <div>
-        <div class="search-wrapper">
-            <input type="text" class="search" :placeholder="store.searchPlaceholder" v-model.trim="searchFor" @input="onInput">
-        </div>
+        <vuetable-filter-bar :store="store"></vuetable-filter-bar>
         <vuetable ref="vuetable"
                   :css="css.table"
                   :fields="store.fields || []"
                   :searchFields="store.searchFields || []"
                   :sortOrder="store.sortOrder"
-                  :api-mode="false"
+                  :api-mode="true"
+                  :api-url="store.api"
                   :per-page="store.perPage || perPage"
+                  :append-params="extraParams"
                   :data-total="dataCount"
-                  :data-manager="dataManager"
-                  pagination-path="pagination"
+                  pagination-path="links.pagination"
                   :show-sort-icons="true"
                   @vuetable:pagination-data="onPaginationData"
         ></vuetable>
 
-        <vuetable-pagination ref="pagination"
-                             :css="css.pagination"
-                             @vuetable-pagination:change-page="onChangePage"
-        ></vuetable-pagination>
+        <div class="flex-list-pagination">
+            <vuetable-pagination-info ref="paginationInfo"
+                                      :info-template="store.paginationInfo"
+                                      :info-no-data-template="store.emptyResult"
+                                      :css="css.paginationInfo"
+                                      ></vuetable-pagination-info>
+            <vuetable-pagination ref="pagination"
+                                 :css="css.pagination"
+                                 @vuetable-pagination:change-page="onChangePage"
+            ></vuetable-pagination>
+        </div>
     </div>
 </template>
 
 <script>
+    import Vue from 'vue';
     import Vuetable from 'vuetable-2/src/components/Vuetable.vue';
     import VuetablePagination from "vuetable-2/src/components/VuetablePagination.vue";
+    import VuetablePaginationInfo from 'vuetable-2/src/components/VuetablePaginationInfo.vue';
     import VuetableCssConfig from "./VuetableCssConfig.js";
+    import VuetableFilterBar from './components/VuetableFilterBar.vue';
 
     import _ from 'lodash';
     // import FlexTable from './components/FlexTable.vue';
 
     export default {
         props: ['initialStore'],
-        components: {Vuetable, VuetablePagination},
+        components: {Vuetable, VuetablePagination, VuetablePaginationInfo, VuetableFilterBar},
         data: () => ({
             css: VuetableCssConfig,
             perPage: 10,
             dataCount: 0,
-            searchFor: '',
+            filterText: '',
             searchPlaceholder: 'Filter...',
-            data: []
+            data: [],
+            extraParams: {}
         }),
-        watch: {
+       /* watch: {
             data(newVal, oldVal) {
                 this.$refs.vuetable.refresh();
             }
-        },
+        },*/
         computed: {
             store() {
                 return JSON.parse(this.initialStore || '{}');
@@ -58,56 +68,24 @@
         },
         mounted() {
             this.$refs.vuetable.setData(this.data);
+            this.$events.$on('filter-set', event => this.onFilterSet(event));
+            this.$events.$on('filter-reset', event => this.onFilterReset());
         },
         methods: {
-            onInput() {
-                this.dataManager(this.$refs.vuetable.sortOrder, 'pagination');
-                this.$refs.vuetable.refresh();
-            },
             onPaginationData(paginationData) {
                 this.$refs.pagination.setPaginationData(paginationData);
+                this.$refs.paginationInfo.setPaginationData(paginationData);
+            },
+            onFilterSet (filterText) {
+                _.set(this.extraParams, 'filter', filterText);
+                Vue.nextTick(() => this.$refs.vuetable.refresh());
+            },
+            onFilterReset () {
+                _.unset(this.extraParams, 'filter');
+                Vue.nextTick(() => this.$refs.vuetable.refresh());
             },
             onChangePage(page) {
                 this.$refs.vuetable.changePage(page);
-            },
-            dataManager(sortOrder, pagination) {
-                if (this.data.length < 1) return;
-
-                let local = this.data;
-
-                if (this.searchFor) {
-                    local = this.filter(local);
-                }
-
-                // sortOrder can be empty, so we have to check for that as well
-                if (sortOrder.length > 0) {
-                    local = _.orderBy(
-                        local,
-                        sortOrder[0].sortField,
-                        sortOrder[0].direction
-                    );
-                }
-
-                pagination = this.$refs.vuetable.makePagination(local.length);
-                return {
-                    pagination: pagination,
-                    data: _.slice(local, pagination.from - 1, pagination.to)
-                };
-            },
-            filter(data = this.data) {
-                // the text should be case insensitive
-                const txt = new RegExp(this.searchFor, 'i');
-
-                // search on name, email, and nickname
-                return _.filter(data, (item) => {
-                    let found = false;
-
-                    this.store.searchFields.forEach((field) => {
-                        found |= (item[field] || '').toString().search(txt) >= 0;
-                    });
-
-                    return found;
-                });
             }
         }
     }

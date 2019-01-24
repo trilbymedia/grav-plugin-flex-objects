@@ -130,12 +130,14 @@
                 data-initial-store="{{
                     {
                         data: list,
-                        api: 'endpoint',
+                        api: grav.uri.currentRoute().withExtension('json').uri() ~ '',
                         perPage: perPage,
                         fields: tableFields,
                         searchFields: searchFields,
                         sortOrder: [{ field: 'updated_date', direction: 'desc' }],
-                        searchPlaceholder: "PLUGIN_ADMIN.RESOURCE_FILTER"|tu
+                        searchPlaceholder: "PLUGIN_ADMIN.RESOURCE_FILTER"|tu,
+                        paginationInfo: "PLUGIN_FLEX_OBJECTS.LIST_INFO"|tu,
+                        emptyResult: "PLUGIN_FLEX_OBJECTS.EMPTY_RESULT"|tu
                     }|json_encode|e('html_attr')
                 }}">
                 <svg viewBox="0 0 1060 {{ 31 * (min(perPage, list|count) + 2) }}">

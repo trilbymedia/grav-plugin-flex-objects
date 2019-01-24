@@ -22,5 +22,8 @@ export default {
             next: 'fa fa-fw fa-chevron-right',
             last: 'fa fa-fw fa-angle-double-right'
         }
+    },
+    paginationInfo: {
+        infoClass: ''
     }
 };
