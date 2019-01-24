@@ -82,8 +82,8 @@
                         emptyResult: "PLUGIN_FLEX_OBJECTS.EMPTY_RESULT"|tu
                     }|json_encode|e('html_attr')
                 }}">
-                <svg viewBox="0 0 1060 {{ 31 * (min(perPage, list|count) + 2) }}">
-                {% for i in 0..((min(perPage, list|count) + 3) - 1) %}
+                <svg viewBox="0 0 1060 {{ 31 * (min(perPage, list.data|count) + 2) }}">
+                {% for i in 0..((min(perPage, list.data|count) + 3) - 1) %}
                     <rect clip-path="url(#clip-path-{{ i }})" x="0" y="0" width="1060" height="{{ 31 * perPage }}" style="fill: url(#linear-gradient-{{ i }})"></rect>
                     <defs>
                         <clipPath id="clip-path-{{ i }}">
