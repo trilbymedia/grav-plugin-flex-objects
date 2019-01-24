@@ -5,6 +5,7 @@
 
 {% set collection = directory.collection.authorize('list') %}
 {% set table = flex.dataTable(collection.type(false)) %}
+{% set config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
 
 {% block content_top %}
 {% if directory %}
@@ -38,7 +39,7 @@
                 {% endif %}
             </div>
         {% else %}
-            {% set perPage = 15 %}
+            {% set per_page = config.per_page %}
 
             {% set tableFields = [] %}
             {% set searchFields = [] %}
@@ -66,6 +67,7 @@
 
             {% set list = table.jsonSerialize %}
 
+            {{ dump('opts', directory.config('admin.options')) }}
             <div
                 id="flex-objects-list"
                 {# FIXME: api needs proper endpoint #}
@@ -73,18 +75,18 @@
                     {
                         data: list,
                         api: grav.uri.currentRoute().withExtension('json').uri()|string,
-                        perPage: perPage,
+                        perPage: per_page,
                         fields: tableFields,
                         searchFields: searchFields,
-                        sortOrder: [{ field: 'updated_timestamp', direction: 'desc' }],
+                        sortOrder: [{ field: config.order.by, direction: config.order.dir }],
                         searchPlaceholder: "PLUGIN_ADMIN.RESOURCE_FILTER"|tu,
                         paginationInfo: "PLUGIN_FLEX_OBJECTS.LIST_INFO"|tu,
                         emptyResult: "PLUGIN_FLEX_OBJECTS.EMPTY_RESULT"|tu
                     }|json_encode|e('html_attr')
                 }}">
-                <svg viewBox="0 0 1060 {{ 31 * (min(perPage, list.data|count) + 2) }}">
-                {% for i in 0..((min(perPage, list.data|count) + 3) - 1) %}
-                    <rect clip-path="url(#clip-path-{{ i }})" x="0" y="0" width="1060" height="{{ 31 * perPage }}" style="fill: url(#linear-gradient-{{ i }})"></rect>
+                <svg viewBox="0 0 1060 {{ 31 * (min(per_page, list.data|count) + 2) }}">
+                {% for i in 0..((min(per_page, list.data|count) + 3) - 1) %}
+                    <rect clip-path="url(#clip-path-{{ i }})" x="0" y="0" width="1060" height="{{ 31 * per_page }}" style="fill: url(#linear-gradient-{{ i }})"></rect>
                     <defs>
                         <clipPath id="clip-path-{{ i }}">
                             <rect x="13" y="{{ 31 * i + 10 }}" rx="6" ry="6" width="{{ 200 * random([0.7, 0.8, 0.9, 1]) }}" height="12"></rect>

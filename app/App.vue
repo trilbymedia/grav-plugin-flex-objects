@@ -6,6 +6,8 @@
                   :fields="store.fields || []"
                   :searchFields="store.searchFields || []"
                   :sortOrder="store.sortOrder"
+                  :multi-sort="true"
+                  
                   :api-mode="true"
                   :api-url="store.api"
                   :per-page="store.perPage || perPage"
