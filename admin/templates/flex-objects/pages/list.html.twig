@@ -5,7 +5,7 @@
 
 {% set collection = directory.collection.authorize('list') %}
 {% set table = flex.dataTable(collection.type(false)) %}
-{% set config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
+{% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
 
 {% block content_top %}
 {% if directory %}
@@ -39,7 +39,7 @@
                 {% endif %}
             </div>
         {% else %}
-            {% set per_page = config.per_page %}
+            {% set per_page = directory_config.per_page %}
 
             {% set tableFields = [] %}
             {% set searchFields = [] %}
@@ -78,7 +78,7 @@
                         perPage: per_page,
                         fields: tableFields,
                         searchFields: searchFields,
-                        sortOrder: [{ field: config.order.by, direction: config.order.dir }],
+                        sortOrder: [{ field: directory_config.order.by, direction: directory_config.order.dir }],
                         searchPlaceholder: "PLUGIN_ADMIN.RESOURCE_FILTER"|tu,
                         paginationInfo: "PLUGIN_FLEX_OBJECTS.LIST_INFO"|tu,
                         emptyResult: "PLUGIN_FLEX_OBJECTS.EMPTY_RESULT"|tu
