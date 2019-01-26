@@ -9,11 +9,10 @@
 
     export default {
         props: ['store'],
-        data() {
-            return {
-                filterText: ''
-            }
-        },
+        data: () => ({
+            filterText: '',
+            searchPlaceholder: 'Filter...'
+        }),
         created() {
             this.doFilter = debounce(() => {
                 this.$events.fire('filter-set', this.filterText);
