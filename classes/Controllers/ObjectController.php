@@ -69,7 +69,7 @@ class ObjectController extends AbstractController
 
         $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.UPDATED_SUCCESSFULLY'), 'info');
 
-        $redirect = $request->getAttribute('redirect', (string)$request->getUri());
+        $redirect = $request->getAttribute('redirect', (string)$request->getUri()->getPath());
 
         return $this->createRedirectResponse($redirect, 303);
     }
