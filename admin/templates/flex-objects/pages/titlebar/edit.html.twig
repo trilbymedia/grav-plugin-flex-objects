@@ -1,7 +1,7 @@
 {% block titlebar %}
     <div class="button-bar">
         <a class="button" href="{{ base_url ~ flex.adminRoute(directory) }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
-        {% if object.exits and object.route %}
+        {% if object.exists and object.route %}
             <a href="{{ url(object.route, true) }}" class="button" target="_blank"><i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}</a>
         {% endif %}
         {% if object.authorize('save') %}
