@@ -175,7 +175,7 @@ class AdminController extends SimpleController
 
             $object = $key ? $directory->getIndex()->get($key) : null;
             if (null === $object) {
-                $object = $directory->createObject($this->data, $key, true);
+                $object = $directory->createObject($this->data, $key ?? '', true);
             }
 
             if ($object->exists()) {
