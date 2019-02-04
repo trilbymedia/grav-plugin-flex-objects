@@ -76,7 +76,7 @@ class Flex extends \Grav\Framework\Flex\Flex
         $routes = $this->getAdminRoutes();
 
         $grav = Grav::instance();
-        $route = Utils::isAdminPlugin() ? '' : $grav['base_url'] . '/admin';
+        $route = Utils::isAdminPlugin() ? '' : $grav['base_url'] . '/' . trim($grav['config']->get('plugins.admin.route'), '/');
 
         if ($type && isset($routes[$type])) {
             if ($routes[$type] === null) {
