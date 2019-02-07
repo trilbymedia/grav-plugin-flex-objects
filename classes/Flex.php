@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects;
 
+use Grav\Common\Config\Config;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
 use Grav\Common\Utils;
@@ -76,7 +77,9 @@ class Flex extends \Grav\Framework\Flex\Flex
         $routes = $this->getAdminRoutes();
 
         $grav = Grav::instance();
-        $route = Utils::isAdminPlugin() ? '' : $grav['base_url'] . '/' . trim($grav['config']->get('plugins.admin.route'), '/');
+        /** @var Config $config */
+        $config = $grav['config'];
+        $route = Utils::isAdminPlugin() ? '' : $grav['base_url'] . '/' . trim($config->get('plugins.admin.route'), '/');
 
         if ($type && isset($routes[$type])) {
             if ($routes[$type] === null) {
@@ -95,9 +98,10 @@ class Flex extends \Grav\Framework\Flex\Flex
         }
 
         $p = [];
+
+        $separator = $config->get('system.param_sep');
         foreach ($params as $key => $val) {
-            // FIXME: use config
-            $p[] = $key . ':' . $val;
+            $p[] = $key . $separator . $val;
         }
 
         return $route . ($p ? '/' . implode('/', $p) : '');
