@@ -160,7 +160,7 @@ class ObjectController extends AbstractController
         }
 
         if ($object instanceof FlexAuthorizeInterface) {
-            if (!$object->authorize($action)) {
+            if (!$object->isAuthorized($action)) {
                 throw new \RuntimeException('Forbitten', 403);
             }
         }

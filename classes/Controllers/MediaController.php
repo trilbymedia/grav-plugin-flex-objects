@@ -316,7 +316,7 @@ class MediaController extends AbstractController
             throw new \RuntimeException('Not Found', 404);
         }
 
-        if (!$object->authorize($action)) {
+        if (!$object->isAuthorized($action)) {
             throw new \RuntimeException('Forbitten', 403);
         }
     }

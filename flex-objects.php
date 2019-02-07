@@ -2,6 +2,7 @@
 namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
+use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
@@ -116,7 +117,7 @@ class FlexObjectsPlugin extends Plugin
         $config = $this->config->get('plugins.flex-objects');
 
         // Add to DI container
-        $this->grav['flex_objects'] = function () use ($config) {
+        $this->grav['flex_objects'] = function (Grav $grav) use ($config) {
             $blueprints = $config['directories'] ?: [];
 
             $list = [];
@@ -124,7 +125,11 @@ class FlexObjectsPlugin extends Plugin
                 $list[basename($blueprint, '.yaml')] = $blueprint;
             }
 
-            return new Flex($list, $config);
+            $flex = new Flex($list, $config);
+
+            $grav->fireEvent('onFlexInit', new Event(['flex' => $flex]));
+
+            return $flex;
         };
     }
 
@@ -183,10 +188,10 @@ class FlexObjectsPlugin extends Plugin
             $title = $item['title'] ?? 'PLUGIN_FLEX_OBJECTS.TITLE';
             $icon = $item['icon'] ?? 'fa-list';
             $authorize = $item['authorize'] ?? ($directory ? null : ['admin.flex-objects', 'admin.super']);
-            if ($hidden || (null === $authorize && $directory->authorize('list', 'admin'))) {
+            if ($hidden || (null === $authorize && $directory->isAuthorized('list', 'admin'))) {
                 continue;
             }
-            $badge = $directory ? ['badge' => ['count' => $directory->getCollection()->authorize('list')->count()]] : [];
+            $badge = $directory ? ['badge' => ['count' => $directory->getCollection()->isAuthorized('list')->count()]] : [];
 
             $this->grav['twig']->plugins_hooked_nav[$title] = [
                 'route' => $route,

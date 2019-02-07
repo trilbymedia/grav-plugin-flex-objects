@@ -4,7 +4,7 @@
         {% if object.exists and object.route %}
             <a href="{{ url(object.route, true) }}" class="button" target="_blank"><i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}</a>
         {% endif %}
-        {% if object ? object.authorize('save') : directory.authorize('create') %}
+        {% if object ? object.isAuthorized('save') : directory.isAuthorized('create') %}
         <button class="button" type="submit" name="task" value="save" form="blueprints"><i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}</button>
         {% endif %}
     </div>

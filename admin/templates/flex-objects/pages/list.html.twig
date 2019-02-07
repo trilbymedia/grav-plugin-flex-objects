@@ -3,7 +3,7 @@
 
 {% do assets.addJs('plugin://flex-objects/js/flex-objects.js', { 'group': 'bottom', 'loading': 'defer' }) %}
 
-{% set collection = directory.collection.authorize('list') %}
+{% set collection = directory.collection.isAuthorized('list') %}
 {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
 {% set table = flex.dataTable(collection.type(false), { limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
 
@@ -32,7 +32,7 @@
             </div>
             {% elseif not collection.count %}
             <div class="no-entries">
-                {% if directory.authorize('create') %}
+                {% if directory.isAuthorized('create') %}
                     There are currently no entries, click the <a href="{{ base_url ~ flex.adminRoute(collection, {action: 'add'}) }}">Add</a> button to create a new one...
                 {% else %}
                     There are currently no entries.

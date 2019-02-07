@@ -1,11 +1,11 @@
 {% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
 
-{% if object.authorize('read') %}
+{% if object.isAuthorized('read') %}
     <a href="{{ base_url ~ flex.adminRoute(object) }}" title="Edit {{ object_title }}" class="edit-action">
         <i class="fa fa-pencil"></i>
     </a>
 {% endif %}
-{% if object.authorize('delete') %}
+{% if object.isAuthorized('delete') %}
     <a href="#delete"
        class="page-delete delete-action"
        title="Delete {{ object_title }}"

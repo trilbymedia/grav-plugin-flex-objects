@@ -140,7 +140,7 @@ class AdminController extends SimpleController
             $object = $directory && null !== $key ? $directory->getIndex()->get($key) : null;
 
             if ($object) {
-                if (!$object->authorize('delete')) {
+                if (!$object->isAuthorized('delete')) {
                     throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
                 }
 
@@ -179,12 +179,12 @@ class AdminController extends SimpleController
             }
 
             if ($object->exists()) {
-                if (!$object->authorize('update')) {
+                if (!$object->isAuthorized('update')) {
                     throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
                         403);
                 }
             } else {
-                if (!$object->authorize('create')) {
+                if (!$object->isAuthorized('create')) {
                     throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
                         403);
                 }
