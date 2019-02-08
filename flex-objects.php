@@ -48,12 +48,12 @@ class FlexObjectsPlugin extends Plugin
         return [
             'onCliInitialize' => [
                 ['autoload', 100000],
-                ['initializeFlex', 0]
+                ['initializeFlex', 10]
             ],
             'onPluginsInitialized' => [
                 ['autoload', 100000],
                 ['onPluginsInitialized', 0],
-                ['initializeFlex', 0]
+                ['initializeFlex', 10]
             ],
             'onFormRegisterTypes' => [
                 ['onFormRegisterTypes', 0],
@@ -168,9 +168,16 @@ class FlexObjectsPlugin extends Plugin
 
     public function getAdminMenu()
     {
-        $config = $this->config();
+        /** @var Flex $flex */
+        $flex = $this->grav['flex_objects'];
 
-        return $config['admin']['menu'] ?? ['flex-objects' => []];
+        $list = [];
+        foreach ($flex->getAdminMenuItems() as $name => $item) {
+            $route = trim($item['route'] ?? $name, '/');
+            $list[$route] = $item;
+        }
+
+        return $list;
     }
 
     /**

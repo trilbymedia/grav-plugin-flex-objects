@@ -20,6 +20,7 @@ class Flex extends \Grav\Framework\Flex\Flex
 {
     /** @var array */
     protected $adminRoutes;
+    protected $adminMenu;
 
     /**
      * @return array
@@ -77,22 +78,33 @@ class Flex extends \Grav\Framework\Flex\Flex
         $routes = $this->getAdminRoutes();
 
         $grav = Grav::instance();
+
         /** @var Config $config */
         $config = $grav['config'];
         $route = Utils::isAdminPlugin() ? '' : $grav['base_url'] . '/' . trim($config->get('plugins.admin.route'), '/');
 
         if ($type && isset($routes[$type])) {
-            if ($routes[$type] === null) {
+            if (!$routes[$type]) {
+                // Directory has empty route.
                 return '';
             }
-            $route .= '/' .  $routes[$type];
-        } elseif ($type) {
-            if (!isset($routes[''])) {
+
+            // Directory has it's own menu item.
+            $route .= $routes[$type];
+        } else {
+            if (empty($routes[''])) {
+                // Default route has been disabled.
                 return '';
             }
-            $route .= '/' .  $routes[''] . '/' . $type;
+
+            // Use default route.
+            $route .= '/' . $routes[''];
+            if ($type) {
+                $route .= '/' . $type;
+            }
         }
 
+        // Append object key if available.
         if ($object instanceof FlexObject) {
             $route .= '/' . $object->getKey();
         }
@@ -110,24 +122,58 @@ class Flex extends \Grav\Framework\Flex\Flex
     /**
      * @return array
      */
-    protected function getAdminRoutes(): array
+    public function getAdminRoutes(): array
     {
         if (null === $this->adminRoutes) {
             $routes = [];
-
-            $menu = (array)($this->config['admin']['menu'] ?? null);
-            foreach ($menu as $slug => $menuItem) {
-                $directory = $menuItem['directory'] ?? '';
-                $routes[$directory] = !isset($menuItem['disabled']) || $menuItem['disabled'] !== true ? $slug : null;
-            }
-
-            if (empty($routes)) {
-                $routes[''] = 'flex-objects';
+            foreach ($this->getAdminMenuItems() as $name => $item) {
+                $routes[$name] = !isset($item['disabled']) || $item['disabled'] !== true ? $item['route'] : null;
             }
 
             $this->adminRoutes = $routes;
         }
 
         return $this->adminRoutes;
+    }
+
+    public function getAdminMenuItems(): array
+    {
+        if (null === $this->adminMenu) {
+            $routes = [];
+            $count = 0;
+
+            $directories = $this->getDirectories();
+            foreach ($directories as $directory) {
+                $type = $directory->getType();
+                $items = $directory->getConfig('admin.menu') ?? [];
+                if ($items) {
+                    foreach ($items as $view => $item) {
+                        $item += [
+                            'route' => '/' . $type,
+                            'title' => $directory->getTitle(),
+                            'icon' => 'fa fa-file',
+                            'directory' => $type
+                        ];
+                        $routes[$type] = $item;
+                    }
+                } else {
+                    $count++;
+                }
+            }
+
+            $menu = (array)($this->config['admin']['menu'] ?? []);
+            foreach ($menu as $slug => $menuItem) {
+                $directory = $menuItem['directory'] ?? '';
+                $routes[$directory] = $menuItem + ['route' => '/' . $slug];
+            }
+
+            if ($count && !isset($routes[''])) {
+                $routes[''] = ['route' => '/flex-objects'];
+            }
+
+            $this->adminMenu = $routes;
+        }
+
+        return $this->adminMenu;
     }
 }
