@@ -28,6 +28,7 @@ abstract class AbstractController implements RequestHandlerInterface
 {
     /** @var string */
     protected $nonce_action = 'flex-object';
+
     /** @var string */
     protected $nonce_name = 'nonce';
 
@@ -75,11 +76,16 @@ abstract class AbstractController implements RequestHandlerInterface
         $route = $attributes['route'];
         $post = $this->getPost();
 
+        if ($this->isFormSubmit()) {
+            $form = $this->getForm();
+            $this->nonce_name = $form->getNonceName();
+            $this->nonce_action = $form->getNonceAction();
+        }
+
         try {
             $task = $request->getAttribute('task') ?? $post['task'] ?? $route->getParam('task');
             if ($task) {
-                // FIXME: put back
-                //$this->checkNonce($task);
+                $this->checkNonce($task);
                 $type = 'task';
                 $command = $task;
             } else {
@@ -141,6 +147,11 @@ abstract class AbstractController implements RequestHandlerInterface
         }
 
         return $body;
+    }
+
+    public function isFormSubmit(): bool
+    {
+        return (bool)$this->getPost('__form-name__');
     }
 
     public function getForm(string $type = null): FlexFormInterface
