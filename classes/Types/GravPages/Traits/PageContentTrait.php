@@ -271,7 +271,7 @@ trait PageContentTrait
             throw new \RuntimeException('Not Implemented');
         }
 
-        return $this->modified() . md5( 'flex-' . $this->getType() . '-' . $this->getKey());
+        return $this->modified() . md5( 'flex-' . $this->getType(false) . '-' . $this->getKey());
     }
 
     /**
