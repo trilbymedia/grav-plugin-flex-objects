@@ -4,7 +4,7 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
 use Grav\Common\Plugin;
-use Grav\Common\User\User;
+use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Plugin\Admin\AdminBaseController;
 use RocketTheme\Toolbox\Session\Message;
@@ -87,7 +87,7 @@ abstract class SimpleController extends AdminBaseController
      */
     public function execute()
     {
-        /** @var User $user */
+        /** @var UserInterface $user */
         $user = $this->grav['user'];
         if (!$user->authorize('admin.login')) {
             // TODO: improve
