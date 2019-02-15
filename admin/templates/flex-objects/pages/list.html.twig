@@ -48,6 +48,7 @@
                 {% set sortField = options.sort.field ?? key %}
                 {% set title = (options.field.label ?? schema.get(options.alias ?? key).label)|tu %}
                 {% set width = options.width ?: ((100-fields_width) / ((fields_count-fields_set) ?: 1))|round(3) %}
+                {% set class = options.class ?: '' %}
 
                 {# Vuetable doesn't like field names with `.` in them, so we convert name and sortField to `_` #}
                 {% set tableFields = tableFields|merge([
@@ -55,7 +56,8 @@
                         name: name|replace('.', '__'),
                         sortField: sortField,
                         title: title,
-                        width: width ~ '%'
+                        width: width ~ '%',
+                        class: class
                     }
                 ]) %}
 
