@@ -48,7 +48,8 @@
                 {% set sortField = options.sort.field ?? key %}
                 {% set title = (options.field.label ?? schema.get(options.alias ?? key).label)|tu %}
                 {% set width = options.width ?: ((100-fields_width) / ((fields_count-fields_set) ?: 1))|round(3) %}
-                {% set class = options.class ?: '' %}
+                {% set title_class = options.title_class ?: '' %}
+                {% set data_class = options.data_class ?: '' %}
 
                 {# Vuetable doesn't like field names with `.` in them, so we convert name and sortField to `_` #}
                 {% set tableFields = tableFields|merge([
@@ -57,14 +58,15 @@
                         sortField: sortField,
                         title: title,
                         width: width ~ '%',
-                        class: class
+                        titleClass: title_class,
+                        dataClass: data_class
                     }
                 ]) %}
 
                 {# FIXME: Search fields should be passed and individually customizable, right now defaulting to all fields selected #}
                 {% set searchFields = searchFields|merge([key|replace('.', '__')]) %}
             {% endfor %}
-            {% set tableFields = tableFields|merge([{ name: '_actions_', title: 'Actions', class: 'right' }]) %}
+            {% set tableFields = tableFields|merge([{ name: '_actions_', title: 'Actions', titleClass: 'right' }]) %}
 
 
             {% set list = table.jsonSerialize %}
