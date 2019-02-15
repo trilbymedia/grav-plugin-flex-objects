@@ -254,7 +254,6 @@ class FlexObjectsPlugin extends Plugin
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
             // Twig shortcuts
-            $this->grav['twig']->twig_vars['location'] = $this->controller->getLocation();
             $this->grav['twig']->twig_vars['action'] = $this->controller->getAction();
             $this->grav['twig']->twig_vars['task'] = $this->controller->getTask();
             $this->grav['twig']->twig_vars['target'] = $this->controller->getTarget();
