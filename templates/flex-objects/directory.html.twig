@@ -1,7 +1,7 @@
 {% set type = page.header.directory ?? uri.param('type') %}
 {% set flex = grav.flex_objects %}
 
-{% if not type and flex.count != 1 %}
+{% if not type %}
 {% include 'flex-objects/types.html.twig' %}
 {% else %}
 {% include 'flex-objects/list.html.twig' with {type: type } %}

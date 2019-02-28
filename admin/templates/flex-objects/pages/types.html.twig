@@ -2,9 +2,6 @@
 {% use 'flex-objects/pages/titlebar/types.html.twig' %}
 
 {% block head %}
-    {% if flex.count == 1 %}
-        {{ redirect_me(flex.adminRoute(flex.directory.collection)) }}
-    {% endif %}
     {{ parent() }}
 {% endblock %}
 

@@ -1,5 +1,5 @@
 {% block titlebar %}
-    {% set back_url = flex.count > 1 or not directory ? base_url ~ flex.adminRoute() : base_url %}
+    {% set back_url = base_url ~ flex.adminRoute() %}
     <div class="button-bar">
         <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
         {% if directory.isAuthorized('create') %}
