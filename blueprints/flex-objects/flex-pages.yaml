@@ -32,7 +32,7 @@ config:
     collection: 'Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageCollection'
     index: 'Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageIndex'
     storage:
-      class: 'Grav\Plugin\FlexObjects\Storage\FolderStorage'
+      class: 'Grav\Framework\Flex\Storage\FolderStorage'
       options:
         formatter:
           class: 'Grav\Framework\File\Formatter\MarkdownFormatter'
