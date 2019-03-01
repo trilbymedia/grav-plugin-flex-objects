@@ -148,6 +148,10 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
             return $this->hasNestedProperty($property);
         }
 
+        if ($property === 'content') {
+            return true;
+        }
+
         return parent::hasProperty($property);
     }
 
@@ -164,6 +168,10 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
             $property = "header.{$property}";
 
             return $this->getNestedProperty($property, $default);
+        }
+
+        if ($property === 'content') {
+            $property = 'markdown';
         }
 
         return parent::getProperty($property, $default);
@@ -184,6 +192,10 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
             return $this->setNestedProperty($property, $value);
         }
 
+        if ($property === 'content') {
+            $property = 'markdown';
+        }
+
         return parent::setProperty($property, $value);
     }
 
@@ -196,6 +208,12 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
             $property = "header.{$property}";
 
             $this->unsetNestedProperty($property);
+
+            return;
+        }
+
+        if ($property === 'content') {
+            $property = 'markdown';
         }
 
         parent::unsetProperty($property);
@@ -404,11 +422,6 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
      */
     protected function filterElements(array &$elements)
     {
-        if (isset($elements['content'])) {
-            $elements['markdown'] = $elements['content'];
-            unset($elements['content']);
-        }
-
         $folder = !empty($elements['folder']) ? trim($elements['folder']) : '';
 
         if ($folder) {
