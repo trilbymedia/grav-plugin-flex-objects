@@ -2,7 +2,7 @@
     <ul class="list">
         {% for object in collection %}
         <li>
-            {{ object.render(layout)|raw }}
+            {% render object layout: layout %}
         </li>
         {% endfor %}
     </ul>
