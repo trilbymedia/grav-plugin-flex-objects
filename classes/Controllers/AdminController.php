@@ -228,27 +228,39 @@ class AdminController extends SimpleController
 
     public function taskMediaList()
     {
-        $response = $this->forwardMediaTask('action', 'media.list');
+        try {
+            $response = $this->forwardMediaTask('action', 'media.list');
 
-        $this->admin->json_response = json_decode($response->getBody());
+            $this->admin->json_response = json_decode($response->getBody());
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
 
         return true;
     }
 
     public function taskMediaUpload()
     {
-        $response = $this->forwardMediaTask('task', 'media.upload');
+        try {
+            $response = $this->forwardMediaTask('task', 'media.upload');
 
-        $this->admin->json_response = json_decode($response->getBody());
+            $this->admin->json_response = json_decode($response->getBody());
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
 
         return true;
     }
 
     public function taskMediaDelete()
     {
-        $response = $this->forwardMediaTask('task', 'media.delete');
+        try {
+            $response = $this->forwardMediaTask('task', 'media.delete');
 
-        $this->admin->json_response = json_decode($response->getBody());
+            $this->admin->json_response = json_decode($response->getBody());
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
 
         return true;
     }
@@ -270,9 +282,13 @@ class AdminController extends SimpleController
 
     public function taskGetFilesInFolder()
     {
-        $response = $this->forwardMediaTask('action', 'media.picker');
+        try {
+            $response = $this->forwardMediaTask('action', 'media.picker');
 
-        $this->admin->json_response = json_decode($response->getBody());
+            $this->admin->json_response = json_decode($response->getBody());
+        } catch (\Exception $e) {
+            $this->admin->json_response = ['success' => false, 'error' => $e->getMessage()];
+        }
 
         return true;
     }
