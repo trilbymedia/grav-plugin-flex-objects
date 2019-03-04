@@ -38,10 +38,26 @@ class MediaController extends AbstractController
         }
 
         $files = $this->getRequest()->getUploadedFiles();
+        if ($field) {
+            $files = $files['data'] ?? [];
+            $parts = explode('.', $field);
+            $last = array_pop($parts);
+            foreach ($parts as $name) {
+                if (!is_array($files['name'])) {
+                    throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
+                }
+                $files = $files['name'];
+            }
+            $file = $files[$last] ?? null;
 
-        // TODO: handle also nested fields.
+        } else {
+            $file = $files['file'] ?? null;
+        }
+
         /** @var UploadedFileInterface $file */
-        $file = $field ? $files['data'][$field][0] ?? null : $files['file'] ?? null;
+        if (is_array($file)) {
+            $file = reset($file);
+        }
 
         if (!$file instanceof UploadedFileInterface) {
             throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
@@ -99,8 +115,7 @@ class MediaController extends AbstractController
             'status'  => 'success',
             'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
             'filename' => $filename,
-            'metadata' => $metadata,
-            'session' => null
+            'metadata' => $metadata
         ];
 
         return $this->createJsonResponse($response);
