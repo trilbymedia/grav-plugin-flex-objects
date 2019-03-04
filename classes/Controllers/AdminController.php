@@ -226,7 +226,7 @@ class AdminController extends SimpleController
         return $object ? true : false;
     }
 
-    public function taskListmedia()
+    public function taskMediaList()
     {
         $response = $this->forwardMediaTask('action', 'media.list');
 
@@ -235,7 +235,7 @@ class AdminController extends SimpleController
         return true;
     }
 
-    public function taskAddmedia()
+    public function taskMediaUpload()
     {
         $response = $this->forwardMediaTask('task', 'media.upload');
 
@@ -244,13 +244,28 @@ class AdminController extends SimpleController
         return true;
     }
 
-    public function taskDelmedia()
+    public function taskMediaDelete()
     {
         $response = $this->forwardMediaTask('task', 'media.delete');
 
         $this->admin->json_response = json_decode($response->getBody());
 
         return true;
+    }
+
+    public function taskListmedia()
+    {
+        return $this->taskMediaList();
+    }
+
+    public function taskAddmedia()
+    {
+        return $this->taskMediaUpload();
+    }
+
+    public function taskDelmedia()
+    {
+        return $this->taskMediaDelete();
     }
 
     public function taskGetFilesInFolder()

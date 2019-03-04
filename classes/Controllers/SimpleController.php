@@ -103,7 +103,7 @@ abstract class SimpleController extends AdminBaseController
             if (!$this->validateNonce()) {
                 return false;
             }
-            $method = $this->task_prefix . ucfirst($this->task);
+            $method = $this->task_prefix . ucfirst(str_replace('.', '', $this->task));
 
             if (!method_exists($this, $method)) {
                 $method = $this->task_prefix . 'Default';
@@ -118,7 +118,7 @@ abstract class SimpleController extends AdminBaseController
                     $this->action = 'list';
                 }
             }
-            $method = 'action' . ucfirst(strtolower($this->action));
+            $method = 'action' . ucfirst(strtolower(str_replace('.', '', $this->action)));
 
             if (!method_exists($this, $method)) {
                 $method = $this->action_prefix . 'Default';
