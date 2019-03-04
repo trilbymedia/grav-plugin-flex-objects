@@ -9,7 +9,6 @@ use Grav\Common\Uri;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Plugin\FlexObjects\Flex;
-use Grav\Plugin\FlexObjects\Table\DataTable;
 use Nyholm\Psr7\ServerRequest;
 use RocketTheme\Toolbox\Event\Event;
 
@@ -272,7 +271,8 @@ class AdminController extends SimpleController
         $request = $request
             ->withAttribute('type', $this->target)
             ->withAttribute('key', $this->id)
-            ->withAttribute('route', $route);
+            ->withAttribute('route', $route)
+            ->withAttribute('forwarded', true);
 
         $controller = new MediaController();
 

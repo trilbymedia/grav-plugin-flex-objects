@@ -64,9 +64,10 @@ class Flex extends \Grav\Framework\Flex\Flex
     /**
      * @param string|object|null $type
      * @param array $params
+     * @param string $extension
      * @return string
      */
-    public function adminRoute($type = null, array $params = []): string
+    public function adminRoute($type = null, array $params = [], string $extension = ''): string
     {
         if (\is_object($type)) {
             $object = $type;
@@ -116,7 +117,9 @@ class Flex extends \Grav\Framework\Flex\Flex
             $p[] = $key . $separator . $val;
         }
 
-        return $route . ($p ? '/' . implode('/', $p) : '');
+        $extension = $extension ? '.' . $extension : '';
+
+        return $route . $extension . ($p ? '/' . implode('/', $p) : '');
     }
 
     /**

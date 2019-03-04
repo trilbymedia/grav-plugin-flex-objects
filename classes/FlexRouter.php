@@ -23,6 +23,9 @@ class FlexRouter implements MiddlewareInterface
         $task = $post['task'] ?? $route->getParam('task');
 
         switch ($task) {
+            case 'media.list':
+            case 'media.add':
+            case 'media.delete':
             case 'listmedia':
             case 'addmedia':
             case 'delmedia':

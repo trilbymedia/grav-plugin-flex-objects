@@ -78,14 +78,16 @@ abstract class AbstractController implements RequestHandlerInterface
 
         if ($this->isFormSubmit()) {
             $form = $this->getForm();
-            $this->nonce_name = $form->getNonceName();
-            $this->nonce_action = $form->getNonceAction();
+            $this->nonce_name = $attributes['nonce_name'] ?? $form->getNonceName();
+            $this->nonce_action = $attributes['nonce_action'] ?? $form->getNonceAction();
         }
 
         try {
             $task = $request->getAttribute('task') ?? $post['task'] ?? $route->getParam('task');
             if ($task) {
-                $this->checkNonce($task);
+                if (empty($attributes['forwarded'])) {
+                    $this->checkNonce($task);
+                }
                 $type = 'task';
                 $command = $task;
             } else {
