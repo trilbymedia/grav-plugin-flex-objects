@@ -375,7 +375,6 @@ abstract class AbstractController implements RequestHandlerInterface
         }
     }
 
-
     protected function getAccept(array $compare)
     {
         $accepted = [];

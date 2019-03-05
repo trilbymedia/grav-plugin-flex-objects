@@ -2,14 +2,13 @@
 
 namespace Grav\Plugin\FlexObjects\Controllers;
 
-use Grav\Common\Form\FormFlash;
 use Grav\Common\Grav;
-use Grav\Common\Session;
 use Grav\Common\Uri;
-use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Plugin\FlexObjects\Flex;
 use Nyholm\Psr7\ServerRequest;
+use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -189,25 +188,23 @@ class AdminController extends SimpleController
                 }
             }
 
-            // Handle uploads.
             $grav = Grav::instance();
 
-            /** @var Uri $uri */
-            $uri = $grav['uri'];
+            /** @var ServerRequestInterface $request */
+            $request = $grav['request'];
 
-            /** @var Session $session */
-            $session = $grav['session'];
+            /** @var FlexForm $form */
+            $form = $this->getForm();
+            $form->handleRequest($request);
+            $errors = $form->getErrors();
+            if ($errors) {
+                foreach ($errors as $error) {
+                    $this->admin->setMessage($error, 'error');
+                }
 
-            $uniqueId = sha1($uri->url);
-            $flash = new FormFlash($session->getId(), $uniqueId);
-            $flash->setUrl($uri->url)->setUser($grav['user']);
-
-            // Update and save object
-            $object->update($this->data, $flash->getFilesByFields());
-            $object->save();
-
-            // Delete form flash
-            $flash->delete();
+                throw new \RuntimeException('Form validation failed');
+            }
+            $object = $form->getObject();
 
             $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
@@ -223,7 +220,7 @@ class AdminController extends SimpleController
             $this->setRedirect($this->getFlex()->adminRoute($object ?? $directory ?? null), 302);
         }
 
-        return $object ? true : false;
+        return true;
     }
 
     public function taskMediaList()
@@ -346,15 +343,6 @@ class AdminController extends SimpleController
         $collection = $this->getDirectory($type)->getIndex();
 
         return null !== $id ? $collection[$id] : $collection;
-    }
-
-    /**
-     * @param string $type
-     * @return FlexDirectory
-     */
-    protected function getDirectory($type)
-    {
-        return Grav::instance()['flex_objects']->getDirectory($type);
     }
 
     /**

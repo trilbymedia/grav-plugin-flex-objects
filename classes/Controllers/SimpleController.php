@@ -6,6 +6,9 @@ use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
+use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\Interfaces\FlexFormInterface;
+use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Plugin\Admin\AdminBaseController;
 use RocketTheme\Toolbox\Session\Message;
 
@@ -21,6 +24,10 @@ abstract class SimpleController extends AdminBaseController
     protected $id;
     protected $active;
     protected $blueprints;
+    protected $object;
+
+    protected $nonce_name = 'admin-form';
+    protected $nonce_action = 'admin-nonce';
 
     protected $task_prefix = 'task';
     protected $action_prefix = 'action';
@@ -97,6 +104,12 @@ abstract class SimpleController extends AdminBaseController
         $success = false;
         $params = [];
 
+        if ($this->isFormSubmit()) {
+            $form = $this->getForm();
+            $this->nonce_name = $form->getNonceName();
+            $this->nonce_action = $form->getNonceAction();
+        }
+
         // Handle Task & Action
         if ($this->task) {
             // validate nonce
@@ -147,6 +160,54 @@ abstract class SimpleController extends AdminBaseController
         }
 
         return $success;
+    }
+
+    public function isFormSubmit(): bool
+    {
+        return (bool)($this->post['__form-name__'] ?? null);
+    }
+
+    public function getForm(string $type = null): FlexFormInterface
+    {
+        $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $formName = $this->post['__form-name__'] ?? null;
+        $uniqueId = $this->post['__unique_form_id__'] ?: $formName;
+
+        $form = $object->getForm($type ?? 'edit');
+        if ($uniqueId) {
+            $form->setUniqueId($uniqueId);
+        }
+
+        return $form;
+    }
+
+    /**
+     * @return FlexObjectInterface|null
+     */
+    public function getObject(): ?FlexObjectInterface
+    {
+        if (null === $this->object) {
+            $type = $this->target;
+            $key = $this->id;
+
+            $directory = $this->getDirectory($type);
+            $this->object = $directory && null !== $key ? $directory->getIndex()->get($key) : false;
+        }
+
+        return $this->object ?: null;
+    }
+
+    /**
+     * @param string $type
+     * @return FlexDirectory
+     */
+    protected function getDirectory($type)
+    {
+        return Grav::instance()['flex_objects']->getDirectory($type);
     }
 
     public function prepareData(array $data = null)
@@ -239,5 +300,24 @@ abstract class SimpleController extends AdminBaseController
     public function getId()
     {
         return $this->id;
+    }
+
+    protected function validateNonce()
+    {
+        $nonce = $this->post[$this->nonce_name] ?? null;
+
+        if (!$nonce) {
+            $nonce = $this->grav['uri']->param($this->nonce_name);
+        }
+
+        if (!$nonce) {
+            $nonce = $this->grav['uri']->query($this->nonce_name);
+        }
+
+        if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce_action)) {
+            return false;
+        }
+
+        return true;
     }
 }
