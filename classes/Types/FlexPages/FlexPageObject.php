@@ -70,10 +70,13 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             'shouldProcess' => true,
             'isPage' => true,
             'isDir' => true,
+            'folderExists' => true,
 
             // Page
             'isPublished' => true,
-            'folderExists' => true
+            'getCreated_Timestamp' => true,
+            'getPublish_Timestamp' => true,
+            'getUpdated_Timestamp' => true,
         ] + parent::getCachedMethods();
     }
 
@@ -83,6 +86,36 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function isPublished()
     {
         return $this->published();
+    }
+
+    /**
+     * @return bool
+     */
+    public function getCreated_Timestamp(): int
+    {
+        $date = $this->getProperty('created_date');
+
+        return null !== $date ? (new \DateTime($date))->getTimestamp() : 0;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getPublish_Timestamp(): int
+    {
+        $date = $this->getProperty('publish_date');
+
+        return null !== $date ? (new \DateTime($date))->getTimestamp() : $this->getCreated_Timestamp();
+    }
+
+    /**
+     * @return bool
+     */
+    public function getUpdated_Timestamp(): int
+    {
+        $date = $this->getProperty('updated_date');
+
+        return null !== $date ? (new \DateTime($date))->getTimestamp() : $this->getPublish_Timestamp();
     }
 
     /**
