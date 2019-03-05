@@ -170,7 +170,6 @@ class AdminController extends SimpleController
             if (!$directory) {
                 throw new \RuntimeException('Not Found', 404);
             }
-
             $object = $key ? $directory->getIndex()->get($key) : null;
             if (null === $object) {
                 $object = $directory->createObject($this->data, $key ?? '', true);
@@ -187,14 +186,14 @@ class AdminController extends SimpleController
                         403);
                 }
             }
-
             $grav = Grav::instance();
 
             /** @var ServerRequestInterface $request */
             $request = $grav['request'];
 
             /** @var FlexForm $form */
-            $form = $this->getForm();
+            $form = $this->getForm($object);
+
             $form->handleRequest($request);
             $errors = $form->getErrors();
             if ($errors) {

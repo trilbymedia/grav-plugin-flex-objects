@@ -166,15 +166,15 @@ abstract class SimpleController extends AdminBaseController
         return (bool)($this->post['__form-name__'] ?? null);
     }
 
-    public function getForm(string $type = null): FlexFormInterface
+    public function getForm(FlexObjectInterface $object = null): FlexFormInterface
     {
-        $object = $this->getObject();
+        $object = $object ?? $this->getObject();
         if (!$object) {
             throw new \RuntimeException('Not Found', 404);
         }
 
         $formName = $this->post['__form-name__'] ?? null;
-        $uniqueId = $this->post['__unique_form_id__'] ?: $formName;
+        $uniqueId = $this->post['__unique_form_id__'] ?? null;
 
         $form = $object->getForm();
         if ($uniqueId) {
