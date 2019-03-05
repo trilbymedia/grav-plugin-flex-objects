@@ -202,7 +202,7 @@ class AdminController extends SimpleController
                     $this->admin->setMessage($error, 'error');
                 }
 
-                throw new \RuntimeException('Form validation failed');
+                throw new \RuntimeException('Form validation failed, please check your input');
             }
             $object = $form->getObject();
 

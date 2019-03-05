@@ -26,8 +26,8 @@ abstract class SimpleController extends AdminBaseController
     protected $blueprints;
     protected $object;
 
-    protected $nonce_name = 'admin-form';
-    protected $nonce_action = 'admin-nonce';
+    protected $nonce_name = 'admin-nonce';
+    protected $nonce_action = 'admin-form';
 
     protected $task_prefix = 'task';
     protected $action_prefix = 'action';
@@ -100,7 +100,6 @@ abstract class SimpleController extends AdminBaseController
             // TODO: improve
             return false;
         }
-
         $success = false;
         $params = [];
 
@@ -177,7 +176,7 @@ abstract class SimpleController extends AdminBaseController
         $formName = $this->post['__form-name__'] ?? null;
         $uniqueId = $this->post['__unique_form_id__'] ?: $formName;
 
-        $form = $object->getForm($type ?? 'edit');
+        $form = $object->getForm();
         if ($uniqueId) {
             $form->setUniqueId($uniqueId);
         }
@@ -304,17 +303,15 @@ abstract class SimpleController extends AdminBaseController
 
     protected function validateNonce()
     {
-        $nonce = $this->post[$this->nonce_name] ?? null;
+        $nonce_action = $this->nonce_action;
+        $nonce = $this->post[$this->nonce_name] ??  $this->grav['uri']->param($this->nonce_name) ?? $this->grav['uri']->query($this->nonce_name);
 
         if (!$nonce) {
-            $nonce = $this->grav['uri']->param($this->nonce_name);
+            $nonce = $this->post['admin-nonce'] ??  $this->grav['uri']->param('admin-nonce') ?? $this->grav['uri']->query('admin-nonce');
+            $nonce_action = 'admin-form';
         }
 
-        if (!$nonce) {
-            $nonce = $this->grav['uri']->query($this->nonce_name);
-        }
-
-        if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce_action)) {
+        if (!$nonce || !Utils::verifyNonce($nonce, $nonce_action)) {
             return false;
         }
 
