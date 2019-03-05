@@ -6,22 +6,38 @@ use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Markdown\Parsedown;
 use Grav\Common\Markdown\ParsedownExtra;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Traits\FlexMediaTrait;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
-use Grav\Plugin\FlexObjects\Types\GravPages\Interfaces\PageContentInterface;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
+use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageLegacyTrait;
+use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageRoutableTrait;
+use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageTranslateTrait;
 
 /**
  * Class FlexPageObject
  * @package Grav\Plugin\FlexObjects\Types\FlexPages
  */
-class FlexPageObject extends FlexObject implements PageContentInterface, MediaManipulationInterface
+class FlexPageObject extends FlexObject implements PageInterface, MediaManipulationInterface
 {
     use PageContentTrait;
+    use PageLegacyTrait;
+    use PageTranslateTrait;
+    use PageRoutableTrait;
     use FlexMediaTrait;
+
+    /**
+     * @var string
+     */
+    protected $summary;
+
+    /**
+     * @var string
+     */
+    protected $content;
 
     /**
      * @return array
@@ -91,6 +107,15 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
         return parent::value($name, $default, $separator);
     }
 
+    public function save($reorder = true)
+    {
+        if ($reorder === true) {
+            //throw new \RuntimeException('Not Implemented');
+        }
+
+        return parent::save();
+    }
+
     /**
      * Get unknown header variables.
      *
@@ -108,11 +133,6 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
         }
 
         return $this->getStorageKey();
-    }
-
-    public function folderExists()
-    {
-        return $this->exists();
     }
 
     /**
@@ -143,13 +163,7 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
     public function hasProperty($property)
     {
         if (isset(static::$headerProperties[$property])) {
-            $property = "header.{$property}";
-
-            return $this->hasNestedProperty($property);
-        }
-
-        if ($property === 'content') {
-            return true;
+            return $this->hasNestedProperty("header.{$property}");
         }
 
         return parent::hasProperty($property);
@@ -165,13 +179,7 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
     public function getProperty($property, $default = null)
     {
         if (isset(static::$headerProperties[$property])) {
-            $property = "header.{$property}";
-
-            return $this->getNestedProperty($property, $default);
-        }
-
-        if ($property === 'content') {
-            $property = 'markdown';
+            return $this->getNestedProperty("header.{$property}", $default);
         }
 
         return parent::getProperty($property, $default);
@@ -182,21 +190,16 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
      *
      * @param string $property
      * @param mixed $default
-     * @return mixed
      */
     public function setProperty($property, $value)
     {
         if (isset(static::$headerProperties[$property])) {
-            $property = "header.{$property}";
+            $this->setNestedProperty("header.{$property}", $value);
 
-            return $this->setNestedProperty($property, $value);
+            return;
         }
 
-        if ($property === 'content') {
-            $property = 'markdown';
-        }
-
-        return parent::setProperty($property, $value);
+        parent::setProperty($property, $value);
     }
 
     /**
@@ -205,15 +208,9 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
     public function unsetProperty($property)
     {
         if (isset(static::$headerProperties[$property])) {
-            $property = "header.{$property}";
-
-            $this->unsetNestedProperty($property);
+            $this->unsetNestedProperty("header.{$property}");
 
             return;
-        }
-
-        if ($property === 'content') {
-            $property = 'markdown';
         }
 
         parent::unsetProperty($property);
@@ -231,22 +228,21 @@ class FlexPageObject extends FlexObject implements PageContentInterface, MediaMa
 
     protected function offsetLoad_content($value)
     {
+        $value = $value ?? $this->getRawContent();
+
+        return $this->processContent($value);
+    }
+
+    protected function offsetPrepare_content($value)
+    {
+        $this->setRawContent($value);
+
         return $this->processContent($value);
     }
 
     protected function offsetSerialize_content()
     {
-        return $this->getElement('content');
-    }
-
-    protected function offsetLoad_media()
-    {
-        return $this->getMedia();
-    }
-
-    protected function offsetSerialize_media()
-    {
-        return null;
+        return $this->getRawContent();
     }
 
     /**

@@ -124,11 +124,6 @@ class GravPageObject extends FlexPageObject
         return $pages->children($this->path());
     }
 
-    public function rawRoute()
-    {
-        return '/' . $this->getKey();
-    }
-
     /**
      * Gets and sets the name field.  If no name field is set, it will return 'default.md'.
      *
@@ -212,11 +207,6 @@ class GravPageObject extends FlexPageObject
         }
 
         return $this->getProperty('modular_twig');
-    }
-
-    public function folderExists()
-    {
-        return $this->exists() || is_dir($this->getStorageFolder());
     }
 
     public function full_order()
