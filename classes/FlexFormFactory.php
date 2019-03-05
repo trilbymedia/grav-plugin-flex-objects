@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects;
 
 use Grav\Common\Grav;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Page;
 use Grav\Framework\Form\Interfaces\FormFactoryInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
@@ -12,6 +13,11 @@ use Grav\Framework\Form\Interfaces\FormInterface;
 class FlexFormFactory implements FormFactoryInterface
 {
     public function createPageForm(Page $page, string $name, array $form): ?FormInterface
+    {
+        return $this->createFormForPage($page, $name, $form);
+    }
+
+    public function createFormForPage(PageInterface $page, string $name, array $form): ?FormInterface
     {
         $formFlex = $form['flex'] ?? [];
 
