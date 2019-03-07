@@ -3,6 +3,7 @@
 namespace Grav\Plugin\FlexObjects\Types\FlexPages;
 
 use Grav\Framework\Flex\FlexCollection;
+use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 
 /**
  * Class FlexPageCollection
@@ -11,11 +12,12 @@ use Grav\Framework\Flex\FlexCollection;
 class FlexPageCollection extends FlexCollection
 {
     /**
+     * @param bool $bool
      * @return FlexCollection|FlexPageCollection
      */
-    public function withPublished()
+    public function withPublished($bool = true): FlexCollectionInterface
     {
-        $list = array_keys(array_filter($this->call('isPublished')));
+        $list = array_keys(array_filter($this->call('isPublished', [$bool])));
 
         return $this->select($list);
     }
