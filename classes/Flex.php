@@ -107,7 +107,11 @@ class Flex extends \Grav\Framework\Flex\Flex
 
         // Append object key if available.
         if ($object instanceof FlexObject) {
-            $route .= '/' . $object->getKey();
+            if ($object->exists()) {
+                $route .= "/{$object->getKey()}";
+            } else {
+                $params = ['action' => 'add'] + $params;
+            }
         }
 
         $p = [];

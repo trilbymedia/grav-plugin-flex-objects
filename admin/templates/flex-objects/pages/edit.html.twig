@@ -13,6 +13,7 @@
 
 {% block content %}
 {% if directory and object or uri.param('action') == 'add' %}
+{% set object = object ?? directory.createObject([]) %}
 <div id="directory">
     {% block edit %}{% endblock %}
 </div>
