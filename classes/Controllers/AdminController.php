@@ -292,14 +292,17 @@ class AdminController extends SimpleController
     protected function forwardMediaTask(string $type, string $name)
     {
         $route = Uri::getCurrentRoute()->withGravParam('task', null)->withGravParam($type, $name);
+        $object = $this->getObject();
 
         /** @var ServerRequest $request */
         $request = $this->grav['request'];
         $request = $request
             ->withAttribute('type', $this->target)
             ->withAttribute('key', $this->id)
+            ->withAttribute('storage_key', $object && $object->exists() ? $object->getStorageKey() : null)
             ->withAttribute('route', $route)
-            ->withAttribute('forwarded', true);
+            ->withAttribute('forwarded', true)
+            ->withAttribute('object', $object);
 
         $controller = new MediaController();
 

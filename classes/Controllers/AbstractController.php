@@ -67,8 +67,9 @@ abstract class AbstractController implements RequestHandlerInterface
         $this->key =  $attributes['key'] ?? null;
         if ($this->type) {
             $this->directory = $this->getFlex()->getDirectory($this->type);
-            if ($this->key && $this->directory) {
-                $this->object = $this->directory->getObject($this->key);
+            $this->object = $attributes['object'] ?? null;
+            if (!$this->object && $this->key && $this->directory) {
+                $this->object = $this->directory->getObject($this->key) ?? $this->directory->createObject([], $this->key ?? '');
             }
         }
 

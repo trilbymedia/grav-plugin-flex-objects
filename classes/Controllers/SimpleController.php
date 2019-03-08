@@ -192,9 +192,20 @@ abstract class SimpleController extends AdminBaseController
         if (null === $this->object) {
             $type = $this->target;
             $key = $this->id;
+            $object = false;
 
             $directory = $this->getDirectory($type);
-            $this->object = $directory && null !== $key ? $directory->getIndex()->get($key) : false;
+            if ($directory) {
+                if (null === $key) {
+                    if ($this->action === 'add') {
+                        $object = $directory->createObject([]);
+                    }
+                } else {
+                    $object = $directory->getObject($key);
+                }
+            }
+
+            $this->object = $object;
         }
 
         return $this->object ?: null;

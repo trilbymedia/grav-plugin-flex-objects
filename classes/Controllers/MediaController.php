@@ -179,6 +179,10 @@ class MediaController extends AbstractController
 
         /** @var MediaManipulationInterface $object */
         $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
         $media = $object->getMedia();
         $media_list = [];
 
@@ -215,6 +219,9 @@ class MediaController extends AbstractController
 
         /** @var FlexObject|MediaManipulationInterface $object */
         $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
 
         $name = $this->getPost('name');
         $settings = $object->getBlueprint()->schema()->getProperty($name);
@@ -310,6 +317,13 @@ class MediaController extends AbstractController
      */
     protected function checkAuthorization(string $action): void
     {
+        /** @var FlexAuthorizeInterface $object */
+        $object = $this->getObject();
+
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
         switch ($action) {
             case 'media.list':
                 $action = 'read';
@@ -317,18 +331,11 @@ class MediaController extends AbstractController
 
             case 'media.create':
             case 'media.delete':
-                $action = 'update';
+                $action = $object->exists() ? 'update' : 'create';
                 break;
 
             default:
                 throw new \LogicException(sprintf('Unsupported authorize action %s', $action), 500);
-        }
-
-        /** @var FlexAuthorizeInterface $object */
-        $object = $this->getObject();
-
-        if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
         }
 
         if (!$object->isAuthorized($action)) {
