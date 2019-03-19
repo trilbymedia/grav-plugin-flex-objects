@@ -42,7 +42,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     /**
      * @return array
      */
-    public static function getCachedMethods()
+    public static function getCachedMethods(): array
     {
         return [
             // Page Content Interface
@@ -449,7 +449,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     /**
      * @param array $elements
      */
-    protected function filterElements(array &$elements)
+    protected function filterElements(array &$elements): void
     {
         $folder = !empty($elements['folder']) ? trim($elements['folder']) : '';
 

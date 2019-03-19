@@ -132,6 +132,7 @@ class AdminController extends SimpleController
     {
         $type = $this->target;
         $key = $this->id;
+        $object = null;
 
         try {
             $directory = $this->getDirectory($type);

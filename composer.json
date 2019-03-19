@@ -20,7 +20,8 @@
   "autoload": {
     "psr-4": {
       "Grav\\Plugin\\FlexObjects\\": "classes/"
-    }
+    },
+    "classmap":  ["flex-objects.php"]
   },
   "config": {
     "platform": {

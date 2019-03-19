@@ -4,6 +4,7 @@ namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
 use Grav\Common\Data\Blueprint;
 use Grav\Common\Grav;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
 
@@ -16,7 +17,7 @@ class GravPageObject extends FlexPageObject
     /**
      * @return array
      */
-    public static function getCachedMethods()
+    public static function getCachedMethods(): array
     {
         return [
             'isVisible' => true,
@@ -96,7 +97,7 @@ class GravPageObject extends FlexPageObject
         return '/' . implode('/', $parts);
     }
 
-    public function parent()
+    public function parent(PageInterface $var = null)
     {
         $parentKey = \dirname($this->getKey());
         if ($parentKey === '.') {
@@ -199,10 +200,6 @@ class GravPageObject extends FlexPageObject
             $this->setProperty('modular_twig', (bool)$var);
             if ($var) {
                 $this->visible(false);
-                // some routable logic
-                if (empty($this->header->routable)) {
-                    $this->routable = false;
-                }
             }
         }
 
@@ -220,7 +217,7 @@ class GravPageObject extends FlexPageObject
      * @param string|null $name
      * @return Blueprint
      */
-    public function getBlueprint(string $name = null)
+    public function getBlueprint(string $name = '')
     {
         // Make sure that pages has been initialized.
         Pages::getTypes();
@@ -231,7 +228,7 @@ class GravPageObject extends FlexPageObject
     /**
      * @param array $elements
      */
-    protected function filterElements(array &$elements)
+    protected function filterElements(array &$elements): void
     {
         // FIXME: need better logic here.
         if (isset($elements['route'], $elements['folder'], $elements['name'])) {

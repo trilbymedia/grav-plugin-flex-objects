@@ -222,8 +222,7 @@ abstract class SimpleController extends AdminBaseController
 
     public function prepareData(array $data = null)
     {
-        $type = trim("{$this->location}/{$this->target}", '/');
-        $data = $this->data($type, $data ?? $_POST);
+        $data = $this->data($data ?? $_POST);
 
         return $data;
     }
@@ -328,4 +327,6 @@ abstract class SimpleController extends AdminBaseController
 
         return true;
     }
+
+    abstract public function data($type);
 }

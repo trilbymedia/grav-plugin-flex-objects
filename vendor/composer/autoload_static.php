@@ -20,11 +20,16 @@ class ComposerStaticInit69fc28174abe912f71ebf710ee161e8f
         ),
     );
 
+    public static $classMap = array (
+        'Grav\\Plugin\\FlexObjectsPlugin' => __DIR__ . '/../..' . '/flex-objects.php',
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit69fc28174abe912f71ebf710ee161e8f::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit69fc28174abe912f71ebf710ee161e8f::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit69fc28174abe912f71ebf710ee161e8f::$classMap;
 
         }, null, ClassLoader::class);
     }
