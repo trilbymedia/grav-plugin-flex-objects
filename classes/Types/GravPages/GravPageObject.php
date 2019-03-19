@@ -214,7 +214,7 @@ class GravPageObject extends FlexPageObject
     }
 
     /**
-     * @param string|null $name
+     * @param string $name
      * @return Blueprint
      */
     public function getBlueprint(string $name = '')

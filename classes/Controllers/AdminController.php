@@ -337,8 +337,8 @@ class AdminController extends SimpleController
     /**
      * Dynamic method to 'get' data types
      *
-     * @param $type
-     * @param $id
+     * @param string $type
+     * @param string|null $id
      * @return mixed
      */
     protected function get($type, $id = null)
@@ -357,7 +357,7 @@ class AdminController extends SimpleController
     }
 
     /**
-     * @param $type
+     * @param string $type
      * @return FlexObject
      */
     public function data($type)

@@ -89,7 +89,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     }
 
     /**
-     * @return bool
+     * @return int
      */
     public function getCreated_Timestamp(): int
     {
@@ -99,7 +99,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     }
 
     /**
-     * @return bool
+     * @return int
      */
     public function getPublish_Timestamp(): int
     {
@@ -109,7 +109,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     }
 
     /**
-     * @return bool
+     * @return int
      */
     public function getUpdated_Timestamp(): int
     {

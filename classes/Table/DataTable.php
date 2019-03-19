@@ -226,7 +226,7 @@ class DataTable implements \JsonSerializable
     protected function renderActions(FlexObjectInterface $object)
     {
         $grav = Grav::instance();
-        $type = $object->getType(false);
+        $type = $object->getFlexType();
         $template = $this->twig->resolveTemplate(["flex-objects/types/{$type}/list_actions.html.twig", 'flex-objects/types/default/list_actions.html.twig']);
 
         return $this->twig->load($template)->render([
