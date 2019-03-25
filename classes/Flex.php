@@ -71,7 +71,7 @@ class Flex extends \Grav\Framework\Flex\Flex
     {
         if (\is_object($type)) {
             $object = $type;
-            $type = $type->getType(false);
+            $type = $type->getFlexType();
         } else {
             $object = null;
         }
