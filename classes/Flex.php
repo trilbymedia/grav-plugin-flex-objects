@@ -10,6 +10,7 @@ use Grav\Common\Grav;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
+use Grav\Framework\Flex\Interfaces\FlexCommonInterface;
 use Grav\Plugin\FlexObjects\Table\DataTable;
 
 /**
@@ -71,7 +72,11 @@ class Flex extends \Grav\Framework\Flex\Flex
     {
         if (\is_object($type)) {
             $object = $type;
-            $type = $type->getFlexType();
+            if ($object instanceof FlexCommonInterface || $object instanceof FlexDirectory) {
+                $type = $type->getFlexType();
+            } else {
+                return '';
+            }
         } else {
             $object = null;
         }
@@ -151,7 +156,7 @@ class Flex extends \Grav\Framework\Flex\Flex
 
             $directories = $this->getDirectories();
             foreach ($directories as $directory) {
-                $type = $directory->getType();
+                $type = $directory->getFlexType();
                 $items = $directory->getConfig('admin.menu') ?? [];
                 if ($items) {
                     foreach ($items as $view => $item) {
