@@ -211,12 +211,17 @@ class DataTable implements \JsonSerializable
 
         $value = $object->value($name) ?? $object->getNestedProperty($name, $column['field']['default'] ?? null);
         $type = $column['field']['type'] ?? 'text';
+        $hasLink = $column['link'] ?? null;
+        $link = null;
+        if ($hasLink) {
+            $link = $flex->adminRoute($object);
+        }
 
         $template = $this->twig->resolveTemplate(["forms/fields/{$type}/edit_list.html.twig", 'forms/fields/text/edit_list.html.twig']);
 
         return $this->twig->load($template)->render([
             'value' => $value,
-            'link' => $flex->adminRoute($object),
+            'link' => $link,
             'field' => $column['field'],
             'object' => $object,
             'flex' => $flex
