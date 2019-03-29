@@ -2,8 +2,11 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
+use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
+use Grav\Common\Page\Pages;
+use Grav\Common\Uri;
 
 trait PageRoutableTrait
 {
@@ -78,12 +81,12 @@ trait PageRoutableTrait
      *
      * @param bool $include_host Defaults false, but true would include http://yourhost.com
      * @param bool $canonical true to return the canonical URL
-     * @param bool $include_lang
+     * @param bool $include_base
      * @param bool $raw_route
      *
      * @return string The url.
      */
-    public function url($include_host = false, $canonical = false, $include_lang = true, $raw_route = false)
+    public function url($include_host = false, $canonical = false, $include_base = true, $raw_route = false)
     {
         // Override any URL when external_url is set
         $external = $this->getNestedProperty('header.external_url');
@@ -91,8 +94,40 @@ trait PageRoutableTrait
             return $external;
         }
 
-        // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        $grav = Grav::instance();
+
+        /** @var Pages $pages */
+        $pages = $grav['pages'];
+
+        /** @var Config $config */
+        $config = $grav['config'];
+
+        // get base route (multi-site base and language)
+        $route = $include_base ? $pages->baseRoute() : '';
+
+        // add full route if configured to do so
+        if (!$include_host && $config->get('system.absolute_urls', false)) {
+            $include_host = true;
+        }
+
+        if ($canonical) {
+            $route .= $this->routeCanonical();
+        } elseif ($raw_route) {
+            $route .= $this->rawRoute();
+        } else {
+            $route .= $this->route();
+        }
+
+        /** @var Uri $uri */
+        $uri = $grav['uri'];
+        $url = $uri->rootUrl($include_host) . '/' . trim($route, '/') . $this->urlExtension();
+
+        // trim trailing / if not root
+        if ($url !== '/') {
+            $url = rtrim($url, '/');
+        }
+
+        return Uri::filterPath($url);
     }
 
     /**
@@ -110,7 +145,8 @@ trait PageRoutableTrait
             throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        // TODO: implement rest of the routing:
+        return $this->rawRoute();
     }
 
     /**
@@ -136,7 +172,7 @@ trait PageRoutableTrait
             throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
         }
 
-        // TODO: needs better implementation
+        // TODO: missing full implementation
         return '/' . $this->getKey();
     }
 
