@@ -37,7 +37,7 @@ class GravPageObject extends FlexPageObject
     /**
      * @inheritdoc PageInterface
      */
-    public function value($name, $default = null, $separator = null)
+    public function getFormValue(string $name, $default = null, string $separator = null)
     {
         $test = new \stdClass();
 
@@ -61,7 +61,7 @@ class GravPageObject extends FlexPageObject
                 return $this->full_order();
         }
 
-        return parent::value($name, $default, $separator);
+        return parent::getFormValue($name, $default, $separator);
     }
 
     public function folder($var = null)

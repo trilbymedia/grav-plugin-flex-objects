@@ -134,7 +134,7 @@ trait PageContentTrait
      * }
      * return parent::value($name, $default);
      */
-    abstract public function value($name, $default = null);
+    abstract public function value($name, $default = null, $separator = null);
 
     /**
      * Gets and sets the associated media as found in the page folder.

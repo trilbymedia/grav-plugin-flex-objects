@@ -119,9 +119,9 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     }
 
     /**
-     * @inheritdoc PageInterface
+     * @inheritdoc
      */
-    public function value($name, $default = null, $separator = null)
+    public function getFormValue(string $name, $default = null, string $separator = null)
     {
         $test = new \stdClass();
 
@@ -137,7 +137,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
                 return '/' . $this->getKey();
         }
 
-        return parent::value($name, $default, $separator);
+        return parent::getFormValue($name, $default, $separator);
     }
 
     public function save($reorder = true)
