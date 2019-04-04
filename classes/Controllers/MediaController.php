@@ -51,6 +51,7 @@ class MediaController extends AbstractController
             $file = $files[$last] ?? null;
 
         } else {
+            // Legacy call with name being the filename instead of field name.
             $file = $files['file'] ?? null;
             $field = null;
         }
@@ -81,15 +82,24 @@ class MediaController extends AbstractController
             $session = $grav['session'];
 
             $formName = $this->getPost('__form-name__');
-            $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
+            if (!$formName) {
+                // Legacy call without form name.
+                $form = $object->getForm();
+                $formName = $form->getName();
+                $uniqueId = $form->getUniqueId();
+            } else {
+                $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
+            }
+
+
+            $flash = new FormFlash($session->getId(), $uniqueId, $formName);
+            $flash->setUrl($uri->url)->setUser($grav['user']);
 
             $crop = $this->getPost('crop');
             if (\is_string($crop)) {
                 $crop = json_decode($crop, true);
             }
 
-            $flash = new FormFlash($session->getId(), $uniqueId, $formName);
-            $flash->setUrl($uri->url)->setUser($grav['user']);
             $flash->addUploadedFile($file, $field, $crop);
             $flash->save();
         } catch (\Exception $e) {
