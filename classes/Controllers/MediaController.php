@@ -32,14 +32,14 @@ class MediaController extends AbstractController
             throw new \RuntimeException('Not Found', 404);
         }
 
-        $field = $this->getPost('name');
+        $field = $this->getPost('name', 'undefined');
         if ($field === 'undefined') {
             $field = null;
         }
 
         $files = $this->getRequest()->getUploadedFiles();
-        if ($field) {
-            $files = $files['data'] ?? [];
+        if ($field && isset($files['data'])) {
+            $files = $files['data'];
             $parts = explode('.', $field);
             $last = array_pop($parts);
             foreach ($parts as $name) {
@@ -52,6 +52,7 @@ class MediaController extends AbstractController
 
         } else {
             $file = $files['file'] ?? null;
+            $field = null;
         }
 
         /** @var UploadedFileInterface $file */
