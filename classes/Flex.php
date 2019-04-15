@@ -87,7 +87,12 @@ class Flex extends \Grav\Framework\Flex\Flex
 
         /** @var Config $config */
         $config = $grav['config'];
-        $route = Utils::isAdminPlugin() ? '' : $grav['base_url'] . '/' . trim($config->get('plugins.admin.route'), '/');
+        if (!Utils::isAdminPlugin()) {
+            $parts = [
+                trim($grav['base_url'], '/'),
+                trim($config->get('plugins.admin.route'), '/')
+            ];
+        }
 
         if ($type && isset($routes[$type])) {
             if (!$routes[$type]) {
@@ -96,7 +101,7 @@ class Flex extends \Grav\Framework\Flex\Flex
             }
 
             // Directory has it's own menu item.
-            $route .= $routes[$type];
+            $parts[] = trim($routes[$type], '/');
         } else {
             if (empty($routes[''])) {
                 // Default route has been disabled.
@@ -104,28 +109,29 @@ class Flex extends \Grav\Framework\Flex\Flex
             }
 
             // Use default route.
-            $route .= '/' . $routes[''];
+            $parts[] = trim($routes[''], '/');
             if ($type) {
-                $route .= '/' . $type;
+                $parts[] = $type;
             }
         }
 
         // Append object key if available.
         if ($object instanceof FlexObject) {
             if ($object->exists()) {
-                $route .= "/{$object->getKey()}";
+                $parts[] = $object->getKey();
             } else {
                 $params = ['action' => 'add'] + $params;
             }
         }
 
         $p = [];
-
         $separator = $config->get('system.param_sep');
         foreach ($params as $key => $val) {
             $p[] = $key . $separator . $val;
         }
 
+        $parts = array_filter($parts, function ($val) { return $val !== ''; });
+        $route = '/' . implode('/', $parts);
         $extension = $extension ? '.' . $extension : '';
 
         return $route . $extension . ($p ? '/' . implode('/', $p) : '');

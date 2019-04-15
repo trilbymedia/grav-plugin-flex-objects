@@ -14,7 +14,7 @@ The **Flex Objects** Plugin is for [Grav CMS](http://github.com/getgrav/grav).  
 
 ## System Requirements
 
-Plugin requires Grav 1.6.0 and PHP 7.1.3 in order to run.
+Plugin requires Grav 1.6 or later version in order to run.
 
 ## Installation
 
