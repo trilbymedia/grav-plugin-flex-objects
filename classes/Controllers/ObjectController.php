@@ -26,10 +26,16 @@ class ObjectController extends AbstractController
 
         $form = $this->getForm();
         $form->handleRequest($request);
-        $errors = $form->getErrors();
-        if ($errors) {
-            foreach ($errors as $error) {
+        if (!$form->isValid()) {
+            $error = $form->getError();
+            if ($error) {
                 $this->setMessage($error, 'error');
+            }
+            $errors = $form->getErrors();
+            foreach ($errors as $field) {
+                foreach ($field as $error) {
+                    $this->setMessage($error, 'error');
+                }
             }
 
             return $this->createDisplayResponse();
@@ -53,11 +59,18 @@ class ObjectController extends AbstractController
 
         $form = $this->getForm();
         $form->handleRequest($request);
-        $errors = $form->getErrors();
-        if ($errors) {
-            foreach ($errors as $error) {
+        if (!$form->isValid()) {
+            $error = $form->getError();
+            if ($error) {
                 $this->setMessage($error, 'error');
             }
+            $errors = $form->getErrors();
+            foreach ($errors as $field) {
+                foreach ($field as $error) {
+                    $this->setMessage($error, 'error');
+                }
+            }
+
 
             return $this->createDisplayResponse();
         }
@@ -103,9 +116,15 @@ class ObjectController extends AbstractController
         $form = $this->getForm('edit');
         $form->setRequest($request);
         if (!$form->validate()) {
-            $errors = $form->getErrors();
-            foreach ($errors as $error) {
+            $error = $form->getError();
+            if ($error) {
                 $this->setMessage($error, 'error');
+            }
+            $errors = $form->getErrors();
+            foreach ($errors as $field) {
+                foreach ($field as $error) {
+                    $this->setMessage($error, 'error');
+                }
             }
 
             return $this->createRedirectResponse((string)$request->getUri(), 303);
