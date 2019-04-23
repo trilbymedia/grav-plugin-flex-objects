@@ -115,6 +115,7 @@ class AdminController extends SimpleController
                 'limit' => $uri->query('per_page'),
                 'sort' => $uri->query('sort'),
                 'search' => $uri->query('filter'),
+                'filters' => $uri->query('filters'),
             ];
 
             $table = $this->getFlex()->getDataTable($type, $options);
