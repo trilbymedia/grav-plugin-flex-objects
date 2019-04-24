@@ -59,7 +59,7 @@ class FlexObjectsPlugin extends Plugin
                 ['onFormRegisterTypes', 0],
             ],
             'onTwigSiteVariables' => [
-                ['onTwigSiteVariables', 0]
+                ['onTwigAdminVariables', 0]
             ]
         ];
     }
@@ -250,7 +250,7 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Set needed variables to display direcotry.
      */
-    public function onTwigSiteVariables(): void
+    public function onTwigAdminVariables(): void
     {
         if ($this->isAdmin() && $this->controller->isActive()) {
             // Twig shortcuts
@@ -258,6 +258,11 @@ class FlexObjectsPlugin extends Plugin
             $this->grav['twig']->twig_vars['task'] = $this->controller->getTask();
             $this->grav['twig']->twig_vars['target'] = $this->controller->getTarget();
             $this->grav['twig']->twig_vars['key'] = $this->controller->getId();
+
+            $this->grav['twig']->twig_vars['flex'] = $this->grav['flex_objects'];
+            $this->grav['twig']->twig_vars['directory'] = $this->controller->getDirectory();
+            $this->grav['twig']->twig_vars['collection'] = $this->controller->getCollection();
+            $this->grav['twig']->twig_vars['object'] = $this->controller->getObject();
 
             // CSS / JS Assets
             $this->grav['assets']->addCss('plugin://flex-objects/css/admin.css');

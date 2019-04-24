@@ -1,7 +1,5 @@
 {% set template = (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: task ?: 'types' %}
 
-{% set flex = grav.flex_objects %}
-{% set directory = target ? flex.directory(target) : null %}
 {% set separator = config.system.param_sep %}
 
 {% extends target ? [
