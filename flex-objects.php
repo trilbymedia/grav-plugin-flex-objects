@@ -4,6 +4,7 @@ namespace Grav\Plugin;
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Grav;
 use Grav\Common\Plugin;
+use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
 use Grav\Plugin\FlexObjects\Admin\AdminController;
@@ -57,9 +58,6 @@ class FlexObjectsPlugin extends Plugin
             ],
             'onFormRegisterTypes' => [
                 ['onFormRegisterTypes', 0]
-            ],
-            'onTwigSiteVariables' => [
-                ['onTwigAdminVariables', 0]
             ]
         ];
     }
@@ -79,7 +77,10 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onPluginsInitialized(): void
     {
-        if ($this->isAdmin()) {
+        /** @var UserInterface $user */
+        $user = $grav['user'] ?? null;
+
+        if ($user && $this->isAdmin() && $user->authorize('login', 'admin')) {
             $this->enable([
                 'onAdminTwigTemplatePaths' => [
                     ['onAdminTwigTemplatePaths', 10]
@@ -99,6 +100,9 @@ class FlexObjectsPlugin extends Plugin
                 'onPageInitialized' => [
                     ['onAdminPageInitialized', 0]
                 ],
+                'onTwigSiteVariables' => [
+                    ['onTwigAdminVariables', 0]
+                ]
             ]);
             /** @var AdminController controller */
             $this->controller = new AdminController($this);
@@ -151,10 +155,6 @@ class FlexObjectsPlugin extends Plugin
 
     public function onAdminPageInitialized(): void
     {
-        if (!$this->isAdmin()) {
-            return;
-        }
-
         if ($this->controller->isActive()) {
             $this->controller->execute();
             $this->controller->redirect();
@@ -256,7 +256,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onTwigAdminVariables(): void
     {
-        if ($this->isAdmin() && $this->controller->isActive()) {
+        if ($this->controller->isActive()) {
             // Twig shortcuts
             $this->grav['twig']->twig_vars['action'] = $this->controller->getAction();
             $this->grav['twig']->twig_vars['task'] = $this->controller->getTask();
