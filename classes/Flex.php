@@ -56,7 +56,7 @@ class Flex extends \Grav\Framework\Flex\Flex
             throw new \RuntimeException('Not Found', 404);
         }
 
-        $collection = $directory->getCollection();
+        $collection = $options['collection'] ?? $directory->getCollection();
         if (isset($options['filters']) && is_array($options['filters'])) {
             $collection = $collection->filterBy($options['filters']);
         }

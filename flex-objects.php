@@ -6,7 +6,7 @@ use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
-use Grav\Plugin\FlexObjects\Controllers\AdminController;
+use Grav\Plugin\FlexObjects\Admin\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
 use RocketTheme\Toolbox\Event\Event;
 
@@ -56,7 +56,7 @@ class FlexObjectsPlugin extends Plugin
                 ['initializeFlex', 10]
             ],
             'onFormRegisterTypes' => [
-                ['onFormRegisterTypes', 0],
+                ['onFormRegisterTypes', 0]
             ],
             'onTwigSiteVariables' => [
                 ['onTwigAdminVariables', 0]
@@ -97,7 +97,7 @@ class FlexObjectsPlugin extends Plugin
                     ['onAdminControllerInit', 0]
                 ],
                 'onPageInitialized' => [
-                    ['onAdminPageInitialized', 100]
+                    ['onAdminPageInitialized', 0]
                 ],
             ]);
             /** @var AdminController controller */
@@ -151,7 +151,11 @@ class FlexObjectsPlugin extends Plugin
 
     public function onAdminPageInitialized(): void
     {
-        if ($this->isAdmin() && $this->controller->isActive()) {
+        if (!$this->isAdmin()) {
+            return;
+        }
+
+        if ($this->controller->isActive()) {
             $this->controller->execute();
             $this->controller->redirect();
         }

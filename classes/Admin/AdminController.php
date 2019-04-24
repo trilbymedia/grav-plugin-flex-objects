@@ -1,6 +1,6 @@
 <?php
 
-namespace Grav\Plugin\FlexObjects\Controllers;
+namespace Grav\Plugin\FlexObjects\Admin;
 
 use Grav\Common\Grav;
 use Grav\Common\Plugin;
@@ -13,6 +13,7 @@ use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Plugin\Admin\Admin;
+use Grav\Plugin\FlexObjects\Controllers\MediaController;
 use Grav\Plugin\FlexObjects\Flex;
 use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
@@ -163,6 +164,7 @@ class AdminController
             $type = $this->target;
 
             $options = [
+                'collection' => $this->getCollection(),
                 'url' => $uri->path(),
                 'page' => $uri->query('page'),
                 'limit' => $uri->query('per_page'),
