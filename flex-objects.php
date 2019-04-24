@@ -78,7 +78,7 @@ class FlexObjectsPlugin extends Plugin
     public function onPluginsInitialized(): void
     {
         /** @var UserInterface $user */
-        $user = $grav['user'] ?? null;
+        $user = $this->grav['user'] ?? null;
 
         if ($user && $this->isAdmin() && $user->authorize('login', 'admin')) {
             $this->enable([
