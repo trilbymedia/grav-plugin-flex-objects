@@ -7,11 +7,13 @@ use Grav\Common\Plugin;
 use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
+use Grav\Framework\File\Formatter\CsvFormatter;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
+use Grav\Framework\Object\Interfaces\ObjectInterface;
 use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Controllers\MediaController;
 use Grav\Plugin\FlexObjects\Flex;
@@ -179,6 +181,33 @@ class AdminController
             echo json_encode($table);
             die();
         }
+    }
+
+    public function actionCsv()
+    {
+        $collection = $this->getCollection();
+        if (!$collection) {
+            throw new \RuntimeException('Internal Error', 500);
+        }
+
+        $list = [];
+        /** @var ObjectInterface $object */
+        foreach ($collection as $object) {
+            if (method_exists($object, 'csvSerialize')) {
+                $data = $object->csvSerialize();
+                if ($data) {
+                    $list[] = $data;
+                }
+            } else {
+                $list[] = $object->jsonSerialize();
+            }
+        }
+
+        $csv = new CsvFormatter();
+
+        header('Content-Type: text/x-csv');
+        echo $csv->encode($list);
+        die();
     }
 
     /**
