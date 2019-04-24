@@ -214,7 +214,8 @@ class DataTable implements \JsonSerializable
         $hasLink = $column['link'] ?? null;
         $link = null;
         if ($hasLink) {
-            $link = $flex->adminRoute($object);
+            $route = $grav['route'];
+            $link = $route->withAddedPath($object->getKey())->withoutParams()->getUri();
         }
 
         $template = $this->twig->resolveTemplate(["forms/fields/{$type}/edit_list.html.twig", 'forms/fields/text/edit_list.html.twig']);
