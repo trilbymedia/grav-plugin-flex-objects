@@ -1,9 +1,10 @@
 {% block titlebar %}
-    {% set back_url = base_url ~ flex.adminRoute() %}
+    {% set back_url = grav.route.getRoute(0, -1) %}
+
     <div class="button-bar">
         <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
         {% if directory.isAuthorized('create') %}
-        <a class="button" href="{{ base_url ~ flex.adminRoute(directory, {action: 'add'}) }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
+        <a class="button" href="{{ grav.route.withGravParam('action', 'add') }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
         {% endif %}
     </div>
     <h1><i class="fa fa-fw fa-file-text-o"></i> {{ directory ? directory.title|tu : 'Not Found' }}</h1>

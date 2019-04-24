@@ -1,6 +1,10 @@
 {% block titlebar %}
+    {% set route = grav.route %}
+    {% set action = route.getGravParam('action') %}
+    {% set back_url = action ? route.withGravParam('action', null).getRoute() : route.getRoute(0, -1) %}
+
     <div class="button-bar">
-        <a class="button" href="{{ base_url ~ flex.adminRoute(directory) }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+        <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
         {% if object.exists and object.route %}
             <a href="{{ url(object.route.uri, true) }}" class="button" target="_blank"><i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}</a>
         {% endif %}
@@ -8,5 +12,6 @@
         <button class="button" type="submit" name="task" value="save" form="blueprints"><i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}</button>
         {% endif %}
     </div>
-    <h1><i class="fa fa-fw fa-file-text-o"></i> {{  directory ? (object.title ?? object.key ?? '[NEW]') : 'Not Found' }}</small></h1>
+    {% set key = object.hasKey ? object.key : null %}
+    <h1><i class="fa fa-fw fa-file-text-o"></i> {{  directory ? (object.title ?? key ?? '[NEW]') : 'Not Found' }}</small></h1>
 {% endblock %}
