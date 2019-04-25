@@ -58,6 +58,8 @@ class AdminController
     /** @var int */
     protected $redirectCode;
 
+    protected $currentUri;
+    protected $referrerUri;
     protected $action;
     protected $location;
     protected $target;
@@ -227,19 +229,23 @@ class AdminController
         $type = $this->target;
 
         try {
-            $directory = $this->getDirectory($type);
             $object = $this->getObject();
 
             if ($object && $object->exists()) {
                 if (!$object->isAuthorized('delete')) {
-                    throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
+                    throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
                 }
 
                 $object->delete();
 
-                $this->admin->setMessage($this->admin->translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
+                $this->admin->setMessage($this->admin::translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
 
-                $this->setRedirect($this->getFlex()->adminRoute($directory));
+                $redirect = $this->referrerUri;
+                if ($this->currentUri === $this->referrerUri) {
+                    $redirect = dirname($this->currentUri);
+                }
+
+                $this->setRedirect($redirect);
 
                 $grav = Grav::instance();
                 $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
@@ -247,7 +253,8 @@ class AdminController
             }
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Delete Failed: ' . $e->getMessage(), 'error');
-            $this->setRedirect($this->getFlex()->adminRoute($object ?? $directory ?? null), 302);
+
+            $this->setRedirect($this->referrerUri, 302);
         }
 
         return $object ? true : false;
@@ -270,12 +277,12 @@ class AdminController
 
             if ($object->exists()) {
                 if (!$object->isAuthorized('update')) {
-                    throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
+                    throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
                         403);
                 }
             } else {
                 if (!$object->isAuthorized('create')) {
-                    throw new \RuntimeException($this->admin->translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
+                    throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
                         403);
                 }
             }
@@ -298,10 +305,13 @@ class AdminController
             }
             $object = $form->getObject();
 
-            $this->admin->setMessage($this->admin->translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+            $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect) {
-                $this->setRedirect($this->getFlex()->adminRoute($object));
+                if (strpos($this->referrerUri, 'action:add')) {
+                    $this->referrerUri = $this->currentUri . '/' . $object->getKey();
+                }
+                $this->setRedirect($this->referrerUri);
             }
 
             $grav = Grav::instance();
@@ -309,7 +319,7 @@ class AdminController
             $grav->fireEvent('gitsync');
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
-            $this->setRedirect($this->getFlex()->adminRoute($object ?? $directory ?? null), 302);
+            $this->setRedirect($this->referrerUri, 302);
         }
 
         return true;
@@ -464,6 +474,7 @@ class AdminController
                 $id = array_shift($array) ?: null;
             }
 
+            /** @var Uri $uri */
             $uri = $this->grav['uri'];
 
             // Post
@@ -486,6 +497,9 @@ class AdminController
             $this->action = $this->post['action'] ?? $uri->param('action');
             $this->active = true;
             $this->admin = Grav::instance()['admin'];
+            $this->currentUri = $uri->route();
+            $this->referrerUri = $uri->referrer() ?: $this->currentUri;
+
         }
     }
 

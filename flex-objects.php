@@ -80,7 +80,11 @@ class FlexObjectsPlugin extends Plugin
         /** @var UserInterface $user */
         $user = $this->grav['user'] ?? null;
 
-        if ($user && $this->isAdmin() && $user->authorize('login', 'admin')) {
+        if ($this->isAdmin()) {
+            if (!$user || !$user->authorize('login', 'admin')) {
+                return;
+            }
+
             $this->enable([
                 'onAdminTwigTemplatePaths' => [
                     ['onAdminTwigTemplatePaths', 10]
