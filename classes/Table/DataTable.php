@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Table;
 
+use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Framework\Collection\CollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
@@ -126,6 +127,12 @@ class DataTable implements \JsonSerializable
 
     public function getData()
     {
+        $grav = Grav::instance();
+
+        /** @var Debugger $debugger */
+        $debugger = $grav['debugger'];
+        $debugger->startTimer('datatable', 'Data Table');
+
         $collection = $this->getCollection();
         if (!$collection) {
             return [];
@@ -146,12 +153,12 @@ class DataTable implements \JsonSerializable
         $from = $to - $limit + 1;
 
         if ($from < 1 || $from > $this->getTotal()) {
+            $debugger->stopTimer('datatable');
             return [];
         }
 
         $array = $collection->slice($from-1, $limit);
 
-        $grav = Grav::instance();
         $twig = $grav['twig'];
         $grav->fireEvent('onTwigSiteVariables');
 
@@ -172,6 +179,8 @@ class DataTable implements \JsonSerializable
 
             $list[] = $item;
         }
+
+        $debugger->stopTimer('datatable');
 
         return $list;
     }
@@ -200,7 +209,7 @@ class DataTable implements \JsonSerializable
                     'to' => $empty ? null : min($to, $total),
                 ]
             ],
-            'data' => $this->getData()
+            'data' => $data
         ];
     }
 
