@@ -165,7 +165,7 @@ class AdminController
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
         if ($uri->extension() === 'json') {
-            $type = $this->target;
+            $directory = $this->directory;
 
             $options = [
                 'collection' => $this->getCollection(),
@@ -177,7 +177,7 @@ class AdminController
                 'filters' => $uri->query('filters'),
             ];
 
-            $table = $this->getFlex()->getDataTable($type, $options);
+            $table = $this->getFlex()->getDataTable($directory, $options);
 
             header('Content-Type: application/json');
             echo json_encode($table);

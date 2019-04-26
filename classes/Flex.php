@@ -49,9 +49,14 @@ class Flex extends \Grav\Framework\Flex\Flex
         return $directories;
     }
 
-    public function getDataTable(string $type, array $options = [])
+    /**
+     * @param string|FlexDirectory $type
+     * @param array $options
+     * @return DataTable
+     */
+    public function getDataTable($type, array $options = [])
     {
-        $directory = $this->getDirectory($type);
+        $directory = $type instanceof FlexDirectory ? $type : $this->getDirectory($type);
         if (!$directory) {
             throw new \RuntimeException('Not Found', 404);
         }
