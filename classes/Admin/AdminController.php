@@ -165,7 +165,7 @@ class AdminController
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
         if ($uri->extension() === 'json') {
-            $directory = $this->directory;
+            $directory = $this->getDirectory();
 
             $options = [
                 'collection' => $this->getCollection(),
