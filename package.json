@@ -1,7 +1,7 @@
 {
     "name": "flex-objects",
-    "description": "A Vue.js project",
-    "author": "Djamil Legato <djamil@trilby.media>",
+    "description": "Flexible CRUD Architecture for Grav",
+    "author": "Trilby Media <hello@trilby.media>",
     "private": true,
     "scripts": {
         "watch": "cross-env NODE_ENV=development webpack --watch --progress --colors --mode development --config webpack.conf.js",
@@ -15,7 +15,8 @@
         "vue-content-loader": "^0.2.1",
         "vue-events": "^3.1.0",
         "vue-template-compiler": "^2.5.21",
-        "vuetable-2": "^1.7.5"
+        "vuetable-2": "^1.7.5",
+        "gulp-sourcemaps": "^2.6.4"
     },
     "devDependencies": {
         "babel-core": "^6.26.3",
@@ -35,6 +36,20 @@
         "uglifyjs-webpack-plugin": "^2.1.1",
         "vue-loader": "^15.5.1",
         "webpack": "^4.17.1",
-        "webpack-cli": "^3.1.2"
-    }
+        "webpack-cli": "^3.1.2",
+        "gulp": "^4.0.0",
+        "gulp-autoprefixer": "latest",
+        "gulp-clean-css": "^3.9.4",
+        "gulp-csscomb": "^3.0.8",
+        "gulp-rename": "^1.2.2",
+        "gulp-sass": "^4.0.1"
+    },
+    "browserslist": [
+        "last 4 Chrome versions",
+        "Edge >= 12",
+        "Firefox ESR",
+        "last 4 Safari versions",
+        "last 4 Opera versions",
+        "Explorer >= 10"
+    ]
 }

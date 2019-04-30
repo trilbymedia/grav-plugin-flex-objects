@@ -8,6 +8,9 @@ config:
       title: name
       fields:
         published:
+          field:
+            type: toggle
+            label: Publ
           width: 8
         last_name:
           link: edit
@@ -40,17 +43,15 @@ form:
         type: bool
         required: true
 
-    first_name:
-      type: text
-      label: First Name
-      validate:
-        required: true
-
     last_name:
       type: text
       label: Last Name
       validate:
         required: true
+
+    first_name:
+      type: text
+      label: First Name
 
     email:
       type: email
@@ -60,7 +61,7 @@ form:
 
     website:
       type: url
-      label: Web Site
+      label: Website URL
 
     tags:
       type: selectize
