@@ -2,7 +2,7 @@
 
 ## About
 
-The **Flex Objects** Plugin is for [Grav CMS](http://github.com/getgrav/grav).  Flex objects allows you to create collections of objects, which can modified by CRUD operations via the admin plugin to easily manage large sets of data that don't fit as simple YAML configuration files, or Grav pages. These objects are defined by blueprint written in YAML and they are rendered by a set of twig files. Additionally both objects and collections can be customized by PHP classes, which allows you to define complex behaviors and relationships between the objects.
+The **Flex Objects** Plugin is for [Grav CMS](https://github.com/getgrav/grav).  Flex objects is a powerful new plugin that allows you to build custom collections of objects, which can modified by CRUD operations via the admin plugin to easily manage large sets of data that don't make sens as simple YAML configuration files, or Grav pages. These objects are defined by blueprints written in YAML and they are rendered by a set of twig files. Additionally both objects and collections can be customized by PHP classes, which allows you to define complex behaviors and relationships between the objects.
 
 ![](assets/flex-objects-list.png)
 
@@ -10,7 +10,6 @@ The **Flex Objects** Plugin is for [Grav CMS](http://github.com/getgrav/grav).  
 
 ![](assets/flex-objects-options.png)
 
-![](assets/flex-objects-compressor.gif)
 
 ## System Requirements
 
@@ -31,7 +30,7 @@ Alternatively it can be installed via the [Admin Plugin](http://learn.getgrav.or
 Once installed you can either create entries manually, or you can copy the sample data set:
 
 ```shell
-$ cp user/plugins/flex-objects/data/entries.json user/data/flex-objects/contacts.json
+$ cp user/plugins/flex-objects/data/flex-objects/contacts.json user/data/flex-objects/contacts.json
 ```
 
 ## Configuration
@@ -40,11 +39,29 @@ This plugin works out of the box, but provides several fields that make modifyin
 
 ```yaml
 enabled: true
+
 built_in_css: true
 extra_admin_twig_path: 'theme://admin/templates'
-extra_site_twig_path:
+admin_list:
+  per_page: 15
+  order:
+    by: updated_timestamp
+    dir: desc
+
+object:
+  cache:
+    index:
+      enabled: true
+      timeout: 60
+    object:
+      enabled: true
+      timeout: 60
+    render:
+      enabled: true
+      timeout: 60
+
 directories:
-  - blueprints://flex-objects/contacts.yaml
+  - plugin://flex-objects/blueprints/flex-objects/contacts.yaml
 ```
 
 Simply edit the **Flex Objects** plugin options in the Admin plugin, or copy the `flex-objects.yaml` default file to your `user/config/plugins/` folder and edit the values there.   Read below for more help on what these fields do and how they can help you modify the plugin.
@@ -53,22 +70,23 @@ Most interesting configuration option is `directiories`, which contains list or 
 
 ## Displaying
 
-To display the directory simply add the following to our Twig template or even your page content (with Twig processing enabled):
+![](assets/flex-objects-site.png)
+
+just create a page called `flex-objects.md` or set the template of your existing page to `template: flex-objects`.  This will use the `flex-objects.html.twig` file provided by the plugin.
+
 
 ```twig
 ---
-title: Contacts
-process:
-  markdown: false
-  twig: true
+title: Directory
 directory: contacts
 ---
-{% include 'flex-objects/directory.html.twig' %}
+
+# Directory Example
 ```
 
-Alternatively just create a page called `flex-objects.md` or set the template of your existing page to `template: flex-objects`.  This will use the `flex-objects.html.twig` file provided by the plugin.
+If you do not specify `directory` name in the page header, the page will list all directories instead of displaying entries from a single directory.
 
-If you do not specify directory name in the page header, the page will list all directories instead of displaying entries from a single directory.
+![](assets/flex-objects-directory.png)
 
 # Modifications
 
@@ -91,7 +109,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
     ```yaml
     title: Contacts
-    description: Simple contact directory with phone number.
+    description: Simple contact directory with tags.
     type: flex-objects
     
     config:
@@ -100,6 +118,9 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
           title: name
           fields:
             published:
+              field:
+                type: toggle
+                label: Publ
               width: 8
             last_name:
               link: edit
@@ -107,9 +128,13 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
               link: edit
             email:
             website:
-            tags:
       data:
-        storage: user-data://flex-objects/contacts.json
+        storage:
+            class: 'Grav\Framework\Flex\Storage\SimpleStorage'
+            options:
+              formatter:
+                class: 'Grav\Framework\File\Formatter\JsonFormatter'
+              folder: user-data://flex-objects/contacts.json
     
     form:
       validation: loose
@@ -127,17 +152,15 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
             type: bool
             required: true
     
-        first_name:
-          type: text
-          label: First Name
-          validate:
-            required: true
-    
         last_name:
           type: text
           label: Last Name
           validate:
             required: true
+    
+        first_name:
+          type: text
+          label: First Name
     
         email:
           type: email
@@ -147,38 +170,40 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
     
         website:
           type: url
-          label: Web Site
-    
+          label: Website URL
+          
         phone:
           type: text
-          label: Phone
+          label: Phone Number  
     ```
 
     Notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject.
 
-1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has its `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-objects/templates/flex-objects/types/contacts.html.twig` file to `user/themes/antimatter/templates/flex-objects/types/contacts.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one.
+1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has its `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-objects/templates/flex-objects/layouts/contacts/object/default.html.twig` file to `user/themes/quark/templates/flex-objects/layouts/contacts/object/default.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one. We are also assuming you are using `Quark` theme, so you may have to change this to reference the theme you are using.
 
-1. Edit the `contacts.html.twig` file you just copied so it has these modifications:
+1. Edit the `default.html.twig` file you just copied so it has these modifications:
 
     ```twig
-        <li>
-            <div class="entry-details">
-                {% if entry.website %}
-                    <a href="{{ entry.website }}"><span class="name">{{ entry.last_name }}, {{ entry.first_name }}</span></a>
-                {% else %}
-                    <span class="name">{{ entry.last_name }}, {{ entry.first_name }}</span>
-                {% endif %}
-                {% if entry.email %}
-                    <p><a href="mailto:{{ entry.email }}" class="email">{{ entry.email }}</a></p>
-                {% endif %}
-                {% if entry.phone %}
-                    <p class="phone">{{ entry.phone }}</p>
-                {% endif %}
-            </div>
-        </li>
+    <div class="entry-details">
+        {% if object.website %}
+            <a href="{{ object.website }}"><span class="name">{{ object.last_name }}, {{ object.first_name }}</span></a>
+        {% else %}
+            <span class="name">{{ object.last_name }}, {{ object.first_name }}</span>
+        {% endif %}
+        {% if object.email %}
+            <p><a href="mailto:{{ object.email }}" class="email">{{ object.email }}</a></p>
+        {% endif %}
+        {% if object.phone %}
+            <p class="phone">{{ object.phone }}</p>
+        {%endif
+    </div>
     ```
+    
+    Notice, we removed the `entry-extra` DIV, and added a new `if` block with the Twig code to display the phone number if set.
+    
+1. We also need to tweak the JavaScript initialization which provides which hooks up certain classes to the search.  To do this we need to copy the `user/plugins/flex-objects/templates/flex-objects/layouts/contacts/collection/default.html.twig` file to `user/themes/quark/templates/flex-objects/layouts/contacts/collection/default.html.twig`. Notice this is the `collection` template this time, not the `object` template as we copied before.
 
-    And also the JavaScript initialization which provides which hooks up certain classes to the search:
+    Edit this file and replace the `<script></script>` tag at the bottom with this code:
     
     ```html
     <script>
@@ -189,8 +214,6 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
         var userList = new List('flex-objects', options);
     </script>
     ```
-
-    Notice, we removed the `entry-extra` DIV, and added a new `if` block with the Twig code to display the phone number if set.
 
 # File Upload
 
