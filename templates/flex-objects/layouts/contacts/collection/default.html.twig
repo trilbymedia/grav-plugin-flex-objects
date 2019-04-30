@@ -1,11 +1,23 @@
 <div id="flex-objects">
-    <ul class="list">
-        {% for object in collection %}
-            {% if object.published %}
-            <li>
-                {% render object layout: layout %}
-            </li>
-        {% endif %}
-        {% endfor %}
-    </ul>
+  <div class="text-center">
+    <input class="form-input search" type="text" placeholder="Search by name, email, etc" />
+    <button class="button button-primary sort asc" data-sort="name">
+      Sort by Name
+    </button>
+  </div>
+
+  <ul class="list">
+    {% for object in collection if object.published %}
+      <li>
+        {% render object layout: layout %}
+      </li>
+    {% endfor %}
+  </ul>
 </div>
+
+<script>
+    var options = {
+        valueNames: [ 'name', 'email', 'website', 'entry-extra' ]
+    };
+    var flexList = new List('flex-objects', options);
+</script>

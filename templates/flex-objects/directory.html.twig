@@ -1,6 +1,9 @@
 {% set type = page.header.directory ?? uri.param('type') %}
 {% set flex = grav.flex_objects %}
 
+{% do assets.addCss('plugin://flex-objects/css/site.css') %}
+{% do assets.addJs('plugin://flex-objects/js/list.min.js') %}
+
 {% if not type %}
 {% include 'flex-objects/types.html.twig' %}
 {% else %}
