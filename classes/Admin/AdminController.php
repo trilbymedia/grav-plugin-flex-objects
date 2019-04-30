@@ -639,12 +639,14 @@ class AdminController
 
     /**
      * @param string $type
-     * @return FlexDirectory
+     * @return FlexDirectory|null
      */
     public function getDirectory($type = null)
     {
-        if (null === $this->directory) {
-            $this->directory = Grav::instance()['flex_objects']->getDirectory($type ?? $this->target);
+        $type = $type ?? $this->target;
+
+        if ($type && null === $this->directory) {
+            $this->directory = Grav::instance()['flex_objects']->getDirectory($type);
         }
 
         return $this->directory;
