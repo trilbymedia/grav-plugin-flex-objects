@@ -17,7 +17,12 @@ config:
         website:
         tags:
   data:
-    storage: user-data://flex-objects/contacts.json
+    storage:
+        class: 'Grav\Framework\Flex\Storage\SimpleStorage'
+        options:
+          formatter:
+            class: 'Grav\Framework\File\Formatter\JsonFormatter'
+          folder: user-data://flex-objects/contacts.json
 
 form:
   validation: loose
