@@ -290,6 +290,7 @@ class AdminController
 
             /** @var ServerRequestInterface $request */
             $request = $grav['request'];
+            $postAction = $request->getParsedBody()['data']['_post_entries_save'];
 
             /** @var FlexForm $form */
             $form = $this->getForm($object);
@@ -310,6 +311,9 @@ class AdminController
             if (!$this->redirect) {
                 if (strpos($this->referrerUri, 'action:add')) {
                     $this->referrerUri = $this->currentUri . '/' . $object->getKey();
+                }
+                if ($postAction === 'list') {
+                    $this->referrerUri = dirname($this->currentUri);
                 }
                 $this->setRedirect($this->referrerUri);
             }
