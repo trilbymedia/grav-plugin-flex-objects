@@ -13,7 +13,7 @@ The **Flex Objects** Plugin is for [Grav CMS](https://github.com/getgrav/grav). 
 
 ## System Requirements
 
-Plugin requires Grav 1.6 or later version in order to run.
+Plugin requires **Grav** v1.6.9 or later version in order to run. Additionally you need **Form Plugin** v3.0.3 and optionally **Admin Plugin** v1.9.4 or later version.
 
 ## Installation
 
@@ -228,6 +228,8 @@ To upload files you can use the `file` form field.  []The standard features appl
       multiple: true
 ```
 
+> NOTE: In order to fully take advantage of image uploads, you should always be using `FolderStorage`, meaning that the objects get saved to individual folders together with the images. 
+
 # Advanced
 
 You can radically alter the structure of the `entries.json` data file by making major edits to the `contacts.yaml` blueprint file.  However, it's best to start with an empty `contacts.json` if you are making wholesale changes or you will have data conflicts.  Best to create your blueprint first.  Reloading a **New Entry** until the form looks correct, then try saving, and check to make sure the stored `user/data/flex-objects/contacts.json` file looks correct.
@@ -239,24 +241,25 @@ Then you will need to make more widespread changes to the site Twig templates.  
 Here are the main benefits of using Flex objects:
 
 * CRUD is automatically handled for you by Flex Objects plugin
+* Objects can be stored using many diferent strategies, including single file, file per object or folder per object; using yaml, json etc.
 * Flex types can be easily extended by custom PHP collection and object classes
-* Both Flex objects and collections know how to render themselves: `echo $object->render($layout, $context)`
+* Both Flex objects and collections know how to render themselves: `echo $object->render($layout, $context)` or `{% render object layout: layout with context %}`
 * You can easily create custom layouts for your objects and collections to be used in different pages
 * Both Flex objects and collections support serialization and `json_encode()`
 * Flex objects support Grav `Medium` objects with few lines of code
 * Flex objects can have relations to other Flex objects with few lines of code defining the relation
+* Flex directories support indexes which allow searching objects without loading all of them
+* Efficient caching for indexes, searches, objects and rendered output
+
 
 # Limitations and future improvements
 
 Right now there are a few limitations:
 
 * Administration needs more features like filtering, bulk updates etc
-* It would be nice to have an easy way to display Flex admin in other admin plugins (and hide the type from Flex)
-* All entries are stored in a single json or yaml file
+* It would be nice to have an easy way to display Flex admin in other admin plugins (it is already possible, but not easy)
 * Optional database storage layer would be nice to have
 * We need general collection functions to do simple filtering, like: "display all published items" without custom PHP code
-* We need indexes which allow searching objects without loading all of them
-* There is no caching for object and collection rendering
 
 ### Notes:
 
