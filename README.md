@@ -265,3 +265,12 @@ Right now there are a few limitations:
 
 1. You can actually use pretty much any folder under the `user/` folder of Grav. Simply edit the **Extra Admin Twig Path** option in the `flex-objects.yaml` file.  It defaults to `theme://admin/templates` which means it uses the default theme's `admin/templates/` folder if it exists.
 2. You can use any path for front end Twig templates also, if you don't want to put them in your theme, you can add an entry in the **Extra Site Twig Path** option of the `flex-objects.yaml` configuration and point to another location.
+
+# Tricks and tips
+
+* You can enable and disable directories from **Plugins** > **Flex-Objects**
+  * You can also add types from your plugins by hooking into `onFlexInit` event (see `AccountsServiceProvider` in Grav)
+* Directories added to `user/blueprints/flex-objects` folder (or found in `blueprints://flex-objects` stream) will automatically show up in the plugin configuration
+* To properly create your own custom types, you need at least the object blueprint and the template files for collections and objects
+* Use `flex-objects.md` page as the directory location
+    * In header you can use `directory` and `object` variables 

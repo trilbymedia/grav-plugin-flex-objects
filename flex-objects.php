@@ -3,6 +3,7 @@ namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Grav;
+use Grav\Common\Page\Types;
 use Grav\Common\Plugin;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
@@ -106,7 +107,10 @@ class FlexObjectsPlugin extends Plugin
                 ],
                 'onTwigSiteVariables' => [
                     ['onTwigAdminVariables', 0]
-                ]
+                ],
+                'onGetPageTemplates' =>
+                    ['onGetPageTemplates', 0]
+
             ]);
             /** @var AdminController controller */
             $this->controller = new AdminController($this);
@@ -172,6 +176,13 @@ class FlexObjectsPlugin extends Plugin
         foreach ($this->getAdminMenu() as $route => $item) {
             $eventController->blacklist_views[] = $route;
         }
+    }
+
+    public function onGetPageTemplates(Event $event)
+    {
+        /** @var Types $types */
+        $types = $event->types;
+        $types->register('flex-objects');
     }
 
     public function getAdminMenu()
