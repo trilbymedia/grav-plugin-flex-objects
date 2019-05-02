@@ -66,7 +66,7 @@ directories:
 
 Simply edit the **Flex Objects** plugin options in the Admin plugin, or copy the `flex-objects.yaml` default file to your `user/config/plugins/` folder and edit the values there.   Read below for more help on what these fields do and how they can help you modify the plugin.
 
-Most interesting configuration option is `directiories`, which contains list or blueprint files which will define the flex types.
+Most interesting configuration option is `directories`, which contains list or blueprint files which will define the flex types.
 
 ## Displaying
 
@@ -252,11 +252,11 @@ Here are the main benefits of using Flex objects:
 * Flex directories support indexes which allow searching objects without loading all of them
 * Efficient caching for indexes, searches, objects and rendered output
 
-
 # Limitations and future improvements
 
 Right now there are a few limitations:
 
+* Frontend is currently missing routing for the individual pages (you need to do the routing manually by yourself)
 * Administration needs more features like filtering, bulk updates etc
 * It would be nice to have an easy way to display Flex admin in other admin plugins (it is already possible, but not easy)
 * Optional database storage layer would be nice to have
@@ -270,8 +270,9 @@ Right now there are a few limitations:
 # Tricks and tips
 
 * You can enable and disable directories from **Plugins** > **Flex-Objects**
+  * New Flex Directories can be registered by simply creating a new blueprint file in `user/blueprints/flex-objects` folder
   * You can also add types from your plugins by hooking into `onFlexInit` event (see `AccountsServiceProvider` in Grav)
-* Directories added to `user/blueprints/flex-objects` folder (or found in `blueprints://flex-objects` stream) will automatically show up in the plugin configuration
 * To properly create your own custom types, you need at least the object blueprint and the template files for collections and objects
-* Use `flex-objects.md` page as the directory location
-    * In header you can use `directory` and `object` variables 
+* Use `flex-objects.md` page to create entry point for your own directory
+  * In page header you can use nested `flex.directory` variable to define the directory (or do it in admin) 
+  * In Admin you can just select the directory under the page title

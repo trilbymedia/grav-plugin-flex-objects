@@ -1,0 +1,17 @@
+{% set flex = grav.flex_objects %}
+{% set type = page.header.flex.directory ?? page.header.directory ?? uri.param('directory') %}
+{% set id = uri.param('id') %}
+
+{% do assets.addCss('plugin://flex-objects/css/site.css') %}
+{% do assets.addJs('plugin://flex-objects/js/list.min.js') %}
+
+{% if not type %}
+    {# Display list of directories #}
+    {% include 'flex-objects/views/directories.html.twig' %}
+{% elseif not id %}
+    {# Display specified directory #}
+    {% include 'flex-objects/views/directory.html.twig' with {type: type } %}
+{% else %}
+    {# Display specified object #}
+    {% include 'flex-objects/views/object.html.twig' with {type: type, id: id } %}
+{% endif %}

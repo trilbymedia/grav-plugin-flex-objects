@@ -16,7 +16,7 @@
     {% for type,directory in flex.directories %}
         <tr>
             <td>
-                <a href="{{ directory_url ~ '/type:' ~ type }}">{{ directory.title }}</a>
+                <a href="{{ directory_url ~ '/directory:' ~ type }}">{{ directory.title }}</a>
             </td>
             <td>
                 {{ directory.description }}
