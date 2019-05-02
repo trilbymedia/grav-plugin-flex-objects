@@ -1,5 +1,5 @@
-{% set type = page.header.directory ?? uri.param('type') %}
 {% set flex = grav.flex_objects %}
+{% set type = page.header.flex.directory ?? page.header.directory ?? uri.param('type') %}
 
 {% do assets.addCss('plugin://flex-objects/css/site.css') %}
 {% do assets.addJs('plugin://flex-objects/js/list.min.js') %}

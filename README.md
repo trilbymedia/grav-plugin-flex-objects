@@ -78,13 +78,14 @@ just create a page called `flex-objects.md` or set the template of your existing
 ```twig
 ---
 title: Directory
-directory: contacts
+flex:
+  directory: contacts
 ---
 
 # Directory Example
 ```
 
-If you do not specify `directory` name in the page header, the page will list all directories instead of displaying entries from a single directory.
+If you do not specify `flex.directory` name in the page header, the page will list all directories instead of displaying entries from a single directory.
 
 ![](assets/flex-objects-directory.png)
 
@@ -217,7 +218,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
 # File Upload
 
-To upload files you can use the `file` form field.  []The standard features apply](https://learn.getgrav.org/forms/blueprints/how-to-add-file-upload), and you can simply edit your custom blueprint with a field definition similar to:
+To upload files you can use the `file` form field.  [The standard features apply](https://learn.getgrav.org/forms/blueprints/how-to-add-file-upload), and you can simply edit your custom blueprint with a field definition similar to:
 
 ```
     item_image:
@@ -228,11 +229,11 @@ To upload files you can use the `file` form field.  []The standard features appl
       multiple: true
 ```
 
-> NOTE: In order to fully take advantage of image uploads, you should always be using `FolderStorage`, meaning that the objects get saved to individual folders together with the images. 
+> In order to fully take advantage of image uploads, you should always be using `FolderStorage`, meaning that the objects get saved to individual folders together with the images. Other storage layers may or may not support media.
 
 # Advanced
 
-You can radically alter the structure of the `entries.json` data file by making major edits to the `contacts.yaml` blueprint file.  However, it's best to start with an empty `contacts.json` if you are making wholesale changes or you will have data conflicts.  Best to create your blueprint first.  Reloading a **New Entry** until the form looks correct, then try saving, and check to make sure the stored `user/data/flex-objects/contacts.json` file looks correct.
+You can radically alter the structure of the `contacts.json` data file by making major edits to the `contacts.yaml` blueprint file.  However, it's best to start with an empty `contacts.json` if you are making wholesale changes or you will have data conflicts.  Best to create your blueprint first.  Reloading a **New Entry** until the form looks correct, then try saving, and check to make sure the stored `user/data/flex-objects/contacts.json` file looks correct.
 
 Then you will need to make more widespread changes to the site Twig templates.  You might need to adjust the number of columns and the field names.  You will also need to pay attention to the JavaScript initialization in each template.
 

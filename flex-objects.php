@@ -6,6 +6,7 @@ use Grav\Common\Grav;
 use Grav\Common\Page\Types;
 use Grav\Common\Plugin;
 use Grav\Common\User\Interfaces\UserInterface;
+use Grav\Framework\Flex\FlexDirectory;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
 use Grav\Plugin\FlexObjects\Admin\AdminController;
@@ -182,7 +183,30 @@ class FlexObjectsPlugin extends Plugin
     {
         /** @var Types $types */
         $types = $event->types;
-        $types->register('flex-objects');
+        $types->register('flex-objects', 'plugins://flex-objects/blueprints/pages/flex-objects.yaml');
+    }
+
+    /**
+     * Form select options listing all enabled directories.
+     *
+     * @return array
+     */
+    public static function directoryOptions()
+    {
+        /** @var Flex $flex */
+        $flex = Grav::instance()['flex_objects'];
+        $directories = $flex->getDirectories();
+
+        $list = [];
+        /**
+         * @var string $type
+         * @var FlexDirectory $directory
+         */
+        foreach ($directories as $type => $directory) {
+            $list[$type] = $directory->getTitle();
+        }
+
+        return $list;
     }
 
     public function getAdminMenu()
