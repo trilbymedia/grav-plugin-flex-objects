@@ -1,0 +1,9 @@
+<div id="user-profiles">
+    <ul class="user-profiles">
+        {% for object in collection %}
+        <li>
+            {% render object layout: layout %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>
