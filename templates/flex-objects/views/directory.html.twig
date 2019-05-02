@@ -3,4 +3,4 @@
 {% set type = directory.flexType() %}
 {% set collection = directory.collection %}
 
-{% render collection %}
+{% render collection layout: options.layout ?: 'default' %}

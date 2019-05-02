@@ -256,7 +256,7 @@ Here are the main benefits of using Flex objects:
 
 Right now there are a few limitations:
 
-* Frontend is currently missing routing for the individual pages (you need to do the routing manually by yourself)
+* Frontend only has a basic routing for the individual pages (you need to do the advanced routing manually by yourself)
 * Administration needs more features like filtering, bulk updates etc
 * It would be nice to have an easy way to display Flex admin in other admin plugins (it is already possible, but not easy)
 * Optional database storage layer would be nice to have
@@ -276,3 +276,21 @@ Right now there are a few limitations:
 * Use `flex-objects.md` page to create entry point for your own directory
   * In page header you can use nested `flex.directory` variable to define the directory (or do it in admin) 
   * In Admin you can just select the directory under the page title
+
+
+# Parameters supported by Flex page type:
+
+```
+---
+title: 'Flex Directories'
+flex:
+    directories:
+        layout: default
+        list:
+            - accounts
+            - contacts        
+---
+```
+
+`directories.layout`: uses template file `templates/flex-objects/directories/[LAYOUT].html.twig`
+`directories.list`: list of flex directories displayed in this page

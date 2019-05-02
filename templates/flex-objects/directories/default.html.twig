@@ -1,0 +1,24 @@
+<table id="data-table" class="table">
+    <colgroup>
+        <col width="20" />
+        <col width="80" />
+    </colgroup>
+    <thead>
+    <tr>
+        <th>Type</th>
+        <th>Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for type,directory in directories %}
+        <tr>
+            <td>
+                <a href="{{ directory_url ~ '/directory:' ~ type }}">{{ directory.title }}</a>
+            </td>
+            <td>
+                {{ directory.description }}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
