@@ -1,5 +1,4 @@
 {% block titlebar %}
-    {% set route = grav.route %}
     {% set action = route.getGravParam('action') %}
     {% set back_url = base_url ~ '/' ~ (action ? route.getRoute(1) : route.getRoute(1, -1)) %}
 

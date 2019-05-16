@@ -7,7 +7,7 @@
         <div class="button-bar danger">
             <span class="danger-zone"></span>
             {% if object.isAuthorized('delete') %}
-            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(grav.route.withoutParams().withGravParam('task', 'delete').getUri(), 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
+            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(route.withoutParams().withGravParam('task', 'delete').getUri(), 'admin-form', 'admin-nonce') }}" class="button" ><i class="fa fa-fw fa-warning"></i> Delete Entry</a>
             {% endif %}
         </div>
         {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}

@@ -1,6 +1,8 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/types.html.twig' %}
 
+{% set route = grav.route.withExtension('') %}
+
 {% block head %}
     {{ parent() }}
 {% endblock %}
