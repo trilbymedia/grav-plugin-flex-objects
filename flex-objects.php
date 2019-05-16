@@ -19,6 +19,10 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexObjectsPlugin extends Plugin
 {
+    public $features = [
+        'blueprints' => 1000,
+    ];
+
     /** @var AdminController */
     protected $controller;
 
@@ -79,10 +83,10 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onPluginsInitialized(): void
     {
-        /** @var UserInterface $user */
-        $user = $this->grav['user'] ?? null;
-
         if ($this->isAdmin()) {
+            /** @var UserInterface $user */
+            $user = $this->grav['user'] ?? null;
+
             if (!$user || !$user->authorize('login', 'admin')) {
                 return;
             }

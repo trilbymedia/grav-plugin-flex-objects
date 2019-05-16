@@ -21,4 +21,3 @@ object:
       timeout: 60
 
 directories:
-  - plugin://flex-objects/blueprints/flex-objects/contacts.yaml
