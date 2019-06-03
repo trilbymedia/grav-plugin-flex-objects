@@ -14,10 +14,12 @@ use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
+use Grav\Framework\Psr7\Response;
 use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Controllers\MediaController;
 use Grav\Plugin\FlexObjects\Flex;
 use Nyholm\Psr7\ServerRequest;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
@@ -46,7 +48,7 @@ class AdminController
     /** @var array|null */
     public $data;
 
-    /** @var \Grav\Common\Uri */
+    /** @var Uri */
     protected $uri;
 
     /** @var Admin */
@@ -179,9 +181,9 @@ class AdminController
 
             $table = $this->getFlex()->getDataTable($directory, $options);
 
-            header('Content-Type: application/json');
-            echo json_encode($table);
-            die();
+            $response = new Response(200, ['Content-Type' => 'application/json'], json_encode($table));
+
+            $this->exit($response);
         }
     }
 
@@ -207,18 +209,20 @@ class AdminController
 
         $csv = new CsvFormatter();
 
-        header('Content-Type: text/x-csv');
-        header('Content-Disposition: inline; filename="export.csv"');
-        header('Cache-Control: max-age=0');
-        // If you're serving to IE over SSL, then the following may be needed
-        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
-        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-        header('Pragma: public'); // HTTP/1.0
-        ob_end_clean();
+        $response = new Response(
+            200,
+            [
+                'Content-Type' => 'text/x-csv',
+                'Content-Disposition' => 'inline; filename="export.csv"',
+                'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
+                'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate',
+                'Pragma' => 'no-cache',
+            ],
+            $csv->encode($list)
+        );
 
-        echo $csv->encode($list);
-        die();
+        $this->exit($response);
     }
 
     /**
@@ -838,6 +842,31 @@ class AdminController
         $post = $this->cleanDataKeys($post);
 
         return $post;
+    }
+
+    protected function exit(ResponseInterface $response): void
+    {
+        $grav = $this->grav;
+
+        // TODO: remove when Grav 1.6 support is dropped.
+        if (!method_exists($grav, 'exit')) {
+            // Make sure nothing extra gets written to the response.
+            while (ob_get_level()) {
+                ob_end_clean();
+            }
+
+            // Close the session.
+            if (isset($grav['session'])) {
+                $grav['session']->close();
+            }
+
+            // Send the response and terminate.
+            $grav->header($response);
+            echo $response->getBody();
+            exit();
+        }
+
+        $grav->exit($response);
     }
 
     /**

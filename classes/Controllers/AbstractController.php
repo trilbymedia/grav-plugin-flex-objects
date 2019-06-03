@@ -110,7 +110,7 @@ abstract class AbstractController implements RequestHandlerInterface
             if (!$response) {
                 /** @var Inflector $inflector */
                 $inflector = $this->grav['inflector'];
-                $method = $type . $inflector->camelize($command);
+                $method = $type . $inflector::camelize($command);
                 if ($method && method_exists($this, $method)) {
                     $response = $this->{$method}($request);
                 } else {

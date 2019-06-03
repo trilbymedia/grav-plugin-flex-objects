@@ -14,15 +14,15 @@ use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
-use Grav\Framework\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
 class MediaController extends AbstractController
 {
     /**
-     * @return Response
+     * @return ResponseInterface
      */
-    public function taskMediaUpload(): Response
+    public function taskMediaUpload(): ResponseInterface
     {
         $this->checkAuthorization('media.create');
 
@@ -133,9 +133,9 @@ class MediaController extends AbstractController
     }
 
     /**
-     * @return Response
+     * @return ResponseInterface
      */
-    public function taskMediaDelete(): Response
+    public function taskMediaDelete(): ResponseInterface
     {
         $this->checkAuthorization('media.delete');
 
@@ -182,9 +182,9 @@ class MediaController extends AbstractController
     }
 
     /**
-     * @return Response
+     * @return ResponseInterface
      */
-    public function actionMediaList(): Response
+    public function actionMediaList(): ResponseInterface
     {
         $this->checkAuthorization('media.list');
 
@@ -222,9 +222,9 @@ class MediaController extends AbstractController
     /**
      * Used by the filepicker field to get a list of files in a folder.
      *
-     * @return Response
+     * @return ResponseInterface
      */
-    protected function actionMediaPicker(): Response
+    protected function actionMediaPicker(): ResponseInterface
     {
         $this->checkAuthorization('media.list');
 

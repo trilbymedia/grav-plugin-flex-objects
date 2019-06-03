@@ -7,12 +7,12 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 use Grav\Common\Grav;
 use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
-use Grav\Framework\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class ObjectController extends AbstractController
 {
-    public function taskSave(ServerRequestInterface $request): Response
+    public function taskSave(ServerRequestInterface $request): ResponseInterface
     {
         $form = $this->getForm();
         $object = $form->getObject();
@@ -20,7 +20,7 @@ class ObjectController extends AbstractController
         return $object->exists() ? $this->taskUpdate($request) : $this->taskCreate($request);
     }
 
-    public function taskCreate(ServerRequestInterface $request): Response
+    public function taskCreate(ServerRequestInterface $request): ResponseInterface
     {
         $this->checkAuthorization('create');
 
@@ -53,7 +53,7 @@ class ObjectController extends AbstractController
         return $this->createRedirectResponse($redirect, 303);
     }
 
-    public function taskUpdate(ServerRequestInterface $request): Response
+    public function taskUpdate(ServerRequestInterface $request): ResponseInterface
     {
         $this->checkAuthorization('update');
 
@@ -87,7 +87,7 @@ class ObjectController extends AbstractController
         return $this->createRedirectResponse($redirect, 303);
     }
 
-    public function taskDelete(ServerRequestInterface $request): Response
+    public function taskDelete(ServerRequestInterface $request): ResponseInterface
     {
         $this->checkAuthorization('delete');
 
@@ -108,7 +108,7 @@ class ObjectController extends AbstractController
         return $this->createRedirectResponse($redirect, 303);
     }
 
-    public function taskPreview(ServerRequestInterface $request): Response
+    public function taskPreview(ServerRequestInterface $request): ResponseInterface
     {
         $this->checkAuthorization('save');
 
@@ -135,7 +135,7 @@ class ObjectController extends AbstractController
         return $this->actionDisplayPreview();
     }
 
-    protected function actionDisplayPreview(): Response
+    protected function actionDisplayPreview(): ResponseInterface
     {
         $this->checkAuthorization('read');
 
