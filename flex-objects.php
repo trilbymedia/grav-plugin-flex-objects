@@ -3,6 +3,7 @@ namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Grav;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Types;
 use Grav\Common\Plugin;
 use Grav\Common\User\Interfaces\UserInterface;
@@ -160,9 +161,15 @@ class FlexObjectsPlugin extends Plugin
     public function onAdminPage(Event $event): void
     {
         if ($this->controller->isActive()) {
+            /** @var PageInterface $page */
             $page = $event['page'];
             $page->init(new \SplFileInfo(__DIR__ . '/admin/pages/flex-objects.md'));
             $page->slug($this->controller->getLocation());
+
+            $menu = $this->controller->menu;
+
+            $header = $page->header();
+            $header->access = $menu['authorize'] ?? ['admin.flex-objects', 'admin.super'];
         }
     }
 

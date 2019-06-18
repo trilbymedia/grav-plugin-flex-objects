@@ -48,6 +48,9 @@ class AdminController
     /** @var array|null */
     public $data;
 
+    /** @var array */
+    public $menu;
+
     /** @var Uri */
     protected $uri;
 
@@ -471,6 +474,8 @@ class AdminController
                 return;
             }
 
+            $this->menu = $menu[$location];
+
             $directory = $menu[$location]['directory'] ?? '';
             $location = 'flex-objects';
             if ($directory) {
@@ -507,7 +512,6 @@ class AdminController
             $this->admin = Grav::instance()['admin'];
             $this->currentUri = $uri->route();
             $this->referrerUri = $uri->referrer() ?: $this->currentUri;
-
         }
     }
 
