@@ -91,8 +91,12 @@ class MediaController extends AbstractController
                 $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
             }
 
-
-            $flash = new FormFlash($session->getId(), $uniqueId, $formName);
+            $config = [
+                'session_id' => $session->getId(),
+                'unique_id' => $uniqueId,
+                'form_name' => $formName,
+            ];
+            $flash = new FormFlash($config);
             $flash->setUrl($uri->url)->setUser($grav['user']);
 
             $crop = $this->getPost('crop');
@@ -165,7 +169,12 @@ class MediaController extends AbstractController
             $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
             $field = $this->getPost('name');
 
-            $flash = new FormFlash($session->getId(), $uniqueId, $formName);
+            $config = [
+                'session_id' => $session->getId(),
+                'unique_id' => $uniqueId,
+                'form_name' => $formName,
+            ];
+            $flash = new FormFlash($config);
             $flash->removeFile($filename, $field);
             $flash->save();
         } catch (\Exception $e) {

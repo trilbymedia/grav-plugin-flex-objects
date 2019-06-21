@@ -1,5 +1,5 @@
 name: Flex-Objects
-version: 0.9.5
+version: 0.9.6
 description: Flexible Objects Plugin
 icon: list
 author:
@@ -12,7 +12,7 @@ docs: https://github.com/trilbymedia/grav-plugin-flex-objects/blob/develop/READM
 license: MIT
 
 dependencies:
-    - { name: grav, version: '>=1.6.9' }
+    - { name: grav, version: '>=1.6.11' }
     - { name: form, version: '>=3.0.3' }
 
 form:
