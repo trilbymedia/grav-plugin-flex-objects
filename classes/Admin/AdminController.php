@@ -297,7 +297,7 @@ class AdminController
 
             /** @var ServerRequestInterface $request */
             $request = $grav['request'];
-            $postAction = $request->getParsedBody()['data']['_post_entries_save'];
+            $postAction = $request->getParsedBody()['data']['_post_entries_save'] ?? 'list';
 
             /** @var FlexForm $form */
             $form = $this->getForm($object);
