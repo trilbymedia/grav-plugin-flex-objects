@@ -3,7 +3,6 @@
 
 {% do assets.addJs('plugin://flex-objects/js/flex-objects.js', { 'group': 'bottom', 'loading': 'defer' }) %}
 
-{% set route = grav.route.withExtension('') %}
 {% set collection = collection.isAuthorized('list') %}
 {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
 {% set table = flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}

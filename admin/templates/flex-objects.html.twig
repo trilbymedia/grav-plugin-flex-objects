@@ -1,6 +1,7 @@
 {% set template = (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: task ?: 'types' %}
 
 {% set separator = config.system.param_sep %}
+{% set route = grav.route.withExtension('') %}
 
 {% extends target ? [
         'flex-objects/types/' ~ target ~ '/' ~ template ~ '.html.twig',

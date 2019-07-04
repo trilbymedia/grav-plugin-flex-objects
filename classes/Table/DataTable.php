@@ -234,7 +234,8 @@ class DataTable implements \JsonSerializable
             'link' => $link,
             'field' => $column['field'],
             'object' => $object,
-            'flex' => $flex
+            'flex' => $flex,
+            'route' => $grav['route']->withExtension('')
         ] + $this->twig_context);
     }
 
@@ -246,7 +247,8 @@ class DataTable implements \JsonSerializable
 
         return $this->twig->load($template)->render([
             'object' => $object,
-            'flex' => $grav['flex_objects']
+            'flex' => $grav['flex_objects'],
+            'route' => $grav['route']->withExtension('')
         ] + $this->twig_context);
     }
 
