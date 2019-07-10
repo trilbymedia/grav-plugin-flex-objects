@@ -2,13 +2,25 @@
     {% set back_url = base_url ~ '/' ~ route.getRoute(1, -1) %}
 
     <div class="button-bar">
+        {# BACK #}
         <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+
+        {% if directory %}
+        {% block buttons %}
+        {# EXPORT #}
         {% if directory.config('admin.export') %}
         <a class="button" href="{{ route.withGravParam('action', 'csv') }}"><i class="fa fa-download"></i> CSV</a>
         {% endif %}
+
+        {# CREATE #}
         {% if directory.isAuthorized('create') %}
         <a class="button" href="{{ route.withGravParam('action', 'add') }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
         {% endif %}
+        {% endblock buttons %}
+        {% endif %}
     </div>
-    <h1><i class="fa fa-fw fa-file-text-o"></i> {{ directory ? directory.title|tu : 'Not Found' }}</h1>
+
+    <h1>
+        <i class="fa fa-fw fa-file-text-o"></i> {{ directory ? directory.title|tu : 'Not Found' }}
+    </h1>
 {% endblock %}

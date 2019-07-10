@@ -2,29 +2,46 @@
 {% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
 {% set id = key %}
+{% set allowed = directory and (object.exists or uri.param('action') == 'add') %}
 {% set blueprint = object.blueprint ?? directory.blueprint %}
 
 {% block content_top %}
-{% if directory and object or uri.param('action') == 'add' %}
-    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(object.storageFolder ?? directory.getStorageFolder())|trim('/') }} {{ not object ? '[NEW]' }}</b></div>
-{% endif %}
+    {% if allowed and user.authorize('admin.super') %}
+        {% if directory and object or uri.param('action') == 'add' %}
+            <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(object.storageFolder ?? directory.getStorageFolder())|trim('/') }} {{ not object.exists ? '[NEW]' }}</b></div>
+        {% endif %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-{% if directory and object or uri.param('action') == 'add' %}
-{% set object = object ?? directory.createObject([]) %}
-<div id="directory">
-    {% block edit %}{% endblock %}
-</div>
-{% else %}
-    {% do page.modifyHeader('http_response_code', 404) %}
-    <div class="error-block">
-        <h1>Error 404</h1>
-        <div class="padding">
-            <p>
-                Woops! Looks like this page doesn't exist.
-            </p>
+    {% if allowed %}
+        {% set object = object ?? directory.createObject([], key ?? '') %}
+        <div class="clear directory admin-pages">
+            <div class="admin-form-wrapper">
+                <div id="admin-topbar">
+                    {% block topbar %}{% endblock %}
+                </div>
+                {% block edit %}{% endblock %}
+            </div>
+
         </div>
-    </div>
-{% endif %}
+
+        {% include 'partials/modal-changes-detected.html.twig' %}
+
+        {% if object.exists and object.isAuthorized('delete') %}
+            {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
+        {% endif %}
+
+    {% else %}
+
+        {% do page.modifyHeader('http_response_code', 404) %}
+        <div class="error-block">
+            <h1>Error 404</h1>
+            <div class="padding">
+                <p>
+                    Woops! Looks like this page doesn't exist.
+                </p>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}

@@ -3,14 +3,42 @@
     {% set back_url = base_url ~ '/' ~ (action ? route.getRoute(1) : route.getRoute(1, -1)) %}
 
     <div class="button-bar">
+        {# BACK #}
         <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
-        {% if object.exists and object.route %}
-            <a href="{{ url(object.route.uri, true) }}" class="button" target="_blank"><i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}</a>
-        {% endif %}
-        {% if object ? object.isAuthorized('save') : directory.isAuthorized('create') %}
-        <button class="button" type="submit" name="task" value="save" form="blueprints"><i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}</button>
+
+        {% if allowed %}
+        {% block buttons %}
+            {# PREVIEW #}
+            {% if object.exists and object.route %}
+                <a href="{{ url(object.route.uri, true) }}" class="button" target="_blank">
+                    <i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}
+                </a>
+            {% endif %}
+
+            {# DELETE #}
+            {% if object.exists and object.isAuthorized('delete') %}
+                <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(route.withoutParams().withGravParam('task', 'delete').getUri(), 'admin-form', 'admin-nonce') }}" class="button danger">
+                    <i class="fa fa-fw fa-close"></i> Delete
+                </a>
+            {% endif %}
+
+            {# SAVE #}
+            {% if object.exists ? object.isAuthorized('save') : directory.isAuthorized('create') %}
+                <button class="button" type="submit" name="task" value="save" form="blueprints">
+                    <i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}
+                </button>
+            {% endif %}
+        {% endblock buttons %}
         {% endif %}
     </div>
-    {% set key = object.hasKey ? object.key : null %}
-    <h1><i class="fa fa-fw fa-file-text-o"></i> {{  directory ? (object.title ?? key ?? '[NEW]') : 'Not Found' }}</small></h1>
+
+    <h1>
+        <i class="fa fa-fw fa-file-text-o"></i>
+        {% if allowed %}
+            {{ not object.exists ? '[NEW]' }} {{ object.title ?? key }}
+        {% else %}
+            Not Found
+        {% endif %}
+    </h1>
+
 {% endblock %}
