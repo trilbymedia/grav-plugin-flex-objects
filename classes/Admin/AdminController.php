@@ -341,7 +341,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('action', 'media.list');
 
-            $this->admin->json_response = json_decode($response->getBody());
+            $this->admin->json_response = json_decode($response->getBody(), false);
         } catch (\Exception $e) {
             die($e->getMessage());
         }
@@ -354,7 +354,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('task', 'media.upload');
 
-            $this->admin->json_response = json_decode($response->getBody());
+            $this->admin->json_response = json_decode($response->getBody(), false);
         } catch (\Exception $e) {
             die($e->getMessage());
         }
@@ -367,7 +367,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('task', 'media.delete');
 
-            $this->admin->json_response = json_decode($response->getBody());
+            $this->admin->json_response = json_decode($response->getBody(), false);
         } catch (\Exception $e) {
             die($e->getMessage());
         }
@@ -405,7 +405,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('action', 'media.picker');
 
-            $this->admin->json_response = json_decode($response->getBody());
+            $this->admin->json_response = json_decode($response->getBody(), false);
         } catch (\Exception $e) {
             $this->admin->json_response = ['success' => false, 'error' => $e->getMessage()];
         }
@@ -636,7 +636,7 @@ class AdminController
             if ($directory) {
                 if (null === $key) {
                     if ($this->action === 'add') {
-                        $object = $directory->createObject([]);
+                        $object = $directory->createObject([], $key ?? '');
                     }
                 } else {
                     $object = $directory->getObject($key);
