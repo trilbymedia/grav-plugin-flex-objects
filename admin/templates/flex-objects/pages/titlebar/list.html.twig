@@ -1,25 +1,23 @@
 {% block titlebar %}
     {% block titlebar_button_bar %}
     <div class="button-bar">
+        {# BACK #}
         {% block back_button %}
-            {# BACK #}
             <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
         {% endblock back_button %}
 
-        {% if directory %}
-        {% if directory.config('admin.export') %}
+        {# EXPORT #}
+        {% if can_export %}
         {% block export_button %}
-            {# EXPORT #}
             <a class="button" href="{{ route.withGravParam('action', 'csv') }}"><i class="fa fa-download"></i> CSV</a>
         {% endblock export_button %}
         {% endif %}
 
-        {% if directory.isAuthorized('create') %}
+        {# CREATE #}
+        {% if can_create %}
         {% block create_button %}
-            {# CREATE #}
             <a class="button" href="{{ route.withGravParam('action', 'add') }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
         {% endblock create_button %}
-        {% endif %}
         {% endif %}
     </div>
     {% endblock titlebar_button_bar %}

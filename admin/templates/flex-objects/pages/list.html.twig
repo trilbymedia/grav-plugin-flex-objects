@@ -1,14 +1,20 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/list.html.twig' %}
 
-{% do assets.addJs('plugin://flex-objects/js/flex-objects.js', { 'group': 'bottom', 'loading': 'defer' }) %}
+{# These variables can be overridden from the main template file #}
+{% set back_route = back_route ?? '/' ~ route.getRoute(1, -1) %}
+{% set icon = icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+
+{# Allowed actions #}
+{% set can_export = directory.config('admin.export') %}
+{% set can_create = directory.isAuthorized('create') %}
 
 {% set collection = directory ? collection.isAuthorized('list') %}
 {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
 {% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
-
-{% set back_route = '/' ~ route.getRoute(1, -1) %}
 {% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
+
+{% do assets.addJs('plugin://flex-objects/js/flex-objects.js', { 'group': 'bottom', 'loading': 'defer' }) %}
 
 {% block content_top %}
 {% if directory %}

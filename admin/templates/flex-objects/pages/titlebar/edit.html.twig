@@ -2,45 +2,42 @@
     {% block titlebar_button_bar %}
         <div class="button-bar">
 
+        {# BACK #}
         {% block back_button %}
-            {# BACK #}
             <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
         {% endblock back_button %}
 
-        {% if allowed %}
-        {% if object.exists and object.route %}
+        {# PREVIEW #}
+        {% if can_preview %}
         {% block preview_button %}
-            {# PREVIEW #}
             <a href="{{ url(object.route.uri, true) }}" class="button" target="_blank">
                 <i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}
             </a>
         {% endblock preview_button %}
         {% endif %}
 
-        {% if object.exists and object.isAuthorized('delete') %}
+        {# DELETE #}
+        {% if can_delete %}
         {% block delete_button %}
-            {# DELETE #}
             <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(route.withoutParams().withGravParam('task', 'delete').getUri(), 'admin-form', 'admin-nonce') }}" class="button danger">
                 <i class="fa fa-fw fa-close"></i> Delete
             </a>
         {% endblock delete_button %}
         {% endif %}
 
-        {% if object.exists ? object.isAuthorized('save') : directory.isAuthorized('create') %}
+        {# SAVE #}
+        {% if can_save %}
         {% block save_button %}
-            {# SAVE #}
             <button class="button" type="submit" name="task" value="save" form="blueprints">
                 <i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}
             </button>
         {% endblock save_button %}
-        {% endif %}
         {% endif %}
     </div>
     {% endblock titlebar_button_bar %}
 
     {% block titlebar_title %}
     <h1>
-        {% set icon = icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
         <i class="fa fa-fw {{ icon }}"></i>
         {% if allowed %}
             {{ not object.exists ? '[NEW]' }} {{ object.title ?? key }}

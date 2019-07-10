@@ -1,17 +1,25 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
-{% set id = key %}
-{% set allowed = directory and (object.exists or uri.param('action') == 'add') %}
-{% set blueprint = object.blueprint ?? directory.blueprint %}
+{# These variables can be overridden from the main template file #}
+{% set action = action ?? route.getGravParam('action') %}
+{% set allowed = allowed ?? directory and (object.exists or action == 'add') %}
+{% set back_route = back_route ?? '/' ~ (action ? route.getRoute(1) : route.getRoute(1, -1)) %}
+{% set icon = icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
 
-{% set action = route.getGravParam('action') %}
-{% set back_route = '/' ~ (action ? route.getRoute(1) : route.getRoute(1, -1)) %}
+{# Allowed actions #}
+{% set can_preview = object.exists and object.route %}
+{% set can_save = object.exists ? object.isAuthorized('save') : directory.isAuthorized('create') %}
+{% set can_delete = object.exists and object.isAuthorized('delete') %}
+
+{% set id = key %}
+{% set blueprint = object.blueprint ?? directory.blueprint %}
 {% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
+{% set object = object ?? directory.createObject([], key ?? '') %}
 
 {% block content_top %}
     {% if allowed and user.authorize('admin.super') %}
-        {% if directory and object or uri.param('action') == 'add' %}
+        {% if directory and object or action == 'add' %}
             <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(object.storageFolder ?? directory.getStorageFolder())|trim('/') }} {{ not object.exists ? '[NEW]' }}</b></div>
         {% endif %}
     {% endif %}
@@ -19,7 +27,6 @@
 
 {% block content %}
     {% if allowed %}
-        {% set object = object ?? directory.createObject([], key ?? '') %}
         <div class="clear directory admin-pages">
             <div class="admin-form-wrapper">
                 <div id="admin-topbar">
@@ -32,7 +39,7 @@
 
         {% include 'partials/modal-changes-detected.html.twig' %}
 
-        {% if object.exists and object.isAuthorized('delete') %}
+        {% if can_delete %}
             {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
         {% endif %}
 

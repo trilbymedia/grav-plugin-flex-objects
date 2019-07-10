@@ -1,7 +1,9 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/types.html.twig' %}
 
-{% set back_route = '/' ~ route.getRoute(1, -1) %}
+{# These variables can be overridden from the main template file #}
+{% set back_route = back_route ?? '/' ~ route.getRoute(1, -1) %}
+
 {% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
 
 {% block head %}
