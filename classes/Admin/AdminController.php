@@ -10,6 +10,7 @@ use Grav\Common\Utils;
 use Grav\Framework\File\Formatter\CsvFormatter;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexForm;
+use Grav\Framework\Flex\FlexFormFlash;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
@@ -265,6 +266,34 @@ class AdminController
         }
 
         return $object ? true : false;
+    }
+
+    /**
+     * Create a new object (from modal).
+     */
+    public function taskContinue()
+    {
+        $directory = $this->getDirectory();
+
+        $this->data['route'] = '/' . ltrim($this->data['route'] ?? '', '/');
+        $route = ltrim($this->data['route'], '/');
+        $name = $this->data['folder'] ?? 'undefined';
+        unset($this->data['blueprint']);
+
+        $this->object = $directory->createObject($this->data, "{$route}/{$name}", false);
+
+        /** @var FlexForm $form */
+        $form = $this->getForm($this->object);
+
+        // Reset form, we are starting from scratch.
+        $form->reset();
+
+        /** @var FlexFormFlash $flash */
+        $flash = $form->getFlash();
+        $flash->setUrl($this->getFlex()->adminRoute($this->object));
+        $flash->save(true);
+
+        $this->setRedirect($flash->getUrl());
     }
 
     public function taskSave()
