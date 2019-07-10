@@ -3,11 +3,12 @@
 
 {# These variables can be overridden from the main template file #}
 {% set back_route = back_route ?? '/' ~ route.getRoute(1, -1) %}
-{% set icon = icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+{% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
 
 {# Allowed actions #}
 {% set can_export = directory.config('admin.export') %}
 {% set can_create = directory.isAuthorized('create') %}
+{% set can_translate = false %}
 
 {% set collection = directory ? collection.isAuthorized('list') %}
 {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}

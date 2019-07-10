@@ -2,15 +2,15 @@
 {% use 'flex-objects/pages/titlebar/edit.html.twig' %}
 
 {# These variables can be overridden from the main template file #}
-{% set action = action ?? route.getGravParam('action') %}
 {% set allowed = allowed ?? directory and (object.exists or action == 'add') %}
-{% set back_route = back_route ?? '/' ~ (action ? route.getRoute(1) : route.getRoute(1, -1)) %}
-{% set icon = icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+{% set back_route = back_route ?? '/' ~ (action != 'edit' ? route.getRoute(1) : route.getRoute(1, -1)) %}
+{% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
 
 {# Allowed actions #}
 {% set can_preview = object.exists and object.route %}
 {% set can_save = object.exists ? object.isAuthorized('save') : directory.isAuthorized('create') %}
 {% set can_delete = object.exists and object.isAuthorized('delete') %}
+{% set can_translate = false %}
 
 {% set id = key %}
 {% set blueprint = object.blueprint ?? directory.blueprint %}
@@ -27,6 +27,7 @@
 
 {% block content %}
     {% if allowed %}
+
         <div class="clear directory admin-pages">
             <div class="admin-form-wrapper">
                 <div id="admin-topbar">
@@ -34,7 +35,6 @@
                 </div>
                 {% block edit %}{% endblock %}
             </div>
-
         </div>
 
         {% include 'partials/modal-changes-detected.html.twig' %}
@@ -54,5 +54,6 @@
                 </p>
             </div>
         </div>
+
     {% endif %}
 {% endblock %}

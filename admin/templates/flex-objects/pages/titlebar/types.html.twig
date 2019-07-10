@@ -1,8 +1,17 @@
 {% block titlebar %}
+    {% block titlebar_button_bar %}
     <div class="button-bar">
-        <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+        {# BACK #}
+        {% block back_button %}
+            {% include 'flex-objects/pages/buttons/back.html.twig' %}
+        {% endblock back_button %}
     </div>
+    {% endblock titlebar_button_bar %}
+
+    {% block titlebar_title %}
     <h1>
-        <i class="fa fa-fw fa-list"></i> {{ "PLUGIN_FLEX_OBJECTS.TITLE"|tu }}
+        <i class="fa fa-fw fa-list"></i>
+        {{ "PLUGIN_FLEX_OBJECTS.TITLE"|tu }}
     </h1>
+    {% endblock titlebar_title %}
 {% endblock %}

@@ -1,36 +1,31 @@
 {% block titlebar %}
     {% block titlebar_button_bar %}
-        <div class="button-bar">
-
+    <div class="button-bar">
         {# BACK #}
         {% block back_button %}
-            <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+            {% include 'flex-objects/pages/buttons/back.html.twig' %}
         {% endblock back_button %}
 
         {# PREVIEW #}
         {% if can_preview %}
         {% block preview_button %}
-            <a href="{{ url(object.route.uri, true) }}" class="button" target="_blank">
-                <i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}
-            </a>
+            {% include 'flex-objects/pages/buttons/preview.html.twig' %}
         {% endblock preview_button %}
         {% endif %}
+
+        {% block extra_buttons %}{% endblock extra_buttons %}
 
         {# DELETE #}
         {% if can_delete %}
         {% block delete_button %}
-            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(route.withoutParams().withGravParam('task', 'delete').getUri(), 'admin-form', 'admin-nonce') }}" class="button danger">
-                <i class="fa fa-fw fa-close"></i> Delete
-            </a>
+            {% include 'flex-objects/pages/buttons/delete.html.twig' %}
         {% endblock delete_button %}
         {% endif %}
 
         {# SAVE #}
         {% if can_save %}
         {% block save_button %}
-            <button class="button" type="submit" name="task" value="save" form="blueprints">
-                <i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}
-            </button>
+            {% include 'flex-objects/pages/buttons/save.html.twig' %}
         {% endblock save_button %}
         {% endif %}
     </div>
@@ -38,7 +33,7 @@
 
     {% block titlebar_title %}
     <h1>
-        <i class="fa fa-fw {{ icon }}"></i>
+        <i class="fa fa-fw {{ title_icon }}"></i>
         {% if allowed %}
             {{ not object.exists ? '[NEW]' }} {{ object.title ?? key }}
         {% else %}

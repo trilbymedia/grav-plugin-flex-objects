@@ -3,29 +3,35 @@
     <div class="button-bar">
         {# BACK #}
         {% block back_button %}
-            <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+            {% include 'flex-objects/pages/buttons/back.html.twig' %}
         {% endblock back_button %}
 
         {# EXPORT #}
         {% if can_export %}
         {% block export_button %}
-            <a class="button" href="{{ route.withGravParam('action', 'csv') }}"><i class="fa fa-download"></i> CSV</a>
+            {% include 'flex-objects/pages/buttons/export-csv.html.twig' %}
         {% endblock export_button %}
         {% endif %}
 
         {# CREATE #}
         {% if can_create %}
         {% block create_button %}
-            <a class="button" href="{{ route.withGravParam('action', 'add') }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
+            {% include 'flex-objects/pages/buttons/add.html.twig' %}
         {% endblock create_button %}
+        {% endif %}
+
+        {# LANGUAGES #}
+        {% if can_translate %}
+        {% block languages_button %}
+            {% include 'flex-objects/pages/buttons/languages.html.twig' %}
+        {% endblock languages_button %}
         {% endif %}
     </div>
     {% endblock titlebar_button_bar %}
 
     {% block titlebar_title %}
     <h1>
-        {% set icon = icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
-        <i class="fa fa-fw {{ icon }}"></i>
+        <i class="fa fa-fw {{ title_icon }}"></i>
         {{ directory ? directory.title|tu : 'Not Found' }}
     </h1>
     {% endblock titlebar_title %}
