@@ -132,9 +132,9 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
         switch ($name) {
             case 'name':
-                return $this->getKey();
+                return $this->hasKey() ? $this->getKey() : '';
             case 'route':
-                return '/' . $this->getKey();
+                return $this->hasKey() ? '/' . $this->getKey() : '';
         }
 
         return parent::getFormValue($name, $default, $separator);
@@ -143,7 +143,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function save($reorder = true)
     {
         if ($reorder === true) {
-            //throw new \RuntimeException('Not Implemented');
+            throw new \RuntimeException('Not Implemented');
         }
 
         return parent::save();
@@ -156,7 +156,9 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function extra()
     {
-        return $this->getBlueprint()->extra($this->prepareStorage()['header'], 'header.');
+        $data = $this->prepareStorage();
+
+        return $this->getBlueprint()->extra($data['header'] ?? [], 'header.');
     }
 
     public function folder($var = null)
@@ -165,7 +167,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             throw new \RuntimeException('Not Implemented');
         }
 
-        return $this->getStorageKey();
+        return $this->hasKey() ? $this->getStorageKey() : '';
     }
 
     /**
@@ -195,7 +197,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function hasProperty($property)
     {
-        if (isset(static::$headerProperties[$property])) {
+        if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
             return $this->hasNestedProperty("header.{$property}");
         }
 
@@ -211,7 +213,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function getProperty($property, $default = null)
     {
-        if (isset(static::$headerProperties[$property])) {
+        if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
             return $this->getNestedProperty("header.{$property}", $default);
         }
 
@@ -226,7 +228,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function setProperty($property, $value)
     {
-        if (isset(static::$headerProperties[$property])) {
+        if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
             $this->setNestedProperty("header.{$property}", $value);
 
             return;
@@ -240,7 +242,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function unsetProperty($property)
     {
-        if (isset(static::$headerProperties[$property])) {
+        if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
             $this->unsetNestedProperty("header.{$property}");
 
             return;
