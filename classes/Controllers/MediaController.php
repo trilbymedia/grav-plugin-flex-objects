@@ -247,7 +247,7 @@ class MediaController extends AbstractController
         $settings = $object->getBlueprint()->schema()->getProperty($name);
 
         $media = $object->getMedia();
-        $folder = $settings['folder'] ?? trim(Utils::url($media->path()), '/');
+        $folder = $settings['folder'] ?? Utils::url($media->path()) ?: null;
 
         $available_files = [];
         $metadata = [];

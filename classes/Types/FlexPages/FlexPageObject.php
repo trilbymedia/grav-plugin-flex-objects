@@ -167,7 +167,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             throw new \RuntimeException('Not Implemented');
         }
 
-        return $this->hasKey() ? $this->getStorageKey() : '';
+        return $this->hasKey() ? $this->getKey() : '';
     }
 
     /**
