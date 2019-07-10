@@ -1,26 +1,34 @@
 {% block titlebar %}
-    {% set back_url = base_url ~ '/' ~ route.getRoute(1, -1) %}
-
+    {% block titlebar_button_bar %}
     <div class="button-bar">
-        {# BACK #}
-        <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+        {% block back_button %}
+            {# BACK #}
+            <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+        {% endblock back_button %}
 
         {% if directory %}
-        {% block buttons %}
-        {# EXPORT #}
         {% if directory.config('admin.export') %}
-        <a class="button" href="{{ route.withGravParam('action', 'csv') }}"><i class="fa fa-download"></i> CSV</a>
+        {% block export_button %}
+            {# EXPORT #}
+            <a class="button" href="{{ route.withGravParam('action', 'csv') }}"><i class="fa fa-download"></i> CSV</a>
+        {% endblock export_button %}
         {% endif %}
 
-        {# CREATE #}
         {% if directory.isAuthorized('create') %}
-        <a class="button" href="{{ route.withGravParam('action', 'add') }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
+        {% block create_button %}
+            {# CREATE #}
+            <a class="button" href="{{ route.withGravParam('action', 'add') }}"><i class="fa fa-plus"></i> {{ "PLUGIN_ADMIN.ADD"|tu }}</a>
+        {% endblock create_button %}
         {% endif %}
-        {% endblock buttons %}
         {% endif %}
     </div>
+    {% endblock titlebar_button_bar %}
 
+    {% block titlebar_title %}
     <h1>
-        <i class="fa fa-fw fa-file-text-o"></i> {{ directory ? directory.title|tu : 'Not Found' }}
+        {% set icon = icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+        <i class="fa fa-fw {{ icon }}"></i>
+        {{ directory ? directory.title|tu : 'Not Found' }}
     </h1>
+    {% endblock titlebar_title %}
 {% endblock %}

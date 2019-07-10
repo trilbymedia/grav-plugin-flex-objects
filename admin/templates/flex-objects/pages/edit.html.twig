@@ -5,6 +5,10 @@
 {% set allowed = directory and (object.exists or uri.param('action') == 'add') %}
 {% set blueprint = object.blueprint ?? directory.blueprint %}
 
+{% set action = route.getGravParam('action') %}
+{% set back_route = '/' ~ (action ? route.getRoute(1) : route.getRoute(1, -1)) %}
+{% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
+
 {% block content_top %}
     {% if allowed and user.authorize('admin.super') %}
         {% if directory and object or uri.param('action') == 'add' %}

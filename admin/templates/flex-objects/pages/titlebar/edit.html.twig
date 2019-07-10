@@ -1,44 +1,53 @@
 {% block titlebar %}
-    {% set action = route.getGravParam('action') %}
-    {% set back_url = base_url ~ '/' ~ (action ? route.getRoute(1) : route.getRoute(1, -1)) %}
+    {% block titlebar_button_bar %}
+        <div class="button-bar">
 
-    <div class="button-bar">
-        {# BACK #}
-        <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+        {% block back_button %}
+            {# BACK #}
+            <a class="button" href="{{ back_url }}"><i class="fa fa-reply"></i> {{ "PLUGIN_ADMIN.BACK"|tu }}</a>
+        {% endblock back_button %}
 
         {% if allowed %}
-        {% block buttons %}
+        {% if object.exists and object.route %}
+        {% block preview_button %}
             {# PREVIEW #}
-            {% if object.exists and object.route %}
-                <a href="{{ url(object.route.uri, true) }}" class="button" target="_blank">
-                    <i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}
-                </a>
-            {% endif %}
+            <a href="{{ url(object.route.uri, true) }}" class="button" target="_blank">
+                <i class="fa fa-eye"></i> {{ "PLUGIN_ADMIN.PREVIEW"|tu }}
+            </a>
+        {% endblock preview_button %}
+        {% endif %}
 
+        {% if object.exists and object.isAuthorized('delete') %}
+        {% block delete_button %}
             {# DELETE #}
-            {% if object.exists and object.isAuthorized('delete') %}
-                <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(route.withoutParams().withGravParam('task', 'delete').getUri(), 'admin-form', 'admin-nonce') }}" class="button danger">
-                    <i class="fa fa-fw fa-close"></i> Delete
-                </a>
-            {% endif %}
+            <a href="#delete" data-remodal-target="delete" data-delete-url="{{ uri.addNonce(route.withoutParams().withGravParam('task', 'delete').getUri(), 'admin-form', 'admin-nonce') }}" class="button danger">
+                <i class="fa fa-fw fa-close"></i> Delete
+            </a>
+        {% endblock delete_button %}
+        {% endif %}
 
+        {% if object.exists ? object.isAuthorized('save') : directory.isAuthorized('create') %}
+        {% block save_button %}
             {# SAVE #}
-            {% if object.exists ? object.isAuthorized('save') : directory.isAuthorized('create') %}
-                <button class="button" type="submit" name="task" value="save" form="blueprints">
-                    <i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}
-                </button>
-            {% endif %}
-        {% endblock buttons %}
+            <button class="button" type="submit" name="task" value="save" form="blueprints">
+                <i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}
+            </button>
+        {% endblock save_button %}
+        {% endif %}
         {% endif %}
     </div>
+    {% endblock titlebar_button_bar %}
 
+    {% block titlebar_title %}
     <h1>
-        <i class="fa fa-fw fa-file-text-o"></i>
+        {% set icon = icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+        <i class="fa fa-fw {{ icon }}"></i>
         {% if allowed %}
             {{ not object.exists ? '[NEW]' }} {{ object.title ?? key }}
         {% else %}
             Not Found
         {% endif %}
     </h1>
+    {% endblock titlebar_title %}
 
 {% endblock %}
