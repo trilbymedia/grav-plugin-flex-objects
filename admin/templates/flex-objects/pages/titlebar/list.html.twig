@@ -32,7 +32,7 @@
     {% block titlebar_title %}
     <h1>
         <i class="fa fa-fw {{ title_icon }}"></i>
-        {{ directory ? directory.title|tu : 'Not Found' }}
+        {{ directory ? title|tu : 'Not Found' }}
     </h1>
     {% endblock titlebar_title %}
 {% endblock %}

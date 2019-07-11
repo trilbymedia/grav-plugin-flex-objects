@@ -35,7 +35,7 @@
     <h1>
         <i class="fa fa-fw {{ title_icon }}"></i>
         {% if allowed %}
-            {{ not object.exists ? '[NEW]' }} {{ object.title ?? key }}
+            {{ not object.exists ? '[NEW]' }} {{ title }}
         {% else %}
             Not Found
         {% endif %}

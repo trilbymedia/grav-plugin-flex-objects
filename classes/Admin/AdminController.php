@@ -274,14 +274,21 @@ class AdminController
     public function taskContinue()
     {
         $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new \RuntimeException('Not Found', 404);
+        }
 
-        $this->data['route'] = '/' . ltrim($this->data['route'] ?? '', '/');
-        $route = ltrim($this->data['route'], '/');
+        $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
+        $route = trim($this->data['route'], '/');
         $name = $this->data['folder'] ?? 'undefined';
         $key = trim("{$route}/{$name}", '/');
+        if (isset($this->data['title'])) {
+            $this->data['header']['title'] = $this->data['title'];
+            unset($this->data['title']);
+        }
         unset($this->data['blueprint']);
 
-        $this->object = $directory->createObject($this->data, $key, false);
+        $this->object = $directory->createObject($this->data, $key);
 
         /** @var FlexForm $form */
         $form = $this->object->getForm();
@@ -292,6 +299,7 @@ class AdminController
         /** @var FlexFormFlash $flash */
         $flash = $form->getFlash();
         $flash->setUrl($this->getFlex()->adminRoute($this->object));
+        $flash->setData($this->data);
         $flash->save(true);
 
         $this->setRedirect($flash->getUrl());
@@ -427,12 +435,12 @@ class AdminController
 
     public function taskFilesUpload()
     {
-        throw new \RuntimeException('Should not be called!');
+        throw new \RuntimeException('Task delMedia should not be called!');
     }
 
     public function taskRemoveMedia($filename = null)
     {
-        throw new \RuntimeException('Should not be called!');
+        throw new \RuntimeException('Task removeMedia should not be called!');
     }
 
     public function taskGetFilesInFolder()

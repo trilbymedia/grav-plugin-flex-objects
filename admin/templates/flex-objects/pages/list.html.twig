@@ -4,6 +4,7 @@
 {# These variables can be overridden from the main template file #}
 {% set back_route = back_route ?? '/' ~ route.getRoute(1, -1) %}
 {% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+{% set title = title ?? directory.title %}
 
 {# Allowed actions #}
 {% set can_export = directory.config('admin.export') %}

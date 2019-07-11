@@ -3,8 +3,9 @@
 
 {# These variables can be overridden from the main template file #}
 {% set allowed = allowed ?? directory and (object.exists or action == 'add') %}
-{% set back_route = back_route ?? '/' ~ (action != 'edit' ? route.getRoute(1) : route.getRoute(1, -1)) %}
+{% set back_route = back_route ?? '/' ~ (action != 'edit' and not key ? route.getRoute(1) : route.getRoute(1, -1)) %}
 {% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+{% set title = title ?? object.form.getValue('title') ?? object.title ?? key %}
 
 {# Allowed actions #}
 {% set can_preview = object.exists and object.route %}
