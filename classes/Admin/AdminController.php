@@ -278,12 +278,13 @@ class AdminController
         $this->data['route'] = '/' . ltrim($this->data['route'] ?? '', '/');
         $route = ltrim($this->data['route'], '/');
         $name = $this->data['folder'] ?? 'undefined';
+        $key = trim("{$route}/{$name}", '/');
         unset($this->data['blueprint']);
 
-        $this->object = $directory->createObject($this->data, "{$route}/{$name}", false);
+        $this->object = $directory->createObject($this->data, $key, false);
 
         /** @var FlexForm $form */
-        $form = $this->getForm($this->object);
+        $form = $this->object->getForm();
 
         // Reset form, we are starting from scratch.
         $form->reset();
@@ -332,8 +333,13 @@ class AdminController
             $form = $this->getForm($object);
 
             $form->handleRequest($request);
+            $error = $form->getError();
             $errors = $form->getErrors();
-            if ($errors) {
+            if ($error || $errors) {
+                if ($error) {
+                    $this->admin->setMessage($error, 'error');
+                }
+
                 foreach ($errors as $error) {
                     $this->admin->setMessage($error, 'error');
                 }
@@ -663,12 +669,10 @@ class AdminController
 
             $directory = $this->getDirectory();
             if ($directory) {
-                if (null === $key) {
-                    if ($this->action === 'add') {
-                        $object = $directory->createObject([], $key ?? '');
-                    }
-                } else {
-                    $object = $directory->getObject($key);
+                if (null !== $key) {
+                    $object = $directory->getObject($key) ?: $directory->createObject([], $key);
+                } elseif ($this->action === 'add') {
+                    $object = $directory->createObject([], '');
                 }
             }
 
