@@ -31,8 +31,8 @@
 
     {% block titlebar_title %}
     <h1>
-        <i class="fa fa-fw {{ title_icon }}"></i>
-        {{ directory ? title|tu : 'Not Found' }}
+        <i class="fa fa-fw {{ directory ? title_icon : 'fa-exclamation-triangle' }}"></i>
+        {{ directory ? title|tu : 'Error' }}
     </h1>
     {% endblock titlebar_title %}
 {% endblock %}

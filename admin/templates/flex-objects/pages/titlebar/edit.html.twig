@@ -33,11 +33,12 @@
 
     {% block titlebar_title %}
     <h1>
-        <i class="fa fa-fw {{ title_icon }}"></i>
         {% if allowed %}
+            <i class="fa fa-fw {{ title_icon }}"></i>
             {{ not object.exists ? '[NEW]' }} {{ title }}
         {% else %}
-            Not Found
+            <i class="fa fa-fw fa-exclamation-triangle"></i>
+            Error
         {% endif %}
     </h1>
     {% endblock titlebar_title %}
