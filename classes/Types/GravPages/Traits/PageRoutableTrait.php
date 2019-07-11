@@ -142,7 +142,7 @@ trait PageRoutableTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
         // TODO: implement rest of the routing:
@@ -155,7 +155,7 @@ trait PageRoutableTrait
     public function unsetRouteSlug()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -169,7 +169,7 @@ trait PageRoutableTrait
     {
         if (null !== $var) {
             // TODO:
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
         // TODO: missing full implementation
@@ -232,7 +232,7 @@ trait PageRoutableTrait
     public function relativePagePath()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -247,10 +247,10 @@ trait PageRoutableTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -264,10 +264,10 @@ trait PageRoutableTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -281,10 +281,10 @@ trait PageRoutableTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(PageInterface): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(PageInterface): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -295,7 +295,7 @@ trait PageRoutableTrait
     public function topParent()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -308,7 +308,7 @@ trait PageRoutableTrait
     public function currentPosition()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -319,7 +319,7 @@ trait PageRoutableTrait
     public function active()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -331,7 +331,7 @@ trait PageRoutableTrait
     public function activeChild()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**

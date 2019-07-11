@@ -143,7 +143,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function save($reorder = true)
     {
         if ($reorder === true) {
-            throw new \RuntimeException('Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
         }
 
         return parent::save();
@@ -164,7 +164,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function folder($var = null)
     {
         if (null !== $var) {
-            throw new \RuntimeException('Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
         }
 
         return $this->hasKey() ? $this->getKey() : '';

@@ -24,7 +24,7 @@ trait PageLegacyTrait
     public function init(\SplFileInfo $file, $extension = null)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -38,10 +38,10 @@ trait PageLegacyTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -55,10 +55,10 @@ trait PageLegacyTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -133,7 +133,7 @@ trait PageLegacyTrait
     public function setSummary($summary)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -144,7 +144,7 @@ trait PageLegacyTrait
     public function contentMeta()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -156,7 +156,7 @@ trait PageLegacyTrait
     public function addContentMeta($name, $value)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -169,7 +169,7 @@ trait PageLegacyTrait
     public function getContentMeta($name = null)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -182,7 +182,7 @@ trait PageLegacyTrait
     public function setContentMeta($content_meta)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -191,7 +191,7 @@ trait PageLegacyTrait
     public function cachePageContent()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -202,7 +202,7 @@ trait PageLegacyTrait
     public function file()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     abstract public function save($reorder = true);
@@ -219,7 +219,7 @@ trait PageLegacyTrait
     public function move(PageInterface $parent)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -235,7 +235,7 @@ trait PageLegacyTrait
     public function copy(PageInterface $parent)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     abstract public function blueprints();
@@ -248,7 +248,7 @@ trait PageLegacyTrait
     public function blueprintName()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -259,7 +259,7 @@ trait PageLegacyTrait
     public function validate()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -268,7 +268,7 @@ trait PageLegacyTrait
     public function filter()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -279,7 +279,7 @@ trait PageLegacyTrait
     public function extra()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -323,7 +323,7 @@ trait PageLegacyTrait
     public function forms()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -332,7 +332,7 @@ trait PageLegacyTrait
     public function addForms(array $new)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -346,10 +346,10 @@ trait PageLegacyTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -374,7 +374,7 @@ trait PageLegacyTrait
     {
         if (null !== $var) {
             // TODO:
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
         return ($this->modular() ? 'modular/' : '') . str_replace($this->extension(), '', $this->name());
@@ -392,10 +392,10 @@ trait PageLegacyTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -409,7 +409,7 @@ trait PageLegacyTrait
     {
         if (null !== $var) {
             // TODO:
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
         return '.' . pathinfo($this->name(), PATHINFO_EXTENSION);
@@ -478,10 +478,10 @@ trait PageLegacyTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(array): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(array): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -511,10 +511,10 @@ trait PageLegacyTrait
     {
         // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(string): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -525,7 +525,7 @@ trait PageLegacyTrait
     public function filePathClean()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -626,7 +626,7 @@ trait PageLegacyTrait
     {
         if (null !== $var) {
             // TODO:
-            throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(bool): Not Implemented');
+            throw new \RuntimeException(__METHOD__ . '(bool): Not Implemented');
         }
 
         return strpos($this->slug(), '_') === 0;
@@ -640,7 +640,7 @@ trait PageLegacyTrait
     public function children()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -651,7 +651,7 @@ trait PageLegacyTrait
     public function isFirst()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -662,7 +662,7 @@ trait PageLegacyTrait
     public function isLast()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -673,7 +673,7 @@ trait PageLegacyTrait
     public function prevSibling()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -684,7 +684,7 @@ trait PageLegacyTrait
     public function nextSibling()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -697,7 +697,7 @@ trait PageLegacyTrait
     public function adjacentSibling($direction = 1)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -711,7 +711,7 @@ trait PageLegacyTrait
     public function ancestor($lookup = null)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -725,7 +725,7 @@ trait PageLegacyTrait
     public function inherited($field)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -739,7 +739,7 @@ trait PageLegacyTrait
     public function inheritedField($field)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -753,7 +753,7 @@ trait PageLegacyTrait
     public function find($url, $all = false)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -768,7 +768,7 @@ trait PageLegacyTrait
     public function collection($params = 'content', $pagination = true)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -780,7 +780,7 @@ trait PageLegacyTrait
     public function evaluate($value, $only_published = true)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -802,7 +802,7 @@ trait PageLegacyTrait
     public function getOriginal()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -813,7 +813,7 @@ trait PageLegacyTrait
     public function getAction()
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     abstract protected function exists();

@@ -4,7 +4,8 @@ namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
 trait PageTranslateTrait
 {
-    private $_page_language;
+    /** @var string|null Language code, eg: 'en' */
+    protected $language;
 
     /**
      * Return an array with the routes of other translated languages
@@ -16,7 +17,7 @@ trait PageTranslateTrait
     public function translatedLanguages($onlyPublished = false)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -29,7 +30,7 @@ trait PageTranslateTrait
     public function untranslatedLanguages($includeUnpublished = false)
     {
         // TODO:
-        throw new \RuntimeException(__CLASS__ . '::' . __METHOD__ . '(): Not Implemented');
+        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
@@ -42,11 +43,18 @@ trait PageTranslateTrait
     public function language($var = null)
     {
         if (null !== $var) {
-            $this->_page_language = (string)$var;
-        } elseif (null === $this->_page_language) {
-            $this->_page_language = trim(basename($this->extension(), 'md'), '.');
+            $this->setProperty('language', $var);
         }
 
-        return $this->_page_language ?: null;
+        return $this->getProperty('language');
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    protected function offsetLoad_language($value)
+    {
+        return $value ?? trim(basename($this->extension(), 'md'), '.');
     }
 }
