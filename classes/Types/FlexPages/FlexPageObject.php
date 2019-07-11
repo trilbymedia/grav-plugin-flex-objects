@@ -143,7 +143,8 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function save($reorder = true)
     {
         if ($reorder === true) {
-            throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+            // FIXME: I guess we want to support ordering?
+            //throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
         }
 
         return parent::save();

@@ -351,7 +351,7 @@ class AdminController
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect) {
-                if (strpos($this->referrerUri, 'action:add')) {
+                if (strpos($this->referrerUri, 'action:add') && !Utils::endsWith($this->currentUri, $object->getKey())) {
                     $this->referrerUri = $this->currentUri . '/' . $object->getKey();
                 }
                 if ($postAction === 'list') {
