@@ -1,0 +1,49 @@
+{% extends 'partials/base.html.twig' %}
+{% use 'flex-objects/pages/titlebar/preview.html.twig' %}
+
+{# Allowed actions #}
+{% set can_preview = can_preview ?? object.exists and object.route %}
+{% set can_translate = can_translate ?? false %}
+
+{# These variables can be overridden from the main template file #}
+{% set allowed = allowed ?? directory and (object.exists or action == 'add') %}
+{% set back_route = back_route ?? '/' ~ route.getRoute(1) %}
+{% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+{% set title = title ?? object.form.getValue('title') ?? object.title ?? key %}
+{% set preview_url = preview_url ?? (can_preview ? object.getRoute().uri ?: null : null) %}
+
+{% block body %}
+    {% if not can_preview or not preview_url %}
+        {% set allowed = false %}
+    {% endif %}
+    {% set id = key %}
+    {% set blueprint = object.blueprint ?? directory.blueprint %}
+    {% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
+
+    {{ parent() }}
+{% endblock body %}
+
+{% block content_wrapper %}
+{% if allowed %}
+    <div class="content-wrapper preview-wrapper">
+        <div class="content-padding" width="100%" height="100%">
+            <iframe width="100%" height="100%" frameborder="0" src="{{ preview_url }}" />
+        </div>
+    </div>
+{% else %}
+    {{ parent() }}
+{% endif %}
+{% endblock content_wrapper %}
+
+{% block content %}
+    {{ preview_url }}
+    {% do page.modifyHeader('http_response_code', 404) %}
+    <div class="error-block">
+        <h1>Error 404</h1>
+        <div class="padding">
+            <p>
+                Woops! Looks like this page doesn't exist.
+            </p>
+        </div>
+    </div>
+{% endblock content %}

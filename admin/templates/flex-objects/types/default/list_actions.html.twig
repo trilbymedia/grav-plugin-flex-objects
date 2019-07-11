@@ -1,6 +1,12 @@
 {% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
 
 {% if object.isAuthorized('read') %}
+    {% if object.getRoute() %}
+        <a href="{{ route.withAddedPath(object.getKey()).withoutParams().withQueryParam('preview', 1) }}" title="{{ "PLUGIN_ADMIN.PREVIEW"|tu }}" class="preview-action">
+            <i class="fa fa-eye"></i>
+        </a>
+    {% endif %}
+
     <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="Edit {{ object_title }}" class="edit-action">
         <i class="fa fa-pencil"></i>
     </a>

@@ -11,12 +11,16 @@
 {% set can_create = directory.isAuthorized('create') %}
 {% set can_translate = false %}
 
-{% set collection = directory ? collection.isAuthorized('list') %}
-{% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
-{% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
-{% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
-
 {% do assets.addJs('plugin://flex-objects/js/flex-objects.js', { 'group': 'bottom', 'loading': 'defer' }) %}
+
+{% block body %}
+    {% set collection = directory ? collection.isAuthorized('list') %}
+    {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
+    {% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
+    {% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
+
+    {{ parent() }}
+{% endblock body %}
 
 {% block content_top %}
 {% if directory %}

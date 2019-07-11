@@ -1,4 +1,4 @@
-{% set template = (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: task ?: 'types' %}
+{% set template = grav.route.queryParam('preview') ? 'preview' : (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: task ?: 'types' %}
 
 {% set separator = config.system.param_sep %}
 {% set route = grav.route.withExtension('') %}

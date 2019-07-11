@@ -8,15 +8,18 @@
 {% set title = title ?? object.form.getValue('title') ?? object.title ?? key %}
 
 {# Allowed actions #}
-{% set can_preview = object.exists and object.route %}
+{% set can_preview = object.exists and object.getRoute() %}
 {% set can_save = object.exists ? object.isAuthorized('save') : directory.isAuthorized('create') %}
 {% set can_delete = object.exists and object.isAuthorized('delete') %}
 {% set can_translate = false %}
 
-{% set id = key %}
-{% set blueprint = object.blueprint ?? directory.blueprint %}
-{% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
-{% set object = object ?? directory.createObject([], key ?? '') %}
+{% block body %}
+    {% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
+    {% set id = key %}
+    {% set blueprint = blueprint ?? object.blueprint ?? directory.blueprint %}
+
+    {{ parent() }}
+{% endblock body %}
 
 {% block content_top %}
     {% if allowed and user.authorize('admin.super') %}
@@ -28,7 +31,6 @@
 
 {% block content %}
     {% if allowed %}
-
         <div class="clear directory admin-pages">
             <div class="admin-form-wrapper">
                 <div id="admin-topbar">
