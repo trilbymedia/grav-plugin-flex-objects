@@ -1,15 +1,31 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/pages/titlebar/list.html.twig' %}
 
+{% set route = grav.route.withExtension('') %}
+
+{# Allowed actions #}
+{% set can_export = can_export ?? directory.config('admin.export') %}
+{% set can_create = can_create ?? directory.isAuthorized('create') %}
+{% set can_translate = can_translate ?? (admin.multilang and directory.object.hasFlexFeature('flex-translate')) %}
+
 {# These variables can be overridden from the main template file #}
-{% set back_route = back_route ?? '/' ~ route.getRoute(1, -1) %}
+{% set back_route = back_route ?? ('/' ~ route.getRoute(1, -1)) %}
 {% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
 {% set title = title ?? directory.title %}
 
-{# Allowed actions #}
-{% set can_export = directory.config('admin.export') %}
-{% set can_create = directory.isAuthorized('create') %}
-{% set can_translate = false %}
+{% set fields = directory.config('admin.list.fields') %}
+{% set fields_count = fields ? count(fields) : 0 %}
+{% set fields_width = 8 %}
+{% set fields_set = 0 %}
+{% set title_field = directory.config('admin.list.title') %}
+{% for key,options in fields %}
+    {% set fields_width = fields_width + options.width ?: 0 %}
+    {% set fields_set = fields_set + (options.width ? 1 : 0) %}
+    {% if not title_field and options.link == 'edit' %}
+        {% set title_field = key %}
+    {% endif %}
+{% endfor %}
+{% set schema = directory.blueprint.schema %}
 
 {% do assets.addJs('plugin://flex-objects/js/flex-objects.js', { 'group': 'bottom', 'loading': 'defer' }) %}
 
@@ -17,7 +33,7 @@
     {% set collection = directory ? collection.isAuthorized('list') %}
     {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
     {% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
-    {% set back_url = admin_route(back_route) ?: base_url ~ back_route %}
+    {% set back_url = admin_route(back_route) ?: (base_url ~ back_route) %}
 
     {{ parent() }}
 {% endblock body %}

@@ -1,15 +1,1 @@
 {% extends 'flex-objects/pages/list.html.twig' %}
-
-{% set fields = directory.config('admin.list.fields') %}
-{% set fields_count = fields ? count(fields) : 0 %}
-{% set fields_width = 8 %}
-{% set fields_set = 0 %}
-{% set title_field = directory.config('admin.list.title') %}
-{% for key,options in fields %}
-    {% set fields_width = fields_width + options.width ?: 0 %}
-    {% set fields_set = fields_set + (options.width ? 1 : 0) %}
-    {% if not title_field and options.link == 'edit' %}
-        {% set title_field = key %}
-    {% endif %}
-{% endfor %}
-{% set schema = directory.blueprint.schema %}
