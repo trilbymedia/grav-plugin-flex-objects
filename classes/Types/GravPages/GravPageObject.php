@@ -6,14 +6,39 @@ use Grav\Common\Data\Blueprint;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
+use Grav\Framework\Route\Route;
+use Grav\Framework\Route\RouteFactory;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
 
 /**
  * Class GravPageObject
  * @package Grav\Plugin\FlexObjects\Types\GravPages
+ *
+ * @property string $name
+ * @property string $folder
+ * @property string $route
+ * @property string $template
  */
 class GravPageObject extends FlexPageObject
 {
+    /** @var string Route to the page excluding order and folder, eg: '/blog/2019' */
+    protected $route;
+
+    /** @var string Folder of the page, eg: 'article-title' */
+    protected $folder;
+
+    /** @var string|false Numeric order of the page, eg. 3 */
+    protected $order;
+
+    /** @var string Template name, eg: 'article' */
+    protected $template;
+
+    /** @var string File format, eg. 'md' */
+    protected $format;
+
+    /** @var string Filename, eg: 'article.md' */
+    protected $name;
+
     /**
      * @return array
      */
@@ -24,6 +49,24 @@ class GravPageObject extends FlexPageObject
             'path' => true,
             'full_order' => true
         ] + parent::getCachedMethods();
+    }
+
+    /**
+     * @param string|array $query
+     * @return Route
+     */
+    public function getRoute($query = []): Route
+    {
+        $route = RouteFactory::createFromString($this->route());
+        if (\is_array($query)) {
+            foreach ($query as $key => $value) {
+                $route = $route->withQueryParam($key, $value);
+            }
+        } else {
+            $route = $route->withAddedPath($query);
+        }
+
+        return $route;
     }
 
     /**
@@ -48,13 +91,13 @@ class GravPageObject extends FlexPageObject
 
         switch ($name) {
             case 'name':
-                // TODO: language
-                $language = '';
-                $name_val = str_replace($language . '.md', '', $this->name());
-
-                return $this->modular() ? 'modular/' . $name_val : $name_val;
+                // TODO: this should not be template!
+                return $this->getProperty('template');
+            case 'folder':
+                return $this->getProperty('folder');
             case 'route':
-                return \dirname('/' . $this->getKey());
+                // FIXME: remove filename from key.
+                return $this->getProperty('route');
             case 'full_route':
                 return '/' . $this->getKey();
             case 'full_order':
@@ -67,13 +110,21 @@ class GravPageObject extends FlexPageObject
     public function folder($var = null)
     {
         if (null !== $var) {
-            throw new \RuntimeException('Not Implemented');
+            $this->setProperty('folder', $var);
         }
 
-        $parts = explode('/', '/' . $this->getStorageKey());
-        array_pop($parts);
+        return $this->getProperty('folder');
+    }
 
-        return end($parts);
+    public function order($var = null)
+    {
+        if (null !== $var) {
+            $this->setProperty('order', $var);
+        }
+
+        $var = $this->getProperty('order');
+
+        return $var !== false ? sprintf('%02d.', $var) : false;
     }
 
     public function path($var = null)
@@ -82,7 +133,8 @@ class GravPageObject extends FlexPageObject
             throw new \RuntimeException('Not Implemented');
         }
 
-        $parts = explode('/', '/' . $this->getStorageKey());
+        $key = $this->hasKey() ? '/' . $this->getStorageKey() : '';
+        $parts = explode('/', '/' . $key);
         array_pop($parts);
         array_pop($parts);
 
@@ -91,7 +143,8 @@ class GravPageObject extends FlexPageObject
 
     protected function location()
     {
-        $parts = explode('/', '/' . $this->getStorageKey());
+        $key = $this->hasKey() ? '/' . $this->getStorageKey() : '';
+        $parts = explode('/', '/' . $key);
         array_pop($parts);
 
         return '/' . implode('/', $parts);
@@ -135,10 +188,10 @@ class GravPageObject extends FlexPageObject
     public function name($var = null)
     {
         if ($var !== null) {
-            throw new \RuntimeException('Not Implemented');
+            $this->setProperty('name', $var);
         }
 
-        return basename($this->getStorageKey());
+        return $this->getProperty('name');
     }
 
     /**
@@ -152,10 +205,10 @@ class GravPageObject extends FlexPageObject
     public function template($var = null)
     {
         if ($var !== null) {
-            throw new \RuntimeException('Not Implemented');
+            $this->setProperty('template', $var);
         }
 
-        return ($this->modular() ? 'modular/' : '') . str_replace($this->extension(), '', $this->name());
+        return $this->getProperty('template');
     }
 
     /**
@@ -222,7 +275,11 @@ class GravPageObject extends FlexPageObject
         // Make sure that pages has been initialized.
         Pages::getTypes();
 
-        return $this->getFlexDirectory()->getBlueprint($this->template(), 'blueprints://pages');
+        try {
+            return $this->getFlexDirectory()->getBlueprint($this->getProperty('template'), 'blueprints://pages');
+        } catch (\RuntimeException $e) {
+            return $this->getFlexDirectory()->getBlueprint('default', 'blueprints://pages');
+        }
     }
 
     /**
@@ -280,5 +337,99 @@ class GravPageObject extends FlexPageObject
         unset($elements['order'], $elements['folder']);
 
         parent::filterElements($elements);
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    protected function offsetLoad_route($value)
+    {
+        return $value ?? $this->hasKey() ? \dirname('/' . $this->getKey()) : '/';
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    protected function offsetLoad_folder($value)
+    {
+        return $value ?? $this->hasKey() ? \basename($this->getKey()) : '';
+    }
+
+    protected function offsetLoad_order($value)
+    {
+        if (null === $value) {
+            preg_match(PAGE_ORDER_PREFIX_REGEX, \basename(\dirname($this->getStorageKey())), $order);
+
+            if (isset($order[0])) {
+                $value = (int)$order[0];
+            } else {
+                $value = false;
+            }
+        }
+
+        return $value;
+    }
+
+    protected function offsetPrepare_order($value)
+    {
+        return false !== $value ? (int)$value : false;
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    protected function offsetLoad_name($value)
+    {
+        return $value ?? $this->hasKey() ? \basename($this->getStorageKey()) : 'default.md';
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    protected function offsetPrepare_name($value): string
+    {
+        // Setting name will reset page template.
+        $this->unsetProperty('template');
+
+        if ($value && !preg_match('/\.md$/', $value)) {
+            // FIXME: missing language support.
+            $value .= '.md';
+        }
+
+        return $value ?: 'default.md';
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    protected function offsetLoad_template($value): string
+    {
+        $value = $value ?? $this->getNestedProperty('header.template');
+        if (!$value) {
+            $value = $this->stripNameExtension($this->getProperty('name'));
+            $value = $this->modular() ? 'modular/' . $value : $value;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Strip filename from its extensions.
+     *
+     * @param string $value
+     * @return string
+     */
+    protected function stripNameExtension(string $value): string
+    {
+        // Also accept name with file extension: .en.md
+        $language = $this->language() ? '.' . $this->language() : '';
+        $pattern = '%(' . preg_quote($language, '%') . ')?\.md$%';
+
+        return preg_replace($pattern, '', $value);
     }
 }

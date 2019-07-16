@@ -1,0 +1,48 @@
+{% extends 'flex-objects/pages/list.html.twig' %}
+
+{% set can_translate = can_translate ?? (admin.multilang and directory.object.hasFlexFeature('page-translate')) %}
+
+{% block back_button %}
+    {% include 'flex-objects/types/grav-pages/buttons/back.html.twig' %}
+{% endblock %}
+
+{% block create_button %}
+    {% include 'flex-objects/types/grav-pages/buttons/add.html.twig' %}
+{% endblock %}
+
+{% block content_top %}
+{% if directory and grav.user.authorize('admin.super') %}
+    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(directory.storageFolder())|trim('/') }}</b></div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+    {{ parent() }}
+
+    {# Modals #}
+    <div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking: false">
+        {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/new'), data: obj_data, form_id:'new-page' } %}
+    </div>
+
+    <div class="remodal" data-remodal-id="modal-folder" data-remodal-options="hashTracking: false">
+        {% include 'partials/blueprints-new-folder.html.twig' with { blueprints: admin.blueprints('admin/pages/new_folder'), data: obj_data, form_id:'new-folder' } %}
+    </div>
+
+    <div class="remodal" data-remodal-id="modular" data-remodal-options="hashTracking: false">
+        {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/modular_new'), data: obj_data, form_id:'new-modular' } %}
+    </div>
+
+    {# TODO: regular pages support extra modals from admin config #}
+
+    <div class="remodal parents-container" data-remodal-id="parents" data-remodal-options="hashTracking: false, stack: true">
+        <form>
+            <h1>Parents</h1>
+            <div class="grav-loading"><div class="grav-loader">Loading...</div></div>
+            <div class="parents-content"></div>
+            <div class="button-bar">
+                <a class="button secondary remodal-cancel" data-remodal-action="cancel" href="#"><i class="fa fa-fw fa-close"></i> {{ "PLUGIN_ADMIN.CANCEL"|tu }}</a>
+                <a class="button" data-parents-select href="#"><i class="fa fa-fw fa-check"></i> {{ "PLUGIN_ADMIN.CONTINUE"|tu }}</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -17,7 +17,7 @@ trait PageTranslateTrait
     public function translatedLanguages($onlyPublished = false)
     {
         // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return [];
     }
 
     /**
@@ -30,7 +30,7 @@ trait PageTranslateTrait
     public function untranslatedLanguages($includeUnpublished = false)
     {
         // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return [];
     }
 
     /**

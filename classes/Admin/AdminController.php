@@ -2,6 +2,8 @@
 
 namespace Grav\Plugin\FlexObjects\Admin;
 
+use Grav\Common\Cache;
+use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
 use Grav\Common\Plugin;
 use Grav\Common\Uri;
@@ -269,7 +271,46 @@ class AdminController
     }
 
     /**
+     * Create a new empty folder (from modal).
+     *
+     * TODO: Pages
+     */
+    public function taskSaveNewFolder()
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if (!$directory->isAuthorized('create')) {
+            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
+        }
+
+        $data = $this->data;
+
+        if ($data['route'] === '' || $data['route'] === '/') {
+            $path = $this->grav['locator']->findResource('page://');
+        } else {
+            $path = $this->grav['page']->find($data['route'])->path();
+        }
+
+        $orderOfNewFolder = ''; //static::getNextOrderInFolder($path) . '.';
+        $new_path         = $path . '/' . $orderOfNewFolder . $data['folder'];
+
+        Folder::create($new_path);
+        Cache::clearCache('invalidate');
+
+        $this->grav->fireEvent('onAdminAfterSaveAs', new Event(['path' => $new_path]));
+
+        $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+
+        $this->setRedirect($this->referrerUri);
+    }
+
+    /**
      * Create a new object (from modal).
+     *
+     * TODO: Pages
      */
     public function taskContinue()
     {
@@ -286,7 +327,30 @@ class AdminController
             $this->data['header']['title'] = $this->data['title'];
             unset($this->data['title']);
         }
+        if (isset($this->data['name']) && $this->data['name'] === 'modular') {
+            $this->data['header']['body_classes'] = 'modular';
+        }
         unset($this->data['blueprint']);
+
+        /*
+        if (isset($data['visible'])) {
+            if ($data['visible'] === '' || $data['visible']) {
+                // if auto (ie '')
+                $pageParent = $page->parent();
+                $children = $pageParent ? $pageParent->children() : [];
+                foreach ($children as $child) {
+                    if ($child->order()) {
+                        // set page order
+                        $page->order(AdminController::getNextOrderInFolder($pageParent->path()));
+                        break;
+                    }
+                }
+            }
+            if ((int)$data['visible'] === 1 && !$page->order()) {
+                $header['visible'] = $data['visible'];
+            }
+        }
+         */
 
         $this->object = $directory->createObject($this->data, $key);
 
@@ -301,6 +365,10 @@ class AdminController
         $flash->setUrl($this->getFlex()->adminRoute($this->object));
         $flash->setData($this->data);
         $flash->save(true);
+
+        // Store the name and route of a page, to be used pre-filled defaults of the form in the future
+        $this->admin->session()->lastPageName  = $this->data['name'] ?? '';
+        $this->admin->session()->lastPageRoute = $this->data['route'] ?? '';
 
         $this->setRedirect($flash->getUrl());
     }
@@ -359,6 +427,7 @@ class AdminController
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect) {
+                // TODO: remove 'action:add' after save.
                 if (strpos($this->referrerUri, 'action:add') && !Utils::endsWith($this->currentUri, $object->getKey())) {
                     $this->referrerUri = $this->currentUri . '/' . $object->getKey();
                 }
@@ -595,7 +664,7 @@ class AdminController
         if ($this->task) {
             // validate nonce
             if (!$this->validateNonce()) {
-                return false;
+                throw new \RuntimeException('Page Expired', 400);
             }
             $method = $this->task_prefix . ucfirst(str_replace('.', '', $this->task));
 
@@ -853,10 +922,10 @@ class AdminController
     protected function validateNonce()
     {
         $nonce_action = $this->nonce_action;
-        $nonce = $this->post[$this->nonce_name] ??  $this->grav['uri']->param($this->nonce_name) ?? $this->grav['uri']->query($this->nonce_name);
+        $nonce = $this->post[$this->nonce_name] ?? $this->grav['uri']->param($this->nonce_name) ?? $this->grav['uri']->query($this->nonce_name);
 
         if (!$nonce) {
-            $nonce = $this->post['admin-nonce'] ??  $this->grav['uri']->param('admin-nonce') ?? $this->grav['uri']->query('admin-nonce');
+            $nonce = $this->post['admin-nonce'] ?? $this->grav['uri']->param('admin-nonce') ?? $this->grav['uri']->query('admin-nonce');
             $nonce_action = 'admin-form';
         }
 

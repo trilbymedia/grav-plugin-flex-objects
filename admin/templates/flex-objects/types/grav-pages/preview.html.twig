@@ -1,0 +1,3 @@
+{% extends 'flex-objects/pages/preview.html.twig' %}
+
+{% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate')) %}

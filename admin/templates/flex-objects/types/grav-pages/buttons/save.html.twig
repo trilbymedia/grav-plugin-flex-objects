@@ -1,0 +1,25 @@
+<div class="button-group">
+    <button class="button" type="submit" name="task" value="save" form="blueprints">
+        <i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}
+    </button>
+    {% if admin.multilang %}
+        {% set untranslated = object.untranslatedLanguages(true) %}
+        {% if untranslated %}
+            <button type="button" class="button dropdown-toggle" data-toggle="dropdown">
+                <i class="fa fa-caret-down"></i>
+            </button>
+            <ul class="dropdown-menu lang-switcher">
+                {% for langCode in untranslated %}
+                    {% set langName = admin.siteLanguages[langCode] %}
+                    {% if langCode != page_lang %}
+                        <li>
+                            <button class="button task" name="task" value="saveas" lang="{{langCode}}" form="blueprints" type="submit">
+                                {{ "PLUGIN_ADMIN.SAVE_AS"|tu }} {{ langName[:1]|upper ~ langName[1:] }}
+                            </button>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endif %}
+</div>
