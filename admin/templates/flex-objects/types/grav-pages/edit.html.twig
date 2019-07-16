@@ -86,7 +86,7 @@
     {% if admin.session.expert == '0' %}
         {% include 'partials/blueprints.html.twig' with { form: object.form, context: object, data: object, blueprints: blueprint } %}
     {% else %}
-        {% include 'partials/blueprints-raw.html.twig' with { form: object.form, context: object, data: object, blueprints: admin.blueprints('admin/pages/'~modular~'raw'), data: context } %}
+        {% include 'partials/blueprints-raw.html.twig' with { form: object.form, context: object, data: object, blueprints: admin.blueprints('admin/pages/'~modular~'raw') } %}
     {% endif %}
 {% endblock edit %}
 
