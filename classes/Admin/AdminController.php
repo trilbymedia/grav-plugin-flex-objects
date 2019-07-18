@@ -200,16 +200,21 @@ class AdminController
             throw new \RuntimeException('Internal Error', 500);
         }
 
-        $list = [];
-        /** @var ObjectInterface $object */
-        foreach ($collection as $object) {
-            if (method_exists($object, 'csvSerialize')) {
-                $data = $object->csvSerialize();
-                if ($data) {
-                    $list[] = $data;
+        if (method_exists($collection, 'csvSerialize')) {
+            $list = $collection->csvSerialize();
+        } else {
+            $list = [];
+
+            /** @var ObjectInterface $object */
+            foreach ($collection as $object) {
+                if (method_exists($object, 'csvSerialize')) {
+                    $data = $object->csvSerialize();
+                    if ($data) {
+                        $list[] = $data;
+                    }
+                } else {
+                    $list[] = $object->jsonSerialize();
                 }
-            } else {
-                $list[] = $object->jsonSerialize();
             }
         }
 
