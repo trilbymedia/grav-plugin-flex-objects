@@ -5,6 +5,7 @@ namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 use Grav\Common\Grav;
 use Grav\Common\Page\Media;
 use Grav\Common\Utils;
+use Grav\Framework\File\Formatter\YamlFormatter;
 
 class_exists('Grav\\Common\\Page\\Page', true);
 
@@ -384,7 +385,17 @@ trait PageContentTrait
     {
         switch ($name) {
             case 'frontmatter':
-                return $this->getArrayProperty('frontmatter');
+                $frontmatter = $this->getArrayProperty('frontmatter');
+                if ($frontmatter === null) {
+                    $header = $this->prepareStorage()['header'] ?? null;
+                    if ($header) {
+                        $formatter = new YamlFormatter();
+                        $frontmatter = $formatter->encode($header);
+                    } else {
+                        $frontmatter = '';
+                    }
+                }
+                return $frontmatter;
             case 'content':
                 return $this->getArrayProperty('markdown');
             case 'order':

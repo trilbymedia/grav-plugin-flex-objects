@@ -10,6 +10,7 @@ use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Framework\File\Formatter\CsvFormatter;
+use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\FlexFormFlash;
@@ -356,6 +357,9 @@ class AdminController
             }
         }
          */
+
+        $formatter = new YamlFormatter();
+        $this->data['frontmatter'] = $formatter->encode($this->data['header'] ?? []);
 
         $this->object = $directory->createObject($this->data, $key);
 
