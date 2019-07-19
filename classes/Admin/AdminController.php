@@ -732,7 +732,16 @@ class AdminController
         $formName = $this->post['__form-name__'] ?? null;
         $uniqueId = $this->post['__unique_form_id__'] ?? null;
 
-        $form = $object->getForm();
+        // Get the form name. This defines the blueprint which is being used.
+        $name = '';
+        if ($formName && strpos($formName, '--')) {
+            [,$name] = explode('--', $formName);
+            if ($name === 'object') {
+                $name = '';
+            }
+        }
+
+        $form = $object->getForm($name);
         if ($uniqueId) {
             $form->setUniqueId($uniqueId);
         }

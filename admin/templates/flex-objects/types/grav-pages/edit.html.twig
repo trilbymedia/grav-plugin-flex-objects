@@ -1,6 +1,6 @@
 {% extends 'flex-objects/pages/edit.html.twig' %}
 
-{% set form = object.form %}
+{% set form = object.form(admin.session.expert != '0' ? 'raw') %}
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate')) %}
 
@@ -83,11 +83,7 @@
 {% endblock topbar %}
 
 {% block edit %}
-    {% if admin.session.expert == '0' %}
-        {% include 'partials/blueprints.html.twig' with { form: object.form, context: object, data: object, blueprints: blueprint } %}
-    {% else %}
-        {% include 'partials/blueprints-raw.html.twig' with { form: object.form, context: object, data: object, blueprints: admin.blueprints('admin/pages/'~modular~'raw') } %}
-    {% endif %}
+    {% include 'partials/blueprints.html.twig' with { context: object, data: object, blueprints: form.blueprint } %}
 {% endblock edit %}
 
 {% block content %}

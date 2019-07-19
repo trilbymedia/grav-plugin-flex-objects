@@ -6,8 +6,10 @@ use Grav\Common\Data\Blueprint;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
+use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\Route\Route;
 use Grav\Framework\Route\RouteFactory;
+use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
 
 /**
@@ -272,13 +274,26 @@ class GravPageObject extends FlexPageObject
      */
     public function getBlueprint(string $name = '')
     {
-        // Make sure that pages has been initialized.
-        Pages::getTypes();
-
         try {
-            return $this->getFlexDirectory()->getBlueprint($this->getProperty('template'), 'blueprints://pages');
+            // Make sure that pages has been initialized.
+            Pages::getTypes();
+
+            if ($name === 'raw') {
+                // Admin RAW mode.
+                /** @var Admin $admin */
+                $admin = Grav::instance()['admin'];
+                $template = $this->modular() ? 'modular_raw' : 'raw';
+
+                return $admin->blueprints("admin/pages/{$template}");
+            }
+
+            $template = $this->getProperty('template') . ($name ? '.' . $name : '');
+
+            return $this->getFlexDirectory()->getBlueprint($template, 'blueprints://pages');
         } catch (\RuntimeException $e) {
-            return $this->getFlexDirectory()->getBlueprint('default', 'blueprints://pages');
+            $template = 'default' . ($name ? '.' . $name : '');
+
+            return $this->getFlexDirectory()->getBlueprint($template, 'blueprints://pages');
         }
     }
 
@@ -287,6 +302,24 @@ class GravPageObject extends FlexPageObject
      */
     protected function filterElements(array &$elements): void
     {
+        if (isset($elements['frontmatter'], $elements['content'])) {
+            $formatter = new YamlFormatter();
+            try {
+                // Replace the whole header except for media order, which is used in admin.
+                $media_order = $elements['media_order'] ?? null;
+                $elements['header'] = $formatter->decode($elements['frontmatter']);
+                if ($media_order) {
+                    $elements['header']['media_order'] = $media_order;
+                }
+            } catch (\RuntimeException $e) {
+                throw new \RuntimeException('Badly formatted markdown');
+            }
+
+            $elements['markdown'] = $elements['content'];
+
+            unset($elements['frontmatter'], $elements['content']);
+        }
+
         // FIXME: need better logic here.
         if (isset($elements['route'], $elements['folder'], $elements['name'])) {
             $parts = [];
