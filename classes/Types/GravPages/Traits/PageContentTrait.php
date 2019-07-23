@@ -48,9 +48,6 @@ trait PageContentTrait
         'debugger'          => 'bool'
     ];
 
-    protected $summary;
-    protected $content;
-
     /**
      * @param string $route
      * @return string
@@ -100,7 +97,7 @@ trait PageContentTrait
      */
     public function getRawContent()
     {
-        return $this->getArrayProperty('markdown');
+        return $this->getArrayProperty('markdown') ?? '';
     }
 
     /**
@@ -397,7 +394,7 @@ trait PageContentTrait
                 }
                 return $frontmatter;
             case 'content':
-                return $this->getArrayProperty('markdown');
+                return $this->getArrayProperty('content');
             case 'order':
                 $order = $this->order();
                 return $order ? (int)$order : '';
