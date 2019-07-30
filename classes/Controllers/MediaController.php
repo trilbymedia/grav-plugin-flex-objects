@@ -73,32 +73,7 @@ class MediaController extends AbstractController
         }
 
         try {
-            $grav = Grav::instance();
-
-            /** @var Uri $uri */
-            $uri = $grav['uri'];
-
-            /** @var Session $session */
-            $session = $grav['session'];
-
-            $formName = $this->getPost('__form-name__');
-            if (!$formName) {
-                // Legacy call without form name.
-                $form = $object->getForm();
-                $formName = $form->getName();
-                $uniqueId = $form->getUniqueId();
-            } else {
-                $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
-            }
-
-            $config = [
-                'session_id' => $session->getId(),
-                'unique_id' => $uniqueId,
-                'form_name' => $formName,
-            ];
-            $flash = new FormFlash($config);
-            $flash->setUrl($uri->url)->setUser($grav['user']);
-
+            $flash = $this->getFormFlash($object);
             $crop = $this->getPost('crop');
             if (\is_string($crop)) {
                 $crop = json_decode($crop, true);
@@ -157,24 +132,8 @@ class MediaController extends AbstractController
         }
 
         try {
-            $grav = Grav::instance();
-
-            /** @var Uri $uri */
-            $uri = $grav['uri'];
-
-            /** @var Session $session */
-            $session = $grav['session'];
-
-            $formName = $this->getPost('__form-name__');
-            $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($uri->url);
             $field = $this->getPost('name');
-
-            $config = [
-                'session_id' => $session->getId(),
-                'unique_id' => $uniqueId,
-                'form_name' => $formName,
-            ];
-            $flash = new FormFlash($config);
+            $flash = $this->getFormFlash($object);
             $flash->removeFile($filename, $field);
             $flash->save();
         } catch (\Exception $e) {
@@ -316,6 +275,42 @@ class MediaController extends AbstractController
         ];
 
         return $this->createJsonResponse($response);
+    }
+
+    /**
+     * @param FlexObjectInterface $object
+     * @return FormFlash
+     */
+    protected function getFormFlash(FlexObjectInterface $object)
+    {
+        $grav = Grav::instance();
+
+        /** @var Session $session */
+        $session = $grav['session'];
+
+        /** @var Uri $uri */
+        $uri = $grav['uri'];
+        $url = $uri->url;
+
+        $formName = $this->getPost('__form-name__');
+        if (!$formName) {
+            // Legacy call without form name.
+            $form = $object->getForm();
+            $formName = $form->getName();
+            $uniqueId = $form->getUniqueId();
+        } else {
+            $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($url);
+        }
+
+        $config = [
+            'session_id' => $session->getId(),
+            'unique_id' => $uniqueId,
+            'form_name' => $formName,
+        ];
+        $flash = new FormFlash($config);
+        $flash->setUrl($url)->setUser($grav['user']);
+
+        return $flash;
     }
 
     protected function filterAcceptedFiles(string $file, array $settings)
