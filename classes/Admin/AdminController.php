@@ -325,6 +325,10 @@ class AdminController
             throw new \RuntimeException('Not Found', 404);
         }
 
+        if (!$directory->isAuthorized('create')) {
+            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
+        }
+
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
         $name = $this->data['folder'] ?? 'undefined';
@@ -380,6 +384,49 @@ class AdminController
         $this->admin->session()->lastPageRoute = $this->data['route'] ?? '';
 
         $this->setRedirect($flash->getUrl());
+    }
+
+    /**
+     * Save page as a new copy.
+     *
+     * Route: /pages
+     *
+     * @return bool True if the action was performed.
+     * @throws \RuntimeException
+     * @TODO: Pages
+     */
+    protected function taskCopy()
+    {
+        $type = $this->target;
+        $key = $this->id;
+
+        try {
+            $directory = $this->getDirectory($type);
+            if (!$directory) {
+                throw new \RuntimeException('Not Found', 404);
+            }
+
+            $object = $key ? $directory->getIndex()->get($key) : null;
+            if (!$object || !$object->exists()) {
+                throw new \RuntimeException('Not Found', 404);
+            }
+
+            if (!$object->isAuthorized('create')) {
+                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' copy.',
+                    403);
+            }
+
+            // FIXME:
+            // Clone page, append the POST data and modify folder name and ordering if not changed by the user.
+
+            throw new \RuntimeException('Not Implemented');
+
+        } catch (\RuntimeException $e) {
+            $this->admin->setMessage('Copy Failed: ' . $e->getMessage(), 'error');
+            $this->setRedirect($this->referrerUri, 302);
+        }
+
+        return true;
     }
 
     public function taskSave()

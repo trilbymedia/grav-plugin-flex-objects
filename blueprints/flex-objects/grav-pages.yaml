@@ -26,10 +26,57 @@ config:
             label: Route
             type: text
           link: edit
+          sort:
+            field: key
         name:
           field:
             label: Type
             type: text
+#        updated_date:
+#          field:
+#            type: datetime
+#            label: Last Updated
+
+
+      options:
+        per_page: 20
+        order:
+          by: key
+          dir: asc
+
+      # TODO: not used yet
+      buttons:
+        back:
+          icon: reply
+          title: PLUGIN_ADMIN.BACK
+        add:
+          icon: plus
+          label: PLUGIN_ADMIN.ADD
+
+    edit:
+      # TODO: not used yet
+      buttons:
+        back:
+          icon: reply
+          title: PLUGIN_ADMIN.BACK
+        preview:
+          icon: eye
+          title: PLUGIN_ADMIN.PREVIEW
+        add:
+          icon: plus
+          label: PLUGIN_ADMIN.ADD
+        copy:
+          icon: copy
+          label: PLUGIN_ADMIN.COPY
+        move:
+          icon: arrows
+          label: PLUGIN_ADMIN.MOVE
+        delete:
+          icon: close
+          label: PLUGIN_ADMIN.DELETE
+        save:
+          icon: check
+          label: PLUGIN_ADMIN.SAVE
 
   site:
     filter:
@@ -47,3 +94,10 @@ config:
         folder: 'page://'
     ordering:
       full_order: ASC
+    search:
+      options:
+        contains: 1
+      fields:
+        - header.menu
+        - full_route
+        - name

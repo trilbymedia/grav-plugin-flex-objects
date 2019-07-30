@@ -97,7 +97,7 @@ trait PageContentTrait
      */
     public function getRawContent()
     {
-        return $this->getArrayProperty('markdown') ?? '';
+        return $this->getArrayProperty('content') ?? '';
     }
 
     /**
@@ -105,7 +105,7 @@ trait PageContentTrait
      */
     public function setRawContent($content)
     {
-        $this->setArrayProperty('markdown', $content ?? '');
+        $this->setArrayProperty('content', $content ?? '');
     }
 
     /**

@@ -6,7 +6,6 @@ use Grav\Common\Data\Blueprint;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
-use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\Route\Route;
 use Grav\Framework\Route\RouteFactory;
 use Grav\Plugin\Admin\Admin;
@@ -398,7 +397,7 @@ class GravPageObject extends FlexPageObject
      */
     protected function offsetLoad_name($value)
     {
-        return $value ?? $this->hasKey() ? \basename($this->getStorageKey()) : 'default.md';
+        return $value ?? $this->getStorage()['storage_file'] ?? 'folder.md';
     }
 
     /**
