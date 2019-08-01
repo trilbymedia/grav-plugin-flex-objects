@@ -242,8 +242,6 @@ class AdminController
      */
     public function taskDelete()
     {
-        $type = $this->target;
-
         try {
             $object = $this->getObject();
 
@@ -463,21 +461,25 @@ class AdminController
 
             /** @var FlexForm $form */
             $form = $this->getForm($object);
-
             $form->handleRequest($request);
             $error = $form->getError();
             $errors = $form->getErrors();
-            if ($error || $errors) {
+            if ($errors) {
                 if ($error) {
                     $this->admin->setMessage($error, 'error');
                 }
 
-                foreach ($errors as $error) {
-                    $this->admin->setMessage($error, 'error');
+                foreach ($errors as $field => $list) {
+                    foreach ((array)$list as $message) {
+                        $this->admin->setMessage($message, 'error');
+                    }
                 }
-
                 throw new \RuntimeException('Form validation failed, please check your input');
             }
+            if ($error) {
+                throw new \RuntimeException($error);
+            }
+
             $object = $form->getObject();
 
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
@@ -607,20 +609,6 @@ class AdminController
     protected function getFlex()
     {
         return Grav::instance()['flex_objects'];
-    }
-
-    /**
-     * @param string $type
-     * @return FlexObjectInterface
-     */
-    public function data($type)
-    {
-        $type = explode('/', $type, 2)[1] ?? null;
-        $id = $this->id;
-
-        $directory = $this->getDirectory($type);
-
-        return $id ? $directory->getObject($id) : $directory->createObject([], '__new__');
     }
 
     /**
