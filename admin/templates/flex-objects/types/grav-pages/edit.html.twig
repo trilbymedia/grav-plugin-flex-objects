@@ -20,10 +20,8 @@
 {% block extra_buttons %}
     {% if object.exists %}
     {% include 'flex-objects/types/grav-pages/buttons/add.html.twig' %}
-    {#
     {% include 'flex-objects/types/grav-pages/buttons/copy.html.twig' %}
     {% include 'flex-objects/types/grav-pages/buttons/move.html.twig' %}
-    #}
     {% endif %}
 {% endblock extra_buttons %}
 
@@ -122,6 +120,10 @@
                 <a class="button" data-parents-select href="#"><i class="fa fa-fw fa-check"></i> {{ "PLUGIN_ADMIN.CONTINUE"|tu }}</a>
             </div>
         </form>
+    </div>
+
+    <div class="remodal parents-container" data-remodal-id="move" data-remodal-options="hashTracking: false">
+        {% include 'partials/page-move.html.twig' with { blueprints: admin.blueprints('admin/pages/move'), data: context } %}
     </div>
 
 {% endblock content %}

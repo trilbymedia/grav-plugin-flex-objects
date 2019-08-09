@@ -9,6 +9,7 @@ use Grav\Common\Markdown\ParsedownExtra;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
+use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Traits\FlexMediaTrait;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
@@ -29,14 +30,10 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     use PageRoutableTrait;
     use FlexMediaTrait;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $summary;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $content;
 
     /**
@@ -454,6 +451,29 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     protected function filterElements(array &$elements): void
     {
+        // Markdown storage conversion to page structure.
+        if (isset($elements['markdown'])) {
+            $elements['content'] = $elements['content'] ?? $elements['markdown'];
+            unset($elements['markdown']);
+        }
+
+        // RAW frontmatter support.
+        if (isset($elements['frontmatter'])) {
+            $formatter = new YamlFormatter();
+            try {
+                // Replace the whole header except for media order, which is used in admin.
+                $media_order = $elements['media_order'] ?? null;
+                $elements['header'] = $formatter->decode($elements['frontmatter']);
+                if ($media_order) {
+                    $elements['header']['media_order'] = $media_order;
+                }
+            } catch (\RuntimeException $e) {
+                throw new \RuntimeException('Badly formatted markdown');
+            }
+
+            unset($elements['frontmatter']);
+        }
+
         $folder = !empty($elements['folder']) ? trim($elements['folder']) : '';
 
         if ($folder) {

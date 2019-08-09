@@ -242,8 +242,6 @@ class AdminController
      */
     public function taskDelete()
     {
-        $type = $this->target;
-
         try {
             $object = $this->getObject();
 
@@ -325,6 +323,10 @@ class AdminController
             throw new \RuntimeException('Not Found', 404);
         }
 
+        if (!$directory->isAuthorized('create')) {
+            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
+        }
+
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
         $name = $this->data['folder'] ?? 'undefined';
@@ -382,6 +384,49 @@ class AdminController
         $this->setRedirect($flash->getUrl());
     }
 
+    /**
+     * Save page as a new copy.
+     *
+     * Route: /pages
+     *
+     * @return bool True if the action was performed.
+     * @throws \RuntimeException
+     * @TODO: Pages
+     */
+    protected function taskCopy()
+    {
+        $type = $this->target;
+        $key = $this->id;
+
+        try {
+            $directory = $this->getDirectory($type);
+            if (!$directory) {
+                throw new \RuntimeException('Not Found', 404);
+            }
+
+            $object = $key ? $directory->getIndex()->get($key) : null;
+            if (!$object || !$object->exists()) {
+                throw new \RuntimeException('Not Found', 404);
+            }
+
+            if (!$object->isAuthorized('create')) {
+                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' copy.',
+                    403);
+            }
+
+            // FIXME:
+            // Clone page, append the POST data and modify folder name and ordering if not changed by the user.
+
+            throw new \RuntimeException('Not Implemented');
+
+        } catch (\RuntimeException $e) {
+            $this->admin->setMessage('Copy Failed: ' . $e->getMessage(), 'error');
+            $this->setRedirect($this->referrerUri, 302);
+        }
+
+        return true;
+    }
+
     public function taskSave()
     {
         $type = $this->target;
@@ -416,21 +461,25 @@ class AdminController
 
             /** @var FlexForm $form */
             $form = $this->getForm($object);
-
             $form->handleRequest($request);
             $error = $form->getError();
             $errors = $form->getErrors();
-            if ($error || $errors) {
+            if ($errors) {
                 if ($error) {
                     $this->admin->setMessage($error, 'error');
                 }
 
-                foreach ($errors as $error) {
-                    $this->admin->setMessage($error, 'error');
+                foreach ($errors as $field => $list) {
+                    foreach ((array)$list as $message) {
+                        $this->admin->setMessage($message, 'error');
+                    }
                 }
-
                 throw new \RuntimeException('Form validation failed, please check your input');
             }
+            if ($error) {
+                throw new \RuntimeException($error);
+            }
+
             $object = $form->getObject();
 
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
@@ -560,20 +609,6 @@ class AdminController
     protected function getFlex()
     {
         return Grav::instance()['flex_objects'];
-    }
-
-    /**
-     * @param string $type
-     * @return FlexObjectInterface
-     */
-    public function data($type)
-    {
-        $type = explode('/', $type, 2)[1] ?? null;
-        $id = $this->id;
-
-        $directory = $this->getDirectory($type);
-
-        return $id ? $directory->getObject($id) : $directory->createObject([], '__new__');
     }
 
     /**

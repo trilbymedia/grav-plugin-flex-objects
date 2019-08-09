@@ -6,7 +6,6 @@ use Grav\Common\Data\Blueprint;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
-use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\Route\Route;
 use Grav\Framework\Route\RouteFactory;
 use Grav\Plugin\Admin\Admin;
@@ -302,24 +301,6 @@ class GravPageObject extends FlexPageObject
      */
     protected function filterElements(array &$elements): void
     {
-        if (isset($elements['frontmatter'], $elements['content'])) {
-            $formatter = new YamlFormatter();
-            try {
-                // Replace the whole header except for media order, which is used in admin.
-                $media_order = $elements['media_order'] ?? null;
-                $elements['header'] = $formatter->decode($elements['frontmatter']);
-                if ($media_order) {
-                    $elements['header']['media_order'] = $media_order;
-                }
-            } catch (\RuntimeException $e) {
-                throw new \RuntimeException('Badly formatted markdown');
-            }
-
-            $elements['markdown'] = $elements['content'];
-
-            unset($elements['frontmatter'], $elements['content']);
-        }
-
         // FIXME: need better logic here.
         if (isset($elements['route'], $elements['folder'], $elements['name'])) {
             $parts = [];
@@ -416,7 +397,7 @@ class GravPageObject extends FlexPageObject
      */
     protected function offsetLoad_name($value)
     {
-        return $value ?? $this->hasKey() ? \basename($this->getStorageKey()) : 'default.md';
+        return $value ?? $this->getStorage()['storage_file'] ?? 'folder.md';
     }
 
     /**

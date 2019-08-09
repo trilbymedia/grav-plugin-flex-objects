@@ -15,11 +15,6 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
  */
 class GravPageStorage extends FolderStorage
 {
-    /** @var string */
-    protected $dataFolder;
-    /** @var string */
-    protected $dataPattern = '%1s/%2s';
-
     protected $ignore_files;
     protected $ignore_folders;
     protected $ignore_hidden;
@@ -31,8 +26,14 @@ class GravPageStorage extends FolderStorage
     protected $flags;
     protected $regex;
 
+    protected $meta = [];
+
     protected function initOptions(array $options): void
     {
+        parent::initOptions($options);
+
+        $this->flags = \FilesystemIterator::KEY_AS_FILENAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
+
         $grav = Grav::instance();
 
         $config = $grav['config'];
@@ -40,12 +41,10 @@ class GravPageStorage extends FolderStorage
         $this->ignore_files = (array)$config->get('system.pages.ignore_files');
         $this->ignore_folders = (array)$config->get('system.pages.ignore_folders');
         $this->recurse = $options['recurse'] ?? true;
-        $this->base_path = $options['base_path'] ?? '';
-        $this->base_route = trim(GravPageIndex::adjustRouteCase(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', '/' . $this->base_path)), '/');
 
         /** @var Language $language */
         $language = $grav['language'];
-        $this->page_extensions = $language->getFallbackPageExtensions();
+        $this->page_extensions = $language->getPageExtensions();
 
         // Build regular expression for all the allowed page extensions.
         $exts = [];
@@ -54,31 +53,16 @@ class GravPageStorage extends FolderStorage
         }
 
         $this->regex = '/^[^\.]*(' . implode('|', $exts) . ')$/sD';
-
-        $this->dataFolder = $options['folder'];
-    }
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getStoragePath(string $key = null): string
-    {
-        if (null === $key) {
-            $path = $this->dataFolder;
-        } else {
-            $path = $this->getPathFromKey($key);
-        }
-
-        return $path;
     }
 
     /**
      * {@inheritdoc}
+     * @see FlexStorageInterface::hasKey()
      */
-    public function getMediaPath(string $key = null): string
+    public function hasKey(string $key): bool
     {
-        return \dirname($this->getStoragePath($key));
+        // Empty folders are valid, too.
+        return $key && strpos($key, '@@') === false && file_exists($this->getStoragePath($key));
     }
 
     /**
@@ -89,13 +73,20 @@ class GravPageStorage extends FolderStorage
      */
     public function getPathFromKey(string $key): string
     {
-        if ($this->base_path) {
-            $key = substr($key,  \strlen($this->base_path) + 1);
-        }
+        $key = trim($key, '/');
 
-        $dataFolder = substr($this->dataFolder, -1) === '/' ? substr($this->dataFolder, 0, -1) : $this->dataFolder;
+        $meta = $this->getObjectMeta($key);
+        $file = basename($meta['storage_file'] ?? 'folder.md', $this->dataExt);
 
-        return sprintf($this->dataPattern, $dataFolder, $key);
+        $options = [
+            $this->dataFolder,
+            $key,
+            \mb_substr($key, 0, 2),
+            $file,
+            $this->dataExt
+        ];
+
+        return sprintf($this->dataPattern, ...$options);
     }
 
     /**
@@ -120,84 +111,125 @@ class GravPageStorage extends FolderStorage
      */
     protected function buildIndex(): array
     {
-        $folder = $this->getStoragePath();
-        $this->flags = \FilesystemIterator::KEY_AS_FILENAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
-
-        $list = $this->buildIndexRecurse($folder, '', $modified);
-
-        ksort($list, SORT_NATURAL);
-
-        return $list;
+        return $this->getIndexMeta();
     }
 
-    protected function buildIndexRecurse(string $folder, string $prefix, &$modified)
+    /**
+     * @param string $key
+     * @param bool $reload
+     * @return array
+     */
+    protected function getObjectMeta(string $key, bool $reload = false): array
     {
-        $iterator = new \FilesystemIterator($folder . $prefix, $this->flags);
+        if (!$reload && isset($this->meta[$key])) {
+            return $this->meta[$key];
+        }
 
-        $file = null;
+        $path = $this->getStoragePath($key);
+
+        $modified = 0;
         $markdown = [];
-        $list = [];
-        /** @var \SplFileInfo $info */
-        foreach ($iterator as $key => $info) {
-            // Ignore all hidden files if set.
-            if ($key === '' || ($this->ignore_hidden && $key[0] === '.')) {
-                continue;
-            }
+        $children = [];
 
-            if (!$info->isDir()) {
-                // Ignore all files in ignore list.
-                if ($this->ignore_files && \in_array($key, $this->ignore_files, true)) {
+        if (file_exists($path)) {
+            $modified = filemtime($path);
+            $iterator = new \FilesystemIterator($path, $this->flags);
+
+            /** @var \SplFileInfo $info */
+            foreach ($iterator as $k => $info) {
+                // Ignore all hidden files if set.
+                if ($k === '' || ($this->ignore_hidden && $k[0] === '.')) {
                     continue;
                 }
 
-                $modified = max($modified, $info->getMTime());
+                if ($info->isDir()) {
+                    // Ignore all folders in ignore list.
+                    if ($this->ignore_folders && \in_array($k, $this->ignore_folders, true)) {
+                        continue;
+                    }
 
-                // Page is the one that matches to $page_extensions list with the lowest index number.
-                if (preg_match($this->regex, $key, $matches)) {
-                    $markdown[$matches['MARK']][] = $key;
+                    $children[$k] = false;
+                } else {
+                    // Ignore all files in ignore list.
+                    if ($this->ignore_files && \in_array($k, $this->ignore_files, true)) {
+                        continue;
+                    }
+
+                    $modified = max($modified, $info->getMTime());
+
+                    // Page is the one that matches to $page_extensions list with the lowest index number.
+                    if (preg_match($this->regex, $k, $matches)) {
+                        $markdown[$matches['MARK']][] = $k;
+                    }
                 }
-
-                continue;
-            }
-
-            // Ignore all folders in ignore list.
-            if ($this->ignore_folders && \in_array($key, $this->ignore_folders, true)) {
-                continue;
-            }
-
-            $updated = $info->getMTime();
-
-            if ($this->recurse) {
-                $list += $this->buildIndexRecurse($folder, $prefix . '/' . $key, $updated);
-            }
-
-            if (strpos($key[0], '_') === 0) {
-                // Update modified only for modular pages.
-                $modified = max($modified, $updated);
             }
         }
 
-        $path = trim(GravPageIndex::adjustRouteCase(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', $prefix)), '/');
-        if (isset($list[$path])) {
-            $debugger = Grav::instance()['debugger'];
-            $debugger->addMessage('Page name conflict: ' . $path);
-        }
+        $route = trim(GravPageIndex::adjustRouteCase(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', "/{$key}")), '/');
 
         ksort($markdown, SORT_NATURAL);
+        ksort($children, SORT_NATURAL);
 
-        if ($this->base_path) {
-            $path = ($path ? $path . '/' : $path) . $this->base_route;
-            $name = $prefix ? '/'. $this->base_path . '/' . $prefix : '/'. $this->base_path;
-        } else {
-            $name = $prefix;
+        $meta = [
+            'storage_key' => $key,
+            'storage_file' => $markdown['-'][0] ?? null,
+            'storage_timestamp' => $modified,
+            'key' => $route,
+        ];
+        if ($markdown) {
+            $meta['markdown'] = $markdown;
+        }
+        if ($children) {
+            $meta['children'] = $children;
         }
 
-        $list[$name] = [
-            'storage_key' => $name,
-            'storage_timestamp' => $modified,
-            'key' => $path,
-            'markdown' => $markdown
-        ];
+        $this->meta[$key . ' '. $key] = $meta;
+
+        return $meta;
+    }
+
+    protected function getIndexMeta(): array
+    {
+        $queue = [''];
+        $list = [];
+        do {
+            $current = array_pop($queue);
+            $meta = $this->getObjectMeta($current);
+            $storage_key = $meta['storage_key'];
+
+            if (!empty($meta['children'])) {
+                $prefix = $storage_key . ($storage_key !== '' ? '/' : '');
+
+                foreach ($meta['children'] as $child => $value) {
+                    $queue[] = $prefix . $child;
+                }
+            }
+
+            $list[$storage_key] = $meta;
+        } while ($queue);
+
+        ksort($list, SORT_NATURAL);
+
+        // Update parent timestamps.
+        foreach (array_reverse($list) as $storage_key => $meta) {
+            if ($storage_key !== '') {
+                $parentKey = dirname($storage_key);
+                if ($parentKey === '.') {
+                    $parentKey = '';
+                }
+
+                $parent = &$list[$parentKey];
+                $basename = basename($storage_key);
+
+                if (isset($parent['children'][$basename])) {
+                    $timestamp = $meta['storage_timestamp'];
+                    $parent['children'][$basename] = $timestamp;
+                    if ($basename && $basename[0] === '_') {
+                        $parent['storage_timestamp'] = max($parent['storage_timestamp'], $timestamp);
+                    }
+                }
+            }
+        }
 
         return $list;
     }
@@ -208,22 +240,5 @@ class GravPageStorage extends FolderStorage
     protected function getNewKey(): string
     {
         throw new \RuntimeException('Generating random key is disabled for pages');
-    }
-
-    /**
-     * @param string $path
-     * @return string
-     */
-    protected function resolvePath(string $path): string
-    {
-        /** @var UniformResourceLocator $locator
-         */
-        $locator = Grav::instance()['locator'];
-
-        if (!$locator->isStream($path)) {
-            return $path;
-        }
-
-        return (string) $locator->findResource($path) ?: $locator->findResource($path, true, true);
     }
 }
