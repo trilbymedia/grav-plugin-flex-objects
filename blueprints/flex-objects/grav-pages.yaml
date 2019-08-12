@@ -53,6 +53,14 @@ config:
           icon: plus
           label: PLUGIN_ADMIN.ADD
 
+    menu:
+      list:
+        hidden: false
+        route: /flex-pages
+        title: Flex Pages
+        icon: fa-file-text-o
+        authorize: ['admin.pages', 'admin.super']
+
     edit:
       # TODO: not used yet
       buttons:
