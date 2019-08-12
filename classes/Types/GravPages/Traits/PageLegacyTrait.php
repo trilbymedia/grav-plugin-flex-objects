@@ -3,7 +3,6 @@
 namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
 use Exception;
-use Grav\Common\Data\Blueprint;
 use Grav\Common\Grav;
 use Grav\Common\Page\Collection;
 use Grav\Common\Page\Interfaces\PageInterface;
@@ -316,26 +315,6 @@ trait PageLegacyTrait
     }
 
     /**
-     * Returns normalized list of name => form pairs.
-     *
-     * @return array
-     */
-    public function forms()
-    {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
-    }
-
-    /**
-     * @param array $new
-     */
-    public function addForms(array $new)
-    {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
-    }
-
-    /**
      * Gets and sets the name field.  If no name field is set, it will return 'default.md'.
      *
      * @param  string $var The name of this page.
@@ -381,21 +360,22 @@ trait PageLegacyTrait
     }
 
     /**
-     * Allows a page to override the output render format, usually the extension provided
-     * in the URL. (e.g. `html`, `json`, `xml`, etc).
+     * Allows a page to override the output render format, usually the extension provided in the URL.
+     * (e.g. `html`, `json`, `xml`, etc).
      *
      * @param string|null $var
      *
-     * @return string|null
+     * @return string
      */
     public function templateFormat($var = null)
     {
-        // TODO:
-        if (null !== $var) {
-            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
+        if (is_string($var)) {
+            $this->setNestedProperty('header.append_url_extension', '.' . $var);
+        } else {
+            $var = ltrim($this->getNestedProperty('header.append_url_extension') ?: Utils::getPageFormat(), '.');
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $var;
     }
 
     /**

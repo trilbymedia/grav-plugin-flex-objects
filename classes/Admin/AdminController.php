@@ -374,7 +374,6 @@ class AdminController
         /** @var FlexFormFlash $flash */
         $flash = $form->getFlash();
         $flash->setUrl($this->getFlex()->adminRoute($this->object));
-        $flash->setData($this->data);
         $flash->save(true);
 
         // Store the name and route of a page, to be used pre-filled defaults of the form in the future
@@ -780,12 +779,11 @@ class AdminController
             }
         }
 
-        $form = $object->getForm($name);
-        if ($uniqueId) {
-            $form->setUniqueId($uniqueId);
-        }
+        $options = [
+            'unique_id' => $uniqueId,
+        ];
 
-        return $form;
+        return $object->getForm($name, $options);
     }
 
     /**

@@ -29,6 +29,6 @@ class FlexFormFactory implements FormFactoryInterface
         $flex = Grav::instance()['flex_objects'];
         $object = $flex->getObject($key, $type);
 
-        return $object ? $object->getForm($layout, $form) : null;
+        return $object ? $object->getForm($layout, ['form' => $form]) : null;
     }
 }

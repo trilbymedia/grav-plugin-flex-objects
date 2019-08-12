@@ -7,6 +7,7 @@ use Grav\Common\Grav;
 use Grav\Common\Markdown\Parsedown;
 use Grav\Common\Markdown\ParsedownExtra;
 use Grav\Common\Page\Interfaces\PageInterface;
+use Grav\Common\Page\Traits\PageFormTrait;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
 use Grav\Framework\File\Formatter\YamlFormatter;
@@ -25,6 +26,7 @@ use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageTranslateTrait;
 class FlexPageObject extends FlexObject implements PageInterface, MediaManipulationInterface
 {
     use PageContentTrait;
+    use PageFormTrait;
     use PageLegacyTrait;
     use PageTranslateTrait;
     use PageRoutableTrait;

@@ -34,7 +34,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public static function checkRequirements(): bool
     {
-        return version_compare(GRAV_VERSION, '1.6', '>');
+        return version_compare(GRAV_VERSION, '1.7.0-beta.4', '>=');
     }
 
     /**
