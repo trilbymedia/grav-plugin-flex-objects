@@ -2,6 +2,9 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
+use Grav\Common\Grav;
+use Grav\Common\Language\Language;
+
 trait PageTranslateTrait
 {
     /** @var string|null Language code, eg: 'en' */
@@ -16,8 +19,33 @@ trait PageTranslateTrait
      */
     public function translatedLanguages($onlyPublished = false)
     {
-        // TODO:
-        return [];
+        $translated = $this->getlanguages();
+        if (!$translated) {
+            return $translated;
+        }
+
+        $grav = Grav::instance();
+
+        /** @var Language $language */
+        $language = $grav['language'];
+
+        $languages = $language->getLanguages();
+        $defaultCode = $language->getDefault();
+
+        if (!isset($translated[$defaultCode]) && isset($translated['-'])) {
+            $translated[$defaultCode] = $translated['-'];
+        }
+        unset($translated['-']);
+
+        $translated = array_intersect_key($translated, array_flip($languages));
+
+        $translatedLanguages = [];
+        foreach ($translated as $languageCode => $languageFile) {
+            // FIXME: add missing published, route logic
+            $translatedLanguages[$languageCode] = $this->route();
+        }
+
+        return $translatedLanguages;
     }
 
     /**
@@ -29,8 +57,15 @@ trait PageTranslateTrait
      */
     public function untranslatedLanguages($includeUnpublished = false)
     {
-        // TODO:
-        return [];
+        $grav = Grav::instance();
+
+        /** @var Language $language */
+        $language = $grav['language'];
+
+        $languages = $language->getLanguages();
+        $translated = array_values(array_flip($this->translatedLanguages(!$includeUnpublished)));
+
+        return array_diff($languages, $translated);
     }
 
     /**
@@ -47,6 +82,23 @@ trait PageTranslateTrait
         }
 
         return $this->getProperty('language');
+    }
+
+    protected function getlanguages()
+    {
+        $template = $this->getProperty('template');
+
+        $storage = $this->getStorage();
+        $translations = $storage['markdown'] ?? [];
+        $list = [];
+        foreach ($translations as $code => $search) {
+            $filename = $code === '-' ? "{$template}.md" : "{$template}.{$code}.md";
+            if (in_array($filename, $search, true)) {
+                $list[$code] = $filename;
+            }
+        }
+
+        return $list;
     }
 
     /**

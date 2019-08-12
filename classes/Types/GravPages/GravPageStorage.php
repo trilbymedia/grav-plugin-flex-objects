@@ -170,9 +170,19 @@ class GravPageStorage extends FolderStorage
         ksort($markdown, SORT_NATURAL);
         ksort($children, SORT_NATURAL);
 
+        $file = $markdown['-'][0] ?? null;
+        if (!$file) {
+            $first = reset($markdown) ?: [];
+            $file = reset($first) ?: null;
+            if ($file) {
+                $k = '.' . key($markdown);
+                $file = str_replace($k, '', $file);
+            }
+        }
+
         $meta = [
             'storage_key' => $key,
-            'storage_file' => $markdown['-'][0] ?? null,
+            'storage_file' => $file,
             'storage_timestamp' => $modified,
             'key' => $route,
         ];
