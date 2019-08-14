@@ -767,15 +767,21 @@ class AdminController
             throw new \RuntimeException('Not Found', 404);
         }
 
-        $formName = $this->post['__form-name__'] ?? null;
-        $uniqueId = $this->post['__unique_form_id__'] ?? null;
+        $formName = $this->post['__form-name__'] ?? '';
+        $name = '';
+        $uniqueId = null;
 
         // Get the form name. This defines the blueprint which is being used.
-        $name = '';
-        if ($formName && strpos($formName, '--')) {
-            [,$name] = explode('--', $formName);
-            if ($name === 'object') {
-                $name = '';
+        if (strpos($formName, '-')) {
+            $parts = explode('-', $formName);
+            $prefix = $parts[0] ?? '';
+            $type = $parts[1] ?? '';
+            if ($prefix === 'flex' && $type === $object->getFlexType()) {
+                $name = $parts[2] ?? '';
+                if ($name === 'object') {
+                    $name = '';
+                }
+                $uniqueId = $this->post['__unique_form_id__'] ?? null;
             }
         }
 
