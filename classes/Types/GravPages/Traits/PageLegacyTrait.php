@@ -12,6 +12,8 @@ use RocketTheme\Toolbox\File\MarkdownFile;
 
 trait PageLegacyTrait
 {
+    private $_content_meta;
+
     /**
      * Initializes the page instance variables based on a file
      *
@@ -143,45 +145,52 @@ trait PageLegacyTrait
     public function contentMeta()
     {
         // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        /*
+        if ($this->content === null) {
+            $this->content();
+        }
+        */
+
+        return $this->getContentMeta();
     }
 
     /**
      * Add an entry to the page's contentMeta array
      *
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param string $value
      */
     public function addContentMeta($name, $value)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $this->_content_meta[$name] = $value;
     }
 
     /**
      * Return the whole contentMeta array as it currently stands
      *
-     * @param null $name
+     * @param string|null $name
      *
-     * @return mixed
+     * @return string|null
      */
     public function getContentMeta($name = null)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        if ($name) {
+            return $this->_content_meta[$name] ?? null;
+        }
+
+        return $this->_content_meta;
     }
 
     /**
      * Sets the whole content meta array in one shot
      *
-     * @param $content_meta
+     * @param array $content_meta
      *
-     * @return mixed
+     * @return array
      */
     public function setContentMeta($content_meta)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->_content_meta = $content_meta;
     }
 
     /**

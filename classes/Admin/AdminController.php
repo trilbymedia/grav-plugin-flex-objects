@@ -3,6 +3,7 @@
 namespace Grav\Plugin\FlexObjects\Admin;
 
 use Grav\Common\Cache;
+use Grav\Common\Debugger;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
 use Grav\Common\Plugin;
@@ -113,6 +114,9 @@ class AdminController
                 $grav = Grav::instance();
                 $grav->fireEvent('onFlexTask' . ucfirst($this->task), $event);
             } catch (\Exception $e) {
+                /** @var Debugger $debugger */
+                $debugger = $this->grav['debugger'];
+                $debugger->addException($e);
                 $this->admin->setMessage($e->getMessage(), 'error');
             }
 
@@ -155,6 +159,9 @@ class AdminController
                 $grav = Grav::instance();
                 $grav->fireEvent('onFlexAction' . ucfirst($this->action), $event);
             } catch (\Exception $e) {
+                /** @var Debugger $debugger */
+                $debugger = $this->grav['debugger'];
+                $debugger->addException($e);
                 $this->admin->setMessage($e->getMessage(), 'error');
             }
 

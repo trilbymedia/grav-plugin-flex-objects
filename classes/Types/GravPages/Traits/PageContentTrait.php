@@ -97,7 +97,7 @@ trait PageContentTrait
      */
     public function getRawContent()
     {
-        return $this->getArrayProperty('content') ?? '';
+        return $this->getArrayProperty('markdown') ?? '';
     }
 
     /**
@@ -105,7 +105,8 @@ trait PageContentTrait
      */
     public function setRawContent($content)
     {
-        $this->setArrayProperty('content', $content ?? '');
+        $this->unsetProperty('content');
+        $this->setArrayProperty('markdown', $content ?? '');
     }
 
     /**
@@ -394,7 +395,7 @@ trait PageContentTrait
                 }
                 return $frontmatter;
             case 'content':
-                return $this->getArrayProperty('content');
+                return $this->getProperty('markdown');
             case 'order':
                 $order = $this->order();
                 return $order ? (int)$order : '';

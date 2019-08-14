@@ -149,6 +149,20 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
         return parent::save();
     }
 
+
+    /**
+     * {@inheritdoc}
+     * @see FlexObjectInterface::prepareStorage()
+     */
+    public function prepareStorage(): array
+    {
+        $elements = $this->getElements();
+
+        unset($elements['content'], $elements['summary']);
+
+        return $elements;
+    }
+
     /**
      * Get unknown header variables.
      *
@@ -403,7 +417,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
         // Handle summary divider
         $delimiter = $config->get('site.summary.delimiter', '===');
-        $divider_pos = mb_strpos($this->content, "<p>{$delimiter}</p>");
+        $divider_pos = mb_strpos($content, "<p>{$delimiter}</p>");
         if ($divider_pos !== false) {
             $this->setProperty('summary_size', $divider_pos);
             $content = str_replace("<p>{$delimiter}</p>", '', $content);
@@ -454,9 +468,9 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     protected function filterElements(array &$elements): void
     {
         // Markdown storage conversion to page structure.
-        if (isset($elements['markdown'])) {
-            $elements['content'] = $elements['content'] ?? $elements['markdown'];
-            unset($elements['markdown']);
+        if (isset($elements['content'])) {
+            $elements['markdown'] = $elements['content'];
+            unset($elements['content']);
         }
 
         // RAW frontmatter support.

@@ -4,11 +4,16 @@ namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
+use Grav\Common\Page\Page;
+use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 trait PageTranslateTrait
 {
     /** @var string|null Language code, eg: 'en' */
     protected $language;
+
+    /** @var array|null */
+    private $_languages;
 
     /**
      * Return an array with the routes of other translated languages
@@ -29,6 +34,9 @@ trait PageTranslateTrait
         /** @var Language $language */
         $language = $grav['language'];
 
+        /** @var UniformResourceLocator $locator */
+        $locator = $grav['locator'];
+
         $languages = $language->getLanguages();
         $defaultCode = $language->getDefault();
 
@@ -41,8 +49,22 @@ trait PageTranslateTrait
 
         $translatedLanguages = [];
         foreach ($translated as $languageCode => $languageFile) {
-            // FIXME: add missing published, route logic
-            $translatedLanguages[$languageCode] = $this->route();
+            $languageExtension = ".{$languageCode}.md";
+            $path = $locator($this->getStorageFolder()) . "/$languageFile";
+
+            // FIXME: use flex, also rawRoute() does not fully work?
+            $aPage = new Page();
+            $aPage->init(new \SplFileInfo($path), $languageExtension);
+            if ($onlyPublished && !$aPage->published()) {
+                continue;
+            }
+
+            $route = $aPage->header()->routes['default'] ?? $aPage->rawRoute();
+            if (!$route) {
+                $route = $aPage->route();
+            }
+
+            $translatedLanguages[$languageCode] = $route;
         }
 
         return $translatedLanguages;
@@ -63,7 +85,7 @@ trait PageTranslateTrait
         $language = $grav['language'];
 
         $languages = $language->getLanguages();
-        $translated = array_values(array_flip($this->translatedLanguages(!$includeUnpublished)));
+        $translated = array_keys($this->translatedLanguages(!$includeUnpublished));
 
         return array_diff($languages, $translated);
     }
@@ -86,19 +108,23 @@ trait PageTranslateTrait
 
     protected function getlanguages()
     {
-        $template = $this->getProperty('template');
+        if (null === $this->_languages) {
+            $template = $this->getProperty('template');
 
-        $storage = $this->getStorage();
-        $translations = $storage['markdown'] ?? [];
-        $list = [];
-        foreach ($translations as $code => $search) {
-            $filename = $code === '-' ? "{$template}.md" : "{$template}.{$code}.md";
-            if (in_array($filename, $search, true)) {
-                $list[$code] = $filename;
+            $storage = $this->getStorage();
+            $translations = $storage['markdown'] ?? [];
+            $list = [];
+            foreach ($translations as $code => $search) {
+                $filename = $code === '-' ? "{$template}.md" : "{$template}.{$code}.md";
+                if (in_array($filename, $search, true)) {
+                    $list[$code] = $filename;
+                }
             }
+
+            $this->_languages = $list;
         }
 
-        return $list;
+        return $this->_languages;
     }
 
     /**

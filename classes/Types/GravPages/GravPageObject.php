@@ -28,7 +28,7 @@ class GravPageObject extends FlexPageObject
     const PAGE_ORDER_REGEX = '/^(\d+)\.(.*)$/u';
 
     /** @var string Route to the page excluding the page itself, eg: '/blog/2019' */
-    protected $route;
+    protected $parent_route;
 
     /** @var string Folder of the page, eg: 'article-title' */
     protected $folder;
@@ -321,7 +321,8 @@ class GravPageObject extends FlexPageObject
         // FIXME: need better logic here.
         if (isset($elements['route'], $elements['folder'], $elements['name'])) {
             $parts = [];
-            $route = $elements['route'];
+            $route = $elements['parent_route'] = $elements['route'];
+            unset($elements['route']);
 
             $key = $this->getKey();
             $parentKey = trim($route, '/');
@@ -376,7 +377,7 @@ class GravPageObject extends FlexPageObject
      */
     protected function offsetLoad($offset, $value)
     {
-        if (in_array($offset, ['route', 'folder', 'order', 'name', 'format', 'language'])) {
+        if (in_array($offset, ['parent_route', 'folder', 'order', 'name', 'format', 'language'])) {
             return $this->{$offset} ?? $value ?? $this->extractStorageInformation() ?? $this->{$offset};
         }
 
@@ -403,10 +404,10 @@ class GravPageObject extends FlexPageObject
      */
     protected function extractStorageInformation()
     {
-        if (null === $this->route || null === $this->folder) {
+        if (null === $this->parent_route || null === $this->folder) {
             $key = $this->hasKey() ? $this->getKey() : '';
 
-            $this->route = $this->route ?? (($route = \dirname('/' . $key)) && $route !== '/' ? $route : '');
+            $this->parent_route = $this->parent_route ?? (($route = \dirname('/' . $key)) && $route !== '/' ? $route : '');
             $this->folder = $this->folder ?? \basename($key);
         }
         if (null === $this->order) {
