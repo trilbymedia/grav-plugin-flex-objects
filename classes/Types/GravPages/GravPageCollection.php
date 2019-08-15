@@ -22,6 +22,7 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
  *     $collection->add()               incompatible method signature
  *     $collection->remove()            incompatible method signature
  *     $collection->filter()            incompatible method signature (takes closure instead of callable)
+ * AND most methods are immutable; they do not update the current collection, but return updated one
  */
 class GravPageCollection extends FlexPageCollection implements PageCollectionInterface
 {
