@@ -11,7 +11,10 @@ use Grav\Common\Page\Pages;
 use Grav\Common\Utils;
 use Grav\Common\Yaml;
 use Grav\Framework\Cache\CacheInterface;
+use Grav\Framework\File\Formatter\MarkdownFormatter;
+use Grav\Framework\File\Formatter\YamlFormatter;
 use RocketTheme\Toolbox\File\MarkdownFile;
+use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 trait PageLegacyTrait
 {
@@ -41,12 +44,16 @@ trait PageLegacyTrait
      */
     public function raw($var = null): string
     {
+        $formatter = new MarkdownFormatter();
+
         // TODO:
         if (null !== $var) {
             throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $array = $this->prepareStorage();
+
+        return $formatter->encode($array);
     }
 
     /**
@@ -58,12 +65,16 @@ trait PageLegacyTrait
      */
     public function frontmatter($var = null): string
     {
+        $formatter = new YamlFormatter();
+
         // TODO:
         if (null !== $var) {
             throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $array = $this->prepareStorage();
+
+        return $formatter->encode($array['header'] ?? []);
     }
 
     /**
@@ -567,7 +578,10 @@ trait PageLegacyTrait
             throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
+        return $locator->findResource($this->getStorageFolder() .  '/' . $this->name());
     }
 
     /**
@@ -577,8 +591,10 @@ trait PageLegacyTrait
      */
     public function filePathClean(): string
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
+        return $locator->findResource($this->getStorageFolder() .  '/' . $this->name(), false);
     }
 
     /**
@@ -677,12 +693,14 @@ trait PageLegacyTrait
      */
     public function modularTwig($var = null): bool
     {
-        if (null !== $var) {
-            // TODO:
-            throw new \RuntimeException(__METHOD__ . '(bool): Not Implemented');
+        if ($var !== null) {
+            $this->setProperty('modular_twig', (bool)$var);
+            if ($var) {
+                $this->visible(false);
+            }
         }
 
-        return strpos($this->slug(), '_') === 0;
+        return (bool)($this->getProperty('modular_twig') ?? strpos($this->slug(), '_') === 0);
     }
 
     /**
@@ -697,7 +715,6 @@ trait PageLegacyTrait
 
         return $pages->children($this->path());
     }
-
 
     /**
      * Check to see if this item is the first in an array of sub-pages.

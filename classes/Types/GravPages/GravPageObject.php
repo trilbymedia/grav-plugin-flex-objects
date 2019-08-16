@@ -10,7 +10,6 @@ use Grav\Framework\Route\Route;
 use Grav\Framework\Route\RouteFactory;
 use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
  * Class GravPageObject
@@ -54,7 +53,6 @@ class GravPageObject extends FlexPageObject
     public static function getCachedMethods(): array
     {
         return [
-            'isVisible' => true,
             'path' => true,
             'full_order' => true
         ] + parent::getCachedMethods();
@@ -103,14 +101,6 @@ class GravPageObject extends FlexPageObject
     }
 
     /**
-     * @return bool
-     */
-    public function isVisible(): bool
-    {
-        return $this->isPublished() && $this->visible();
-    }
-
-    /**
      * @inheritdoc PageInterface
      */
     public function getFormValue(string $name, $default = null, string $separator = null)
@@ -139,43 +129,6 @@ class GravPageObject extends FlexPageObject
         return parent::getFormValue($name, $default, $separator);
     }
 
-    public function folder($var = null): string
-    {
-        if (null !== $var) {
-            $this->setProperty('folder', $var);
-        }
-
-        return $this->getProperty('folder');
-    }
-
-    public function order($var = null)
-    {
-        if (null !== $var) {
-            $this->setProperty('order', $var);
-        }
-
-        $var = $this->getProperty('order');
-
-        return $var !== false ? sprintf('%02d.', $var) : false;
-    }
-
-    public function path($var = null): string
-    {
-        if (null !== $var) {
-            throw new \RuntimeException('Not Implemented');
-        }
-
-        /** @var UniformResourceLocator $locator */
-        $locator = Grav::instance()['locator'];
-
-        return $locator($this->getFlexDirectory()->getStorageFolder()) . $this->location();
-    }
-
-    protected function location(): string
-    {
-        return '/' . ($this->hasKey() ? $this->getStorageKey() : '');
-    }
-
     public function parent(PageInterface $var = null)
     {
         if (null !== $var) {
@@ -186,105 +139,6 @@ class GravPageObject extends FlexPageObject
         $pages = Grav::instance()['pages'];
 
         return $pages->get($this->parent_route);
-    }
-
-    /**
-     * @return \Grav\Common\Page\Collection
-     */
-    public function children()
-    {
-        /** @var Pages $pages */
-        $pages = Grav::instance()['pages'];
-
-        return $pages->children($this->path());
-    }
-
-    /**
-     * Gets and sets the name field.  If no name field is set, it will return 'default.md'.
-     *
-     * @param  string $var The name of this page.
-     * @return string      The name of this page.
-     */
-    public function name($var = null): string
-    {
-        if ($var !== null) {
-            $this->setProperty('name', $var);
-        }
-
-        return $this->getProperty('name');
-    }
-
-    /**
-     * Gets and sets the template field. This is used to find the correct Twig template file to render.
-     * If no field is set, it will return the name without the .md extension
-     *
-     * @param  string $var the template name
-     *
-     * @return string      the template name
-     */
-    public function template($var = null): string
-    {
-        if ($var !== null) {
-            $this->setProperty('template', $var);
-        }
-
-        return $this->getProperty('template');
-    }
-
-    /**
-     * Gets and sets the extension field.
-     *
-     * @param null $var
-     *
-     * @return string
-     */
-    public function extension($var = null): string
-    {
-        if ($var !== null) {
-            throw new \RuntimeException('Not Implemented');
-        }
-
-        return '.' . pathinfo($this->name(), PATHINFO_EXTENSION);
-    }
-
-    /**
-     * Gets and sets the modular var that helps identify this page is a modular child
-     *
-     * @param  bool $var true if modular_twig
-     *
-     * @return bool      true if modular_twig
-     */
-    public function modular($var = null): bool
-    {
-        return $this->modularTwig($var);
-    }
-
-    /**
-     * Gets and sets the modular_twig var that helps identify this page as a modular child page that will need
-     * twig processing handled differently from a regular page.
-     *
-     * @param  bool $var true if modular_twig
-     *
-     * @return bool      true if modular_twig
-     */
-    public function modularTwig($var = null): bool
-    {
-        if ($var !== null) {
-            $this->setProperty('modular_twig', (bool)$var);
-            if ($var) {
-                $this->visible(false);
-            }
-        }
-
-        return (bool)$this->getProperty('modular_twig');
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function isPage(): bool
-    {
-        return $this->getProperty('template') !== 'folder';
     }
 
     public function full_order(): string

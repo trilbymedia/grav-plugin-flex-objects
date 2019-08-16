@@ -64,6 +64,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
             // Page
             'isPublished' => true,
+            'isVisible' => true,
             'getCreated_Timestamp' => true,
             'getPublish_Timestamp' => true,
             'getUpdated_Timestamp' => true,
@@ -76,6 +77,14 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function isPublished(): bool
     {
         return $this->published();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVisible(): bool
+    {
+        return $this->published() && $this->visible();
     }
 
     /**
@@ -132,24 +141,6 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
         //}
 
         return parent::save();
-    }
-
-    public function folder($var = null): string
-    {
-        if (null !== $var) {
-            throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
-        }
-
-        return $this->hasKey() ? $this->getKey() : '';
-    }
-
-    /**
-     * Returns the clean path to the page file
-     * @deprecated Needed in admin for Page Media.
-     */
-    public function relativePagePath()
-    {
-        return $this->getMediaFolder();
     }
 
     /**

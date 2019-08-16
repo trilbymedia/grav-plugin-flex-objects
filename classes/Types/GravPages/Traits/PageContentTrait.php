@@ -280,13 +280,17 @@ trait PageContentTrait
     public function order($var = null)
     {
         if (null !== $var) {
-            // TODO:
-            throw new \RuntimeException('Not Implemented');
+            $this->setProperty('order', $var);
         }
 
-        preg_match(PAGE_ORDER_PREFIX_REGEX, $this->folder(), $order);
+        $var = $this->getProperty('order');
+        if (null === $var) {
+            preg_match(PAGE_ORDER_PREFIX_REGEX, $this->folder(), $order);
 
-        return $order[0] ?? false;
+            $var = $order[0] ?? false;
+        }
+
+        return $var !== false ? sprintf('%02d.', $var) : false;
     }
 
     /**
@@ -295,11 +299,10 @@ trait PageContentTrait
     public function id($var = null): string
     {
         if (null !== $var) {
-            // TODO:
-            throw new \RuntimeException('Not Implemented');
+            $this->setProperty('id', $var);
         }
 
-        return $this->modified() . md5( 'flex-' . $this->getFlexType() . '-' . $this->getKey());
+        return $this->getProperty('id') ?? $this->modified() . md5( 'flex-' . $this->getFlexType() . '-' . $this->getKey());
     }
 
     /**
@@ -378,8 +381,7 @@ trait PageContentTrait
      */
     public function isPage(): bool
     {
-        // TODO: add support
-        return true;
+        return !in_array($this->template(), ['', 'folder'], true);
     }
 
     /**

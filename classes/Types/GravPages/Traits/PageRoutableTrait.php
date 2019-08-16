@@ -8,6 +8,7 @@ use Grav\Common\Page\Interfaces\PageCollectionInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
+use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 trait PageRoutableTrait
 {
@@ -228,11 +229,12 @@ trait PageRoutableTrait
 
     /**
      * Returns the clean path to the page file
+     *
+     * Needed in admin for Page Media.
      */
     public function relativePagePath(): ?string
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->getMediaFolder();
     }
 
     /**
@@ -250,7 +252,10 @@ trait PageRoutableTrait
             throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
+        return $locator($this->getStorageFolder());
     }
 
     /**
@@ -262,12 +267,11 @@ trait PageRoutableTrait
      */
     public function folder($var = null): ?string
     {
-        // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
+            $this->setProperty('folder', $var);
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->getProperty('folder') ?? ($this->getKey() ?: null);
     }
 
     /**
