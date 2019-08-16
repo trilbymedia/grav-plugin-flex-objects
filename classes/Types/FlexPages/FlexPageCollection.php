@@ -12,6 +12,17 @@ use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 class FlexPageCollection extends FlexCollection
 {
     /**
+     * @return array
+     */
+    public static function getCachedMethods(): array
+    {
+        return [
+            'withPublished' => true,
+            'getNextOrder' => false,
+        ] + parent::getCachedMethods();
+    }
+
+    /**
      * @param bool $bool
      * @return FlexCollection|FlexPageCollection
      */

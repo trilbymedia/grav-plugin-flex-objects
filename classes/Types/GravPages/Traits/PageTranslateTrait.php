@@ -22,7 +22,7 @@ trait PageTranslateTrait
      *
      * @return array the page translated languages
      */
-    public function translatedLanguages($onlyPublished = false)
+    public function translatedLanguages($onlyPublished = false): array
     {
         $translated = $this->getlanguages();
         if (!$translated) {
@@ -77,7 +77,7 @@ trait PageTranslateTrait
      *
      * @return array the page untranslated languages
      */
-    public function untranslatedLanguages($includeUnpublished = false)
+    public function untranslatedLanguages($includeUnpublished = false): array
     {
         $grav = Grav::instance();
 
@@ -97,7 +97,7 @@ trait PageTranslateTrait
      *
      * @return string|null
      */
-    public function language($var = null)
+    public function language($var = null): ?string
     {
         if (null !== $var) {
             $this->setProperty('language', $var);
@@ -106,7 +106,10 @@ trait PageTranslateTrait
         return $this->getProperty('language');
     }
 
-    protected function getlanguages()
+    /**
+     * @return array
+     */
+    protected function getlanguages(): array
     {
         if (null === $this->_languages) {
             $template = $this->getProperty('template');
@@ -131,8 +134,10 @@ trait PageTranslateTrait
      * @param string $value
      * @return string
      */
-    protected function offsetLoad_language($value)
+    protected function offsetLoad_language($value): string
     {
-        return $value ?? trim(basename($this->extension(), 'md'), '.');
+        $value = (string)($value ?? trim(basename($this->extension(), 'md'), '.'));
+
+        return $value !== '' ? $value : null;
     }
 }

@@ -86,14 +86,16 @@ class GravPageObject extends FlexPageObject
      *
      * @return string  The route for the Page.
      */
-    public function route($var = null)
+    public function route($var = null): string
     {
         if (null !== $var) {
             if ($var !== '/' && $var !== Grav::instance()['config']->get('system.home.alias')) {
                 throw new \RuntimeException(__METHOD__ . '(\'' . $var . '\'): Not Implemented');
             }
+        }
 
-
+        if ($this->home()) {
+            return '/';
         }
 
         // TODO: implement rest of the routing:
@@ -103,7 +105,7 @@ class GravPageObject extends FlexPageObject
     /**
      * @return bool
      */
-    public function isVisible()
+    public function isVisible(): bool
     {
         return $this->isPublished() && $this->visible();
     }
@@ -137,7 +139,7 @@ class GravPageObject extends FlexPageObject
         return parent::getFormValue($name, $default, $separator);
     }
 
-    public function folder($var = null)
+    public function folder($var = null): string
     {
         if (null !== $var) {
             $this->setProperty('folder', $var);
@@ -157,7 +159,7 @@ class GravPageObject extends FlexPageObject
         return $var !== false ? sprintf('%02d.', $var) : false;
     }
 
-    public function path($var = null)
+    public function path($var = null): string
     {
         if (null !== $var) {
             throw new \RuntimeException('Not Implemented');
@@ -169,7 +171,7 @@ class GravPageObject extends FlexPageObject
         return $locator($this->getFlexDirectory()->getStorageFolder()) . $this->location();
     }
 
-    protected function location()
+    protected function location(): string
     {
         return '/' . ($this->hasKey() ? $this->getStorageKey() : '');
     }
@@ -180,7 +182,10 @@ class GravPageObject extends FlexPageObject
             throw new \RuntimeException('Not Implemented');
         }
 
-        return $this->getFlexDirectory()->getObject($this->getProperty('route'));
+        /** @var Pages $pages */
+        $pages = Grav::instance()['pages'];
+
+        return $pages->get($this->parent_route);
     }
 
     /**
@@ -188,8 +193,6 @@ class GravPageObject extends FlexPageObject
      */
     public function children()
     {
-        // FIXME: needs a proper solution
-
         /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
 
@@ -200,10 +203,9 @@ class GravPageObject extends FlexPageObject
      * Gets and sets the name field.  If no name field is set, it will return 'default.md'.
      *
      * @param  string $var The name of this page.
-     *
      * @return string      The name of this page.
      */
-    public function name($var = null)
+    public function name($var = null): string
     {
         if ($var !== null) {
             $this->setProperty('name', $var);
@@ -220,7 +222,7 @@ class GravPageObject extends FlexPageObject
      *
      * @return string      the template name
      */
-    public function template($var = null)
+    public function template($var = null): string
     {
         if ($var !== null) {
             $this->setProperty('template', $var);
@@ -234,9 +236,9 @@ class GravPageObject extends FlexPageObject
      *
      * @param null $var
      *
-     * @return null|string
+     * @return string
      */
-    public function extension($var = null)
+    public function extension($var = null): string
     {
         if ($var !== null) {
             throw new \RuntimeException('Not Implemented');
@@ -252,7 +254,7 @@ class GravPageObject extends FlexPageObject
      *
      * @return bool      true if modular_twig
      */
-    public function modular($var = null)
+    public function modular($var = null): bool
     {
         return $this->modularTwig($var);
     }
@@ -265,7 +267,7 @@ class GravPageObject extends FlexPageObject
      *
      * @return bool      true if modular_twig
      */
-    public function modularTwig($var = null)
+    public function modularTwig($var = null): bool
     {
         if ($var !== null) {
             $this->setProperty('modular_twig', (bool)$var);
@@ -274,10 +276,18 @@ class GravPageObject extends FlexPageObject
             }
         }
 
-        return $this->getProperty('modular_twig');
+        return (bool)$this->getProperty('modular_twig');
     }
 
-    public function full_order()
+    /**
+     * @inheritdoc
+     */
+    public function isPage(): bool
+    {
+        return $this->getProperty('template') !== 'folder';
+    }
+
+    public function full_order(): string
     {
         $path = $this->path();
 
@@ -288,7 +298,7 @@ class GravPageObject extends FlexPageObject
      * @param string $name
      * @return Blueprint
      */
-    public function getBlueprint(string $name = '')
+    public function getBlueprint(string $name = ''): Blueprint
     {
         try {
             // Make sure that pages has been initialized.
@@ -311,6 +321,16 @@ class GravPageObject extends FlexPageObject
 
             return $this->getFlexDirectory()->getBlueprint($template, 'blueprints://pages');
         }
+    }
+
+    public function __debugInfo(): array
+    {
+        $list = parent::__debugInfo();
+
+        return $list + [
+            '_content_meta:private' => $this->getContentMeta(),
+            '_content:private' => $this->getRawContent()
+        ];
     }
 
     /**
@@ -399,6 +419,28 @@ class GravPageObject extends FlexPageObject
         return $value;
     }
 
+    protected function offsetPrepare_order($value)
+    {
+        return false !== $value ? (int)$value : false;
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    protected function offsetPrepare_name($value): string
+    {
+        // Setting name will reset page template.
+        $this->unsetProperty('template');
+
+        if ($value && !preg_match('/\.md$/', $value)) {
+            // FIXME: missing language support.
+            $value .= '.md';
+        }
+
+        return $value ?: 'default.md';
+    }
+
     /**
      * @return mixed|null
      */
@@ -421,28 +463,6 @@ class GravPageObject extends FlexPageObject
 
         // Allows us to make code more readable. :)
         return null;
-    }
-
-    protected function offsetPrepare_order($value)
-    {
-        return false !== $value ? (int)$value : false;
-    }
-
-    /**
-     * @param string $value
-     * @return string
-     */
-    protected function offsetPrepare_name($value): string
-    {
-        // Setting name will reset page template.
-        $this->unsetProperty('template');
-
-        if ($value && !preg_match('/\.md$/', $value)) {
-            // FIXME: missing language support.
-            $value .= '.md';
-        }
-
-        return $value ?: 'default.md';
     }
 
     /**

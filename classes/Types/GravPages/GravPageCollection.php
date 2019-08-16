@@ -2,14 +2,11 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
-use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageCollectionInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
-use Grav\Common\Page\Page;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageCollection;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
  * Class GravPageCollection
@@ -22,28 +19,19 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
  *     $collection->add()               incompatible method signature
  *     $collection->remove()            incompatible method signature
  *     $collection->filter()            incompatible method signature (takes closure instead of callable)
+ *     $collection->prev()              does not rewind the internal pointer
  * AND most methods are immutable; they do not update the current collection, but return updated one
  */
 class GravPageCollection extends FlexPageCollection implements PageCollectionInterface
 {
-    protected $_root;
     protected $_params;
 
+    /**
+     * @return PageInterface
+     */
     public function getRoot()
     {
-        if (null === $this->_root) {
-            $grav = Grav::instance();
-
-            /** @var UniformResourceLocator $locator */
-            $locator = $grav['locator'];
-
-            $page = new Page();
-            $page->path($locator($this->getFlexDirectory()->getStorageFolder()));
-
-            $this->_root = $page;
-        }
-
-        return $page;
+        return $this->getIndex()->getRoot();
     }
 
     /**
@@ -51,9 +39,9 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      *
      * @return array
      */
-    public function getParams()
+    public function getParams(): array
     {
-        return $this->_params;
+        return $this->_params ?? [];
     }
 
     /**
@@ -65,7 +53,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      */
     public function setParams(array $params)
     {
-        $this->_params = array_merge($this->_params, $params);
+        $this->_params = $this->_params ? array_merge($this->_params, $params) : $params;
 
         return $this;
     }
@@ -75,7 +63,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      *
      * @return array
      */
-    public function params()
+    public function params(): array
     {
         return $this->getParams();
     }
@@ -85,7 +73,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      *
      * @param PageInterface $page
      *
-     * @return $this
+     * @return self
      */
     public function addPage(PageInterface $page)
     {
@@ -104,7 +92,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      * Merge another collection with the current collection
      *
      * @param PageCollectionInterface $collection
-     * @return $this
+     * @return self
      */
     public function merge(PageCollectionInterface $collection)
     {
@@ -115,7 +103,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      * Intersect another collection with the current collection
      *
      * @param PageCollectionInterface $collection
-     * @return $this
+     * @return self
      */
     public function intersect(PageCollectionInterface $collection)
     {
@@ -125,35 +113,37 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Return previous item.
      *
-     * @return mixed
+     * @return PageInterface|false
      */
     public function prev()
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        // FIXME: this method does not rewind the internal pointer!
+        $key = $this->key();
+        $prev = $this->prevSibling($key);
+
+        return $prev !== $this->current() ? $prev : false;
     }
 
     /**
      * Return nth item.
-     *
      * @param int $key
      *
-     * @return mixed|bool
+     * @return PageInterface|bool
      */
     public function nth($key)
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->slice($key, 1)[0] ?? false;
     }
 
     /**
      * Pick one or more random entries.
      *
      * @param int $num Specifies how many entries should be picked.
-     *
-     * @return $this
+     * @return self
      */
     public function random($num = 1)
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->createFrom($this->shuffle()->slice(0, $num));
     }
 
     /**
@@ -161,7 +151,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      *
      * @param array $items Items to be appended. Existing keys will be overridden with the new values.
      *
-     * @return $this
+     * @return self
      */
     public function append($items)
     {
@@ -172,9 +162,9 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      * Split collection into array of smaller collections.
      *
      * @param int $size
-     * @return PageCollectionInterface[]
+     * @return self[]
      */
-    public function batch($size)
+    public function batch($size): array
     {
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
@@ -187,7 +177,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      * @param array  $manual
      * @param string $sort_flags
      *
-     * @return $this
+     * @return self
      */
     public function order($by, $dir = 'asc', $manual = null, $sort_flags = null)
     {
@@ -203,7 +193,10 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      */
     public function isFirst($path): bool
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $keys = $this->getKeys();
+        $first = reset($keys);
+
+        return $path === $first;
     }
 
     /**
@@ -215,7 +208,10 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      */
     public function isLast($path): bool
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $keys = $this->getKeys();
+        $last = end($keys);
+
+        return $path === $last;
     }
 
     /**
@@ -227,7 +223,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      */
     public function prevSibling($path)
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->adjacentSibling($path, -1);
     }
 
     /**
@@ -239,7 +235,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      */
     public function nextSibling($path)
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->adjacentSibling($path, 1);
     }
 
     /**
@@ -252,7 +248,18 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      */
     public function adjacentSibling($path, $direction = 1)
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $keys = $this->getKeys();
+        $pos = \array_search($path, $keys, true);
+
+        if ($pos !== false) {
+            $pos += $direction;
+            if (isset($keys[$pos])) {
+                return $this[$keys[$pos]];
+            }
+        }
+
+        // FIXME: This makes no sense!
+        return $this;
     }
 
     /**
@@ -260,11 +267,13 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      *
      * @param  string $path the path the item
      *
-     * @return int   the index of the current page.
+     * @return int|null The index of the current page, null if not found.
      */
-    public function currentPosition($path): int
+    public function currentPosition($path): ?int
     {
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $pos = \array_search($path, $this->getKeys(), true);
+
+        return $pos !== false ? $pos : null;
     }
 
     /**
@@ -277,7 +286,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      * @param string|bool $endDate
      * @param string|null $field
      *
-     * @return $this
+     * @return self
      * @throws \Exception
      */
     public function dateRange($startDate, $endDate = false, $field = null)
@@ -304,7 +313,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Creates new collection with only visible pages
      *
-     * @return GravPageCollection The collection with only visible pages
+     * @return self The collection with only visible pages
      */
     public function visible()
     {
@@ -321,7 +330,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Creates new collection with only non-visible pages
      *
-     * @return GravPageCollection The collection with only non-visible pages
+     * @return self The collection with only non-visible pages
      */
     public function nonVisible()
     {
@@ -338,7 +347,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Creates new collection with only modular pages
      *
-     * @return GravPageCollection The collection with only modular pages
+     * @return self The collection with only modular pages
      */
     public function modular()
     {
@@ -355,7 +364,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Creates new collection with only non-modular pages
      *
-     * @return GravPageCollection The collection with only non-modular pages
+     * @return self The collection with only non-modular pages
      */
     public function nonModular()
     {
@@ -372,7 +381,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Creates new collection with only published pages
      *
-     * @return GravPageCollection The collection with only published pages
+     * @return self The collection with only published pages
      */
     public function published()
     {
@@ -389,7 +398,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Creates new collection with only non-published pages
      *
-     * @return GravPageCollection The collection with only non-published pages
+     * @return self The collection with only non-published pages
      */
     public function nonPublished()
     {
@@ -406,7 +415,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Creates new collection with only routable pages
      *
-     * @return GravPageCollection The collection with only routable pages
+     * @return self The collection with only routable pages
      */
     public function routable()
     {
@@ -423,7 +432,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
     /**
      * Creates new collection with only non-routable pages
      *
-     * @return GravPageCollection The collection with only non-routable pages
+     * @return self The collection with only non-routable pages
      */
     public function nonRoutable()
     {
@@ -442,7 +451,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      *
      * @param string $type
      *
-     * @return GravPageCollection The collection
+     * @return self The collection
      */
     public function ofType($type)
     {
@@ -461,7 +470,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      *
      * @param string[] $types
      *
-     * @return GravPageCollection The collection
+     * @return self The collection
      */
     public function ofOneOfTheseTypes($types)
     {
@@ -480,7 +489,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      *
      * @param array $accessLevels
      *
-     * @return GravPageCollection The collection
+     * @return self The collection
      */
     public function ofOneOfTheseAccessLevels($accessLevels)
     {
@@ -526,7 +535,7 @@ class GravPageCollection extends FlexPageCollection implements PageCollectionInt
      * @return array
      * @throws \Exception
      */
-    public function toExtendedArray()
+    public function toExtendedArray(): array
     {
         $entries  = [];
         foreach ($this as $key => $object) {

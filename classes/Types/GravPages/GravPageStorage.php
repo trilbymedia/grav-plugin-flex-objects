@@ -20,7 +20,6 @@ class GravPageStorage extends FolderStorage
     protected $ignore_hidden;
     protected $recurse;
     protected $base_path;
-    protected $base_route;
 
     protected $page_extensions;
     protected $flags;
@@ -32,7 +31,8 @@ class GravPageStorage extends FolderStorage
     {
         parent::initOptions($options);
 
-        $this->flags = \FilesystemIterator::KEY_AS_FILENAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
+        $this->flags = \FilesystemIterator::KEY_AS_FILENAME | \FilesystemIterator::CURRENT_AS_FILEINFO
+            | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
 
         $grav = Grav::instance();
 
@@ -165,7 +165,7 @@ class GravPageStorage extends FolderStorage
             }
         }
 
-        $route = trim(GravPageIndex::adjustRouteCase(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', "/{$key}")), '/');
+        $route = trim(GravPageIndex::normalizeRoute(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', "/{$key}")), '/');
 
         ksort($markdown, SORT_NATURAL);
         ksort($children, SORT_NATURAL);

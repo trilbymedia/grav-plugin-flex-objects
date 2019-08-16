@@ -2,10 +2,16 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
+use Grav\Common\Config\Config;
 use Grav\Common\Grav;
+use Grav\Common\Markdown\Parsedown;
+use Grav\Common\Markdown\ParsedownExtra;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Media;
+use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
 use Grav\Framework\File\Formatter\YamlFormatter;
+use RocketTheme\Toolbox\Event\Event;
 
 class_exists('Grav\\Common\\Page\\Page', true);
 
@@ -48,16 +54,27 @@ trait PageContentTrait
         'debugger'          => 'bool'
     ];
 
+    /** @var object */
+    protected $header;
+
+    /** @var string */
+    protected $_summary;
+
+    /** @var string */
+    protected $_content;
+
     /**
+     * Method to normalize the route.
+     *
      * @param string $route
      * @return string
      * @internal
      */
-    static public function adjustRouteCase($route)
+    public static function normalizeRoute($route): string
     {
         $case_insensitive = Grav::instance()['config']->get('system.force_lowercase_urls');
 
-        return $case_insensitive ? mb_strtolower($route) : $route;
+        return $case_insensitive ? mb_strtolower($route) : (string)$route;
     }
 
     /**
@@ -69,56 +86,66 @@ trait PageContentTrait
             $this->setProperty('header', $var);
         }
 
-        return (object)$this->getProperty('header', []);
+        return $this->getProperty('header');
     }
 
     /**
      * @inheritdoc
      */
-    public function summary($size = null, $textOnly = false)
+    public function summary($size = null, $textOnly = false): string
     {
         return $this->processSummary($size, $textOnly);
     }
 
     /**
-     * @inheritdoc
+     * Sets the summary of the page
+     *
+     * @param string $summary Summary
      */
-    public function content($var = null)
+    public function setSummary($summary): void
+    {
+        $this->_summary = $summary;
+    }
+
+    /**
+     * @inheritdoc
+     * @throws \Exception
+     */
+    public function content($var = null): string
     {
         if (null !== $var) {
-            $this->setProperty('content', $var);
+            $this->_content = $var;
         }
 
-        return $this->getProperty('content');
+        return $this->_content ?? $this->processContent($this->getRawContent());
     }
 
     /**
      * @inheritdoc
      */
-    public function getRawContent()
+    public function getRawContent(): string
     {
-        return $this->getArrayProperty('markdown') ?? '';
+        return $this->_content ?? $this->getArrayProperty('markdown') ?? '';
     }
 
     /**
      * @inheritdoc
      */
-    public function setRawContent($content)
+    public function setRawContent($content): void
     {
-        $this->unsetProperty('content');
-        $this->setArrayProperty('markdown', $content ?? '');
+        $this->_content = $content ?? '';
     }
 
     /**
      * @inheritdoc
      */
-    public function rawMarkdown($var = null)
+    public function rawMarkdown($var = null): string
     {
         if ($var !== null) {
-            $this->setRawContent($var);
+            $this->setProperty('markdown', $var);
         }
 
-        return $this->getRawContent();
+        return $this->getProperty('markdown') ?? '';
     }
 
     /**
@@ -142,7 +169,7 @@ trait PageContentTrait
      *
      * @return Media      Representation of associated media.
      */
-    public function media($var = null)
+    public function media($var = null): Media
     {
         if (null !== $var) {
             $this->setProperty('media', $var);
@@ -154,7 +181,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function title($var = null)
+    public function title($var = null): string
     {
         if (null !== $var) {
             $this->setProperty('title', $var);
@@ -166,7 +193,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function menu($var = null)
+    public function menu($var = null): string
     {
         if (null !== $var) {
             $this->setProperty('menu', $var);
@@ -178,19 +205,19 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function visible($var = null)
+    public function visible($var = null): bool
     {
         if (null !== $var) {
             $this->setProperty('visible', $var);
         }
 
-        return $this->published() && ($this->getProperty('visible') ?? preg_match(PAGE_ORDER_PREFIX_REGEX, $this->folder()));
+        return $this->published() && ($this->getProperty('visible') ?? $this->order() !== false);
     }
 
     /**
      * @inheritdoc
      */
-    public function published($var = null)
+    public function published($var = null): bool
     {
         if (null !== $var) {
             $this->setProperty('published', $var);
@@ -202,7 +229,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function publishDate($var = null)
+    public function publishDate($var = null): int
     {
         if (null !== $var) {
             $this->setProperty('publish_date', $var);
@@ -214,7 +241,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function unpublishDate($var = null)
+    public function unpublishDate($var = null): int
     {
         if (null !== $var) {
             $this->setProperty('unpublish_date', $var);
@@ -226,7 +253,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function process($var = null)
+    public function process($var = null): array
     {
         if (null !== $var) {
             $this->setProperty('process', $var);
@@ -238,13 +265,13 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function slug($var = null)
+    public function slug($var = null): string
     {
         if (null !== $var) {
             $this->setProperty('slug', $var);
         }
 
-        return $this->getProperty('slug') ?: static::adjustRouteCase(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder()));
+        return $this->getProperty('slug') ?: static::normalizeRoute(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder()));
     }
 
     /**
@@ -265,7 +292,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function id($var = null)
+    public function id($var = null): string
     {
         if (null !== $var) {
             // TODO:
@@ -278,20 +305,20 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function modified($var = null)
+    public function modified($var = null): int
     {
         if (null !== $var) {
             $this->setProperty('modified', $var);
         }
 
         // TODO: Initialize in the blueprints.
-        return $this->getProperty('modified');
+        return (int)$this->getProperty('modified');
     }
 
     /**
      * @inheritdoc
      */
-    public function lastModified($var = null)
+    public function lastModified($var = null): bool
     {
         if (null !== $var) {
             $this->setProperty('last_modified', $var);
@@ -303,7 +330,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function date($var = null)
+    public function date($var = null): int
     {
         if (null !== $var) {
             $this->setProperty('date', $var);
@@ -315,7 +342,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function dateformat($var = null)
+    public function dateformat($var = null): string
     {
         if (null !== $var) {
             $this->setProperty('dateformat', $var);
@@ -327,7 +354,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function taxonomy($var = null)
+    public function taxonomy($var = null): array
     {
         if (null !== $var) {
             $this->setProperty('taxonomy', $var);
@@ -339,7 +366,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function shouldProcess($process)
+    public function shouldProcess($process): bool
     {
         $test = $this->process();
 
@@ -349,7 +376,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function isPage()
+    public function isPage(): bool
     {
         // TODO: add support
         return true;
@@ -358,10 +385,9 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function isDir()
+    public function isDir(): bool
     {
-        // TODO: add support
-        return false;
+        return !$this->isPage();
     }
 
     /**
@@ -372,7 +398,17 @@ trait PageContentTrait
     abstract public function getProperty($property, $default = null);
     abstract public function setProperty($property, $value);
     abstract public function &getArrayProperty($property, $default = null, $doCreate = false);
-    abstract public function setArrayProperty($property, $value);
+
+
+    protected function offsetLoad_header($value)
+    {
+        return (object)$value;
+    }
+
+    protected function offsetPrepare_header($value)
+    {
+        return (object)$value;
+    }
 
     /**
      * @param string $name
@@ -424,5 +460,218 @@ trait PageContentTrait
         }
 
         return $default;
+    }
+
+
+    /**
+     * @param int|null $size
+     * @param bool $textOnly
+     * @return string
+     */
+    protected function processSummary($size = null, $textOnly = false): string
+    {
+        $config = (array)Grav::instance()['config']->get('site.summary');
+        $config_page = (array)$this->getNestedProperty('header.summary');
+        if ($config_page) {
+            $config = array_merge($config, $config_page);
+        }
+
+        // Return summary based on settings in site config file.
+        if (empty($config['enabled'])) {
+            return $this->content();
+        }
+
+        $content = $this->_summary ?? $this->content();
+        if ($textOnly) {
+            $content =  strip_tags($content);
+        }
+        $content_size = mb_strwidth($content, 'utf-8');
+        $summary_size = $this->_summary !== null ? $content_size : $this->getProperty('summary_size');
+
+        // Return calculated summary based on summary divider's position.
+        $format = $config['format'] ?? '';
+        if ($format === 'short' && $summary_size) {
+            // Slice the string on breakpoint.
+            if ($content_size > $summary_size) {
+                return mb_substr($content, 0, $summary_size);
+            }
+
+            return $content;
+        }
+
+        // Return entire page content on wrong/unknown format or if format=short and summary_size=0.
+        if ($format !== 'long') {
+            return $content;
+        }
+
+        // If needed, get summary size from the config.
+        $size = $size ?? $config['size'] ?? null;
+
+        // Return calculated summary based on defaults.
+        $size = is_numeric($size) ? (int)$size : -1;
+        if ($size < 0) {
+            $size = 300;
+        }
+
+        // If the size is zero or smaller than the summary limit, return the entire page content.
+        if ($size === 0 || $content_size <= $size) {
+            return $content;
+        }
+
+        // Only return string but not html, wrap whatever html tag you want when using.
+        if ($textOnly) {
+            return mb_strimwidth($content, 0, $size, '...', 'utf-8');
+        }
+
+        $summary = Utils::truncateHTML($content, $size);
+
+        return html_entity_decode($summary);
+    }
+
+    /**
+     * Gets and Sets the content based on content portion of the .md file
+     *
+     * @param  string $content
+     * @return string
+     * @throws \Exception
+     */
+    protected function processContent($content): string
+    {
+        $grav = Grav::instance();
+
+        /** @var Config $config */
+        $config = $grav['config'];
+
+        $process_markdown = $this->shouldProcess('markdown');
+        $process_twig = $this->shouldProcess('twig') || $this->modularTwig();
+        $cache_enable = $this->getNestedProperty('header.cache_enable') ?? $config->get('system.cache.enabled', true);
+
+        $twig_first = $this->getNestedProperty('header.twig_first') ?? $config->get('system.pages.twig_first', true);
+        $never_cache_twig = $this->getNestedProperty('header.never_cache_twig') ?? $config->get('system.pages.never_cache_twig', false);
+
+        $cached = null;
+        if ($cache_enable) {
+            $cache = $this->getCache('render');
+            $key = md5($this->getCacheKey() . '-content');
+            $cached = $cache->get($key);
+            if ($cached && $cached['checksum'] === $this->getCacheChecksum()) {
+                $this->_content = $cached['content'] ?? '';
+                $this->_content_meta = $cached['content_meta'] ?? null;
+
+                if ($process_twig && $never_cache_twig) {
+                    $this->_content = $this->processTwig($this->_content);
+                }
+            } else {
+                $cached = null;
+            }
+        }
+
+        if (!$cached) {
+            $markdown_options = [];
+            if ($process_markdown) {
+                // Build markdown options.
+                $markdown_options = (array)$config->get('system.pages.markdown');
+                $markdown_page_options = (array)$this->getNestedProperty('header.markdown');
+                if ($markdown_page_options) {
+                    $markdown_options = array_merge($markdown_options, $markdown_page_options);
+                }
+
+                // pages.markdown_extra is deprecated, but still check it...
+                if (!isset($markdown_options['extra'])) {
+                    $extra = $this->getNestedProperty('markdown_extra') ?? $config->get('system.pages.markdown_extra');
+                    if (null !== $extra) {
+                        user_error('Configuration option \'system.pages.markdown_extra\' is deprecated since Grav 1.5, use \'system.pages.markdown.extra\' instead', E_USER_DEPRECATED);
+
+                        $markdown_options['extra'] = $extra;
+                    }
+                }
+            }
+
+            $this->_content = $content;
+            $grav->fireEvent('onPageContentRaw', new Event(['page' => $this]));
+
+            if ($twig_first && !$never_cache_twig) {
+                if ($process_twig) {
+                    $this->_content = $this->processTwig($this->_content);
+                }
+
+                if ($process_markdown) {
+                    $this->_content = $this->processMarkdown($this->_content, $markdown_options);
+                }
+
+                // Content Processed but not cached yet
+                $grav->fireEvent('onPageContentProcessed', new Event(['page' => $this]));
+
+            } else {
+                if ($process_markdown) {
+                    $this->_content = $this->processMarkdown($this->_content, $markdown_options);
+                }
+
+                // Content Processed but not cached yet
+                $grav->fireEvent('onPageContentProcessed', new Event(['page' => $this]));
+
+                if ($cache_enable && $never_cache_twig) {
+                    $this->cachePageContent();
+                }
+
+                if ($process_twig) {
+                    $this->_content = $this->processTwig($this->_content);
+                }
+            }
+
+            if ($cache_enable && !$never_cache_twig) {
+                $this->cachePageContent();
+            }
+        }
+
+        // Handle summary divider
+        $delimiter = $config->get('site.summary.delimiter', '===');
+        $divider_pos = mb_strpos($this->_content, "<p>{$delimiter}</p>");
+        if ($divider_pos !== false) {
+            $this->setProperty('summary_size', $divider_pos);
+            $this->_content = str_replace("<p>{$delimiter}</p>", '', $this->_content);
+        }
+
+        // Fire event when Page::content() is called
+        $grav->fireEvent('onPageContent', new Event(['page' => $this]));
+
+        return $this->_content;
+    }
+
+    /**
+     * Process the Twig page content.
+     *
+     * @param  string $content
+     * @return string
+     */
+    protected function processTwig($content): string
+    {
+        /** @var Twig $twig */
+        $twig = Grav::instance()['twig'];
+
+        /** @var PageInterface $this */
+        return $twig->processPage($this, $content);
+    }
+
+    /**
+     * Process the Markdown content.
+     *
+     * Uses Parsedown or Parsedown Extra depending on configuration.
+     *
+     * @param string $content
+     * @param array  $options
+     * @return string
+     * @throws \Exception
+     */
+    protected function processMarkdown($content, array $options = []): string
+    {
+        // Initialize the preferred variant of markdown parser.
+        if (isset($defaults['extra'])) {
+            $parsedown = new ParsedownExtra($this, $options);
+        } else {
+            $parsedown = new Parsedown($this, $options);
+        }
+
+        return $parsedown->text($content);
     }
 }

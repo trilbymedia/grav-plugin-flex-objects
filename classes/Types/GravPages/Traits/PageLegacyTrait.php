@@ -5,14 +5,18 @@ namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 use Exception;
 use Grav\Common\Grav;
 use Grav\Common\Page\Collection;
+use Grav\Common\Page\Interfaces\PageCollectionInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
+use Grav\Common\Page\Pages;
 use Grav\Common\Utils;
 use Grav\Common\Yaml;
+use Grav\Framework\Cache\CacheInterface;
 use RocketTheme\Toolbox\File\MarkdownFile;
 
 trait PageLegacyTrait
 {
     private $_content_meta;
+    private $_metadata;
 
     /**
      * Initializes the page instance variables based on a file
@@ -35,7 +39,7 @@ trait PageLegacyTrait
      *
      * @return string      Raw content string
      */
-    public function raw($var = null)
+    public function raw($var = null): string
     {
         // TODO:
         if (null !== $var) {
@@ -52,7 +56,7 @@ trait PageLegacyTrait
      *
      * @return string
      */
-    public function frontmatter($var = null)
+    public function frontmatter($var = null): string
     {
         // TODO:
         if (null !== $var) {
@@ -68,20 +72,22 @@ trait PageLegacyTrait
      * @param $key
      * @param $value
      */
-    public function modifyHeader($key, $value)
+    public function modifyHeader($key, $value): void
     {
-        $this->setProperty("header.{$key}", $value);
+        $this->setNestedProperty("header.{$key}", $value);
     }
 
     /**
      * @return int
      */
-    public function httpResponseCode()
+    public function httpResponseCode(): int
     {
-        return (int)($this->getNestedProperty('header.http_response_code') ?? 200);
+        $code = (int)$this->getNestedProperty('header.http_response_code');
+
+        return $code ?: 200;
     }
 
-    public function httpHeaders()
+    public function httpHeaders(): array
     {
         $headers = [];
 
@@ -89,10 +95,10 @@ trait PageLegacyTrait
         $cache_control = $this->cacheControl();
         $expires = $this->expires();
 
-        // Set Content-Type header
+        // Set Content-Type header.
         $headers['Content-Type'] = Utils::getMimeByExtension($format, 'text/html');
 
-        // Calculate Expires Headers if set to > 0
+        // Calculate Expires Headers if set to > 0.
         if ($expires > 0) {
             $expires_date = gmdate('D, d M Y H:i:s', time() + $expires) . ' GMT';
             if (!$cache_control) {
@@ -101,23 +107,23 @@ trait PageLegacyTrait
             $headers['Expires'] = $expires_date;
         }
 
-        // Set Cache-Control header
+        // Set Cache-Control header.
         if ($cache_control) {
             $headers['Cache-Control'] = strtolower($cache_control);
         }
 
-        // Set Last-Modified header
+        // Set Last-Modified header.
         if ($this->lastModified()) {
             $last_modified_date = gmdate('D, d M Y H:i:s', $this->modified()) . ' GMT';
             $headers['Last-Modified'] = $last_modified_date;
         }
 
-        // Calculate ETag based on the raw file
+        // Calculate ETag based on the serialized page and modified time.
         if ($this->eTag()) {
-            $headers['ETag'] = '"' . md5($this->raw() . $this->modified()).'"';
+            $headers['ETag'] = '"' . md5(json_encode($this) . $this->modified()).'"';
         }
 
-        // Set Vary: Accept-Encoding header
+        // Set Vary: Accept-Encoding header.
         $grav = Grav::instance();
         if ($grav['config']->get('system.pages.vary_accept_encoding', false)) {
             $headers['Vary'] = 'Accept-Encoding';
@@ -127,29 +133,14 @@ trait PageLegacyTrait
     }
 
     /**
-     * Sets the summary of the page
-     *
-     * @param string $summary Summary
-     */
-    public function setSummary($summary)
-    {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
-    }
-
-    /**
      * Get the contentMeta array and initialize content first if it's not already
      *
-     * @return mixed
+     * @return array
      */
-    public function contentMeta()
+    public function contentMeta(): array
     {
-        // TODO:
-        /*
-        if ($this->content === null) {
-            $this->content();
-        }
-        */
+        // Content meta is generated during the content is being rendered, so make sure we have done it.
+        $this->content();
 
         return $this->getContentMeta();
     }
@@ -160,7 +151,7 @@ trait PageLegacyTrait
      * @param string $name
      * @param string $value
      */
-    public function addContentMeta($name, $value)
+    public function addContentMeta($name, $value): void
     {
         $this->_content_meta[$name] = $value;
     }
@@ -170,7 +161,7 @@ trait PageLegacyTrait
      *
      * @param string|null $name
      *
-     * @return string|null
+     * @return string|array|null
      */
     public function getContentMeta($name = null)
     {
@@ -178,7 +169,7 @@ trait PageLegacyTrait
             return $this->_content_meta[$name] ?? null;
         }
 
-        return $this->_content_meta;
+        return $this->_content_meta ?? [];
     }
 
     /**
@@ -188,7 +179,7 @@ trait PageLegacyTrait
      *
      * @return array
      */
-    public function setContentMeta($content_meta)
+    public function setContentMeta($content_meta): array
     {
         return $this->_content_meta = $content_meta;
     }
@@ -196,10 +187,18 @@ trait PageLegacyTrait
     /**
      * Fires the onPageContentProcessed event, and caches the page content using a unique ID for the page
      */
-    public function cachePageContent()
+    public function cachePageContent(): void
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $value = [
+            'checksum' => $this->getCacheChecksum(),
+            'content' => $this->_content,
+            'content_meta' => $this->_content_meta
+        ];
+
+        $cache = $this->getCache('render');
+        $key = md5($this->getCacheKey() . '-content');
+
+        $cache->set($key, $value);
     }
 
     /**
@@ -207,7 +206,7 @@ trait PageLegacyTrait
      *
      * @return MarkdownFile|null
      */
-    public function file()
+    public function file(): ?MarkdownFile
     {
         // TODO:
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
@@ -253,7 +252,7 @@ trait PageLegacyTrait
      *
      * @return string
      */
-    public function blueprintName()
+    public function blueprintName(): string
     {
         // TODO:
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
@@ -264,7 +263,7 @@ trait PageLegacyTrait
      *
      * @throws Exception
      */
-    public function validate()
+    public function validate(): void
     {
         // TODO:
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
@@ -273,7 +272,7 @@ trait PageLegacyTrait
     /**
      * Filter page header from illegal contents.
      */
-    public function filter()
+    public function filter(): void
     {
         // TODO:
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
@@ -284,10 +283,11 @@ trait PageLegacyTrait
      *
      * @return array
      */
-    public function extra()
+    public function extra(): array
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $data = $this->prepareStorage();
+
+        return $this->getBlueprint()->extra($data['header'] ?? [], 'header.');
     }
 
     /**
@@ -295,7 +295,7 @@ trait PageLegacyTrait
      *
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'header' => (array)$this->header(),
@@ -308,7 +308,7 @@ trait PageLegacyTrait
      *
      * @return string
      */
-    public function toYaml()
+    public function toYaml(): string
     {
         return Yaml::dump($this->toArray(), 20);
     }
@@ -318,7 +318,7 @@ trait PageLegacyTrait
      *
      * @return string
      */
-    public function toJson()
+    public function toJson(): string
     {
         return json_encode($this->toArray());
     }
@@ -330,14 +330,13 @@ trait PageLegacyTrait
      *
      * @return string      The name of this page.
      */
-    public function name($var = null)
+    public function name($var = null): string
     {
-        // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
+            $this->setProperty('name', $var);
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->getProperty('name');
     }
 
     /**
@@ -345,7 +344,7 @@ trait PageLegacyTrait
      *
      * @return string
      */
-    public function childType()
+    public function childType(): string
     {
         return (string)$this->getNestedProperty('header.child_type');
     }
@@ -358,14 +357,14 @@ trait PageLegacyTrait
      *
      * @return string      the template name
      */
-    public function template($var = null)
+    public function template($var = null): string
     {
         if (null !== $var) {
-            // TODO:
-            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
+            $this->setProperty('template', $var);
         }
 
-        return ($this->modular() ? 'modular/' : '') . str_replace($this->extension(), '', $this->name());
+        return $this->getProperty('template')
+            ?? (($this->modular() ? 'modular/' : '') . str_replace($this->extension(), '', $this->name()));
     }
 
     /**
@@ -376,7 +375,7 @@ trait PageLegacyTrait
      *
      * @return string
      */
-    public function templateFormat($var = null)
+    public function templateFormat($var = null): string
     {
         if (is_string($var)) {
             $this->setNestedProperty('header.append_url_extension', '.' . $var);
@@ -392,16 +391,15 @@ trait PageLegacyTrait
      *
      * @param string|null $var
      *
-     * @return null|string
+     * @return string
      */
-    public function extension($var = null)
+    public function extension($var = null): string
     {
         if (null !== $var) {
-            // TODO:
-            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
+            $this->setProperty('format', $var);
         }
 
-        return '.' . pathinfo($this->name(), PATHINFO_EXTENSION);
+        return $this->getProperty('format') ?? ('.' . pathinfo($this->name(), PATHINFO_EXTENSION));
     }
 
     /**
@@ -411,7 +409,7 @@ trait PageLegacyTrait
      *
      * @return int      The expires value
      */
-    public function expires($var = null)
+    public function expires($var = null): int
     {
         if (null !== $var) {
             $this->setNestedProperty('header.expires', (int)$var);
@@ -427,7 +425,7 @@ trait PageLegacyTrait
      * @param string|null $var
      * @return string|null
      */
-    public function cacheControl($var = null)
+    public function cacheControl($var = null): ?string
     {
         if (null !== $var) {
             $this->setNestedProperty('header.cache_control', (string)$var);
@@ -436,7 +434,7 @@ trait PageLegacyTrait
         return $this->getNestedProperty('header.cache_control') ?? Grav::instance()['config']->get('system.pages.cache_control');
     }
 
-    public function ssl($var = null)
+    public function ssl($var = null): ?bool
     {
         if (null !== $var) {
             $this->setNestedProperty('header.ssl', (bool)$var);
@@ -446,13 +444,13 @@ trait PageLegacyTrait
     }
 
     /**
-     * Returns the state of the debugger override etting for this page
+     * Returns the state of the debugger override setting for this page
      *
      * @return bool
      */
-    public function debugger()
+    public function debugger(): bool
     {
-        return (bool)$this->getNestedProperty('header.debugger', false);
+        return (bool)$this->getNestedProperty('header.debugger', true);
     }
 
     /**
@@ -463,14 +461,80 @@ trait PageLegacyTrait
      *
      * @return array      an Array of metadata values for the page
      */
-    public function metadata($var = null)
+    public function metadata($var = null): array
     {
-        // TODO:
-        if (null !== $var) {
-            throw new \RuntimeException(__METHOD__ . '(array): Not Implemented');
+        if ($var !== null) {
+            $this->_metadata = (array)$var;
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        // if not metadata yet, process it.
+        if (null === $this->_metadata) {
+            $this->_metadata = [];
+
+            // Set the Generator tag
+            $defaultMetadata = ['generator' => 'GravCMS'];
+            $siteMetadata = Grav::instance()['config']->get('site.metadata', []);
+            $headerMetadata = $this->getNestedProperty('header.metadata', []);
+
+            // Get initial metadata for the page
+            $metadata = array_merge($defaultMetadata, $siteMetadata, $headerMetadata);
+
+            $header_tag_http_equivs = ['content-type', 'default-style', 'refresh', 'x-ua-compatible'];
+
+            // Build an array of meta objects..
+            foreach ($metadata as $key => $value) {
+                // Lowercase the key
+                $key = strtolower($key);
+
+                // If this is a property type metadata: "og", "twitter", "facebook" etc
+                // Backward compatibility for nested arrays in metas
+                if (is_array($value)) {
+                    foreach ($value as $property => $prop_value) {
+                        $prop_key = $key . ':' . $property;
+                        $this->_metadata[$prop_key] = [
+                            'name' => $prop_key,
+                            'property' => $prop_key,
+                            'content' => htmlspecialchars($prop_value, ENT_QUOTES, 'UTF-8')
+                        ];
+                    }
+                } elseif ($value) {
+                    // If it this is a standard meta data type
+                    if (\in_array($key, $header_tag_http_equivs, true)) {
+                        $this->_metadata[$key] = [
+                            'http_equiv' => $key,
+                            'content' => htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+                        ];
+                    } elseif ($key === 'charset') {
+                        $this->_metadata[$key] = ['charset' => htmlspecialchars($value, ENT_QUOTES, 'UTF-8')];
+                    } else {
+                        // if it's a social metadata with separator, render as property
+                        $separator = strpos($key, ':');
+                        $hasSeparator = $separator && $separator < strlen($key) - 1;
+                        $entry = [
+                            'content' => htmlspecialchars($value, ENT_QUOTES, 'UTF-8')
+                        ];
+
+                        if ($hasSeparator && !Utils::startsWith($key, 'twitter')) {
+                            $entry['property'] = $key;
+                        } else {
+                            $entry['name'] = $key;
+                        }
+
+                        $this->_metadata[$key] = $entry;
+                    }
+                }
+            }
+        }
+
+        return $this->_metadata;
+    }
+
+    /**
+     * Reset the metadata and pull from header again
+     */
+    public function resetMetadata(): void
+    {
+        $this->_metadata = null;
     }
 
     /**
@@ -480,7 +544,7 @@ trait PageLegacyTrait
      *
      * @return bool      show etag header
      */
-    public function eTag($var = null)
+    public function eTag($var = null): bool
     {
         if (null !== $var) {
             $this->setNestedProperty('header.etag', (bool)$var);
@@ -496,7 +560,7 @@ trait PageLegacyTrait
      *
      * @return string|null      the file path
      */
-    public function filePath($var = null)
+    public function filePath($var = null): ?string
     {
         // TODO:
         if (null !== $var) {
@@ -511,7 +575,7 @@ trait PageLegacyTrait
      *
      * @return string The relative file path
      */
-    public function filePathClean()
+    public function filePathClean(): string
     {
         // TODO:
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
@@ -525,7 +589,7 @@ trait PageLegacyTrait
      * @return string      the order, either "asc" or "desc"
      * @deprecated 1.6
      */
-    public function orderDir($var = null)
+    public function orderDir($var = null): string
     {
         if (null !== $var) {
             $this->setNestedProperty('header.order_dir', strtolower($var) === 'desc' ? 'desc' : 'asc');
@@ -547,7 +611,7 @@ trait PageLegacyTrait
      * @return string      supported options include "default", "title", "date", and "folder"
      * @deprecated 1.6
      */
-    public function orderBy($var = null)
+    public function orderBy($var = null): string
     {
         if (null !== $var) {
             $this->setNestedProperty('header.order_by', $var);
@@ -564,7 +628,7 @@ trait PageLegacyTrait
      * @return array
      * @deprecated 1.6
      */
-    public function orderManual($var = null)
+    public function orderManual($var = null): array
     {
         if (null !== $var) {
             $this->setNestedProperty('header.order_manual', (array)$var);
@@ -582,7 +646,7 @@ trait PageLegacyTrait
      * @return int      the maximum number of sub-pages
      * @deprecated 1.6
      */
-    public function maxCount($var = null)
+    public function maxCount($var = null): int
     {
         if (null !== $var) {
             $this->setNestedProperty('header.max_count', (int)$var);
@@ -598,7 +662,7 @@ trait PageLegacyTrait
      *
      * @return bool      true if modular_twig
      */
-    public function modular($var = null)
+    public function modular($var = null): bool
     {
         return $this->modularTwig($var);
     }
@@ -611,7 +675,7 @@ trait PageLegacyTrait
      *
      * @return bool      true if modular_twig
      */
-    public function modularTwig($var = null)
+    public function modularTwig($var = null): bool
     {
         if (null !== $var) {
             // TODO:
@@ -624,83 +688,100 @@ trait PageLegacyTrait
     /**
      * Returns children of this page.
      *
-     * @return \Grav\Common\Page\Collection
+     * @return PageCollectionInterface|Collection
      */
     public function children()
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        /** @var Pages $pages */
+        $pages = Grav::instance()['pages'];
+
+        return $pages->children($this->path());
     }
+
 
     /**
      * Check to see if this item is the first in an array of sub-pages.
      *
-     * @return boolean True if item is first.
+     * @return bool True if item is first.
      */
-    public function isFirst()
+    public function isFirst(): bool
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $parent = $this->parent();
+        $collection = $parent ? $parent->collection('content', false) : null;
+        if ($collection instanceof PageCollectionInterface) {
+            return $collection->isFirst($this->path());
+        }
+
+        return true;
     }
 
     /**
      * Check to see if this item is the last in an array of sub-pages.
      *
-     * @return boolean True if item is last
+     * @return bool True if item is last
      */
-    public function isLast()
+    public function isLast(): bool
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $parent = $this->parent();
+        $collection = $parent ? $parent->collection('content', false) : null;
+        if ($collection instanceof PageCollectionInterface) {
+            return $collection->isLast($this->path());
+        }
+
+        return true;
     }
 
     /**
      * Gets the previous sibling based on current position.
      *
-     * @return PageInterface the previous Page item
+     * @return PageInterface|false the previous Page item
      */
     public function prevSibling()
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->adjacentSibling(-1);
     }
 
     /**
      * Gets the next sibling based on current position.
      *
-     * @return PageInterface the next Page item
+     * @return PageInterface|false the next Page item
      */
     public function nextSibling()
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        return $this->adjacentSibling(1);
     }
 
     /**
      * Returns the adjacent sibling based on a direction.
      *
-     * @param  integer $direction either -1 or +1
+     * @param  int $direction either -1 or +1
      *
      * @return PageInterface|bool             the sibling page
      */
     public function adjacentSibling($direction = 1)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $parent = $this->parent();
+        $collection = $parent ? $parent->collection('content', false) : null;
+        if ($collection instanceof PageCollectionInterface) {
+            return $collection->adjacentSibling($this->path(), $direction);
+        }
+
+        return false;
     }
 
     /**
      * Helper method to return an ancestor page.
      *
-     * @param string $url The url of the page
      * @param bool $lookup Name of the parent folder
      *
-     * @return PageInterface page you were looking for if it exists
+     * @return PageInterface|null page you were looking for if it exists
      */
     public function ancestor($lookup = null)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        /** @var Pages $pages */
+        $pages = Grav::instance()['pages'];
+
+        return $pages->ancestor($this->getProperty('parent_route'), $lookup);
     }
 
     /**
@@ -709,12 +790,15 @@ trait PageLegacyTrait
      *
      * @param string $field Name of the parent folder
      *
-     * @return PageInterface
+     * @return PageInterface|null
      */
     public function inherited($field)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        [$inherited, $currentParams] = $this->getInheritedParams($field);
+
+        $this->modifyHeader($field, $currentParams);
+
+        return $inherited;
     }
 
     /**
@@ -725,10 +809,33 @@ trait PageLegacyTrait
      *
      * @return array
      */
-    public function inheritedField($field)
+    public function inheritedField($field): array
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        [$inherited, $currentParams] = $this->getInheritedParams($field);
+
+        return $currentParams;
+    }
+
+    /**
+     * Method that contains shared logic for inherited() and inheritedField()
+     *
+     * @param string $field Name of the parent folder
+     *
+     * @return array
+     */
+    protected function getInheritedParams($field): array
+    {
+        $pages = Grav::instance()['pages'];
+
+        /** @var Pages $pages */
+        $inherited = $pages->inherited($this->getProperty('parent_route'), $field);
+        $inheritedParams = $inherited ? (array)$inherited->value('header.' . $field) : [];
+        $currentParams = (array)$this->value('header.' . $field);
+        if ($inheritedParams && is_array($inheritedParams)) {
+            $currentParams = array_replace_recursive($inheritedParams, $currentParams);
+        }
+
+        return [$inherited, $currentParams];
     }
 
     /**
@@ -737,39 +844,71 @@ trait PageLegacyTrait
      * @param string $url the url of the page
      * @param bool $all
      *
-     * @return PageInterface page you were looking for if it exists
+     * @return PageInterface|null page you were looking for if it exists
      */
     public function find($url, $all = false)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        /** @var Pages $pages */
+        $pages = Grav::instance()['pages'];
+
+        return $pages->find($url, $all);
     }
 
     /**
      * Get a collection of pages in the current context.
      *
      * @param string|array $params
-     * @param boolean $pagination
+     * @param bool $pagination
      *
      * @return Collection
      * @throws \InvalidArgumentException
      */
     public function collection($params = 'content', $pagination = true)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        if (is_string($params)) {
+            // Look into a page header field.
+            $params = (array)$this->value('header.' . $params);
+        } elseif (!is_array($params)) {
+            throw new \InvalidArgumentException('Argument should be either header variable name or array of parameters');
+        }
+
+        $context = [
+            'pagination' => $pagination,
+            'self' => $this
+        ];
+
+        /** @var Pages $pages */
+        $pages = Grav::instance()['pages'];
+
+        //$collection = $pages->getCollection($params, $context);
+        //$first = $collection->first();
+        //Grav::instance()->close(new Response(200, ['Content-Type' => 'application/json'], json_encode($first)));
+
+        return $pages->getCollection($params, $context);
     }
 
     /**
      * @param string|array $value
      * @param bool $only_published
-     * @return mixed
-     * @internal
+     * @return Collection
      */
     public function evaluate($value, $only_published = true)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $params = [
+            'items' => $value,
+            'published' => $only_published
+        ];
+        $context = [
+            'event' => false,
+            'pagination' => false,
+            'url_taxonomy_filters' => false,
+            'self' => $this
+        ];
+
+        /** @var Pages $pages */
+        $pages = Grav::instance()['pages'];
+
+        return $pages->getCollection($params, $context);
     }
 
     /**
@@ -777,9 +916,8 @@ trait PageLegacyTrait
      *
      * @return bool
      */
-    public function folderExists()
+    public function folderExists(): bool
     {
-        // TODO:
         return $this->exists() || is_dir($this->getStorageFolder());
     }
 
@@ -804,6 +942,12 @@ trait PageLegacyTrait
         // TODO:
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
+
+    /**
+     * @param string|null $namespace
+     * @return CacheInterface
+     */
+    abstract public function getCache(string $namespace = null);
 
     abstract protected function exists();
     abstract protected function getStorageFolder();

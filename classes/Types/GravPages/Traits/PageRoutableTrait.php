@@ -4,6 +4,7 @@ namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
+use Grav\Common\Page\Interfaces\PageCollectionInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
@@ -16,7 +17,7 @@ trait PageRoutableTrait
      *
      * @return string      The extension of this page. For example `.html`
      */
-    public function urlExtension()
+    public function urlExtension(): string
     {
         if ($this->home()) {
             return '';
@@ -26,15 +27,14 @@ trait PageRoutableTrait
     }
 
     /**
-     * Gets and Sets whether or not this Page is routable, ie you can reach it
-     * via a URL.
+     * Gets and Sets whether or not this Page is routable, ie you can reach it via a URL.
      * The page must be *routable* and *published*
      *
      * @param  bool $var true if the page is routable
      *
      * @return bool      true if the page is routable
      */
-    public function routable($var = null)
+    public function routable($var = null): bool
     {
         if (null !== $var) {
             $this->setNestedProperty('header.routable', $var);
@@ -50,7 +50,7 @@ trait PageRoutableTrait
      *
      * @return string the permalink
      */
-    public function link($include_host = false)
+    public function link($include_host = false): string
     {
         return $this->url($include_host);
     }
@@ -59,7 +59,7 @@ trait PageRoutableTrait
      * Gets the URL with host information, aka Permalink.
      * @return string The permalink.
      */
-    public function permalink()
+    public function permalink(): string
     {
         return $this->url(true, false, true, true);
     }
@@ -71,7 +71,7 @@ trait PageRoutableTrait
      *
      * @return string
      */
-    public function canonical($include_lang = true)
+    public function canonical($include_lang = true): string
     {
         return $this->url(true, true, $include_lang);
     }
@@ -86,7 +86,7 @@ trait PageRoutableTrait
      *
      * @return string The url.
      */
-    public function url($include_host = false, $canonical = false, $include_base = true, $raw_route = false)
+    public function url($include_host = false, $canonical = false, $include_base = true, $raw_route = false): string
     {
         // Override any URL when external_url is set
         $external = $this->getNestedProperty('header.external_url');
@@ -138,7 +138,7 @@ trait PageRoutableTrait
      *
      * @return string  The route for the Page.
      */
-    public function route($var = null)
+    public function route($var = null): string
     {
         // TODO:
         if (null !== $var) {
@@ -152,7 +152,7 @@ trait PageRoutableTrait
     /**
      * Helper method to clear the route out so it regenerates next time you use it
      */
-    public function unsetRouteSlug()
+    public function unsetRouteSlug(): void
     {
         // TODO:
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
@@ -163,9 +163,9 @@ trait PageRoutableTrait
      *
      * @param string|null $var
      *
-     * @return null|string
+     * @return string|null
      */
-    public function rawRoute($var = null)
+    public function rawRoute($var = null): ?string
     {
         if (null !== $var) {
             // TODO:
@@ -183,7 +183,7 @@ trait PageRoutableTrait
      *
      * @return array  The route aliases for the Page.
      */
-    public function routeAliases($var = null)
+    public function routeAliases($var = null): array
     {
         if (null !== $var) {
             $this->setNestedProperty('header.routes.aliases', (array)$var);
@@ -199,9 +199,9 @@ trait PageRoutableTrait
      *
      * @param string|null $var
      *
-     * @return bool|string
+     * @return string
      */
-    public function routeCanonical($var = null)
+    public function routeCanonical($var = null): string
     {
         if (null !== $var) {
             $this->setNestedProperty('header.routes.canonical', (array)$var);
@@ -215,9 +215,9 @@ trait PageRoutableTrait
      *
      * @param  string $var redirect url
      *
-     * @return string
+     * @return string|null
      */
-    public function redirect($var = null)
+    public function redirect($var = null): ?string
     {
         if (null !== $var) {
             $this->setProperty('header.redirect', $var);
@@ -229,7 +229,7 @@ trait PageRoutableTrait
     /**
      * Returns the clean path to the page file
      */
-    public function relativePagePath()
+    public function relativePagePath(): ?string
     {
         // TODO:
         throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
@@ -243,7 +243,7 @@ trait PageRoutableTrait
      *
      * @return string|null      the path
      */
-    public function path($var = null)
+    public function path($var = null): ?string
     {
         // TODO:
         if (null !== $var) {
@@ -260,7 +260,7 @@ trait PageRoutableTrait
      *
      * @return string|null
      */
-    public function folder($var = null)
+    public function folder($var = null): ?string
     {
         // TODO:
         if (null !== $var) {
@@ -301,14 +301,17 @@ trait PageRoutableTrait
     /**
      * Returns the item in the current position.
      *
-     * @param  string $path the path the item
-     *
-     * @return Integer   the index of the current page.
+     * @return int   the index of the current page.
      */
-    public function currentPosition()
+    public function currentPosition(): int
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $parent = $this->parent();
+        $collection = $parent ? $parent->collection('content', false) : null;
+        if ($collection instanceof PageCollectionInterface) {
+            return $collection->currentPosition($this->path());
+        }
+
+        return 1;
     }
 
     /**
@@ -316,10 +319,13 @@ trait PageRoutableTrait
      *
      * @return bool True if it is active
      */
-    public function active()
+    public function active(): bool
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $grav = Grav::instance();
+        $uri_path = rtrim(urldecode($grav['uri']->path()), '/') ?: '/';
+        $routes = $grav['pages']->routes();
+
+        return isset($routes[$uri_path]) && $routes[$uri_path] === $this->path();
     }
 
     /**
@@ -328,10 +334,28 @@ trait PageRoutableTrait
      *
      * @return bool True if active child exists
      */
-    public function activeChild()
+    public function activeChild(): bool
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $grav = Grav::instance();
+        $uri = $grav['uri'];
+        $pages = $grav['pages'];
+        $uri_path = rtrim(urldecode($uri->path()), '/');
+        $routes = $pages->routes();
+
+        if (isset($routes[$uri_path])) {
+            /** @var PageInterface $child_page */
+            $child_page = $pages->dispatch($uri->route())->parent();
+            if ($child_page) {
+                while (!$child_page->root()) {
+                    if ($this->path() === $child_page->path()) {
+                        return true;
+                    }
+                    $child_page = $child_page->parent();
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -339,11 +363,11 @@ trait PageRoutableTrait
      *
      * @return bool True if it is the homepage
      */
-    public function home()
+    public function home(): bool
     {
         $home = Grav::instance()['config']->get('system.home.alias');
 
-        return $this->route() === $home || $this->rawRoute() === $home;
+        return '/' . $this->getKey() === $home;
     }
 
     /**
@@ -351,7 +375,7 @@ trait PageRoutableTrait
      *
      * @return bool True if it is the root
      */
-    public function root()
+    public function root(): bool
     {
         // Flex Page can never be root.
         return false;
