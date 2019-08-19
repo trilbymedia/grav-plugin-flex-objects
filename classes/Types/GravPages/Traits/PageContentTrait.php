@@ -423,6 +423,11 @@ trait PageContentTrait
         return $this->offsetLoad_header($value);
     }
 
+    protected function offsetSerialize_header(?Header $value)
+    {
+        return $value->toArray();
+    }
+
     /**
      * @param string $name
      * @param mixed $default
