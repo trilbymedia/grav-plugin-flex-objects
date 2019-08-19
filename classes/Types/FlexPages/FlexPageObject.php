@@ -172,7 +172,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function hasProperty($property): bool
     {
         if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
-            return isset($this->getProperty('header')->{$property});
+            return $this->getProperty('header')->get($property) !== null;
         }
 
         return parent::hasProperty($property);
@@ -188,7 +188,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function getProperty($property, $default = null)
     {
         if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
-            return $this->getProperty('header')->{$property} ?? $default;
+            return $this->getProperty('header')->get($property, $default);
         }
 
         return parent::getProperty($property, $default);
@@ -203,7 +203,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function setProperty($property, $value): void
     {
         if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
-            $this->setNestedProperty("header.{$property}", $value);
+            $this->getProperty('header')->set($property, $value);
 
             return;
         }
@@ -217,12 +217,34 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function unsetProperty($property): void
     {
         if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
-            $this->unsetNestedProperty("header.{$property}");
+            $this->getProperty('header')->undef($property);
 
             return;
         }
 
         parent::unsetProperty($property);
+    }
+
+    public function setNestedProperty($property, $value, $separator = null)
+    {
+        if (strpos($property, 'header.') === 0) {
+            $this->getProperty('header')->set(str_replace('header.', '', $property), $value);
+
+            return;
+        }
+
+        parent::setNestedProperty($property, $value, $separator);
+    }
+
+    public function unsetNestedProperty($property, $separator = null)
+    {
+        if (strpos($property, 'header.') === 0) {
+            $this->getProperty('header')->undef(str_replace('header.', '', $property));
+
+            return;
+        }
+
+        parent::unsetNestedProperty($property, $separator);
     }
 
     /**

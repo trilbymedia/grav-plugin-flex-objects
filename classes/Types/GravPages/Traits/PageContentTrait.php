@@ -6,6 +6,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Markdown\Parsedown;
 use Grav\Common\Markdown\ParsedownExtra;
+use Grav\Common\Page\Header;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Media;
 use Grav\Common\Twig\Twig;
@@ -351,7 +352,7 @@ trait PageContentTrait
             $this->setProperty('dateformat', $var);
         }
 
-        return $this->getProperty('dateformat');
+        return $this->getProperty('dateformat') ?? '';
     }
 
     /**
@@ -404,12 +405,22 @@ trait PageContentTrait
 
     protected function offsetLoad_header($value)
     {
-        return (object)$value;
+        if ($value instanceof Header) {
+            return $value;
+        }
+
+        if (null === $value) {
+            $value = [];
+        } elseif ($value instanceof \stdClass) {
+            $value = (array)$value;
+        }
+
+        return new Header($value);
     }
 
     protected function offsetPrepare_header($value)
     {
-        return (object)$value;
+        return $this->offsetLoad_header($value);
     }
 
     /**

@@ -298,7 +298,7 @@ trait PageLegacyTrait
     {
         $data = $this->prepareStorage();
 
-        return $this->getBlueprint()->extra($data['header'] ?? [], 'header.');
+        return $this->getBlueprint()->extra((array)($data['header'] ?? []), 'header.');
     }
 
     /**
