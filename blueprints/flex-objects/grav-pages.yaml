@@ -101,7 +101,7 @@ config:
           class: 'Grav\Framework\File\Formatter\MarkdownFormatter'
         folder: 'page://'
     ordering:
-      full_order: ASC
+      key: ASC
     search:
       options:
         contains: 1
