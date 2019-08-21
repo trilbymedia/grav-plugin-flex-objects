@@ -138,7 +138,7 @@ class GravPageObject extends FlexPageObject
         /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
 
-        return $pages->get($this->parent_route);
+        return $this->parent_route ? $pages->find($this->parent_route) : $pages->root();
     }
 
     public function full_order(): string
