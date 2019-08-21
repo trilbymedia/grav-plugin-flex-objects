@@ -3,8 +3,10 @@
 namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
 use Grav\Common\Config\Config;
+use Grav\Common\File\CompiledJsonFile;
 use Grav\Common\Grav;
 use Grav\Common\Page\Page;
+use Grav\Framework\Flex\Interfaces\FlexStorageInterface;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageIndex;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
@@ -19,6 +21,26 @@ class GravPageIndex extends FlexPageIndex
 
     protected $_root;
     protected $_params;
+
+    /**
+     * @param FlexStorageInterface $storage
+     * @return array
+     */
+    public static function loadEntriesFromStorage(FlexStorageInterface $storage) : array
+    {
+        // Load saved index.
+        $index = static::loadIndex($storage);
+
+        $timestamp = $index['timestamp'] ?? 0;
+        if ($timestamp > time() - 2) {
+            return $index['index'];
+        }
+
+        // Load up to date index.
+        $entries = parent::loadEntriesFromStorage($storage);
+
+        return static::updateIndexFile($storage, $index['index'], $entries);
+    }
 
     public function getRoot()
     {
@@ -78,5 +100,15 @@ class GravPageIndex extends FlexPageIndex
     public function params(): array
     {
         return $this->getParams();
+    }
+
+    protected static function getIndexFile(FlexStorageInterface $storage)
+    {
+        // Load saved index file.
+        $grav = Grav::instance();
+        $locator = $grav['locator'];
+        $filename = $locator->findResource('user-data://flex/indexes/pages.json', true, true);
+
+        return CompiledJsonFile::instance($filename);
     }
 }

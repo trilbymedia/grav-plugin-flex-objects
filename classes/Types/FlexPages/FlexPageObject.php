@@ -283,8 +283,6 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             $elements['storage_key'] = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
         }
 
-        unset($elements['order'], $elements['folder']);
-
         parent::filterElements($elements);
     }
 
