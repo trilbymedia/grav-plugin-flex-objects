@@ -252,7 +252,13 @@ class FlexObjectsPlugin extends Plugin
             if ($hidden || (null === $authorize && $directory->isAuthorized('list', 'admin'))) {
                 continue;
             }
-            $badge = $directory ? ['badge' => ['count' => $directory->getCollection()->isAuthorized('list')->count()]] : [];
+            $cache = $directory->getCache('index');
+            $count = $cache->get('admin-count');
+            if (null === $count) {
+                $count = $directory->getCollection()->isAuthorized('list')->count();
+                $cache->set('admin-count', $count);
+            }
+            $badge = $directory ? ['badge' => ['count' => $count]] : [];
 
             $this->grav['twig']->plugins_hooked_nav[$title] = [
                 'route' => $route,
