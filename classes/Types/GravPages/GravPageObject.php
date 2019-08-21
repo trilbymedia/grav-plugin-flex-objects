@@ -192,56 +192,77 @@ class GravPageObject extends FlexPageObject
      */
     protected function filterElements(array &$elements): void
     {
-        // FIXME: need better logic here.
-        if (isset($elements['route'], $elements['folder'], $elements['name'])) {
-            $parts = [];
+        // Deal with ordering=1 and order=page1,page2,page3.
+        $ordering = (bool)($elements['ordering'] ?? false);
+        if ($ordering) {
+            $list = !empty($elements['order']) ? explode(',', $elements['order']) : [];
+            $order = array_search($this->getProperty('folder'), $list, true);
+            if ($order !== false) {
+                $order++;
+            }
+
+            $elements['order'] = $order;
+        } else {
+            unset($elements['order']);
+        }
+        unset($elements['ordering']);
+
+        // Change storage location if needed.
+        if (array_key_exists('route', $elements) && isset($elements['folder'], $elements['name'])) {
             $route = $elements['parent_route'] = $elements['route'];
             unset($elements['route']);
 
+            $parts = [];
             $key = $this->getKey();
             $parentKey = trim($route, '/');
 
-            // Make sure page isn't being moved under itself.
-            if (strpos($parentKey, $key . '/') === 0) {
-                throw new \RuntimeException(sprintf('Page %s cannot be moved to %s', '/' . $key, $route));
-            }
-
             // Figure out storage path to the new route.
-            if ($parentKey) {
-                $parent = $key !== $parentKey ? $this->getFlexDirectory()->getObject($parentKey) : $this;
-                if ($parent) {
-                    $path = trim($parent->getKey() === $key ? $this->path() : $parent->location(), '/');
-                    if ($path) {
-                        $parts[] = $path;
-                    }
-                } else {
-                    // Page cannot be moved to non-existing location.
-                    throw new \RuntimeException(sprintf('Parent page %s not found', $route));
+            if ($parentKey !== '') {
+                // Make sure page isn't being moved under itself.
+                if ($key === $parentKey || strpos($parentKey, $key . '/') === 0) {
+                    throw new \RuntimeException(sprintf('Page %s cannot be moved to %s', '/' . $key, $route));
                 }
+
+                $parent = $this->getFlexDirectory()->getObject($parentKey);
+                if (!$parent) {
+                    // Page cannot be moved to non-existing location.
+                    throw new \RuntimeException(sprintf('Page %s cannot be moved to non-existing path %s', '/' . $key, $route));
+                }
+
+                $parts[] = $parent->getStorageKey();
             }
 
             // Get the folder name.
-            $folder = !empty($elements['folder']) ? trim($elements['folder']) : $this->folder();
-            $ordering = (bool)($elements['ordering'] ?? false);
-            if ($ordering) {
-                $list = !empty($elements['order']) ? explode(',', $elements['order']) : [];
-                $order = array_search($folder, $list, true);
-                if ($order === false) {
-                    $order = (int)$this->order() - 1;
-                }
-
-                $parts[] = $ordering ? sprintf('%02d.%s', $order + 1, $folder) : $folder;
-            } else {
-                $parts[] = $folder;
-            }
+            $folder = !empty($elements['folder']) ? trim($elements['folder']) : $this->getProperty('folder');
+            $order = $elements['order'] ?? false;
+            $parts[] = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
 
             // Finally update the storage key.
             $elements['storage_key'] = implode('/', $parts);
         }
 
-        unset($elements['order'], $elements['folder']);
+        unset($elements['folder']);
 
         parent::filterElements($elements);
+    }
+
+    /**
+     * @return array
+     */
+    public function prepareStorage(): array
+    {
+        $elements = [
+            '__META' => $this->getStorage(),
+            'storage_key' => $this->getStorageKey(),
+            'folder' => $this->getProperty('folder'),
+            'order' => $this->getProperty('order'),
+            'format' => $this->getProperty('format'),
+            'language' => $this->getProperty('language')
+        ] + parent::prepareStorage();
+
+        unset($elements['name']);
+
+        return $elements;
     }
 
     /**
