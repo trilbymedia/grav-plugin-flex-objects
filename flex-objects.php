@@ -244,6 +244,9 @@ class FlexObjectsPlugin extends Plugin
 
         foreach ($this->getAdminMenu() as $route => $item) {
             $directory = isset($item['directory']) ? $flex->getDirectory($item['directory']) : null;
+            if (!$directory) {
+                continue;
+            }
 
             $hidden = $item['hidden'] ?? false;
             $title = $item['title'] ?? 'PLUGIN_FLEX_OBJECTS.TITLE';
