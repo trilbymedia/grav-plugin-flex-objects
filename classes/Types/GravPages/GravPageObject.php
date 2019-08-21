@@ -241,8 +241,6 @@ class GravPageObject extends FlexPageObject
             $elements['storage_key'] = implode('/', $parts);
         }
 
-        unset($elements['folder']);
-
         parent::filterElements($elements);
     }
 
