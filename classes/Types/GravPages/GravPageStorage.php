@@ -25,8 +25,6 @@ class GravPageStorage extends FolderStorage
     protected $flags;
     protected $regex;
 
-    protected $meta = [];
-
     protected function initOptions(array $options): void
     {
         parent::initOptions($options);
@@ -192,8 +190,9 @@ class GravPageStorage extends FolderStorage
         if ($children) {
             $meta['children'] = $children;
         }
+        $meta['checksum'] = md5(json_encode($meta));
 
-        $this->meta[$key . ' '. $key] = $meta;
+        $this->meta[$key] = $meta;
 
         return $meta;
     }
