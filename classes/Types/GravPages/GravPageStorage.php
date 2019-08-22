@@ -179,10 +179,10 @@ class GravPageStorage extends FolderStorage
         }
 
         $meta = [
+            'key' => $route,
             'storage_key' => $key,
             'storage_file' => $file,
             'storage_timestamp' => $modified,
-            'key' => $route,
         ];
         if ($markdown) {
             $meta['markdown'] = $markdown;

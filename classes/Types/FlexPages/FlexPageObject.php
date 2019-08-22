@@ -249,8 +249,9 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
     /**
      * @param array $elements
+     * @param bool $extended
      */
-    protected function filterElements(array &$elements): void
+    protected function filterElements(array &$elements, bool $extended = false): void
     {
         // Markdown storage conversion to page structure.
         if (isset($elements['content'])) {
@@ -275,12 +276,14 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             unset($elements['frontmatter']);
         }
 
-        $folder = !empty($elements['folder']) ? trim($elements['folder']) : '';
+        if (!$extended) {
+            $folder = !empty($elements['folder']) ? trim($elements['folder']) : '';
 
-        if ($folder) {
-            $order = !empty($elements['order']) ? (int)$elements['order'] : null;
-            // TODO: broken
-            $elements['storage_key'] = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
+            if ($folder) {
+                $order = !empty($elements['order']) ? (int)$elements['order'] : null;
+                // TODO: broken
+                $elements['storage_key'] = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
+            }
         }
 
         parent::filterElements($elements);

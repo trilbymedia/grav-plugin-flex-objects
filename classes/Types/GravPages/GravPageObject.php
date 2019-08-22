@@ -189,8 +189,9 @@ class GravPageObject extends FlexPageObject
 
     /**
      * @param array $elements
+     * @param bool $extended
      */
-    protected function filterElements(array &$elements): void
+    protected function filterElements(array &$elements, bool $extended = false): void
     {
         // Deal with ordering=1 and order=page1,page2,page3.
         $ordering = (bool)($elements['ordering'] ?? false);
@@ -199,6 +200,8 @@ class GravPageObject extends FlexPageObject
             $order = array_search($this->getProperty('folder'), $list, true);
             if ($order !== false) {
                 $order++;
+            } else {
+                $order = $this->getProperty('order');
             }
 
             $elements['order'] = $order;
@@ -241,7 +244,7 @@ class GravPageObject extends FlexPageObject
             $elements['storage_key'] = implode('/', $parts);
         }
 
-        parent::filterElements($elements);
+        parent::filterElements($elements, true);
     }
 
     /**
