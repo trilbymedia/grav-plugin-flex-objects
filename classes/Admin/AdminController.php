@@ -3,6 +3,7 @@
 namespace Grav\Plugin\FlexObjects\Admin;
 
 use Grav\Common\Cache;
+use Grav\Common\Config\Config;
 use Grav\Common\Debugger;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
@@ -10,6 +11,7 @@ use Grav\Common\Plugin;
 use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
+use Grav\Framework\Controller\Traits\ControllerResponseTrait;
 use Grav\Framework\File\Formatter\CsvFormatter;
 use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\Flex\FlexDirectory;
@@ -20,6 +22,7 @@ use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
 use Grav\Framework\Psr7\Response;
+use Grav\Framework\RequestHandler\Exception\RequestException;
 use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Controllers\MediaController;
 use Grav\Plugin\FlexObjects\Flex;
@@ -35,6 +38,8 @@ use RocketTheme\Toolbox\Session\Message;
  */
 class AdminController
 {
+    use ControllerResponseTrait;
+
     /** @var Grav */
     public $grav;
 
@@ -433,6 +438,62 @@ class AdminController
         return true;
     }
 
+        /**
+         * $data['route'] = $this->grav['uri']->param('route');
+         * $data['sortby'] = $this->grav['uri']->param('sortby', null);
+         * $data['filters'] = $this->grav['uri']->param('filters', null);
+         * $data['page'] $this->grav['uri']->param('page', true);
+         * $data['base'] = $this->grav['uri']->param('base');
+         * $initial = (bool) $this->grav['uri']->param('initial');
+         *
+         * @return ResponseInterface
+         * @throws RequestException
+         */
+    protected function taskGetLevelListing(): ResponseInterface
+    {
+        $type = $this->target;
+        $directory = $this->getDirectory($type);
+        $object = $this->getObject();
+
+        if (!$directory || !method_exists($object, 'getLevelListing')) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if ($object && $object->exists()) {
+            if (!$object->isAuthorized('save')) {
+                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
+                    403);
+            }
+        }
+
+        $request = $this->getRequest();
+        $data = $request->getParsedBody();
+
+        if (!isset($data['field'])) {
+            throw new RequestException($request, 'Bad Request', 400);
+        }
+
+        // Base64 decode the route
+        $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
+
+        $initial = $data['initial'] ?? null;
+        if ($initial) {
+            $data['leaf_route'] = $data['route'];
+            $data['route'] = null;
+            $data['level'] = 1;
+        }
+
+        [$status, $message, $response,] = $object->getLevelListing($data);
+
+        $json = [
+            'status'  => $status,
+            'message' => $this->admin::translate($message ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED'),
+            'data' => array_values($response)
+        ];
+
+        return $this->createJsonResponse($json, 200);
+    }
+
     public function taskSave()
     {
         $type = $this->target;
@@ -745,9 +806,15 @@ class AdminController
         }
 
         try {
-            $success = $this->{$method}(...$params);
+            $response = $this->{$method}(...$params);
+        } catch (RequestException $e) {
+            $response = $this->createErrorResponse($e);
         } catch (\RuntimeException $e) {
             $this->setMessage($e->getMessage(), 'error');
+        }
+
+        if ($response instanceof ResponseInterface) {
+            $this->close($response);
         }
 
         // Grab redirect parameter.
@@ -759,7 +826,7 @@ class AdminController
             $this->setRedirect($redirect);
         }
 
-        return $success;
+        return $response;
     }
 
     public function isFormSubmit(): bool
@@ -1083,5 +1150,22 @@ class AdminController
         }
 
         return $out;
+    }
+
+    /**
+     * @return Config
+     */
+    protected function getConfig(): Config
+    {
+        return $this->grav['config'];
+    }
+
+    /**
+     * @return ServerRequestInterface
+     */
+    protected function getRequest(): ServerRequestInterface
+    {
+        /** @var ServerRequestInterface $request */
+        return $this->grav['request'];
     }
 }
