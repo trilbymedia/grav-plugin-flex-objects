@@ -180,9 +180,10 @@ class GravPageObject extends FlexPageObject
 
     public function getLevelListing(array $options): array
     {
+        /** @var Admin $admin */
+        $admin = Grav::instance()['admin'] ?? null;
         /** @var Pages $pages */
-        $pages = Grav::instance()['pages'];
-        $pages->enablePages();
+        $pages = $admin ? $admin::enablePages() : Grav::instance()['pages'];
         $page_instances = $pages->instances();
 
         $default_filters = [
@@ -218,14 +219,14 @@ class GravPageObject extends FlexPageObject
         }
 
         /** @var GravPageCollection|GravPageIndex $collection */
-        $collection = $this->getFlexDirectory()->getCollection();
+        $collection = $this->getFlexDirectory()->getIndex();
 
         // Handle no route, assume page tree root
         if (!$route) {
             $page = $collection->getRoot();
             $root = true;
         } else {
-            $page = $collection->get($route);
+            $page = $collection->get(trim($route, '/'));
         }
 
         $path = $page ? $page->path() : null;

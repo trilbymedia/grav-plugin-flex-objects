@@ -2,13 +2,12 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
-use Grav\Common\Config\Config;
 use Grav\Common\File\CompiledJsonFile;
 use Grav\Common\Grav;
-use Grav\Common\Page\Page;
+use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Flex\Interfaces\FlexStorageInterface;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageIndex;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
  * Class GravPageObject
@@ -19,8 +18,29 @@ class GravPageIndex extends FlexPageIndex
     const ORDER_LIST_REGEX = '/(\/\d+)\.[^\/]+/u';
     const PAGE_ROUTE_REGEX = '/\/\d+\./u';
 
+    /** @var FlexObjectInterface */
     protected $_root;
     protected $_params;
+
+    public function __construct(array $entries = [], FlexDirectory $directory = null)
+    {
+        // Remove root if it's taken.
+        if (isset($entries[''])) {
+            $this->_root = $entries[''];
+            unset($entries['']);
+        }
+
+        parent::__construct($entries, $directory);
+    }
+
+    protected function createFrom(array $entries, string $keyField = null)
+    {
+        /** @var static $index */
+        $index = parent::createFrom($entries, $keyField);
+        $index->_root = $this->getRoot();
+
+        return $index;
+    }
 
     /**
      * @param FlexStorageInterface $storage
@@ -39,33 +59,17 @@ class GravPageIndex extends FlexPageIndex
         // Load up to date index.
         $entries = parent::loadEntriesFromStorage($storage);
 
-        return static::updateIndexFile($storage, $index['index'], $entries);
+        return static::updateIndexFile($storage, $index['index'], $entries, ['include_missing' => true]);
     }
 
     public function getRoot()
     {
-        if (null === $this->_root) {
-            $grav = Grav::instance();
-
-            /** @var UniformResourceLocator $locator */
-            $locator = $grav['locator'];
-
-            /** @var Config $config */
-            $config = $grav['config'];
-
-            $page = new Page();
-            $page->path($locator($this->getFlexDirectory()->getStorageFolder()));
-            $page->orderDir($config->get('system.pages.order.dir'));
-            $page->orderBy($config->get('system.pages.order.by'));
-            $page->modified(0);
-            $page->routable(false);
-            $page->template('default');
-            $page->extension('.md');
-
-            $this->_root = $page;
+        $root = $this->_root;
+        if (is_array($root)) {
+            $this->_root = $this->getFlexDirectory()->createObject($root, '--root--');
         }
 
-        return $page;
+        return $this->_root;
     }
 
     /**

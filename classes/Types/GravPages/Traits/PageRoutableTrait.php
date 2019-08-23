@@ -252,10 +252,16 @@ trait PageRoutableTrait
             throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
+        if ($this->root()) {
+            $folder = $this->getFlexDirectory($this->getStorageKey())->getStorageFolder();
+        } else {
+            $folder = $this->getStorageFolder();
+        }
+
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];
 
-        return $locator($this->getStorageFolder());
+        return $folder ? $locator($folder) : '';
     }
 
     /**
@@ -381,7 +387,6 @@ trait PageRoutableTrait
      */
     public function root(): bool
     {
-        // Flex Page can never be root.
-        return false;
+        return $this->getKey() === '--root--';
     }
 }
