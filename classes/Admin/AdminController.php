@@ -777,20 +777,6 @@ class AdminController
             if (!$this->validateNonce()) {
                 $e = new RequestException($this->getRequest(), 'Page Expired', 400);
 
-                $accept = $this->getAccept(['application/json', 'text/html']);
-                if ($accept === 'text/html') {
-                    if (!$this->action) {
-                        if ($this->id) {
-                            $this->action = 'edit';
-                            $params[] = $this->id;
-                        } else {
-                            $this->action = 'list';
-                        }
-                    }
-                    $this->setMessage($e->getMessage(), 'error');
-                    return false;
-                }
-
                 $this->close($this->createErrorResponse($e));
             }
             $method = $this->task_prefix . ucfirst(str_replace('.', '', $this->task));
