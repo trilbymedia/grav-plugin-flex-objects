@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Controllers;
 
+use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Inflector;
 use Grav\Common\Language\Language;
 use Grav\Common\Session;
 use Grav\Common\Utils;
+use Grav\Framework\Controller\Traits\ControllerResponseTrait;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Psr7\Response;
 use Grav\Framework\RequestHandler\Exception\NotFoundException;
 use Grav\Framework\RequestHandler\Exception\PageExpiredException;
-use Grav\Framework\RequestHandler\Exception\RequestException;
 use Grav\Framework\Route\Route;
 use Grav\Plugin\FlexObjects\Flex;
 use Psr\Http\Message\ResponseInterface;
@@ -26,6 +27,8 @@ use RocketTheme\Toolbox\Session\Message;
 
 abstract class AbstractController implements RequestHandlerInterface
 {
+    use ControllerResponseTrait;
+
     /** @var string */
     protected $nonce_action = 'flex-object';
 
@@ -232,109 +235,6 @@ abstract class AbstractController implements RequestHandlerInterface
     }
 
     /**
-     * Display the current page.
-     *
-     * @return Response
-     */
-    public function createDisplayResponse(): ResponseInterface
-    {
-        return new Response(418);
-    }
-
-    /**
-     * @param string $content
-     * @param int $code
-     * @return Response
-     */
-    public function createHtmlResponse(string $content, int $code = null): ResponseInterface
-    {
-        return new Response($code ?: 200, [], $content);
-    }
-
-    /**
-     * @param array $content
-     * @return Response
-     */
-    public function createJsonResponse(array $content): ResponseInterface
-    {
-        $code = $content['code'] ?? 200;
-        if ($code >= 301 && $code <= 307) {
-            $code = 200;
-        }
-
-        return new Response($code, ['Content-Type' => 'application/json'], json_encode($content));
-    }
-
-    /**
-     * @param string $url
-     * @param int $code
-     * @return Response
-     */
-    public function createRedirectResponse(string $url, int $code = null): ResponseInterface
-    {
-        if (null === $code || $code < 301 || $code > 307) {
-            $code = $this->grav['config']->get('system.pages.redirect_default_code', 302);
-        }
-
-        $accept = $this->getAccept(['application/json', 'text/html']);
-
-        if ($accept === 'application/json') {
-            return $this->createJsonResponse(['code' => $code, 'status' => 'redirect', 'redirect' => $url]);
-        }
-
-        return new Response($code, ['Location' => $url]);
-    }
-
-    /**
-     * @param \Exception $e
-     * @return Response
-     */
-    public function createErrorResponse(\Exception $e): ResponseInterface
-    {
-        $validCodes = [
-            400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 413, 414, 415, 416, 417, 418,
-            422, 423, 424, 425, 426, 428, 429, 431, 451, 500, 501, 502, 503, 504, 505, 506, 507, 508, 511
-        ];
-
-        if ($e instanceof RequestException) {
-            $code = $e->getHttpCode();
-            $reason = $e->getHttpReason();
-        } else {
-            $code = $e->getCode();
-            $reason = null;
-        }
-
-        if (!in_array($code, $validCodes, true)) {
-            $code = 500;
-        }
-
-        $message = $e->getMessage();
-        $response = [
-            'code' => $code,
-            'status' => 'error',
-            'message' => $message
-        ];
-
-        $accept = $this->getAccept(['application/json', 'text/html']);
-
-        if ($accept === 'text/html') {
-            $method = $this->getRequest()->getMethod();
-
-            // On POST etc, redirect back to the previous page.
-            if ($method !== 'GET' && $method !== 'HEAD') {
-                $this->setMessage($message, 'error');
-                $referer = $this->request->getHeaderLine('Referer');
-                return $this->createRedirectResponse($referer, 303);
-            }
-
-            // TODO: improve error page
-            return $this->createHtmlResponse($response['message']);
-        }
-
-        return new Response($code, ['Content-Type' => 'application/json'], json_encode($response), '1.1', $reason);
-    }
-
-    /**
      * @param string $string
      * @return string
      */
@@ -361,6 +261,14 @@ abstract class AbstractController implements RequestHandlerInterface
     }
 
     /**
+     * @return Config
+     */
+    protected function getConfig(): Config
+    {
+        return $this->grav['config'];
+    }
+
+    /**
      * @param string $task
      * @throws PageExpiredException
      */
@@ -383,33 +291,5 @@ abstract class AbstractController implements RequestHandlerInterface
         if (!$nonce || !Utils::verifyNonce($nonce, $this->nonce_action)) {
             throw new PageExpiredException($this->request);
         }
-    }
-
-    protected function getAccept(array $compare)
-    {
-        $accepted = [];
-        foreach ($this->request->getHeader('Accept') as $accept) {
-            foreach (explode(',', $accept) as $item) {
-                if (!$item) {
-                    continue;
-                }
-
-                $split = explode(';q=', $item);
-                $mime = array_shift($split);
-                $priority = array_shift($split) ?? 1.0;
-
-                $accepted[$mime] = $priority;
-            }
-        }
-
-        arsort($accepted);
-
-        // TODO: add support for image/* etc
-        $list = array_intersect($compare, array_keys($accepted));
-        if (!$list && (isset($accepted['*/*']) || isset($accepted['*']))) {
-            return reset($compare);
-        }
-
-        return reset($list);
     }
 }
