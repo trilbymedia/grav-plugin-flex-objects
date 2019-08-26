@@ -426,10 +426,10 @@ class AdminController
                     403);
             }
 
-            // FIXME:
-            // Clone page, append the POST data and modify folder name and ordering if not changed by the user.
+            $object = $object->copy();
+            $object->save();
 
-            throw new \RuntimeException('Not Implemented');
+            $this->setRedirect($this->getFlex()->adminRoute($object));
 
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Copy Failed: ' . $e->getMessage(), 'error');

@@ -13,6 +13,7 @@ use Grav\Common\Yaml;
 use Grav\Framework\Cache\CacheInterface;
 use Grav\Framework\File\Formatter\MarkdownFormatter;
 use Grav\Framework\File\Formatter\YamlFormatter;
+use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use RocketTheme\Toolbox\File\MarkdownFile;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
@@ -256,14 +257,48 @@ trait PageLegacyTrait
      * Returns a new Page object for the copy.
      * You need to call $this->save() in order to perform the move.
      *
-     * @param PageInterface $parent New parent page.
+     * @param PageInterface|null $parent New parent page.
      *
      * @return $this
      */
     public function copy(PageInterface $parent = null)
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $parentStorageKey = ltrim(dirname("/{$this->getStorageKey()}"), '/');
+        $relocate = false;
+
+        if ($parent) {
+            if ($parent instanceof FlexObjectInterface) {
+                $k = $parent->getStorageKey();
+                if ($k !== $parentStorageKey) {
+                    $parentStorageKey = $k;
+                    $relocate = true;
+                }
+            } else {
+                throw new \RuntimeException('Cannot move page');
+            }
+        } else {
+            $parent = $parentStorageKey
+                ? $this->getFlexDirectory()->getObject($parentStorageKey, 'storage_key')
+                : $this->getFlexDirectory()->getIndex()->getRoot();
+        }
+
+        // Get the folder name.
+        $folder = $this->getProperty('folder') . ($relocate ? '' : '-2');
+        $order = $this->getProperty('order');
+        if ($order) {
+            $order++;
+        }
+
+        $parts = [];
+        if ($parentStorageKey !== '') {
+            $parts[] = $parentStorageKey;
+        }
+        $parts[] = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
+
+        // Finally update the storage key.
+        $this->setStorageKey(implode('/', $parts));
+
+        return parent::copy();
     }
 
     abstract public function blueprints();
