@@ -297,7 +297,9 @@ trait PageRoutableTrait
             throw new \RuntimeException(__METHOD__ . '(PageInterface): Not Implemented');
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $parentKey = ltrim(dirname("/{$this->getStorageKey()}"), '/');
+
+        return $parentKey ? $this->getFlexDirectory()->getObject($parentKey, 'storageKey') : $this->getFlexDirectory()->getIndex()->getRoot();
     }
 
     /**
@@ -307,8 +309,16 @@ trait PageRoutableTrait
      */
     public function topParent()
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $topParent = $this->parent();
+        while ($topParent) {
+            $parent = $topParent->parent();
+            if (!$parent || !$parent->parent()) {
+                break;
+            }
+            $topParent = $parent;
+        }
+
+        return $topParent;
     }
 
     /**

@@ -6,6 +6,7 @@ use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageCollectionInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
+use Grav\Common\Utils;
 use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageRoutableTrait as ParentTrait;
 
 /**
@@ -13,8 +14,9 @@ use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageRoutableTrait as ParentTr
  */
 trait PageRoutableTrait
 {
-    use ParentTrait;
-
+    use ParentTrait {
+        ParentTrait::parent as parentTrait;
+    }
 
     /**
      * Gets the route for the page based on the route headers if available, else from
@@ -50,6 +52,10 @@ trait PageRoutableTrait
 
     public function parent(PageInterface $var = null)
     {
+        if (Utils::isAdminPlugin()) {
+            return $this->parentTrait();
+        }
+
         if (null !== $var) {
             throw new \RuntimeException('Not Implemented');
         }
@@ -58,17 +64,6 @@ trait PageRoutableTrait
         $pages = Grav::instance()['pages'];
 
         return $this->parent_route ? $pages->find($this->parent_route) : $pages->root();
-    }
-
-    /**
-     * Gets the top parent object for this page
-     *
-     * @return PageInterface|null the top parent page object if it exists.
-     */
-    public function topParent()
-    {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
     }
 
     /**
