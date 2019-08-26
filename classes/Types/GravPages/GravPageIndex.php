@@ -66,7 +66,7 @@ class GravPageIndex extends FlexPageIndex
     {
         $root = $this->_root;
         if (is_array($root)) {
-            $this->_root = $this->getFlexDirectory()->createObject($root, '--root--');
+            $this->_root = $this->getFlexDirectory()->createObject(['__META' => $root], '--root--');
         }
 
         return $this->_root;

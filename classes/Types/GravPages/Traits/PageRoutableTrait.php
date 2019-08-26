@@ -2,134 +2,19 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
-use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageCollectionInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
-use Grav\Common\Uri;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
+use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageRoutableTrait as ParentTrait;
 
+/**
+ * Implements PageRoutableInterface.
+ */
 trait PageRoutableTrait
 {
-    /**
-     * Returns the page extension, got from the page `url_extension` config and falls back to the
-     * system config `system.pages.append_url_extension`.
-     *
-     * @return string      The extension of this page. For example `.html`
-     */
-    public function urlExtension(): string
-    {
-        if ($this->home()) {
-            return '';
-        }
+    use ParentTrait;
 
-        return $this->getNestedProperty('header.url_extension') ?? Grav::instance()['config']->get('system.pages.append_url_extension', '');
-    }
-
-    /**
-     * Gets and Sets whether or not this Page is routable, ie you can reach it via a URL.
-     * The page must be *routable* and *published*
-     *
-     * @param  bool $var true if the page is routable
-     *
-     * @return bool      true if the page is routable
-     */
-    public function routable($var = null): bool
-    {
-        if (null !== $var) {
-            $this->setNestedProperty('header.routable', $var);
-        }
-
-        return $this->getNestedProperty('header.routable', true) && $this->published();
-    }
-
-    /**
-     * Gets the URL for a page - alias of url().
-     *
-     * @param bool $include_host
-     *
-     * @return string the permalink
-     */
-    public function link($include_host = false): string
-    {
-        return $this->url($include_host);
-    }
-
-    /**
-     * Gets the URL with host information, aka Permalink.
-     * @return string The permalink.
-     */
-    public function permalink(): string
-    {
-        return $this->url(true, false, true, true);
-    }
-
-    /**
-     * Returns the canonical URL for a page
-     *
-     * @param bool $include_lang
-     *
-     * @return string
-     */
-    public function canonical($include_lang = true): string
-    {
-        return $this->url(true, true, $include_lang);
-    }
-
-    /**
-     * Gets the url for the Page.
-     *
-     * @param bool $include_host Defaults false, but true would include http://yourhost.com
-     * @param bool $canonical true to return the canonical URL
-     * @param bool $include_base
-     * @param bool $raw_route
-     *
-     * @return string The url.
-     */
-    public function url($include_host = false, $canonical = false, $include_base = true, $raw_route = false): string
-    {
-        // Override any URL when external_url is set
-        $external = $this->getNestedProperty('header.external_url');
-        if ($external) {
-            return $external;
-        }
-
-        $grav = Grav::instance();
-
-        /** @var Pages $pages */
-        $pages = $grav['pages'];
-
-        /** @var Config $config */
-        $config = $grav['config'];
-
-        // get base route (multi-site base and language)
-        $route = $include_base ? $pages->baseRoute() : '';
-
-        // add full route if configured to do so
-        if (!$include_host && $config->get('system.absolute_urls', false)) {
-            $include_host = true;
-        }
-
-        if ($canonical) {
-            $route .= $this->routeCanonical();
-        } elseif ($raw_route) {
-            $route .= $this->rawRoute();
-        } else {
-            $route .= $this->route();
-        }
-
-        /** @var Uri $uri */
-        $uri = $grav['uri'];
-        $url = $uri->rootUrl($include_host) . '/' . trim($route, '/') . $this->urlExtension();
-
-        // trim trailing / if not root
-        if ($url !== '/') {
-            $url = rtrim($url, '/');
-        }
-
-        return Uri::filterPath($url);
-    }
 
     /**
      * Gets the route for the page based on the route headers if available, else from
@@ -141,143 +26,18 @@ trait PageRoutableTrait
      */
     public function route($var = null): string
     {
-        // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
+            if ($var !== '/' && $var !== Grav::instance()['config']->get('system.home.alias')) {
+                throw new \RuntimeException(__METHOD__ . '(\'' . $var . '\'): Not Implemented');
+            }
+        }
+
+        if ($this->home()) {
+            return '/';
         }
 
         // TODO: implement rest of the routing:
         return $this->rawRoute();
-    }
-
-    /**
-     * Helper method to clear the route out so it regenerates next time you use it
-     */
-    public function unsetRouteSlug(): void
-    {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
-    }
-
-    /**
-     * Gets and Sets the page raw route
-     *
-     * @param string|null $var
-     *
-     * @return string|null
-     */
-    public function rawRoute($var = null): ?string
-    {
-        if (null !== $var) {
-            // TODO:
-            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
-        }
-
-        // TODO: missing full implementation
-        return '/' . $this->getKey();
-    }
-
-    /**
-     * Gets the route aliases for the page based on page headers.
-     *
-     * @param  array $var list of route aliases
-     *
-     * @return array  The route aliases for the Page.
-     */
-    public function routeAliases($var = null): array
-    {
-        if (null !== $var) {
-            $this->setNestedProperty('header.routes.aliases', (array)$var);
-        }
-
-        // FIXME: check route() logic of Page
-        return (array)$this->getNestedProperty('header.routes.aliases');
-    }
-
-    /**
-     * Gets the canonical route for this page if its set. If provided it will use
-     * that value, else if it's `true` it will use the default route.
-     *
-     * @param string|null $var
-     *
-     * @return string
-     */
-    public function routeCanonical($var = null): string
-    {
-        if (null !== $var) {
-            $this->setNestedProperty('header.routes.canonical', (array)$var);
-        }
-
-        return $this->getNestedProperty('header.routes.canonical', $this->route());
-    }
-
-    /**
-     * Gets the redirect set in the header.
-     *
-     * @param  string $var redirect url
-     *
-     * @return string|null
-     */
-    public function redirect($var = null): ?string
-    {
-        if (null !== $var) {
-            $this->setProperty('header.redirect', $var);
-        }
-
-        return $this->getNestedProperty('header.redirect');
-    }
-
-    /**
-     * Returns the clean path to the page file
-     *
-     * Needed in admin for Page Media.
-     */
-    public function relativePagePath(): ?string
-    {
-        return $this->getMediaFolder();
-    }
-
-    /**
-     * Gets and sets the path to the folder where the .md for this Page object resides.
-     * This is equivalent to the filePath but without the filename.
-     *
-     * @param  string $var the path
-     *
-     * @return string|null      the path
-     */
-    public function path($var = null): ?string
-    {
-        // TODO:
-        if (null !== $var) {
-            throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
-        }
-
-        if ($this->root()) {
-            $folder = $this->getFlexDirectory($this->getStorageKey())->getStorageFolder();
-        } else {
-            $folder = $this->getStorageFolder();
-        }
-
-        /** @var UniformResourceLocator $locator */
-        $locator = Grav::instance()['locator'];
-
-        return $folder ? $locator($folder) : '';
-    }
-
-    /**
-     * Get/set the folder.
-     *
-     * @param string $var Optional path
-     *
-     * @return string|null
-     */
-    public function folder($var = null): ?string
-    {
-        if (null !== $var) {
-            $this->setProperty('folder', $var);
-        }
-
-        return $this->getProperty('folder') ?? ($this->getKey() ?: null);
     }
 
     /**
@@ -287,14 +47,17 @@ trait PageRoutableTrait
      *
      * @return PageInterface|null the parent page object if it exists.
      */
+
     public function parent(PageInterface $var = null)
     {
-        // TODO:
         if (null !== $var) {
-            throw new \RuntimeException(__METHOD__ . '(PageInterface): Not Implemented');
+            throw new \RuntimeException('Not Implemented');
         }
 
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        /** @var Pages $pages */
+        $pages = Grav::instance()['pages'];
+
+        return $this->parent_route ? $pages->find($this->parent_route) : $pages->root();
     }
 
     /**
@@ -366,27 +129,5 @@ trait PageRoutableTrait
         }
 
         return false;
-    }
-
-    /**
-     * Returns whether or not this page is the currently configured home page.
-     *
-     * @return bool True if it is the homepage
-     */
-    public function home(): bool
-    {
-        $home = Grav::instance()['config']->get('system.home.alias');
-
-        return '/' . $this->getKey() === $home;
-    }
-
-    /**
-     * Returns whether or not this page is the root node of the pages tree.
-     *
-     * @return bool True if it is the root
-     */
-    public function root(): bool
-    {
-        return $this->getKey() === '--root--';
     }
 }

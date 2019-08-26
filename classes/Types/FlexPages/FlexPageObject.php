@@ -11,10 +11,10 @@ use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Traits\FlexMediaTrait;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
-use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
-use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageLegacyTrait;
-use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageRoutableTrait;
-use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageTranslateTrait;
+use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageContentTrait;
+use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageLegacyTrait;
+use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageRoutableTrait;
+use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageTranslateTrait;
 
 /**
  * Class FlexPageObject

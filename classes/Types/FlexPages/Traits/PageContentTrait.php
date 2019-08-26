@@ -15,7 +15,7 @@ use Grav\Framework\File\Formatter\YamlFormatter;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
- * Implements Grav Page content and header manipulation methods.
+ * Implements PageContentInterface.
  */
 trait PageContentTrait
 {

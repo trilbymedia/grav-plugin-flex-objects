@@ -7,6 +7,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Debugger;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Plugin;
 use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserInterface;
@@ -453,6 +454,8 @@ class AdminController
     {
         $type = $this->target;
         $directory = $this->getDirectory($type);
+
+        /** @var PageInterface|FlexObjectInterface $object */
         $object = $this->getObject();
 
         if (!$directory || !method_exists($object, 'getLevelListing')) {

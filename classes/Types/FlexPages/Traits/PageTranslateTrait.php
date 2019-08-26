@@ -7,6 +7,9 @@ use Grav\Common\Language\Language;
 use Grav\Common\Page\Page;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
+/**
+ * Implements PageTranslateInterface
+ */
 trait PageTranslateTrait
 {
     /** @var string|null Language code, eg: 'en' */

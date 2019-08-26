@@ -11,6 +11,8 @@ use Grav\Framework\Route\Route;
 use Grav\Framework\Route\RouteFactory;
 use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
+use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageLegacyTrait;
+use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageRoutableTrait;
 
 /**
  * Class GravPageObject
@@ -25,6 +27,9 @@ use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
  */
 class GravPageObject extends FlexPageObject
 {
+    use PageLegacyTrait;
+    use PageRoutableTrait;
+
     const PAGE_ORDER_REGEX = '/^(\d+)\.(.*)$/u';
 
     /** @var string Route to the page excluding the page itself, eg: '/blog/2019' */
@@ -78,30 +83,6 @@ class GravPageObject extends FlexPageObject
     }
 
     /**
-     * Gets the route for the page based on the route headers if available, else from
-     * the parents route and the current Page's slug.
-     *
-     * @param  string $var Set new default route.
-     *
-     * @return string  The route for the Page.
-     */
-    public function route($var = null): string
-    {
-        if (null !== $var) {
-            if ($var !== '/' && $var !== Grav::instance()['config']->get('system.home.alias')) {
-                throw new \RuntimeException(__METHOD__ . '(\'' . $var . '\'): Not Implemented');
-            }
-        }
-
-        if ($this->home()) {
-            return '/';
-        }
-
-        // TODO: implement rest of the routing:
-        return $this->rawRoute();
-    }
-
-    /**
      * @inheritdoc PageInterface
      */
     public function getFormValue(string $name, $default = null, string $separator = null)
@@ -128,18 +109,6 @@ class GravPageObject extends FlexPageObject
         }
 
         return parent::getFormValue($name, $default, $separator);
-    }
-
-    public function parent(PageInterface $var = null)
-    {
-        if (null !== $var) {
-            throw new \RuntimeException('Not Implemented');
-        }
-
-        /** @var Pages $pages */
-        $pages = Grav::instance()['pages'];
-
-        return $this->parent_route ? $pages->find($this->parent_route) : $pages->root();
     }
 
     public function full_order(): string
@@ -180,12 +149,6 @@ class GravPageObject extends FlexPageObject
 
     public function getLevelListing(array $options): array
     {
-        /** @var Admin $admin */
-        $admin = Grav::instance()['admin'] ?? null;
-        /** @var Pages $pages */
-        $pages = $admin ? $admin::enablePages() : Grav::instance()['pages'];
-        $page_instances = $pages->instances();
-
         $default_filters = [
             'type'=> ['root', 'dir'],
             'name' => null,
@@ -199,7 +162,6 @@ class GravPageObject extends FlexPageObject
         $leaf_route = $options['leaf_route'] ?? null;
         $sortby = $options['sortby'] ?? 'filename';
         $order = $options['order'] ?? SORT_ASC;
-        $initial = $options['initial'] ?? null;
 
         $status = 'error';
         $msg = null;
@@ -207,7 +169,6 @@ class GravPageObject extends FlexPageObject
         $children = null;
         $sub_route = null;
         $extra = null;
-        $root = false;
 
         // Handle leaf_route
         if ($leaf_route && $route !== $leaf_route) {
@@ -215,7 +176,7 @@ class GravPageObject extends FlexPageObject
             $sub_route =  '/' . implode('/', array_slice($nodes, 1, $options['level']++ ));
             $options['route'] = $sub_route;
 
-            [$status, $msg, $children, $extra] = $this->getLevelListing($options);
+            [$status,,,$extra] = $this->getLevelListing($options);
         }
 
         /** @var GravPageCollection|GravPageIndex $collection */
@@ -224,11 +185,9 @@ class GravPageObject extends FlexPageObject
         // Handle no route, assume page tree root
         if (!$route) {
             $page = $collection->getRoot();
-            $root = true;
         } else {
             $page = $collection->get(trim($route, '/'));
         }
-
         $path = $page ? $page->path() : null;
 
         $settings = $this->getBlueprint()->schema()->getProperty($options['field']);
@@ -236,73 +195,53 @@ class GravPageObject extends FlexPageObject
         $filters = array_merge([], $filters, $settings['filters'] ?? []);
         $filter_type = $filters['type'] ?? $filter_type;
 
-        if ($path) {
-            /** @var \SplFileInfo $fileInfo */
+        if ($page) {
+            if ($page->root() && (!$filters['type'] || in_array('root', $filter_type, true))) {
+                $response[] = [
+                    'name' => '<root>',
+                    'value' => '',
+                    'item-key' => '',
+                    'filename' => '.',
+                    'extension' => '',
+                    'type' => 'root',
+                    'modified' => $page->modified(),
+                    'size' => 0,
+                    'symlink' => false
+                ];
+            }
+
             $status = 'success';
             $msg = 'PLUGIN_ADMIN.PAGE_ROUTE_FOUND';
-            foreach (new \DirectoryIterator($path) as $fileInfo) {
-                $fileName = $fileInfo->getFilename();
-                $filePath = str_replace('\\', '/', $fileInfo->getPathname());
 
-                if (($fileInfo->isDot() && $fileName !== '.' && $initial) || (Utils::startsWith($fileName, '.') && strlen($fileName) > 1)) {
+            $children = $page->children();
+
+            /** @var PageInterface $child */
+            foreach ($children as $child) {
+                $payload = [
+                    'name' => $child->title(),
+                    'value' => $child->rawRoute(),
+                    'item-key' => basename($child->rawRoute()),
+                    'filename' => $child->folder(),
+                    'extension' => $child->extension(),
+                    'type' => 'dir',
+                    'modified' => $child->modified(),
+                    'size' => count($child->children()),
+                    'symlink' => false
+                ];
+
+                // filter types
+                if ($filter_type && !in_array($payload['type'], $filter_type, true)) {
                     continue;
                 }
 
-                if ($fileInfo->isDot()) {
-                    if ($root) {
-                        $payload = [
-                            'name' => '<root>',
-                            'value' => '',
-                            'item-key' => '',
-                            'filename' => '.',
-                            'extension' => '',
-                            'type' => 'root',
-                            'modified' => $fileInfo->getMTime(),
-                            'size' => 0
-                        ];
-                    } else {
-                        continue;
-                    }
-                } else {
-                    $file_page = $page_instances[$filePath] ?? null;
-                    $file_path = Utils::replaceFirstOccurrence(GRAV_ROOT, '', $filePath);
-                    $type = $fileInfo->getType();
-
-                    $payload = [
-                        'name' => $file_page ? $file_page->title() : $fileName,
-                        'value' => $file_page ? $file_page->rawRoute() : $file_path,
-                        'item-key' => basename($file_page ? $file_page->route() : $file_path),
-                        'filename' => $fileName,
-                        'extension' => $type === 'dir' ? '' : $fileInfo->getExtension(),
-                        'type' => $type,
-                        'modified' => $fileInfo->getMTime(),
-                        'size' => $fileInfo->getSize(),
-                        'symlink' => false
-                    ];
-                }
-
-                // Fix for symlink
-                if ($payload['type'] === 'link') {
-                    $payload['symlink'] = true;
-                    $physical_path = $fileInfo->getRealPath();
-                    $payload['type'] = is_dir($physical_path) ? 'dir' : 'file';
-                }
-
-                // filter types
-                if ($filters['type']) {
-                    if (!in_array($payload['type'], $filter_type, true)) {
-                        continue;
-                    }
-                }
-
                 // Simple filter for name or extension
-                if (($filters['name'] && Utils::contains($payload['basename'], $filters['name'])) ||
-                    ($filters['extension'] && Utils::contains($payload['extension'], $filters['extension']))) {
+                if (($filters['name'] && Utils::contains($payload['basename'], $filters['name']))
+                    || ($filters['extension'] && Utils::contains($payload['extension'], $filters['extension']))) {
                     continue;
                 }
 
                 // Add children if any
-                if ($filePath === $extra && is_array($children)) {
+                if ($child->path() === $extra && \is_array($children)) {
                     $payload['children'] = array_values($children);
                 }
 
