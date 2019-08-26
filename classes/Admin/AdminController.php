@@ -558,6 +558,8 @@ class AdminController
                 // TODO: remove 'action:add' after save.
                 if (strpos($this->referrerUri, 'action:add') && !Utils::endsWith($this->currentUri, $object->getKey())) {
                     $this->referrerUri = $this->currentUri . '/' . $object->getKey();
+                } elseif ($key !== $object->getKey()) {
+                    $this->referrerUri = dirname($this->currentUri) . '/' . $object->getKey();
                 }
                 if ($postAction === 'list') {
                     $this->referrerUri = dirname($this->currentUri);

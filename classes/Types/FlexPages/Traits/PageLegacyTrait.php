@@ -274,7 +274,7 @@ trait PageLegacyTrait
                     $relocate = true;
                 }
             } else {
-                throw new \RuntimeException('Cannot move page');
+                throw new \RuntimeException('Cannot copy page');
             }
         } else {
             $parent = $parentStorageKey

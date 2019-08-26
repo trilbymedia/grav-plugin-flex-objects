@@ -329,7 +329,11 @@ class GravPageObject extends FlexPageObject
             $parts[] = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
 
             // Finally update the storage key.
-            $elements['storage_key'] = implode('/', $parts);
+            $storage_key = implode('/', $parts);
+            $elements['storage_key'] = $storage_key;
+            if ($storage_key !== $this->getStorageKey()) {
+                $this->setKey($parentKey ? "{$parentKey}/$folder" : $folder);
+            }
         }
 
         parent::filterElements($elements, true);
