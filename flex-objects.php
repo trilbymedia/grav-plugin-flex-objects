@@ -262,11 +262,13 @@ class FlexObjectsPlugin extends Plugin
                 $cache->set('admin-count', $count);
             }
             $badge = $directory ? ['badge' => ['count' => $count]] : [];
+            $priority = $item['priority'] ?? 0;
 
             $this->grav['twig']->plugins_hooked_nav[$title] = [
                 'route' => $route,
                 'icon' => $icon,
-                'authorize' => $authorize
+                'authorize' => $authorize,
+                'priority' => $priority
             ] + $badge;
         }
     }
