@@ -12,9 +12,6 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
  */
 trait PageTranslateTrait
 {
-    /** @var string|null Language code, eg: 'en' */
-    protected $language;
-
     /** @var array|null */
     private $_languages;
 
@@ -103,11 +100,13 @@ trait PageTranslateTrait
      */
     public function language($var = null): ?string
     {
-        if (null !== $var) {
-            $this->setProperty('language', $var);
-        }
-
-        return $this->getProperty('language');
+        return $this->loadHeaderProperty(
+            'language',
+            $var,
+            static function($value) {
+                return trim($value);
+            }
+        );
     }
 
     /**
@@ -144,4 +143,6 @@ trait PageTranslateTrait
 
         return $value !== '' ? $value : null;
     }
+
+    abstract protected function loadHeaderProperty(string $property, $var, callable $filter);
 }

@@ -166,63 +166,58 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     // Overrides for header properties.
 
     /**
+     * Common logic to load header properties.
+     *
      * @param string $property
-     * @return bool
+     * @param $var
+     * @param callable $filter
+     * @return |null
      */
-    public function hasProperty($property): bool
+    protected function loadHeaderProperty(string $property, $var, callable $filter)
     {
-        if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
-            return $this->getProperty('header')->get($property) !== null;
+        // We have to use parent methods in order to avoid loops.
+        $value = null === $var ? parent::getProperty($property) : null;
+        if (null === $value) {
+            $value = $filter($var ?? $this->getProperty('header')->get($property));
+
+            parent::setProperty($property, $value);
+            if ($this->doHasProperty($property)) {
+                $value = parent::getProperty($property);
+            }
         }
 
-        return parent::hasProperty($property);
+        return $value;
     }
 
     /**
-     * TODO: Add support for property filtering.
-     *
      * @param string $property
      * @param mixed $default
      * @return mixed
      */
     public function getProperty($property, $default = null)
     {
-        if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
-            return $this->getProperty('header')->get($property, $default);
+        $method = static::$headerProperties[$property] ?? null;
+        if ($method && method_exists($this, $method) && !$this->doHasProperty($property)) {
+            return $this->{$method}();
         }
 
         return parent::getProperty($property, $default);
     }
 
     /*
-     * TODO: Add support for property filtering.
-     *
      * @param string $property
      * @param mixed $default
      */
     public function setProperty($property, $value): void
     {
-        if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
-            $this->getProperty('header')->set($property, $value);
+        $method = static::$headerProperties[$property] ?? null;
+        if ($method && method_exists($this, $method) && !$this->doHasProperty($property)) {
+            $this->{$method}($value);
 
             return;
         }
 
         parent::setProperty($property, $value);
-    }
-
-    /**
-     * @param string $property
-     */
-    public function unsetProperty($property): void
-    {
-        if (isset(static::$headerProperties[$property]) && !$this->doHasProperty($property)) {
-            $this->getProperty('header')->undef($property);
-
-            return;
-        }
-
-        parent::unsetProperty($property);
     }
 
     public function setNestedProperty($property, $value, $separator = null)

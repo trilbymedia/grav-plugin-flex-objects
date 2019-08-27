@@ -20,37 +20,35 @@ use RocketTheme\Toolbox\Event\Event;
 trait PageContentTrait
 {
     static protected $headerProperties = [
-        'slug'              => 'trim',          // Page doesn't do trim.
-        'routes'            => 'array',
-        'title'             => 'trim',
-        'summary'           => 'array',         // Oops, not in Page.
-        'language'          => 'trim',
-        'template'          => 'trim',
-        'menu'              => 'trim',
-        'routable'          => 'bool',
-        'visible'           => 'bool',
-        'redirect'          => 'trim',
-        'external_url'      => 'trim',
-        'order_dir'         => 'trim',
-        'order_by'          => 'trim',
-        'order_manual'      => 'array',
-        'dateformat'        => 'dateformat()',
-        'date'              => 'date()',
-        'markdown'          => 'array',         // Oops, not in Page.
-        'markdown_extra'    => 'bool',
-        'taxonomy'          => 'array[array]',
-        'max_count'         => 'int',
-        'process'           => 'array[bool]',
-        'published'         => 'bool',
-        'publish_date'      => 'string',
-        'unpublish_date'    => 'string',
-        'expires'           => 'int',
-        'cache_control'     => 'raw',
-        'etag'              => 'bool',
-        'last_modified'     => 'bool',
-        'ssl'               => 'bool',
-        'template_format'   => 'raw',
-        'debugger'          => 'bool'
+        'slug'              => 'slug',          // Page doesn't do trim.
+        'routes'            => false,
+        'title'             => 'title',
+        'language'          => 'language',
+        'template'          => 'template',
+        'menu'              => 'menu',
+        'routable'          => 'routable',
+        'visible'           => 'visible',
+        'redirect'          => 'redirect',
+        'external_url'      => false,
+        'order_dir'         => 'orderDir',
+        'order_by'          => 'orderBy',
+        'order_manual'      => 'orderManual',
+        'dateformat'        => 'dateformat',
+        'date'              => 'date',
+        'markdown_extra'    => false,
+        'taxonomy'          => 'taxonomy',
+        'max_count'         => 'maxCount',
+        'process'           => 'process',
+        'published'         => 'published',
+        'publish_date'      => 'publishDate',
+        'unpublish_date'    => 'unpublishDate',
+        'expires'           => 'expires',
+        'cache_control'     => 'cacheControl',
+        'etag'              => 'eTag',
+        'last_modified'     => 'lastModified',
+        'ssl'               => 'ssl',
+        'template_format'   => 'templateFormat',
+        'debugger'          => false,
     ];
 
     /** @var object */
@@ -170,7 +168,7 @@ trait PageContentTrait
      */
     public function media($var = null): Media
     {
-        if (null !== $var) {
+        if ($var instanceof Media) {
             $this->setProperty('media', $var);
         }
 
@@ -182,11 +180,13 @@ trait PageContentTrait
      */
     public function title($var = null): string
     {
-        if (null !== $var) {
-            $this->setProperty('title', $var);
-        }
-
-        return $this->getProperty('title') ?: ucfirst($this->slug());
+        return $this->loadHeaderProperty(
+            'title',
+            $var,
+            function($value) {
+                return trim($value ?: ucfirst($this->slug()));
+            }
+        );
     }
 
     /**
@@ -194,11 +194,13 @@ trait PageContentTrait
      */
     public function menu($var = null): string
     {
-        if (null !== $var) {
-            $this->setProperty('menu', $var);
-        }
-
-        return $this->getProperty('menu') ?: $this->title();
+        return $this->loadHeaderProperty(
+            'menu',
+            $var,
+            function($value) {
+                return trim($value ?: $this->title());
+            }
+        );
     }
 
     /**
@@ -206,11 +208,13 @@ trait PageContentTrait
      */
     public function visible($var = null): bool
     {
-        if (null !== $var) {
-            $this->setProperty('visible', $var);
-        }
-
-        return $this->published() && ($this->getProperty('visible') ?? $this->order() !== false);
+        return $this->loadHeaderProperty(
+            'visible',
+            $var,
+            function($value) {
+                return (bool)($value ?? $this->order() !== false);
+            }
+        );
     }
 
     /**
@@ -218,11 +222,13 @@ trait PageContentTrait
      */
     public function published($var = null): bool
     {
-        if (null !== $var) {
-            $this->setProperty('published', $var);
-        }
-
-        return (bool)$this->getProperty('published', true) === true;
+        return $this->loadHeaderProperty(
+            'published',
+            $var,
+            static function($value) {
+                return (bool)($value ?? true);
+            }
+        );
     }
 
     /**
@@ -230,11 +236,13 @@ trait PageContentTrait
      */
     public function publishDate($var = null): int
     {
-        if (null !== $var) {
-            $this->setProperty('publish_date', $var);
-        }
-
-        return Utils::date2timestamp($this->getProperty('publish_date'), $this->getProperty('dateformat'));
+        return $this->loadHeaderProperty(
+            'publish_date',
+            $var,
+            function($value) {
+                return Utils::date2timestamp($value, $this->getProperty('dateformat'));
+            }
+        );
     }
 
     /**
@@ -242,11 +250,13 @@ trait PageContentTrait
      */
     public function unpublishDate($var = null): int
     {
-        if (null !== $var) {
-            $this->setProperty('unpublish_date', $var);
-        }
-
-        return Utils::date2timestamp($this->getProperty('unpublish_date'), $this->getProperty('dateformat'));
+        return $this->loadHeaderProperty(
+            'unpublish_date',
+            $var,
+            function($value) {
+                return Utils::date2timestamp($value, $this->getProperty('dateformat'));
+            }
+        );
     }
 
     /**
@@ -254,11 +264,18 @@ trait PageContentTrait
      */
     public function process($var = null): array
     {
-        if (null !== $var) {
-            $this->setProperty('process', $var);
-        }
+        return $this->loadHeaderProperty(
+            'process',
+            $var,
+            function($value) {
+                $value = (array)($value ?? Grav::instance()['config']->get('system.pages.process'));
+                foreach ($value as $process => $status) {
+                    $value[$process] = (bool)$status;
+                }
 
-        return (array)($this->getProperty('process') ?? Grav::instance()['config']->get('system.pages.process'));
+                return $value;
+            }
+        );
     }
 
     /**
@@ -266,11 +283,13 @@ trait PageContentTrait
      */
     public function slug($var = null): string
     {
-        if (null !== $var) {
-            $this->setProperty('slug', $var);
-        }
-
-        return $this->getProperty('slug') ?: static::normalizeRoute(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder()));
+        return $this->loadHeaderProperty(
+            'slug',
+            $var,
+            function($value) {
+                return $value ?: static::normalizeRoute(preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder()));
+            }
+        );
     }
 
     /**
@@ -278,18 +297,25 @@ trait PageContentTrait
      */
     public function order($var = null)
     {
-        if (null !== $var) {
-            $this->setProperty('order', $var);
+        $property = 'order';
+        $value = null === $var ? $this->getProperty($property) : null;
+        if (null === $value) {
+            $value = $var;
+            if (null === $value) {
+                preg_match(PAGE_ORDER_PREFIX_REGEX, $this->folder(), $order);
+
+                $value = $order[0] ?? false;
+            }
+
+            $value = $value !== false ? sprintf('%02d.', $value) : false;
+
+            $this->setProperty($property, $value);
+            if ($this->doHasProperty($property)) {
+                $value = $this->getProperty($property);
+            }
         }
 
-        $var = $this->getProperty('order');
-        if (null === $var) {
-            preg_match(PAGE_ORDER_PREFIX_REGEX, $this->folder(), $order);
-
-            $var = $order[0] ?? false;
-        }
-
-        return $var !== false ? sprintf('%02d.', $var) : false;
+        return $value;
     }
 
     /**
@@ -297,11 +323,19 @@ trait PageContentTrait
      */
     public function id($var = null): string
     {
-        if (null !== $var) {
-            $this->setProperty('id', $var);
+        $property = 'id';
+        $value = null === $var ? $this->getProperty($property) : null;
+        if (null === $value) {
+            // TODO: make sure this works also with languages enabled; id should be unique per language.
+            $value = $var ?? $this->modified() . md5( 'flex-' . $this->getFlexType() . '-' . $this->getKey());
+
+            $this->setProperty($property, $value);
+            if ($this->doHasProperty($property)) {
+                $value = $this->getProperty($property);
+            }
         }
 
-        return $this->getProperty('id') ?? $this->modified() . md5( 'flex-' . $this->getFlexType() . '-' . $this->getKey());
+        return $value;
     }
 
     /**
@@ -309,12 +343,18 @@ trait PageContentTrait
      */
     public function modified($var = null): int
     {
-        if (null !== $var) {
-            $this->setProperty('modified', $var);
+        $property = 'modified';
+        $value = null === $var ? $this->getProperty($property) : null;
+        if (null === $value) {
+            $value = (int)($var ?: $this->getTimestamp());
+
+            $this->setProperty($property, $value);
+            if ($this->doHasProperty($property)) {
+                $value = $this->getProperty($property);
+            }
         }
 
-        // TODO: Initialize in the blueprints.
-        return (int)$this->getProperty('modified');
+        return $value;
     }
 
     /**
@@ -322,11 +362,13 @@ trait PageContentTrait
      */
     public function lastModified($var = null): bool
     {
-        if (null !== $var) {
-            $this->setProperty('last_modified', $var);
-        }
-
-        return (bool)($this->getProperty('last_modified') ?? Grav::instance()['config']->get('system.pages.last_modified'));
+        return $this->loadHeaderProperty(
+            'last_modified',
+            $var,
+            static function($value) {
+                return (bool)($value ?? Grav::instance()['config']->get('system.pages.last_modified'));
+            }
+        );
     }
 
     /**
@@ -334,11 +376,13 @@ trait PageContentTrait
      */
     public function date($var = null): int
     {
-        if (null !== $var) {
-            $this->setProperty('date', $var);
-        }
-
-        return Utils::date2timestamp($this->getProperty('date'), $this->getProperty('dateformat')) ?: $this->modified();
+        return $this->loadHeaderProperty(
+            'date',
+            $var,
+            function($value) {
+                return Utils::date2timestamp($value, $this->getProperty('dateformat')) ?: $this->modified();
+            }
+        );
     }
 
     /**
@@ -346,11 +390,13 @@ trait PageContentTrait
      */
     public function dateformat($var = null): string
     {
-        if (null !== $var) {
-            $this->setProperty('dateformat', $var);
-        }
-
-        return $this->getProperty('dateformat') ?? '';
+        return $this->loadHeaderProperty(
+            'dateformat',
+            $var,
+            static function($value) {
+                return $value ?? '';
+            }
+        );
     }
 
     /**
@@ -358,11 +404,13 @@ trait PageContentTrait
      */
     public function taxonomy($var = null): array
     {
-        if (null !== $var) {
-            $this->setProperty('taxonomy', $var);
-        }
-
-        return $this->getProperty('taxonomy', []);
+        return $this->loadHeaderProperty(
+            'taxonomy',
+            $var,
+            static function($value) {
+                return $value ?? [];
+            }
+        );
     }
 
     /**
@@ -477,7 +525,6 @@ trait PageContentTrait
 
         return $default;
     }
-
 
     /**
      * @param int|null $size
@@ -594,7 +641,7 @@ trait PageContentTrait
 
                 // pages.markdown_extra is deprecated, but still check it...
                 if (!isset($markdown_options['extra'])) {
-                    $extra = $this->getNestedProperty('markdown_extra') ?? $config->get('system.pages.markdown_extra');
+                    $extra = $this->getNestedProperty('header.markdown_extra') ?? $config->get('system.pages.markdown_extra');
                     if (null !== $extra) {
                         user_error('Configuration option \'system.pages.markdown_extra\' is deprecated since Grav 1.5, use \'system.pages.markdown.extra\' instead', E_USER_DEPRECATED);
 
@@ -692,4 +739,6 @@ trait PageContentTrait
 
         return $parsedown->text($content);
     }
+
+    abstract protected function loadHeaderProperty(string $property, $var, callable $filter);
 }

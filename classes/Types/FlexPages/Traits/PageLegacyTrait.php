@@ -415,12 +415,13 @@ trait PageLegacyTrait
      */
     public function template($var = null): string
     {
-        if (null !== $var) {
-            $this->setProperty('template', $var);
-        }
-
-        return $this->getProperty('template')
-            ?? (($this->modular() ? 'modular/' : '') . str_replace($this->extension(), '', $this->name()));
+        return $this->loadHeaderProperty(
+            'template',
+            $var,
+            function($value) {
+                return trim($value ?? (($this->modular() ? 'modular/' : '') . str_replace($this->extension(), '', $this->name())));
+            }
+        );
     }
 
     /**
@@ -433,13 +434,13 @@ trait PageLegacyTrait
      */
     public function templateFormat($var = null): string
     {
-        if (is_string($var)) {
-            $this->setNestedProperty('header.append_url_extension', '.' . $var);
-        } else {
-            $var = ltrim($this->getNestedProperty('header.append_url_extension') ?: Utils::getPageFormat(), '.');
-        }
-
-        return $var;
+        return $this->loadHeaderProperty(
+            'template_format',
+            $var,
+            function($value) {
+                return ltrim($value ?? $this->getNestedProperty('header.append_url_extension') ?: Utils::getPageFormat(), '.');
+            }
+        );
     }
 
     /**
@@ -467,11 +468,13 @@ trait PageLegacyTrait
      */
     public function expires($var = null): int
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.expires', (int)$var);
-        }
-
-        return (int)($this->getNestedProperty('header.expires') ?? Grav::instance()['config']->get('system.pages.expires'));
+        return $this->loadHeaderProperty(
+            'expires',
+            $var,
+            static function($value) {
+                return (int)($value ?? Grav::instance()['config']->get('system.pages.expires'));
+            }
+        );
     }
 
     /**
@@ -483,20 +486,24 @@ trait PageLegacyTrait
      */
     public function cacheControl($var = null): ?string
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.cache_control', (string)$var);
-        }
-
-        return $this->getNestedProperty('header.cache_control') ?? Grav::instance()['config']->get('system.pages.cache_control');
+        return $this->loadHeaderProperty(
+            'cache_control',
+            $var,
+            static function($value) {
+                return ((string)($value ?? Grav::instance()['config']->get('system.pages.cache_control'))) ?: null;
+            }
+        );
     }
 
     public function ssl($var = null): ?bool
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.ssl', (bool)$var);
-        }
-
-        return $this->getNestedProperty('header.ssl');
+        return $this->loadHeaderProperty(
+            'ssl',
+            $var,
+            static function($value) {
+                return $value ? (bool)$value : null;
+            }
+        );
     }
 
     /**
@@ -602,11 +609,13 @@ trait PageLegacyTrait
      */
     public function eTag($var = null): bool
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.etag', (bool)$var);
-        }
-
-        return (bool)($this->getNestedProperty('header.etag') ?? Grav::instance()['config']->get('system.pages.last_modified'));
+        return $this->loadHeaderProperty(
+            'etag',
+            $var,
+            static function($value) {
+                return (bool)($value ?? Grav::instance()['config']->get('system.pages.last_modified'));
+            }
+        );
     }
 
     /**
@@ -648,15 +657,16 @@ trait PageLegacyTrait
      * @param  string $var the order, either "asc" or "desc"
      *
      * @return string      the order, either "asc" or "desc"
-     * @deprecated 1.6
      */
     public function orderDir($var = null): string
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.order_dir', strtolower($var) === 'desc' ? 'desc' : 'asc');
-        }
-
-        return $this->getNestedProperty('header.order_dir', 'asc');
+        return $this->loadHeaderProperty(
+            'order_dir',
+            $var,
+            static function($value) {
+                return strtolower(trim($value)) === 'desc' ? 'desc' : 'asc';
+            }
+        );
     }
 
     /**
@@ -670,15 +680,16 @@ trait PageLegacyTrait
      * @param  string $var supported options include "default", "title", "date", and "folder"
      *
      * @return string      supported options include "default", "title", "date", and "folder"
-     * @deprecated 1.6
      */
     public function orderBy($var = null): string
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.order_by', $var);
-        }
-
-        return $this->getNestedProperty('header.order_by', '');
+        return $this->loadHeaderProperty(
+            'order_by',
+            $var,
+            static function($value) {
+                return trim($value);
+            }
+        );
     }
 
     /**
@@ -687,15 +698,16 @@ trait PageLegacyTrait
      * @param  string $var supported options include "default", "title", "date", and "folder"
      *
      * @return array
-     * @deprecated 1.6
      */
     public function orderManual($var = null): array
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.order_manual', (array)$var);
-        }
-
-        return (array)$this->getNestedProperty('header.order_manual');
+        return $this->loadHeaderProperty(
+            'order_manual',
+            $var,
+            static function($value) {
+                return (array)$value;
+            }
+        );
     }
 
     /**
@@ -705,15 +717,16 @@ trait PageLegacyTrait
      * @param  int $var the maximum number of sub-pages
      *
      * @return int      the maximum number of sub-pages
-     * @deprecated 1.6
      */
     public function maxCount($var = null): int
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.max_count', (int)$var);
-        }
-
-        return (int)($this->getNestedProperty('header.max_count') ?? Grav::instance()['config']->get('system.pages.list.count'));
+        return $this->loadHeaderProperty(
+            'max_count',
+            $var,
+            static function($value) {
+                return (int)($value ?? Grav::instance()['config']->get('system.pages.list.count'));
+            }
+        );
     }
 
     /**
@@ -1020,4 +1033,5 @@ trait PageLegacyTrait
 
     abstract protected function exists();
     abstract protected function getStorageFolder();
+    abstract protected function loadHeaderProperty(string $property, $var, callable $filter);
 }

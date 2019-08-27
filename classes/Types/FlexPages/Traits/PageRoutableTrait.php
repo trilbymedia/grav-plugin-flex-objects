@@ -23,11 +23,17 @@ trait PageRoutableTrait
      */
     public function urlExtension(): string
     {
-        if ($this->home()) {
-            return '';
-        }
+        return $this->loadHeaderProperty(
+            'url_extension',
+            null,
+            function($value) {
+                if ($this->home()) {
+                    return '';
+                }
 
-        return $this->getNestedProperty('header.url_extension') ?? Grav::instance()['config']->get('system.pages.append_url_extension', '');
+                return $value ?? Grav::instance()['config']->get('system.pages.append_url_extension', '');
+            }
+        );
     }
 
     /**
@@ -40,11 +46,13 @@ trait PageRoutableTrait
      */
     public function routable($var = null): bool
     {
-        if (null !== $var) {
-            $this->setNestedProperty('header.routable', $var);
-        }
-
-        return $this->getNestedProperty('header.routable', true) && $this->published();
+        return $this->loadHeaderProperty(
+            'routable',
+            $var,
+            function($value) {
+                return ($value ?? true) && $this->published();
+            }
+        );
     }
 
     /**
@@ -223,11 +231,13 @@ trait PageRoutableTrait
      */
     public function redirect($var = null): ?string
     {
-        if (null !== $var) {
-            $this->setProperty('header.redirect', $var);
-        }
-
-        return $this->getNestedProperty('header.redirect');
+        return $this->loadHeaderProperty(
+            'redirect',
+            $var,
+            static function($value) {
+                return trim($value);
+            }
+        );
     }
 
     /**
@@ -402,4 +412,6 @@ trait PageRoutableTrait
     {
         return $this->getKey() === '--root--';
     }
+
+    abstract protected function loadHeaderProperty(string $property, $var, callable $filter);
 }
