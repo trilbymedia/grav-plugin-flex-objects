@@ -135,9 +135,9 @@ trait PageTranslateTrait
 
     /**
      * @param string $value
-     * @return string
+     * @return string|null
      */
-    protected function offsetLoad_language($value): string
+    protected function offsetLoad_language($value): ?string
     {
         $value = (string)($value ?? trim(basename($this->extension(), 'md'), '.'));
 

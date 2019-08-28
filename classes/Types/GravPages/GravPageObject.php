@@ -173,10 +173,10 @@ class GravPageObject extends FlexPageObject
         // Handle leaf_route
         if ($leaf_route && $route !== $leaf_route) {
             $nodes = explode('/', $leaf_route);
-            $sub_route =  '/' . implode('/', array_slice($nodes, 1, $options['level']++ ));
+            $sub_route =  '/' . implode('/', array_slice($nodes, 1, $options['level']++));
             $options['route'] = $sub_route;
 
-            [$status,,,$extra] = $this->getLevelListing($options);
+            [$status,,$leaf,$extra] = $this->getLevelListing($options);
         }
 
         /** @var GravPageCollection|GravPageIndex $collection */
@@ -199,7 +199,7 @@ class GravPageObject extends FlexPageObject
             if ($page->root() && (!$filters['type'] || in_array('root', $filter_type, true))) {
                 $response[] = [
                     'name' => '<root>',
-                    'value' => '',
+                    'value' => '<root>',
                     'item-key' => '',
                     'filename' => '.',
                     'extension' => '',
@@ -241,8 +241,8 @@ class GravPageObject extends FlexPageObject
                 }
 
                 // Add children if any
-                if ($child->path() === $extra && \is_array($children)) {
-                    $payload['children'] = array_values($children);
+                if ($child->path() === $extra && \is_array($leaf)) {
+                    $payload['children'] = array_values($leaf);
                 }
 
                 $response[] = $payload;

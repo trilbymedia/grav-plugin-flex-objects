@@ -184,7 +184,7 @@ trait PageContentTrait
             'title',
             $var,
             function($value) {
-                return trim($value ?: ucfirst($this->slug()));
+                return trim($value ?? ($this->root() ? '<root>' : ucfirst($this->slug())));
             }
         );
     }
@@ -471,7 +471,7 @@ trait PageContentTrait
 
     protected function offsetSerialize_header(?Header $value)
     {
-        return $value->toArray();
+        return $value ? $value->toArray() : [];
     }
 
     /**
@@ -502,7 +502,7 @@ trait PageContentTrait
             case 'menu':
                 return $this->menu();
             case 'ordering':
-                return (bool)$this->order();
+                return $this->order() !== false;
             case 'folder':
                 return preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder());
             case 'slug':
