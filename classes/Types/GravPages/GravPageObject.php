@@ -183,7 +183,7 @@ class GravPageObject extends FlexPageObject
             if ($page->root() && (!$filters['type'] || in_array('root', $filter_type, true))) {
                 $response[] = [
                     'name' => '<root>',
-                    'value' => '<root>',
+                    'value' => '/',
                     'item-key' => '',
                     'filename' => '.',
                     'extension' => '',

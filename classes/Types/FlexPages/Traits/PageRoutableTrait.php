@@ -416,7 +416,7 @@ trait PageRoutableTrait
      */
     public function root(): bool
     {
-        return $this->getKey() === '--root--';
+        return $this->getKey() === '/';
     }
 
     abstract protected function loadHeaderProperty(string $property, $var, callable $filter);
