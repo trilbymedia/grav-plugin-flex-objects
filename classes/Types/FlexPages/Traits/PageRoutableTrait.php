@@ -280,17 +280,23 @@ trait PageRoutableTrait
     /**
      * Get/set the folder.
      *
-     * @param string $var Optional path
+     * @param string $var Optional path, including numeric prefix.
      *
      * @return string|null
      */
     public function folder($var = null): ?string
     {
-        if (null !== $var) {
-            $this->setProperty('folder', $var);
-        }
+        return $this->loadProperty(
+            'folder',
+            $var,
+            function($value) {
+                if (null === $value) {
+                    $value = $this->getStorageKey() ?: $this->getKey();
+                }
 
-        return $this->getProperty('folder') ?? ($this->getKey() ?: null);
+                return basename($value) ?: null;
+            }
+        );
     }
 
     /**
@@ -307,9 +313,9 @@ trait PageRoutableTrait
             throw new \RuntimeException(__METHOD__ . '(PageInterface): Not Implemented');
         }
 
-        $parentKey = ltrim(dirname("/{$this->getStorageKey()}"), '/');
+        $parentKey = ltrim(dirname("/{$this->getKey()}"), '/');
 
-        return $parentKey ? $this->getFlexDirectory()->getObject($parentKey, 'storageKey') : $this->getFlexDirectory()->getIndex()->getRoot();
+        return $parentKey ? $this->getFlexDirectory()->getObject($parentKey) : $this->getFlexDirectory()->getIndex()->getRoot();
     }
 
     /**

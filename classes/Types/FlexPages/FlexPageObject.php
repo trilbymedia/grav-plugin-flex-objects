@@ -29,6 +29,8 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     use PageRoutableTrait;
     use FlexMediaTrait;
 
+    const PAGE_ORDER_REGEX = '/^(\d+)\.(.*)$/u';
+
     /**
      * @return array
      */
@@ -133,6 +135,17 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
         return parent::getFormValue($name, $default, $separator);
     }
 
+    /**
+     * @param string|null $key
+     * @return FlexObject
+     */
+    public function createCopy(string $key = null)
+    {
+        $this->copy();
+
+        return parent::createCopy($key);
+    }
+
     public function save($reorder = true)
     {
         // FIXME: I guess we want to support reordering?
@@ -190,14 +203,38 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     }
 
     /**
+     * Common logic to load header properties.
+     *
+     * @param string $property
+     * @param $var
+     * @param callable $filter
+     * @return |null
+     */
+    protected function loadProperty(string $property, $var, callable $filter)
+    {
+        // We have to use parent methods in order to avoid loops.
+        $value = null === $var ? parent::getProperty($property) : null;
+        if (null === $value) {
+            $value = $filter($var);
+
+            parent::setProperty($property, $value);
+            if ($this->doHasProperty($property)) {
+                $value = parent::getProperty($property);
+            }
+        }
+
+        return $value;
+    }
+
+    /**
      * @param string $property
      * @param mixed $default
      * @return mixed
      */
     public function getProperty($property, $default = null)
     {
-        $method = static::$headerProperties[$property] ?? null;
-        if ($method && method_exists($this, $method) && !$this->doHasProperty($property)) {
+        $method = static::$headerProperties[$property] ??static::$calculatedProperties[$property] ??  null;
+        if ($method && method_exists($this, $method)) {
             return $this->{$method}();
         }
 
@@ -210,8 +247,8 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function setProperty($property, $value): void
     {
-        $method = static::$headerProperties[$property] ?? null;
-        if ($method && method_exists($this, $method) && !$this->doHasProperty($property)) {
+        $method = static::$headerProperties[$property] ?? static::$calculatedProperties[$property] ?? null;
+        if ($method && method_exists($this, $method)) {
             $this->{$method}($value);
 
             return;

@@ -13,6 +13,7 @@ use Grav\Common\Yaml;
 use Grav\Framework\Cache\CacheInterface;
 use Grav\Framework\File\Formatter\MarkdownFormatter;
 use Grav\Framework\File\Formatter\YamlFormatter;
+use Grav\Framework\Flex\Interfaces\FlexIndexInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use RocketTheme\Toolbox\File\MarkdownFile;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
@@ -266,6 +267,9 @@ trait PageLegacyTrait
         $parentStorageKey = ltrim(dirname("/{$this->getStorageKey()}"), '/');
         $relocate = false;
 
+        /** @var FlexIndexInterface $index */
+        $index = $this->getFlexDirectory()->getIndex();
+
         if ($parent) {
             if ($parent instanceof FlexObjectInterface) {
                 $k = $parent->getStorageKey();
@@ -274,16 +278,26 @@ trait PageLegacyTrait
                     $relocate = true;
                 }
             } else {
-                throw new \RuntimeException('Cannot copy page');
+                throw new \RuntimeException('Cannot copy page, parent is of unknown type');
             }
         } else {
             $parent = $parentStorageKey
                 ? $this->getFlexDirectory()->getObject($parentStorageKey, 'storage_key')
-                : $this->getFlexDirectory()->getIndex()->getRoot();
+                : $index->getRoot();
         }
 
+        // Find non-existing key.
+        $key = trim($parent->getKey() . '/' . basename($this->getKey()), '/');
+        $key = preg_replace('/-\d+$/', '', $key);
+        $i = 1;
+        do {
+            $i++;
+            $test = "{$key}-{$i}";
+        } while ($index->containsKey($test));
+        $key = $test;
+        $folder = basename($key);
+
         // Get the folder name.
-        $folder = $this->getProperty('folder') . ($relocate ? '' : '-2');
         $order = $this->getProperty('order');
         if ($order) {
             $order++;
@@ -295,10 +309,13 @@ trait PageLegacyTrait
         }
         $parts[] = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
 
-        // Finally update the storage key.
+        // Finally update the object.
+        $this->setKey($key);
         $this->setStorageKey(implode('/', $parts));
 
-        return parent::copy();
+        $this->markAsCopy();
+
+        return $this;
     }
 
     abstract public function blueprints();
@@ -310,8 +327,9 @@ trait PageLegacyTrait
      */
     public function blueprintName(): string
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $blueprint_name = filter_input(INPUT_POST, 'blueprint', FILTER_SANITIZE_STRING) ?: $this->template();
+
+        return $blueprint_name;
     }
 
     /**
@@ -321,8 +339,8 @@ trait PageLegacyTrait
      */
     public function validate(): void
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $blueprint = $this->getBlueprint();
+        $blueprint->validate($this->toArray());
     }
 
     /**
@@ -330,8 +348,11 @@ trait PageLegacyTrait
      */
     public function filter(): void
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $blueprints = $this->getBlueprint();
+        $values = $blueprints->filter($this->toArray());
+        if ($values && isset($values['header'])) {
+            $this->header($values['header']);
+        }
     }
 
     /**
@@ -388,11 +409,25 @@ trait PageLegacyTrait
      */
     public function name($var = null): string
     {
-        if (null !== $var) {
-            $this->setProperty('name', $var);
-        }
+        return $this->loadProperty(
+            'name',
+            $var,
+            function ($value) {
+                $value = $value ?? $this->getMetaData()['storage_file'] ?? 'default.md';
+                if (!preg_match('/\.md$/', $value)) {
+                    $language = $this->language();
+                    if ($language) {
+                        // TODO: better language support
+                        $value .= ".{$language}";
+                    }
+                    $value .= '.md';
+                }
 
-        return $this->getProperty('name');
+                $this->unsetProperty('template');
+
+                return $value;
+            }
+        );
     }
 
     /**
@@ -1017,12 +1052,19 @@ trait PageLegacyTrait
     /**
      * Gets the action.
      *
-     * @return string The Action string.
+     * @return string|null The Action string.
      */
-    public function getAction()
+    public function getAction(): ?string
     {
-        // TODO:
-        throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
+        $meta = $this->getMetaData();
+        if (!empty($meta['copy'])) {
+            return 'copy';
+        }
+        if (isset($meta['storage_key']) && $this->getStorageKey() !== $meta['storage_key']) {
+            return 'move';
+        }
+
+        return null;
     }
 
     /**

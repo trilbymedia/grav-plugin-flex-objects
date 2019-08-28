@@ -30,28 +30,11 @@ class GravPageObject extends FlexPageObject
     use PageLegacyTrait;
     use PageRoutableTrait;
 
-    const PAGE_ORDER_REGEX = '/^(\d+)\.(.*)$/u';
-
-    /** @var string Route to the page excluding the page itself, eg: '/blog/2019' */
-    protected $parent_route;
-
-    /** @var string Folder of the page, eg: 'article-title' */
-    protected $folder;
-
-    /** @var string|false Numeric order of the page, eg. 3 */
-    protected $order;
-
-    /** @var string Template name, eg: 'article' */
-    protected $template;
-
     /** @var string Language code, eg: 'en' */
     protected $language;
 
     /** @var string File format, eg. 'md' */
     protected $format;
-
-    /** @var string Filename, eg: 'article.md' */
-    protected $name;
 
     /**
      * @return array
@@ -98,10 +81,9 @@ class GravPageObject extends FlexPageObject
             case 'name':
                 // TODO: this should not be template!
                 return $this->getProperty('template');
-            case 'folder':
-                return $this->getProperty('folder');
             case 'route':
-                return $this->getProperty('parent_route');
+                $key = dirname($this->hasKey() ? '/' . $this->getKey() : '/');
+                return $key !== '/' ? $key : '';
             case 'full_route':
                 return $this->hasKey() ? '/' . $this->getKey() : '';
             case 'full_order':
@@ -139,12 +121,14 @@ class GravPageObject extends FlexPageObject
 
             $template = $this->getProperty('template') . ($name ? '.' . $name : '');
 
-            return $this->getFlexDirectory()->getBlueprint($template, 'blueprints://pages');
+            $blueprint = $this->getFlexDirectory()->getBlueprint($template, 'blueprints://pages');
         } catch (\RuntimeException $e) {
             $template = 'default' . ($name ? '.' . $name : '');
 
-            return $this->getFlexDirectory()->getBlueprint($template, 'blueprints://pages');
+            $blueprint = $this->getFlexDirectory()->getBlueprint($template, 'blueprints://pages');
         }
+
+        return $blueprint;
     }
 
     public function getLevelListing(array $options): array
@@ -300,33 +284,35 @@ class GravPageObject extends FlexPageObject
 
         // Change storage location if needed.
         if (array_key_exists('route', $elements) && isset($elements['folder'], $elements['name'])) {
-            $route = $elements['parent_route'] = $elements['route'];
+            $parentRoute = $elements['route'];
+            $folder = trim($elements['folder']) ?: preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->getProperty('folder'));
+            $elements['template'] = $elements['name'];
             unset($elements['route']);
 
             $parts = [];
-            $key = $this->getKey();
-            $parentKey = trim($route, '/');
+            $parentKey = trim($parentRoute, '/');
 
             // Figure out storage path to the new route.
             if ($parentKey !== '') {
                 // Make sure page isn't being moved under itself.
+                $key = $this->getKey();
                 if ($key === $parentKey || strpos($parentKey, $key . '/') === 0) {
-                    throw new \RuntimeException(sprintf('Page %s cannot be moved to %s', '/' . $key, $route));
+                    throw new \RuntimeException(sprintf('Page %s cannot be moved to %s', '/' . $key, $parentRoute));
                 }
 
                 $parent = $this->getFlexDirectory()->getObject($parentKey);
                 if (!$parent) {
                     // Page cannot be moved to non-existing location.
-                    throw new \RuntimeException(sprintf('Page %s cannot be moved to non-existing path %s', '/' . $key, $route));
+                    throw new \RuntimeException(sprintf('Page %s cannot be moved to non-existing path %s', '/' . $key, $parentRoute));
                 }
 
                 $parts[] = $parent->getStorageKey();
             }
 
             // Get the folder name.
-            $folder = !empty($elements['folder']) ? trim($elements['folder']) : $this->getProperty('folder');
             $order = $elements['order'] ?? false;
-            $parts[] = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
+            $folder = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
+            $parts[] = $folder;
 
             // Finally update the storage key.
             $storage_key = implode('/', $parts);
@@ -356,81 +342,6 @@ class GravPageObject extends FlexPageObject
         unset($elements['name']);
 
         return $elements;
-    }
-
-    /**
-     * @param string $offset
-     * @param mixed $value
-     * @return mixed
-     */
-    protected function offsetLoad($offset, $value)
-    {
-        if (in_array($offset, ['parent_route', 'folder', 'order', 'name', 'format', 'language'])) {
-            return $this->{$offset} ?? $value ?? $this->extractStorageInformation() ?? $this->{$offset};
-        }
-
-        return parent::offsetLoad($offset, $value);
-    }
-
-    /**
-     * @param string $value
-     * @return string
-     */
-    protected function offsetLoad_template($value): string
-    {
-        $value = $value ?? $this->getNestedProperty('header.template');
-        if (!$value) {
-            $value = $this->stripNameExtension($this->getProperty('name'));
-            $value = $this->modular() ? 'modular/' . $value : $value;
-        }
-
-        return $value;
-    }
-
-    protected function offsetPrepare_order($value)
-    {
-        return false !== $value ? (int)$value : false;
-    }
-
-    /**
-     * @param string $value
-     * @return string
-     */
-    protected function offsetPrepare_name($value): string
-    {
-        // Setting name will reset page template.
-        $this->unsetProperty('template');
-
-        if ($value && !preg_match('/\.md$/', $value)) {
-            // FIXME: missing language support.
-            $value .= '.md';
-        }
-
-        return $value ?: 'default.md';
-    }
-
-    /**
-     * @return mixed|null
-     */
-    protected function extractStorageInformation()
-    {
-        if (null === $this->parent_route || null === $this->folder) {
-            $key = $this->hasKey() ? $this->getKey() : '';
-
-            $this->parent_route = $this->parent_route ?? (($route = \dirname('/' . $key)) && $route !== '/' ? $route : '');
-            $this->folder = $this->folder ?? \basename($key);
-        }
-        if (null === $this->order) {
-            preg_match(static::PAGE_ORDER_REGEX, \basename($this->getStorageKey()), $parts);
-
-            $this->order = $this->order ?? (isset($parts[1]) ? (int)$parts[1] : false);
-        }
-
-        $this->name = $this->name ?? $this->getStorage()['storage_file'] ?? 'default.md';
-        $this->format = $this->format ?? 'md';
-
-        // Allows us to make code more readable. :)
-        return null;
     }
 
     /**

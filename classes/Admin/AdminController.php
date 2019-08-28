@@ -426,8 +426,7 @@ class AdminController
                     403);
             }
 
-            $object = $object->copy();
-            $object->save();
+            $object = $object->createCopy();
 
             $this->setRedirect($this->getFlex()->adminRoute($object));
 

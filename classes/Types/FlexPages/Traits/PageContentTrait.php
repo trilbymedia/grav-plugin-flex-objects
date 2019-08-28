@@ -51,6 +51,13 @@ trait PageContentTrait
         'debugger'          => false,
     ];
 
+    static protected $calculatedProperties = [
+        'parent' => 'parent',
+        'folder' => 'folder',
+        'order' => 'order',
+        'template' => 'template',
+    ];
+
     /** @var object */
     protected $header;
 
@@ -294,28 +301,25 @@ trait PageContentTrait
 
     /**
      * @inheritdoc
+     * FIXME: Not fully compatible, returns 2 not '02.'
      */
     public function order($var = null)
     {
-        $property = 'order';
-        $value = null === $var ? $this->getProperty($property) : null;
-        if (null === $value) {
-            $value = $var;
-            if (null === $value) {
-                preg_match(PAGE_ORDER_PREFIX_REGEX, $this->folder(), $order);
+        return $this->loadProperty(
+            'order',
+            $var,
+            function($value) {
+                if (null === $value) {
+                    preg_match(static::PAGE_ORDER_REGEX, $this->folder(), $order);
 
-                $value = $order[0] ?? false;
+                    $value = $order[1] ?? false;
+                }
+
+                $value = (int)$value;
+
+                return $value ?: false;
             }
-
-            $value = $value !== false ? sprintf('%02d.', $value) : false;
-
-            $this->setProperty($property, $value);
-            if ($this->doHasProperty($property)) {
-                $value = $this->getProperty($property);
-            }
-        }
-
-        return $value;
+        );
     }
 
     /**
@@ -497,8 +501,7 @@ trait PageContentTrait
             case 'content':
                 return $this->getProperty('markdown');
             case 'order':
-                $order = $this->order();
-                return $order ? (int)$order : '';
+                return (string)$this->order();
             case 'menu':
                 return $this->menu();
             case 'ordering':
