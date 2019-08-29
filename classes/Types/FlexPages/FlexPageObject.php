@@ -171,10 +171,11 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
     protected function doReorder(array $ordering, string $key = null)
     {
+        // TODO: Fix orderings when parent changes (add to last, reorder old location).
         $ordering = array_values($ordering);
         $slug = basename($key);
         $order = $this->order();
-        $k = array_search($slug, $ordering, true);
+        $k = $slug !== '' ? array_search($slug, $ordering, true) : false;
         if ($order === false) {
             if ($k !== false) {
                 unset($ordering[$k]);
