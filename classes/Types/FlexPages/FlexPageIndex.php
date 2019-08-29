@@ -31,4 +31,31 @@ class FlexPageIndex extends FlexIndex
 
         return $case_insensitive ? mb_strtolower($route) : $route;
     }
+
+    public function visible()
+    {
+        return $this->withVisible();
+    }
+
+    public function nonVisible()
+    {
+        return $this->withVisible(false);
+    }
+
+    public function withVisible($bool = true)
+    {
+        $keys = $this->getIndexMap('key');
+        $list = [];
+        foreach ($keys as $key => $test) {
+            $keyBase = basename($key);
+            if ((int)$key > 0) {
+                $testBase = basename($test);
+                if (mb_strlen($keyBase) !== mb_strlen($testBase)) {
+                    $list[] = $key;
+                }
+            }
+        }
+
+        return $this->select($list);
+    }
 }

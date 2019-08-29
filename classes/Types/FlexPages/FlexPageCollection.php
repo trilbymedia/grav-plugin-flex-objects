@@ -18,6 +18,7 @@ class FlexPageCollection extends FlexCollection
     {
         return [
             'withPublished' => true,
+            'withVisible' => true,
             'getNextOrder' => false,
         ] + parent::getCachedMethods();
     }
@@ -29,6 +30,13 @@ class FlexPageCollection extends FlexCollection
     public function withPublished($bool = true): FlexCollectionInterface
     {
         $list = array_keys(array_filter($this->call('isPublished', [$bool])));
+
+        return $this->select($list);
+    }
+
+    public function withVisible($bool = true): FlexCollectionInterface
+    {
+        $list = array_keys(array_filter($this->call('isVisible', [$bool])));
 
         return $this->select($list);
     }

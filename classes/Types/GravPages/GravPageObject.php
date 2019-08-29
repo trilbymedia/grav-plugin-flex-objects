@@ -265,22 +265,25 @@ class GravPageObject extends FlexPageObject
      */
     protected function filterElements(array &$elements, bool $extended = false): void
     {
-        // Deal with ordering=1 and order=page1,page2,page3.
-        $ordering = (bool)($elements['ordering'] ?? false);
-        if ($ordering) {
+        // Deal with ordering=bool and order=page1,page2,page3.
+        if (array_key_exists('ordering', $elements) && array_key_exists('order', $elements)) {
+            $ordering = (bool)($elements['ordering'] ?? false);
+            $slug = preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->getProperty('folder'));
             $list = !empty($elements['order']) ? explode(',', $elements['order']) : [];
-            $order = array_search($this->getProperty('folder'), $list, true);
-            if ($order !== false) {
-                $order++;
+            if ($ordering) {
+                $order = array_search($slug, $list, true);
+                if ($order !== false) {
+                    $order++;
+                } else {
+                    $order = $this->getProperty('order') ?: 1;
+                }
             } else {
-                $order = $this->getProperty('order');
+                $order = false;
             }
 
+            $this->_reorder = $list;
             $elements['order'] = $order;
-        } else {
-            unset($elements['order']);
         }
-        unset($elements['ordering']);
 
         // Change storage location if needed.
         if (array_key_exists('route', $elements) && isset($elements['folder'], $elements['name'])) {
@@ -316,8 +319,8 @@ class GravPageObject extends FlexPageObject
 
             // Finally update the storage key.
             $storage_key = implode('/', $parts);
-            $elements['storage_key'] = $storage_key;
             if ($storage_key !== $this->getStorageKey()) {
+                $this->setStorageKey($storage_key);
                 $this->setKey($parentKey ? "{$parentKey}/$folder" : $folder);
             }
         }

@@ -163,7 +163,8 @@ class GravPageStorage extends FolderStorage
             }
         }
 
-        $route = trim(GravPageIndex::normalizeRoute(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', "/{$key}")), '/');
+        $rawRoute = trim(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', "/{$key}"), '/');
+        $route = GravPageIndex::normalizeRoute($rawRoute);
 
         ksort($markdown, SORT_NATURAL);
         ksort($children, SORT_NATURAL);

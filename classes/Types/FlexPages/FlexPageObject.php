@@ -31,6 +31,9 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
     const PAGE_ORDER_REGEX = '/^(\d+)\.(.*)$/u';
 
+    /** @var array|null */
+    protected $_reorder;
+
     /**
      * @return array
      */
@@ -146,14 +149,88 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
         return parent::createCopy($key);
     }
 
+    /**
+     * @param array|bool $reorder
+     * @return FlexObject|\Grav\Framework\Flex\Interfaces\FlexObjectInterface
+     */
     public function save($reorder = true)
     {
-        // FIXME: I guess we want to support reordering?
-        //if ($reorder === true) {
-        //    throw new \RuntimeException(__METHOD__ . '(): Not Implemented');
-        //}
+        $key = $this->getMetaData()['storage_key'] ?? $this->getStorageKey();
 
-        return parent::save();
+        /** @var static $instance */
+        $instance = parent::save();
+        if ($reorder === true) {
+            $reorder = $instance->_reorder ?? false;
+        }
+        if (is_array($reorder)) {
+            $instance->doReorder($reorder, $key ?: $this->getStorageKey());
+        }
+
+        return $instance;
+    }
+
+    protected function doReorder(array $ordering, string $key = null)
+    {
+        $ordering = array_values($ordering);
+        $slug = basename($key);
+        $order = $this->order();
+        $k = array_search($slug, $ordering, true);
+        if ($order === false) {
+            if ($k !== false) {
+                unset($ordering[$k]);
+            }
+        } elseif ($k === false) {
+            $ordering[999999] = $slug;
+        }
+
+        $parent = $this->parent();
+
+        /** @var FlexPageCollection $children */
+        $children = $parent ? $parent->children()->withVisible()->getCollection() : null;
+        if (null !== $children) {
+            $ordering = array_flip($ordering);
+            if ($key !== null) {
+                $children->remove($key);
+                if (isset($ordering[basename($key)])) {
+                    $children->set($key, $this);
+                }
+            }
+            $count = count($ordering);
+            foreach ($children as $child) {
+                $order = $ordering[basename($child->getKey())] ?? null;
+                $child->order(null !== $order ? $order + 1 : $child->order() + $count);
+            }
+            $children = $children->orderBy(['order' => 'ASC']);
+
+            $i = 0;
+            foreach ($children as $child) {
+                $child->reorder(++$i);
+            }
+        }
+    }
+
+    protected function reorder(int $order)
+    {
+        $oldKey = $this->getStorageKey();
+        $newKey = $this->buildStorageKey($order);
+        $storage = $this->getFlexDirectory()->getStorage();
+        if ($oldKey !== $newKey) {
+            $storage->renameRow($oldKey, $newKey);
+            if (method_exists($this, 'clearMediaCache')) {
+                $this->clearMediaCache();
+            }
+        }
+    }
+
+    protected function buildStorageKey(int $order)
+    {
+        $this->order($order);
+        $key = $this->getStorageKey();
+        $slug = basename($this->getKey());
+        $parent = trim(dirname("/{$key}"), '/');
+        $folder = $order ? sprintf('%02d.%s', $order, $slug) : $slug;
+
+        return ($parent ? $parent . '/' : '') . $folder;
     }
 
     /**
@@ -314,7 +391,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             if ($folder) {
                 $order = !empty($elements['order']) ? (int)$elements['order'] : null;
                 // TODO: broken
-                $elements['storage_key'] = $order ? sprintf('%2d.%s', $order, $folder) : $folder;
+                $elements['storage_key'] = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
             }
         }
 
