@@ -354,7 +354,7 @@ class MediaController extends AbstractController
         }
 
         if (!$object->isAuthorized($action)) {
-            throw new \RuntimeException('Forbitten', 403);
+            throw new \RuntimeException('Forbidden', 403);
         }
     }
 }

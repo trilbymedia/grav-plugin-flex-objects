@@ -46,7 +46,6 @@ class GravPageObject extends FlexPageObject
     public static function getCachedMethods(): array
     {
         return [
-            'isVisible' => true,
             'path' => true,
             'full_order' => true
         ] + parent::getCachedMethods();
@@ -68,14 +67,6 @@ class GravPageObject extends FlexPageObject
         }
 
         return $route;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isVisible()
-    {
-        return $this->isPublished() && $this->visible();
     }
 
     /**

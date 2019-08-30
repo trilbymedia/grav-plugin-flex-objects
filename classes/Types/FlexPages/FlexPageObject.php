@@ -71,6 +71,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
             // Page
             'isPublished' => true,
+            'isVisible' => true,
             'getCreated_Timestamp' => true,
             'getPublish_Timestamp' => true,
             'getUpdated_Timestamp' => true,
@@ -80,9 +81,17 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     /**
      * @return bool
      */
-    public function isPublished()
+    public function isPublished(): bool
     {
         return $this->published();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVisible(): bool
+    {
+        return $this->published() && $this->visible();
     }
 
     /**

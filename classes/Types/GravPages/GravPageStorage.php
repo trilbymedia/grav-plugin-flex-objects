@@ -32,7 +32,8 @@ class GravPageStorage extends FolderStorage
     {
         parent::initOptions($options);
 
-        $this->flags = \FilesystemIterator::KEY_AS_FILENAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
+        $this->flags = \FilesystemIterator::KEY_AS_FILENAME | \FilesystemIterator::CURRENT_AS_FILEINFO
+            | \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
 
         $grav = Grav::instance();
 
@@ -44,12 +45,12 @@ class GravPageStorage extends FolderStorage
 
         /** @var Language $language */
         $language = $grav['language'];
-        $this->page_extensions = $language->getPageExtensions();
+        $this->page_extensions = $language->getPageExtensions('.md');
 
         // Build regular expression for all the allowed page extensions.
         $exts = [];
         foreach ($this->page_extensions as $key => $ext) {
-            $exts[] = '(' . preg_quote($ext, '/') . ')(*:' . $key . ')';
+            $exts[] = '(' . preg_quote($ext, '/') . ')(*:' . ($key !== '' ? $key : '-') . ')';
         }
 
         $this->regex = '/^[^\.]*(' . implode('|', $exts) . ')$/sD';

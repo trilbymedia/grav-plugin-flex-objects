@@ -190,7 +190,7 @@ class AdminController
 
             $response = new Response(200, ['Content-Type' => 'application/json'], json_encode($table));
 
-            $this->exit($response);
+            $this->close($response);
         }
     }
 
@@ -234,7 +234,7 @@ class AdminController
             $csv->encode($list)
         );
 
-        $this->exit($response);
+        $this->close($response);
     }
 
     /**
@@ -488,6 +488,8 @@ class AdminController
                 // TODO: remove 'action:add' after save.
                 if (strpos($this->referrerUri, 'action:add') && !Utils::endsWith($this->currentUri, $object->getKey())) {
                     $this->referrerUri = $this->currentUri . '/' . $object->getKey();
+                } elseif ($key !== $object->getKey()) {
+                    $this->referrerUri = dirname($this->currentUri) . '/' . $object->getKey();
                 }
                 if ($postAction === 'list') {
                     $this->referrerUri = dirname($this->currentUri);
@@ -1011,12 +1013,12 @@ class AdminController
         return $post;
     }
 
-    protected function exit(ResponseInterface $response): void
+    protected function close(ResponseInterface $response): void
     {
         $grav = $this->grav;
 
         // TODO: remove when Grav 1.6 support is dropped.
-        if (!method_exists($grav, 'exit')) {
+        if (!method_exists($grav, 'close')) {
             // Make sure nothing extra gets written to the response.
             while (ob_get_level()) {
                 ob_end_clean();
@@ -1033,7 +1035,7 @@ class AdminController
             exit();
         }
 
-        $grav->exit($response);
+        $grav->close($response);
     }
 
     /**

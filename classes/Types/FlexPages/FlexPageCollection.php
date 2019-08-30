@@ -12,12 +12,31 @@ use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 class FlexPageCollection extends FlexCollection
 {
     /**
+     * @return array
+     */
+    public static function getCachedMethods(): array
+    {
+        return [
+            'withPublished' => true,
+            'withVisible' => true,
+            'getNextOrder' => false,
+        ] + parent::getCachedMethods();
+    }
+
+    /**
      * @param bool $bool
      * @return FlexCollection|FlexPageCollection
      */
     public function withPublished($bool = true): FlexCollectionInterface
     {
         $list = array_keys(array_filter($this->call('isPublished', [$bool])));
+
+        return $this->select($list);
+    }
+
+    public function withVisible($bool = true): FlexCollectionInterface
+    {
+        $list = array_keys(array_filter($this->call('isVisible', [$bool])));
 
         return $this->select($list);
     }
