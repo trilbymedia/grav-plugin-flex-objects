@@ -53,6 +53,15 @@ config:
           icon: plus
           label: PLUGIN_ADMIN.ADD
 
+    menu:
+      list:
+        hidden: false
+        route: /grav-pages
+        title: PLUGIN_ADMIN.PAGES
+        icon: fa-file-text-o
+        authorize: ['admin.pages', 'admin.super']
+        priority: 5
+
     edit:
       # TODO: not used yet
       buttons:
@@ -93,11 +102,12 @@ config:
           class: 'Grav\Framework\File\Formatter\MarkdownFormatter'
         folder: 'page://'
     ordering:
-      full_order: ASC
+      key: ASC
     search:
       options:
         contains: 1
       fields:
-        - header.menu
-        - full_route
+        - key
+        - menu
+        - title
         - name

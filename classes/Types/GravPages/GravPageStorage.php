@@ -43,9 +43,7 @@ class GravPageStorage extends FolderStorage
         $this->ignore_folders = (array)$config->get('system.pages.ignore_folders');
         $this->recurse = $options['recurse'] ?? true;
 
-        /** @var Language $language */
-        $language = $grav['language'];
-        $this->page_extensions = $language->getPageExtensions('.md');
+        $this->page_extensions = $this->getPageExtensions('.md');
 
         // Build regular expression for all the allowed page extensions.
         $exts = [];
@@ -54,6 +52,24 @@ class GravPageStorage extends FolderStorage
         }
 
         $this->regex = '/^[^\.]*(' . implode('|', $exts) . ')$/sD';
+    }
+
+    // Grav 1.6 support
+    public function getPageExtensions($fileExtension = null)
+    {
+        $grav = Grav::instance();
+
+        /** @var Language $language */
+        $language = $grav['language'];
+
+        $fileExtension = $fileExtension ?: CONTENT_EXT;
+
+        $extensions[''] = $fileExtension;
+        foreach ($language->getLanguages() as $code) {
+            $extensions[$code] = ".{$code}{$fileExtension}";
+        }
+
+        return $extensions;
     }
 
     /**
