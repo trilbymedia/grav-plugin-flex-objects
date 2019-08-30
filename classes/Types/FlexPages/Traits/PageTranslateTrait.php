@@ -4,8 +4,7 @@ namespace Grav\Plugin\FlexObjects\Types\FlexPages\Traits;
 
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
-use Grav\Common\Page\Page;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
+use Grav\Common\Page\Interfaces\PageInterface;
 
 /**
  * Implements PageTranslateInterface
@@ -14,6 +13,40 @@ trait PageTranslateTrait
 {
     /** @var array|null */
     private $_languages;
+
+    /** @var PageInterface[] */
+    private $_translations = [];
+
+    public function hasTranslation(string $languageCode = null, array $fallback = null): bool
+    {
+        $file = $this->getTranslationFile($languageCode, $fallback);
+
+        return null !== $file;
+    }
+
+    public function getTranslation(string $languageCode = null, array $fallback = null)
+    {
+        $file = $this->getTranslationFile($languageCode, $fallback);
+
+        return $file;
+    }
+
+    public function getTranslationFile(string $languageCode = null, array $fallback = null): ?string
+    {
+        $available = $this->getFallbackLanguages($languageCode, $fallback);
+        $translated = $this->getTranslations();
+        $file = null;
+        foreach ($available as $key => $dummy) {
+            if (!isset($translated[$key])) {
+                continue;
+            }
+
+            $file = $translated[$key];
+            break;
+        }
+
+        return $file;
+    }
 
     /**
      * Return an array with the routes of other translated languages
@@ -24,8 +57,7 @@ trait PageTranslateTrait
      */
     public function translatedLanguages($onlyPublished = false): array
     {
-
-        $translated = $this->getlanguages();
+        $translated = $this->getTranslations();
         if (!$translated) {
             return $translated;
         }
@@ -34,22 +66,13 @@ trait PageTranslateTrait
 
         /** @var Language $language */
         $language = $grav['language'];
-
-        /** @var UniformResourceLocator $locator */
-        $locator = $grav['locator'];
-
         $languages = $language->getLanguages();
-        $defaultCode = $language->getDefault();
-
-        if (!isset($translated[$defaultCode]) && isset($translated['-'])) {
-            $translated[$defaultCode] = $translated['-'];
-        }
-        unset($translated['-']);
+        $languages[] = '';
 
         $translated = array_intersect_key($translated, array_flip($languages));
-
         $translatedLanguages = [];
         foreach ($translated as $languageCode => $languageFile) {
+            /*
             $languageExtension = ".{$languageCode}.md";
             $path = $locator($this->getStorageFolder()) . "/$languageFile";
 
@@ -64,7 +87,8 @@ trait PageTranslateTrait
             if (!$route) {
                 $route = $aPage->route();
             }
-
+*/
+            $route = '';
             $translatedLanguages[$languageCode] = $route;
         }
 
@@ -112,7 +136,7 @@ trait PageTranslateTrait
     /**
      * @return array
      */
-    protected function getlanguages(): array
+    protected function getTranslations(): array
     {
         if (null === $this->_languages) {
             $template = $this->getProperty('template');
@@ -121,7 +145,10 @@ trait PageTranslateTrait
             $translations = $storage['markdown'] ?? [];
             $list = [];
             foreach ($translations as $code => $search) {
-                $filename = $code === '-' ? "{$template}.md" : "{$template}.{$code}.md";
+                if ($code === '-') {
+                    $code = '';
+                }
+                $filename = $code === '' ? "{$template}.md" : "{$template}.{$code}.md";
                 if (in_array($filename, $search, true)) {
                     $list[$code] = $filename;
                 }
@@ -131,6 +158,38 @@ trait PageTranslateTrait
         }
 
         return $this->_languages;
+    }
+
+    /**
+     * @param string|null $languageCode
+     * @param array|null $fallback
+     * @return array
+     */
+    protected function getFallbackLanguages(string $languageCode = null, array $fallback = null): array
+    {
+        $grav = Grav::instance();
+
+        /** @var Language $language */
+        $language = $grav['language'];
+        $languageCode = $languageCode ?? $language->getLanguage();
+        $fileExtension = '.md';
+        $template = $this->getProperty('template');
+
+        if (is_array($fallback)) {
+            $fileExtension = $languageCode !== '' ? ".{$languageCode}{$fileExtension}" : $fileExtension;
+
+            $list = [$languageCode => $fileExtension] + $fallback;
+        } elseif ($languageCode === '') {
+            $list = ['' => $fileExtension];
+        } else {
+            $list = $language->getFallbackPageExtensions($fileExtension, $languageCode, true);
+        }
+
+        foreach ($list as $lang => &$file) {
+            $file = $template . $file;
+        }
+
+        return $list;
     }
 
     /**
