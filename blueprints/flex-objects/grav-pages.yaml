@@ -29,8 +29,14 @@ config:
           sort:
             field: key
         name:
+          width: 8
           field:
             label: Type
+            type: text
+        translations:
+          width: 8
+          field:
+            label: Translations
             type: text
 #        updated_date:
 #          field:
@@ -111,3 +117,9 @@ config:
         - menu
         - title
         - name
+
+form:
+  fields:
+    lang:
+      type: hidden
+      value: ''

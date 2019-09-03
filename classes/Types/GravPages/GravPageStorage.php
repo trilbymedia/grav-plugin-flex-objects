@@ -64,6 +64,19 @@ class GravPageStorage extends FolderStorage
     }
 
     /**
+     * {@inheritdoc}
+     * @see FlexStorageInterface::getStoragePath()
+     */
+    public function getStoragePath(string $key = null): string
+    {
+        if ($key && strpos($key, '|')) {
+            [$key,] = explode('|', $key, 2);
+        }
+
+        return parent::getStoragePath($key);
+    }
+
+    /**
      * Get filesystem path from the key.
      *
      * @param string $key
@@ -72,9 +85,13 @@ class GravPageStorage extends FolderStorage
     public function getPathFromKey(string $key): string
     {
         $key = trim($key, '/');
-
+        $code = '';
+        if (strpos($key, '|')) {
+            [$key, $code] = explode('|', $key, 2);
+            $code = '.' . $code;
+        }
         $meta = $this->getObjectMeta($key);
-        $file = basename($meta['storage_file'] ?? 'folder.md', $this->dataExt);
+        $file = basename(($meta['storage_file'] ?? 'folder') . $code, $this->dataExt);
 
         $options = [
             $this->dataFolder,
@@ -119,81 +136,95 @@ class GravPageStorage extends FolderStorage
      */
     protected function getObjectMeta(string $key, bool $reload = false): array
     {
-        if (!$reload && isset($this->meta[$key])) {
-            return $this->meta[$key];
+        if (strpos($key, '|')) {
+            [$key, $variant] = explode('|', $key, 2);
         }
 
-        $path = $this->getStoragePath($key);
+        if ($reload || !isset($this->meta[$key])) {
+            $path = $this->getStoragePath($key);
 
-        $modified = 0;
-        $markdown = [];
-        $children = [];
+            $modified = 0;
+            $markdown = [];
+            $children = [];
 
-        if (file_exists($path)) {
-            $modified = filemtime($path);
-            $iterator = new \FilesystemIterator($path, $this->flags);
+            if (file_exists($path)) {
+                $modified = filemtime($path);
+                $iterator = new \FilesystemIterator($path, $this->flags);
 
-            /** @var \SplFileInfo $info */
-            foreach ($iterator as $k => $info) {
-                // Ignore all hidden files if set.
-                if ($k === '' || ($this->ignore_hidden && $k[0] === '.')) {
-                    continue;
-                }
-
-                if ($info->isDir()) {
-                    // Ignore all folders in ignore list.
-                    if ($this->ignore_folders && \in_array($k, $this->ignore_folders, true)) {
+                /** @var \SplFileInfo $info */
+                foreach ($iterator as $k => $info) {
+                    // Ignore all hidden files if set.
+                    if ($k === '' || ($this->ignore_hidden && $k[0] === '.')) {
                         continue;
                     }
 
-                    $children[$k] = false;
-                } else {
-                    // Ignore all files in ignore list.
-                    if ($this->ignore_files && \in_array($k, $this->ignore_files, true)) {
-                        continue;
-                    }
+                    if ($info->isDir()) {
+                        // Ignore all folders in ignore list.
+                        if ($this->ignore_folders && \in_array($k, $this->ignore_folders, true)) {
+                            continue;
+                        }
 
-                    $modified = max($modified, $info->getMTime());
+                        $children[$k] = false;
+                    } else {
+                        // Ignore all files in ignore list.
+                        if ($this->ignore_files && \in_array($k, $this->ignore_files, true)) {
+                            continue;
+                        }
 
-                    // Page is the one that matches to $page_extensions list with the lowest index number.
-                    if (preg_match($this->regex, $k, $matches)) {
-                        $markdown[$matches['MARK']][] = $k;
+                        $modified = max($modified, $info->getMTime());
+
+                        // Page is the one that matches to $page_extensions list with the lowest index number.
+                        if (preg_match($this->regex, $k, $matches)) {
+                            $mark = $matches['MARK'];
+                            if ($mark === '-') {
+                                $mark = $ext = '';
+                            } else {
+                                $ext = '.' . $mark;
+
+                            }
+                            $ext .= $this->dataExt;
+                            $markdown[$mark][] = basename($k, $ext);
+                        }
                     }
                 }
             }
-        }
 
-        $rawRoute = trim(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', "/{$key}"), '/');
-        $route = GravPageIndex::normalizeRoute($rawRoute);
+            $rawRoute = trim(preg_replace(GravPageIndex::PAGE_ROUTE_REGEX, '/', "/{$key}"), '/');
+            $route = GravPageIndex::normalizeRoute($rawRoute);
 
-        ksort($markdown, SORT_NATURAL);
-        ksort($children, SORT_NATURAL);
+            ksort($markdown, SORT_NATURAL);
+            ksort($children, SORT_NATURAL);
 
-        $file = $markdown['-'][0] ?? null;
-        if (!$file) {
-            $first = reset($markdown) ?: [];
-            $file = reset($first) ?: null;
-            if ($file) {
-                $k = '.' . key($markdown);
-                $file = str_replace($k, '', $file);
+            $file = $markdown[''][0] ?? null;
+            if (!$file) {
+                $first = reset($markdown) ?: [];
+                $file = reset($first) ?: null;
             }
+
+            $meta = [
+                'key' => $route,
+                'storage_key' => $key,
+                'storage_file' => $file,
+                'storage_timestamp' => $modified,
+            ];
+            if ($markdown) {
+                $meta['markdown'] = $markdown;
+            }
+            if ($children) {
+                $meta['children'] = $children;
+            }
+            $meta['checksum'] = md5(json_encode($meta));
+
+            // Cache meta as copy.
+            $this->meta[$key] = $meta;
+        } else {
+            $meta = $this->meta[$key];
         }
 
-        $meta = [
-            'key' => $route,
-            'storage_key' => $key,
-            'storage_file' => $file,
-            'storage_timestamp' => $modified,
-        ];
-        if ($markdown) {
-            $meta['markdown'] = $markdown;
+        if (isset($variant)) {
+            $meta['storage_key'] .= '|' . $variant;
+            $meta['language'] = $variant;
         }
-        if ($children) {
-            $meta['children'] = $children;
-        }
-        $meta['checksum'] = md5(json_encode($meta));
-
-        $this->meta[$key] = $meta;
 
         return $meta;
     }

@@ -17,35 +17,61 @@ trait PageTranslateTrait
     /** @var PageInterface[] */
     private $_translations = [];
 
-    public function hasTranslation(string $languageCode = null, array $fallback = null): bool
+    /**
+     * @param string|null $languageCode
+     * @param bool|null $fallback
+     * @return bool
+     */
+    public function hasTranslation(string $languageCode = null, bool $fallback = null): bool
     {
-        $file = $this->getTranslationFile($languageCode, $fallback);
+        $code = $this->findTranslation($languageCode, $fallback);
 
-        return null !== $file;
+        return null !== $code;
     }
 
-    public function getTranslation(string $languageCode = null, array $fallback = null)
+    /**
+     * @param string|null $languageCode
+     * @param bool|null $fallback
+     * @return static|null
+     */
+    public function getTranslation(string $languageCode = null, bool $fallback = null)
     {
-        $file = $this->getTranslationFile($languageCode, $fallback);
-
-        return $file;
-    }
-
-    public function getTranslationFile(string $languageCode = null, array $fallback = null): ?string
-    {
-        $available = $this->getFallbackLanguages($languageCode, $fallback);
-        $translated = $this->getTranslations();
-        $file = null;
-        foreach ($available as $key => $dummy) {
-            if (!isset($translated[$key])) {
-                continue;
-            }
-
-            $file = $translated[$key];
-            break;
+        $code = $this->findTranslation($languageCode, $fallback);
+        if ($code) {
+            $key = $this->getStorageKey() . '|' . $code;
+            $meta = ['storage_key' => $key, 'language' => $code] + $this->getMetaData();
+            $object = $this->getFlexDirectory()->loadObjects([$key => $meta])[$key] ?? null;
+        } else {
+            $object = null;
         }
 
-        return $file;
+        return $object;
+    }
+
+    public function getLanguage(): ?string
+    {
+        return $this->language();
+    }
+
+    /**
+     * @param string|null $languageCode
+     * @param array|null $fallback
+     * @return string|null
+     */
+    protected function findTranslation(string $languageCode = null, bool $fallback = null): ?string
+    {
+        // FIXME: only published is not implemented...
+        $languages = $this->getFallbackLanguages($languageCode, $fallback);
+        $translated = $this->getTranslations();
+        $language = null;
+        foreach ($languages as $code) {
+            if (isset($translated[$code])) {
+                $language = $code;
+                break;
+            }
+        }
+
+        return $language;
     }
 
     /**
@@ -57,6 +83,7 @@ trait PageTranslateTrait
      */
     public function translatedLanguages($onlyPublished = false): array
     {
+        // FIXME: only published is not implemented...
         $translated = $this->getTranslations();
         if (!$translated) {
             return $translated;
@@ -70,29 +97,12 @@ trait PageTranslateTrait
         $languages[] = '';
 
         $translated = array_intersect_key($translated, array_flip($languages));
-        $translatedLanguages = [];
+        $list = [];
         foreach ($translated as $languageCode => $languageFile) {
-            /*
-            $languageExtension = ".{$languageCode}.md";
-            $path = $locator($this->getStorageFolder()) . "/$languageFile";
-
-            // FIXME: use flex, also rawRoute() does not fully work?
-            $aPage = new Page();
-            $aPage->init(new \SplFileInfo($path), $languageExtension);
-            if ($onlyPublished && !$aPage->published()) {
-                continue;
-            }
-
-            $route = $aPage->header()->routes['default'] ?? $aPage->rawRoute();
-            if (!$route) {
-                $route = $aPage->route();
-            }
-*/
-            $route = '';
-            $translatedLanguages[$languageCode] = $route;
+            $list[$languageCode] = "/{$languageCode}/{$this->getKey()}";
         }
 
-        return $translatedLanguages;
+        return $list;
     }
 
     /**
@@ -104,6 +114,7 @@ trait PageTranslateTrait
      */
     public function untranslatedLanguages($includeUnpublished = false): array
     {
+        // FIXME: include unpublished is not implemented...
         $grav = Grav::instance();
 
         /** @var Language $language */
@@ -127,8 +138,10 @@ trait PageTranslateTrait
         return $this->loadHeaderProperty(
             'language',
             $var,
-            static function($value) {
-                return trim($value);
+            function($value) {
+                $value = $value ?? $this->getMetaData()['language'] ?? null;
+
+                return $value ? trim($value) : null;
             }
         );
     }
@@ -140,17 +153,16 @@ trait PageTranslateTrait
     {
         if (null === $this->_languages) {
             $template = $this->getProperty('template');
+            if ($template === 'default.fi') {
+                 print_r($this);die();
+            }
 
             $storage = $this->getStorage();
             $translations = $storage['markdown'] ?? [];
             $list = [];
             foreach ($translations as $code => $search) {
-                if ($code === '-') {
-                    $code = '';
-                }
-                $filename = $code === '' ? "{$template}.md" : "{$template}.{$code}.md";
-                if (in_array($filename, $search, true)) {
-                    $list[$code] = $filename;
+                if (in_array($template, $search, true)) {
+                    $list[$code] = $template;
                 }
             }
 
@@ -162,34 +174,23 @@ trait PageTranslateTrait
 
     /**
      * @param string|null $languageCode
-     * @param array|null $fallback
+     * @param bool|null $fallback
      * @return array
      */
-    protected function getFallbackLanguages(string $languageCode = null, array $fallback = null): array
+    protected function getFallbackLanguages(string $languageCode = null, bool $fallback = null): array
     {
+        $fallback = $fallback ?? true;
+        if (!$fallback && null !== $languageCode) {
+            return [$languageCode];
+        }
+
         $grav = Grav::instance();
 
         /** @var Language $language */
         $language = $grav['language'];
         $languageCode = $languageCode ?? $language->getLanguage();
-        $fileExtension = '.md';
-        $template = $this->getProperty('template');
 
-        if (is_array($fallback)) {
-            $fileExtension = $languageCode !== '' ? ".{$languageCode}{$fileExtension}" : $fileExtension;
-
-            $list = [$languageCode => $fileExtension] + $fallback;
-        } elseif ($languageCode === '') {
-            $list = ['' => $fileExtension];
-        } else {
-            $list = $language->getFallbackPageExtensions($fileExtension, $languageCode, true);
-        }
-
-        foreach ($list as $lang => &$file) {
-            $file = $template . $file;
-        }
-
-        return $list;
+        return $fallback ? $language->getFallbackLanguages($languageCode, true) : [$languageCode];
     }
 
     /**

@@ -266,7 +266,7 @@ trait PageRoutableTrait
         }
 
         if ($this->root()) {
-            $folder = $this->getFlexDirectory($this->getStorageKey())->getStorageFolder();
+            $folder = $this->getFlexDirectory($this->getStorageKey(true))->getStorageFolder();
         } else {
             $folder = $this->getStorageFolder();
         }
@@ -291,7 +291,7 @@ trait PageRoutableTrait
             $var,
             function($value) {
                 if (null === $value) {
-                    $value = $this->getStorageKey() ?: $this->getKey();
+                    $value = $this->getStorageKey(true) ?: $this->getKey();
                 }
 
                 return basename($value) ?: null;

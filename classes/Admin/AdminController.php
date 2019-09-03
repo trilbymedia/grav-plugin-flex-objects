@@ -21,6 +21,7 @@ use Grav\Framework\Flex\FlexFormFlash;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
+use Grav\Framework\Flex\Interfaces\FlexTranslateInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
 use Grav\Framework\Psr7\Response;
 use Grav\Framework\RequestHandler\Exception\RequestException;
@@ -407,16 +408,8 @@ class AdminController
      */
     protected function taskCopy()
     {
-        $type = $this->target;
-        $key = $this->id;
-
         try {
-            $directory = $this->getDirectory($type);
-            if (!$directory) {
-                throw new \RuntimeException('Not Found', 404);
-            }
-
-            $object = $key ? $directory->getIndex()->get($key) : null;
+            $object = $this->getObject();
             if (!$object || !$object->exists()) {
                 throw new \RuntimeException('Not Found', 404);
             }
@@ -451,21 +444,16 @@ class AdminController
          */
     protected function taskGetLevelListing(): ResponseInterface
     {
-        $type = $this->target;
-        $directory = $this->getDirectory($type);
-
         /** @var PageInterface|FlexObjectInterface $object */
         $object = $this->getObject();
 
-        if (!$directory || !method_exists($object, 'getLevelListing')) {
+        if (!$object || !method_exists($object, 'getLevelListing')) {
             throw new \RuntimeException('Not Found', 404);
         }
 
-        if ($object && $object->exists()) {
-            if (!$object->isAuthorized('save')) {
-                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
-                    403);
-            }
+        if ($object->exists() && !$object->isAuthorized('save')) {
+            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
+                403);
         }
 
         $request = $this->getRequest();
@@ -498,17 +486,12 @@ class AdminController
 
     public function taskSave()
     {
-        $type = $this->target;
         $key = $this->id;
 
         try {
-            $directory = $this->getDirectory($type);
-            if (!$directory) {
+            $object = $this->getObject($key);
+            if (!$object) {
                 throw new \RuntimeException('Not Found', 404);
-            }
-            $object = $key ? $directory->getIndex()->get($key) : null;
-            if (null === $object) {
-                $object = $directory->createObject($this->data, $key ?? '', true);
             }
 
             if ($object->exists()) {
@@ -526,7 +509,6 @@ class AdminController
 
             /** @var ServerRequestInterface $request */
             $request = $grav['request'];
-            $postAction = $request->getParsedBody()['data']['_post_entries_save'] ?? 'edit';
 
             /** @var FlexForm $form */
             $form = $this->getForm($object);
@@ -560,6 +542,7 @@ class AdminController
                 } elseif ($key !== $object->getKey()) {
                     $this->referrerUri = dirname($this->currentUri) . '/' . $object->getKey();
                 }
+                $postAction = $request->getParsedBody()['data']['_post_entries_save'] ?? 'edit';
                 if ($postAction === 'list') {
                     $this->referrerUri = dirname($this->currentUri);
                 }
@@ -873,12 +856,13 @@ class AdminController
     }
 
     /**
+     * @param string|null $key
      * @return FlexObjectInterface|null
      */
-    public function getObject(): ?FlexObjectInterface
+    public function getObject(string $key = null): ?FlexObjectInterface
     {
         if (null === $this->object) {
-            $key = $this->id;
+            $key = $key ?? $this->id;
             $object = false;
 
             $directory = $this->getDirectory();
@@ -887,6 +871,10 @@ class AdminController
                     $object = $directory->getObject($key) ?: $directory->createObject([], $key);
                 } elseif ($this->action === 'add') {
                     $object = $directory->createObject([], '');
+                }
+
+                if ($this->isMultilang() && $object instanceof FlexTranslateInterface && $object->hasTranslation(null, false)) {
+                    $object = $object->getTranslation(null, false);
                 }
             }
 

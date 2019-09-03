@@ -88,6 +88,10 @@ class GravPageObject extends FlexPageObject
                 return $this->hasKey() ? '/' . $this->getKey() : '';
             case 'full_order':
                 return $this->full_order();
+            case 'lang':
+                return $this->getLanguage() ?? '';
+            case 'translations':
+                return array_keys($this->getTranslations());
         }
 
         return parent::getFormValue($name, $default, $separator);
@@ -316,9 +320,10 @@ class GravPageObject extends FlexPageObject
             $order = $elements['order'] ?? false;
             $folder = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
             $parts[] = $folder;
+            $language = $elements['lang'] ?? $this->getLanguage();
 
             // Finally update the storage key.
-            $storage_key = implode('/', $parts);
+            $storage_key = implode('/', $parts) . ($language ? '|' . $language : '');
             if ($storage_key !== $this->getStorageKey()) {
                 $this->setStorageKey($storage_key);
                 $this->setKey($parentKey ? "{$parentKey}/$folder" : $folder);

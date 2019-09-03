@@ -49,7 +49,7 @@
         <div id="admin-lang-toggle" class="button-group">
             <button type="button" class="button disabled">
                 <i class="fa fa-flag-o"></i>
-                {{ language ? (languages[language] ?? languade) : 'Default' }}
+                {{ language ? (languages[language] ?? language) : 'Default' }}
             </button>
             {% if count(translated) > 1 %}
                 <button type="button" class="button dropdown-toggle" data-toggle="dropdown">
@@ -57,7 +57,7 @@
                 </button>
                 <ul class="dropdown-menu language-switcher">
                 {% for langCode, route in translated %}
-                    {% set langName = languages[langCode] ?? langCode %}
+                    {% set langName = languages[langCode] ?? langCode ?: 'default' %}
                     {% if langCode != language %}
                     <li>
                         <a href="{{ admin_route(grav.route.getRoute(1), langCode) }}">{{ langName[:1]|upper ~ langName[1:] }}</a>

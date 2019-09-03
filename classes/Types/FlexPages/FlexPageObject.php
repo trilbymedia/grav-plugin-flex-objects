@@ -9,6 +9,7 @@ use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Traits\PageFormTrait;
 use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\Flex\FlexObject;
+use Grav\Framework\Flex\Interfaces\FlexTranslateInterface;
 use Grav\Framework\Flex\Traits\FlexMediaTrait;
 use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
 use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageContentTrait;
@@ -20,7 +21,7 @@ use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageTranslateTrait;
  * Class FlexPageObject
  * @package Grav\Plugin\FlexObjects\Types\FlexPages
  */
-class FlexPageObject extends FlexObject implements PageInterface, MediaManipulationInterface
+class FlexPageObject extends FlexObject implements PageInterface, MediaManipulationInterface, FlexTranslateInterface
 {
     use PageContentTrait;
     use PageFormTrait;
