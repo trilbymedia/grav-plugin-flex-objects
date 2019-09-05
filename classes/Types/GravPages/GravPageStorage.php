@@ -93,6 +93,16 @@ class GravPageStorage extends FolderStorage
         return $keys;
     }
 
+    protected function canDeleteFolder(string $key): bool
+    {
+        $parts = $this->parseKey($key);
+        if ($parts['lang']) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Get key from the filesystem path.
      *
