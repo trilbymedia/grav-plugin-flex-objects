@@ -131,7 +131,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
         switch ($name) {
             case 'name':
-                return $this->hasKey() ? $this->getKey() : '';
+                return $this->getProperty('template');
             case 'route':
                 return $this->hasKey() ? '/' . $this->getKey() : '';
         }
