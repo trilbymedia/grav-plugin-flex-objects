@@ -64,44 +64,33 @@ class GravPageStorage extends FolderStorage
     }
 
     /**
-     * {@inheritdoc}
-     * @see FlexStorageInterface::getStoragePath()
-     */
-    public function getStoragePath(string $key = null): string
-    {
-        if ($key && strpos($key, '|')) {
-            [$key,] = explode('|', $key, 2);
-        }
-
-        return parent::getStoragePath($key);
-    }
-
-    /**
-     * Get filesystem path from the key.
-     *
      * @param string $key
-     * @return string
+     * @param bool $variations
+     * @return array
      */
-    public function getPathFromKey(string $key): string
+    public function parseKey(string $key, bool $variations = true): array
     {
         $key = trim($key, '/');
         $code = '';
+        $language = '';
         if (strpos($key, '|')) {
-            [$key, $code] = explode('|', $key, 2);
-            $code = '.' . $code;
+            [$key, $language] = explode('|', $key, 2);
+            $code = '.' . $language;
         }
-        $meta = $this->getObjectMeta($key);
-        $file = basename(($meta['storage_file'] ?? 'folder') . $code, $this->dataExt);
 
-        $options = [
-            $this->dataFolder,
-            $key,
-            \mb_substr($key, 0, 2),
-            $file,
-            $this->dataExt
-        ];
+        $keys = parent::parseKey($key, false);
 
-        return sprintf($this->dataPattern, ...$options);
+        if ($variations) {
+            $meta = $this->getObjectMeta($key);
+            $file = basename(($meta['storage_file'] ?? 'folder') . $code, $this->dataExt);
+
+            $keys += [
+                'file' => $file,
+                'lang' => $language
+            ];
+        }
+
+        return $keys;
     }
 
     /**
@@ -141,7 +130,9 @@ class GravPageStorage extends FolderStorage
         }
 
         if ($reload || !isset($this->meta[$key])) {
-            $path = $this->getStoragePath($key);
+            /** @var UniformResourceLocator $locator */
+            $locator = Grav::instance()['locator'];
+            $path = $locator->findResource($this->getStoragePath($key), true, true);
 
             $modified = 0;
             $markdown = [];

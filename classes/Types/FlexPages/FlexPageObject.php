@@ -213,7 +213,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
 
     protected function reorder(int $order)
     {
-        $oldKey = $this->getStorageKey();
+        $oldKey = $this->getStorageKey(true);
         $newKey = $this->buildStorageKey($order);
         $storage = $this->getFlexDirectory()->getStorage();
         if ($oldKey !== $newKey) {

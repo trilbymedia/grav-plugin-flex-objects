@@ -484,6 +484,11 @@ class AdminController
         return $this->createJsonResponse($json, 200);
     }
 
+    public function taskSaveas()
+    {
+        return $this->taskSave();
+    }
+
     public function taskSave()
     {
         $key = $this->id;
@@ -799,6 +804,7 @@ class AdminController
         } catch (RequestException $e) {
             $response = $this->createErrorResponse($e);
         } catch (\RuntimeException $e) {
+            $response = null;
             $this->setMessage($e->getMessage(), 'error');
         }
 

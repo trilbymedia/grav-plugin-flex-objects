@@ -33,6 +33,8 @@ class DataTable implements \JsonSerializable
     private $collection;
     /** @var FlexCollectionInterface */
     private $filteredCollection;
+    /** @var array */
+    private $columns;
     /** @var \Twig_Environment */
     private $twig;
     /** @var array */
@@ -123,6 +125,34 @@ class DataTable implements \JsonSerializable
         }
 
         return "{$this->url}.json?page={$page}&per_page={$this->getLimit()}&sort={$this->encodeSort()}";
+    }
+
+    public function getColumns()
+    {
+        if (null === $this->columns) {
+            $collection = $this->getCollection();
+            if (!$collection) {
+                return [];
+            }
+
+            $blueprint = $collection->getFlexDirectory()->getBlueprint();
+            $schema = $blueprint->schema();
+
+            $list = [];
+            foreach ($blueprint->get('config/admin/list/fields') as $key => $options) {
+                if (!isset($options['field'])) {
+                    $options['field'] = $schema->get($options['alias'] ?? $key);
+                }
+                if (!$options['field'] || !empty($options['field']['ignore'])) {
+                    continue;
+                }
+                $list[$key] = $options;
+            }
+
+            $this->columns = $list;
+        }
+
+        return $this->columns;
     }
 
     public function getData()
@@ -250,27 +280,6 @@ class DataTable implements \JsonSerializable
             'flex' => $grav['flex_objects'],
             'route' => $grav['route']->withExtension('')
         ] + $this->twig_context);
-    }
-
-    protected function getColumns()
-    {
-        $collection = $this->getCollection();
-        if (!$collection) {
-            return [];
-        }
-
-        $blueprint = $collection->getFlexDirectory()->getBlueprint();
-        $schema = $blueprint->schema();
-
-        $list = [];
-        foreach ($blueprint->get('config/admin/list/fields') as $key => $options) {
-            $list[$key] = $options;
-            if (!isset($options['field'])) {
-                $list[$key]['field'] = $schema->get($options['alias'] ?? $key);
-            }
-        }
-
-        return $list;
     }
 
     protected function decodeSort(string $sort, $fieldSeparator = ',', $orderSeparator = '|')

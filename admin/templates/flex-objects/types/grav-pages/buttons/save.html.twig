@@ -13,7 +13,7 @@
                     {% set langName = admin.siteLanguages[langCode] %}
                     {% if langCode != page_lang %}
                         <li>
-                            <button class="button task" name="task" value="save" lang="{{langCode}}" form="blueprints" type="submit">
+                            <button class="button task" name="task" value="saveas" lang="{{langCode}}" form="blueprints" type="submit">
                                 {{ "PLUGIN_ADMIN.SAVE_AS"|tu }} {{ langName[:1]|upper ~ langName[1:] }}
                             </button>
                         </li>

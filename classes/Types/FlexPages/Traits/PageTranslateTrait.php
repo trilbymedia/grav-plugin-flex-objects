@@ -153,10 +153,6 @@ trait PageTranslateTrait
     {
         if (null === $this->_languages) {
             $template = $this->getProperty('template');
-            if ($template === 'default.fi') {
-                 print_r($this);die();
-            }
-
             $storage = $this->getStorage();
             $translations = $storage['markdown'] ?? [];
             $list = [];

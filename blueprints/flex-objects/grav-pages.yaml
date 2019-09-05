@@ -39,10 +39,7 @@ config:
             label: Translations
             type: text
 #        updated_date:
-#          field:
-#            type: datetime
-#            label: Last Updated
-
+#          alias: header.update_date
 
       options:
         per_page: 20
