@@ -7,6 +7,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Debugger;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
+use Grav\Common\Language\Language;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Plugin;
 use Grav\Common\Uri;
@@ -272,6 +273,7 @@ class AdminController
                 if ($this->currentUri === $this->referrerUri) {
                     $redirect = dirname($this->currentUri);
                 }
+                $redirect = $this->admin->adminUrl($redirect);
 
                 $this->setRedirect($redirect);
 
@@ -282,7 +284,7 @@ class AdminController
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Delete Failed: ' . $e->getMessage(), 'error');
 
-            $this->setRedirect($this->referrerUri, 302);
+            $this->setRedirect($this->admin->adminUrl($this->referrerUri), 302);
         }
 
         return $object ? true : false;
@@ -322,7 +324,7 @@ class AdminController
 
         $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
-        $this->setRedirect($this->referrerUri);
+        $this->setRedirect($this->admin->adminUrl($this->referrerUri));
     }
 
     /**
@@ -425,7 +427,7 @@ class AdminController
 
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Copy Failed: ' . $e->getMessage(), 'error');
-            $this->setRedirect($this->referrerUri, 302);
+            $this->setRedirect($this->admin->adminUrl($this->referrerUri), 302);
         }
 
         return true;
@@ -441,6 +443,7 @@ class AdminController
          *
          * @return ResponseInterface
          * @throws RequestException
+         * @TODO: Pages
          */
     protected function taskGetLevelListing(): ResponseInterface
     {
@@ -551,7 +554,13 @@ class AdminController
                 if ($postAction === 'list') {
                     $this->referrerUri = dirname($this->currentUri);
                 }
-                $this->setRedirect($this->referrerUri);
+
+                $lang = null;
+                if ($this->referrerUri && $object instanceof FlexTranslateInterface) {
+                    $lang = $object->getLanguage() ?: null;
+                }
+
+                $this->setRedirect($this->admin->adminUrl($this->referrerUri, $lang));
             }
 
             $grav = Grav::instance();
@@ -559,7 +568,7 @@ class AdminController
             $grav->fireEvent('gitsync');
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
-            $this->setRedirect($this->referrerUri, 302);
+            $this->setRedirect($this->admin->adminUrl($this->referrerUri), 302);
         }
 
         return true;
@@ -725,9 +734,30 @@ class AdminController
             $this->action = $this->post['action'] ?? $uri->param('action');
             $this->active = true;
             $this->admin = Grav::instance()['admin'];
-            $this->currentUri = $uri->route();
-            $this->referrerUri = $uri->referrer() ?: $this->currentUri;
+            $this->currentUri = $this->makeRelativeUri($uri->route());
+            $this->referrerUri = $this->makeRelativeUri($uri->referrer()) ?: $this->currentUri;
         }
+    }
+
+    protected function makeRelativeUri(string $url)
+    {
+        $base = $this->admin->base;
+
+        if (mb_strpos($url, $base) === 0) {
+            return mb_substr($url, mb_strlen($base));
+        }
+
+        /** @var Language $language */
+        $language = $this->grav['language'];
+        $lang = $language->getLanguage();
+        if ($lang) {
+            $base = '/' . $lang . $base;
+            if (mb_strpos($url, $base) === 0) {
+                return mb_substr($url, mb_strlen($base));
+            }
+        }
+
+        return '';
     }
 
     /**
@@ -743,7 +773,7 @@ class AdminController
             // TODO: improve
             return false;
         }
-        $success = false;
+
         $params = [];
 
         $event = new Event(
@@ -1045,12 +1075,12 @@ class AdminController
      *
      * @return bool True if multilang is active
      */
-    protected function isMultilang()
+    protected function isMultilang(): bool
     {
         return count($this->grav['config']->get('system.languages.supported', [])) > 1;
     }
 
-    protected function validateNonce()
+    protected function validateNonce(): bool
     {
         $nonce_action = $this->nonce_action;
         $nonce = $this->post[$this->nonce_name] ?? $this->grav['uri']->param($this->nonce_name) ?? $this->grav['uri']->query($this->nonce_name);
@@ -1070,7 +1100,7 @@ class AdminController
      *
      * @return array
      */
-    protected function getPost($post)
+    protected function getPost($post): array
     {
         if (!is_array($post)) {
             return [];
@@ -1091,27 +1121,7 @@ class AdminController
 
     protected function close(ResponseInterface $response): void
     {
-        $grav = $this->grav;
-
-        // TODO: remove when Grav 1.6 support is dropped.
-        if (!method_exists($grav, 'close')) {
-            // Make sure nothing extra gets written to the response.
-            while (ob_get_level()) {
-                ob_end_clean();
-            }
-
-            // Close the session.
-            if (isset($grav['session'])) {
-                $grav['session']->close();
-            }
-
-            // Send the response and terminate.
-            $grav->header($response);
-            echo $response->getBody();
-            exit();
-        }
-
-        $grav->close($response);
+        $this->grav->close($response);
     }
 
     /**
@@ -1134,7 +1144,7 @@ class AdminController
         return $data;
     }
 
-    protected function cleanDataKeys($source = [])
+    protected function cleanDataKeys($source = []): array
     {
         $out = [];
 

@@ -20,6 +20,8 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexObjectsPlugin extends Plugin
 {
+    const MIN_GRAV_VERSION = '1.7.0-beta.7';
+
     public $features = [
         'blueprints' => 1000,
     ];
@@ -34,7 +36,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public static function checkRequirements(): bool
     {
-        return version_compare(GRAV_VERSION, '1.7.0-beta.5', '>=');
+        return version_compare(GRAV_VERSION, static::MIN_GRAV_VERSION, '>=');
     }
 
     /**
@@ -130,12 +132,12 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
-    public function initializeFlex()
+    public function initializeFlex(): void
     {
         $config = $this->config->get('plugins.flex-objects');
 
         // Add to DI container
-        $this->grav['flex_objects'] = function (Grav $grav) use ($config) {
+        $this->grav['flex_objects'] = static function (Grav $grav) use ($config) {
             $blueprints = $config['directories'] ?: [];
 
             $list = [];
@@ -190,7 +192,7 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
-    public function onGetPageTemplates(Event $event)
+    public function onGetPageTemplates(Event $event): void
     {
         /** @var Types $types */
         $types = $event->types;
@@ -202,7 +204,7 @@ class FlexObjectsPlugin extends Plugin
      *
      * @return array
      */
-    public static function directoryOptions()
+    public static function directoryOptions(): array
     {
         /** @var Flex $flex */
         $flex = Grav::instance()['flex_objects'];
@@ -220,7 +222,10 @@ class FlexObjectsPlugin extends Plugin
         return $list;
     }
 
-    public function getAdminMenu()
+    /**
+     * @return array
+     */
+    public function getAdminMenu(): array
     {
         /** @var Flex $flex */
         $flex = $this->grav['flex_objects'];
@@ -237,7 +242,7 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Add Flex Directory to admin menu
      */
-    public function onAdminMenu()
+    public function onAdminMenu(): void
     {
         /** @var Flex $flex */
         $flex = $this->grav['flex_objects'];
@@ -258,7 +263,8 @@ class FlexObjectsPlugin extends Plugin
             $cache = $directory->getCache('index');
             $count = $cache->get('admin-count');
             if (null === $count) {
-                $count = $directory->getCollection()->isAuthorized('list')->count();
+                $collection = $directory->getCollection();
+                $count = $collection->isAuthorized('list')->count();
                 $cache->set('admin-count', $count);
             }
             $badge = $directory ? ['badge' => ['count' => $count]] : [];
@@ -276,7 +282,7 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Exclude Flex Directory data from the Data Manager plugin
      */
-    public function onDataTypeExcludeFromDataManagerPluginHook()
+    public function onDataTypeExcludeFromDataManagerPluginHook(): void
     {
         $this->grav['admin']->dataTypesExcludedFromDataManagerPlugin[] = 'flex-objects';
     }

@@ -2,7 +2,7 @@
 
 {% if object.isAuthorized('read') %}
     {% if object.getRoute() %}
-        <a href="{{ route.withAddedPath(object.getKey()).withoutParams().withQueryParam('preview', 1) }}" title="{{ "PLUGIN_ADMIN.PREVIEW"|tu }}" class="preview-action">
+        <a href="{{ route.withAddedPath(object.getKey()).withoutParams().withQueryParam('preview', 1).getUri() }}" title="{{ "PLUGIN_ADMIN.PREVIEW"|tu }}" class="preview-action">
             <i class="fa fa-eye"></i>
         </a>
     {% endif %}
