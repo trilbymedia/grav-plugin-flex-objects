@@ -63,7 +63,10 @@ trait PageRoutableTrait
         /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
 
-        return $this->parent_route ? $pages->find($this->parent_route) : $pages->root();
+        $key = $this->getKey();
+        $parent_route = dirname('/' . $key);
+
+        return $parent_route !== '/' ? $pages->find($parent_route) : $pages->root();
     }
 
     /**
@@ -112,7 +115,7 @@ trait PageRoutableTrait
 
         if (isset($routes[$uri_path])) {
             /** @var PageInterface $child_page */
-            $child_page = $pages->dispatch($uri->route())->parent();
+            $child_page = $pages->dispatch($uri->route(), false, false)->parent();
             if ($child_page) {
                 while (!$child_page->root()) {
                     if ($this->path() === $child_page->path()) {
