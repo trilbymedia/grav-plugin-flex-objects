@@ -276,7 +276,7 @@ trait PageContentTrait
             'process',
             $var,
             function($value) {
-                $value = (array)($value ?? Grav::instance()['config']->get('system.pages.process'));
+                $value = array_replace(Grav::instance()['config']->get('system.pages.process', []), is_array($value) ? $value : []);
                 foreach ($value as $process => $status) {
                     $value[$process] = (bool)$status;
                 }
