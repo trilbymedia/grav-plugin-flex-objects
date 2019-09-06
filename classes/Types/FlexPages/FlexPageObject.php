@@ -140,6 +140,15 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     }
 
     /**
+     * {@inheritdoc}
+     * @see FlexObjectInterface::getCacheKey()
+     */
+    public function getCacheKey(): string
+    {
+        return $this->hasKey() ? $this->getTypePrefix() . $this->getFlexType() . '.' . $this->getKey() . $this->getLanguage() : '';
+    }
+
+    /**
      * @param string|null $key
      * @return FlexObject
      */

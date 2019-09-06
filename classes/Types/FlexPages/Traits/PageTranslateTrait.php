@@ -37,12 +37,14 @@ trait PageTranslateTrait
     public function getTranslation(string $languageCode = null, bool $fallback = null)
     {
         $code = $this->findTranslation($languageCode, $fallback);
-        if ($code) {
+        if (null === $code) {
+            $object = null;
+        } elseif ('' === $code) {
+            $object = $this->getFlexDirectory()->getObject($this->getStorageKey(true), 'storage_key');
+        } else {
             $key = $this->getStorageKey() . '|' . $code;
             $meta = ['storage_key' => $key, 'language' => $code] + $this->getMetaData();
             $object = $this->getFlexDirectory()->loadObjects([$key => $meta])[$key] ?? null;
-        } else {
-            $object = null;
         }
 
         return $object;
