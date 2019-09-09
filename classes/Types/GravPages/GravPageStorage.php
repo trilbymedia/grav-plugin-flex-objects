@@ -54,16 +54,6 @@ class GravPageStorage extends FolderStorage
     }
 
     /**
-     * {@inheritdoc}
-     * @see FlexStorageInterface::hasKey()
-     */
-    public function hasKey(string $key): bool
-    {
-        // Empty folders are valid, too.
-        return $key && strpos($key, '@@') === false && file_exists($this->getStoragePath($key));
-    }
-
-    /**
      * @param string $key
      * @param bool $variations
      * @return array
@@ -142,13 +132,17 @@ class GravPageStorage extends FolderStorage
         if ($reload || !isset($this->meta[$key])) {
             /** @var UniformResourceLocator $locator */
             $locator = Grav::instance()['locator'];
-            $path = $locator->findResource($this->getStoragePath($key), true, true);
+            if (strpos($key, '@@') === false) {
+                $path = $locator->findResource($this->getStoragePath($key), true, true);
+            } else {
+                $path = null;
+            }
 
             $modified = 0;
             $markdown = [];
             $children = [];
 
-            if (file_exists($path)) {
+            if ($path && file_exists($path)) {
                 $modified = filemtime($path);
                 $iterator = new \FilesystemIterator($path, $this->flags);
 
@@ -172,7 +166,7 @@ class GravPageStorage extends FolderStorage
                             continue;
                         }
 
-                        $modified = max($modified, $info->getMTime());
+                        $timestamp = $info->getMTime();
 
                         // Page is the one that matches to $page_extensions list with the lowest index number.
                         if (preg_match($this->regex, $k, $matches)) {
@@ -184,8 +178,10 @@ class GravPageStorage extends FolderStorage
 
                             }
                             $ext .= $this->dataExt;
-                            $markdown[$mark][] = basename($k, $ext);
+                            $markdown[$mark][basename($k, $ext)] = $timestamp;
                         }
+
+                        $modified = max($modified, $timestamp);
                     }
                 }
             }
@@ -196,11 +192,7 @@ class GravPageStorage extends FolderStorage
             ksort($markdown, SORT_NATURAL);
             ksort($children, SORT_NATURAL);
 
-            $file = $markdown[''][0] ?? null;
-            if (!$file) {
-                $first = reset($markdown) ?: [];
-                $file = reset($first) ?: null;
-            }
+            $file = array_key_first($markdown[''] ?? reset($markdown) ?: []);
 
             $meta = [
                 'key' => $route,
@@ -223,6 +215,8 @@ class GravPageStorage extends FolderStorage
         }
 
         if (isset($variant)) {
+            $file = $meta['storage_file'];
+            $meta['exists'] = isset($meta['markdown'][$variant][$file]);
             $meta['storage_key'] .= '|' . $variant;
             $meta['language'] = $variant;
         }

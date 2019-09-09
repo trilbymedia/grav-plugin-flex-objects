@@ -159,7 +159,7 @@ trait PageTranslateTrait
             $translations = $storage['markdown'] ?? [];
             $list = [];
             foreach ($translations as $code => $search) {
-                if (in_array($template, $search, true)) {
+                if (isset($search[$template])) {
                     $list[$code] = $template;
                 }
             }
