@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
 use Grav\Common\Grav;
-use Grav\Common\Language\Language;
 use Grav\Framework\Flex\Storage\FolderStorage;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
@@ -21,7 +20,6 @@ class GravPageStorage extends FolderStorage
     protected $recurse;
     protected $base_path;
 
-    protected $page_extensions;
     protected $flags;
     protected $regex;
 
@@ -39,18 +37,7 @@ class GravPageStorage extends FolderStorage
         $this->ignore_files = (array)$config->get('system.pages.ignore_files');
         $this->ignore_folders = (array)$config->get('system.pages.ignore_folders');
         $this->recurse = $options['recurse'] ?? true;
-
-        /** @var Language $language */
-        $language = $grav['language'];
-        $this->page_extensions = $language->getPageExtensions('.md');
-
-        // Build regular expression for all the allowed page extensions.
-        $exts = [];
-        foreach ($this->page_extensions as $key => $ext) {
-            $exts[] = '(' . preg_quote($ext, '/') . ')(*:' . ($key !== '' ? $key : '-') . ')';
-        }
-
-        $this->regex = '/^[^\.]*(' . implode('|', $exts) . ')$/sD';
+        $this->regex = '/(\.(\w+))?\.md$/D';
     }
 
     /**
@@ -170,13 +157,8 @@ class GravPageStorage extends FolderStorage
 
                         // Page is the one that matches to $page_extensions list with the lowest index number.
                         if (preg_match($this->regex, $k, $matches)) {
-                            $mark = $matches['MARK'];
-                            if ($mark === '-') {
-                                $mark = $ext = '';
-                            } else {
-                                $ext = '.' . $mark;
-
-                            }
+                            $mark = $matches[2] ?? '';
+                            $ext = $matches[1] ?? '';
                             $ext .= $this->dataExt;
                             $markdown[$mark][basename($k, $ext)] = $timestamp;
                         }
