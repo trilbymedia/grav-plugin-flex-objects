@@ -216,7 +216,7 @@ class GravPageStorage extends FolderStorage
 
         if (isset($variant)) {
             $file = $meta['storage_file'];
-            $meta['exists'] = isset($meta['markdown'][$variant][$file]);
+            $meta['exists'] = (null === $file && !empty($meta['children'])) || isset($meta['markdown'][$variant][$file]);
             $meta['storage_key'] .= '|' . $variant;
             $meta['language'] = $variant;
         }

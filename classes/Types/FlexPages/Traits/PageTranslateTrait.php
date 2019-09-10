@@ -62,9 +62,16 @@ trait PageTranslateTrait
      */
     protected function findTranslation(string $languageCode = null, bool $fallback = null): ?string
     {
+        $translated = $this->getTranslations();
+
+        // If there's no translations (including default), we have an empty folder.
+        if (!$translated) {
+            return '';
+        }
+
         // FIXME: only published is not implemented...
         $languages = $this->getFallbackLanguages($languageCode, $fallback);
-        $translated = $this->getTranslations();
+
         $language = null;
         foreach ($languages as $code) {
             if (isset($translated[$code])) {
