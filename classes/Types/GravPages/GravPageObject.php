@@ -146,9 +146,10 @@ class GravPageObject extends FlexPageObject
         $filters = $default_filters + json_decode($options['filters'] ?? '{}', true);
         $filter_type = (array)$filters['type'];
 
+        $field = $options['field'] ?? null;
         $route = $options['route'] ?? null;
         $leaf_route = $options['leaf_route'] ?? null;
-        $sortby = $options['sortby'] ?? 'filename';
+        $sortby = $options['sortby'] ?? null;
         $order = $options['order'] ?? SORT_ASC;
 
         $status = 'error';
@@ -159,6 +160,7 @@ class GravPageObject extends FlexPageObject
         $extra = null;
 
         // Handle leaf_route
+        $leaf = null;
         if ($leaf_route && $route !== $leaf_route) {
             $nodes = explode('/', $leaf_route);
             $sub_route =  '/' . implode('/', array_slice($nodes, 1, $options['level']++));
@@ -178,24 +180,48 @@ class GravPageObject extends FlexPageObject
         }
         $path = $page ? $page->path() : null;
 
-        $settings = $this->getBlueprint()->schema()->getProperty($options['field']);
-
-        $filters = array_merge([], $filters, $settings['filters'] ?? []);
-        $filter_type = $filters['type'] ?? $filter_type;
+        if ($field) {
+            $settings = $this->getBlueprint()->schema()->getProperty($field);
+            $filters = array_merge([], $filters, $settings['filters'] ?? []);
+            $filter_type = $filters['type'] ?? $filter_type;
+        }
 
         if ($page) {
             if ($page->root() && (!$filters['type'] || in_array('root', $filter_type, true))) {
-                $response[] = [
-                    'name' => '<root>',
-                    'value' => '/',
-                    'item-key' => '',
-                    'filename' => '.',
-                    'extension' => '',
-                    'type' => 'root',
-                    'modified' => $page->modified(),
-                    'size' => 0,
-                    'symlink' => false
-                ];
+                if ($field) {
+                    $response[] = [
+                        'name' => '<root>',
+                        'value' => '/',
+                        'item-key' => '',
+                        'filename' => '.',
+                        'extension' => '',
+                        'type' => 'root',
+                        'modified' => $page->modified(),
+                        'size' => 0,
+                        'symlink' => false
+                    ];
+                } else {
+                    $response[] = [
+                        'item-key' => '',
+                        'icon' => 'root',
+                        'title' => '<root>',
+                        'route' => '/',
+                        'raw_route' => null,
+                        'modified' => $page->modified(),
+                        'child_count' => 0,
+                        'extras' => [
+                            'template' => null,
+                            'langs' => [],
+                            'published' => false,
+                            'published_date' => null,
+                            'unpublished_date' => null,
+                            'visible' => false,
+                            'routable' => false,
+                            'tags' => ['non-routable'],
+                            'actions' => [],
+                        ]
+                    ];
+                }
             }
 
             $status = 'success';
@@ -203,33 +229,70 @@ class GravPageObject extends FlexPageObject
 
             $children = $page->children();
 
-            /** @var PageInterface $child */
+            /** @var PageInterface|GravPageObject $child */
             foreach ($children as $child) {
-                $payload = [
-                    'name' => $child->title(),
-                    'value' => $child->rawRoute(),
-                    'item-key' => basename($child->rawRoute()),
-                    'filename' => $child->folder(),
-                    'extension' => $child->extension(),
-                    'type' => 'dir',
-                    'modified' => $child->modified(),
-                    'size' => count($child->children()),
-                    'symlink' => false
-                ];
+                if ($field) {
+                    $payload = [
+                        'name' => $child->title(),
+                        'value' => $child->rawRoute(),
+                        'item-key' => basename($child->rawRoute()),
+                        'filename' => $child->folder(),
+                        'extension' => $child->extension(),
+                        'type' => 'dir',
+                        'modified' => $child->modified(),
+                        'size' => count($child->children()),
+                        'symlink' => false
+                    ];
 
-                // filter types
-                if ($filter_type && !in_array($payload['type'], $filter_type, true)) {
-                    continue;
-                }
+                    // filter types
+                    if ($filter_type && !in_array($payload['type'], $filter_type, true)) {
+                        continue;
+                    }
 
-                // Simple filter for name or extension
-                if (($filters['name'] && Utils::contains($payload['basename'], $filters['name']))
-                    || ($filters['extension'] && Utils::contains($payload['extension'], $filters['extension']))) {
-                    continue;
+                    // Simple filter for name or extension
+                    if (($filters['name'] && Utils::contains($payload['basename'], $filters['name']))
+                        || ($filters['extension'] && Utils::contains($payload['extension'], $filters['extension']))) {
+                        continue;
+                    }
+                } else {
+                    if ($child->home()) {
+                        $icon = 'home';
+                    } elseif ($child->modular()) {
+                        $icon = 'modular';
+                    } elseif ($child->visible()) {
+                        $icon = 'visible';
+                    } else {
+                        $icon = 'page';
+                    }
+                    $tags = [
+                        $child->published() ? 'published' : 'non-published',
+                        $child->visible() ? 'visible' : 'non-visible',
+                        $child->routable() ? 'routable' : 'non-routable'
+                    ];
+                    $payload = [
+                        'item-key' => basename($child->rawRoute()),
+                        'icon' => $icon,
+                        'title' => $child->title(),
+                        'route' => $child->getRoute()->toString(),
+                        'raw_route' => $child->rawRoute(),
+                        'modified' => $page->modified(),
+                        'child_count' => count($child->children()),
+                        'extras' => [
+                            'template' => $child->template(),
+                            'langs' => array_keys($child->translatedLanguages()),
+                            'published' => $child->published(),
+                            'published_date' => $child->getPublish_Timestamp(),
+                            'unpublished_date' => $child->getUnpublish_Timestamp(),
+                            'visible' => $child->visible(),
+                            'routable' => $child->routable(),
+                            'tags' => $tags,
+                            'actions' => true,
+                        ]
+                    ];
                 }
 
                 // Add children if any
-                if ($child->path() === $extra && \is_array($leaf)) {
+                if (\is_array($leaf) && $child->path() === $extra) {
                     $payload['children'] = array_values($leaf);
                 }
 
@@ -240,15 +303,19 @@ class GravPageObject extends FlexPageObject
         }
 
         // Sorting
-        $response = Utils::sortArrayByKey($response, $sortby, $order);
-
-        $temp_array = [];
-        foreach ($response as $index => $item) {
-            $temp_array[$item['type']][$index] = $item;
+        if ($sortby) {
+            $response = Utils::sortArrayByKey($response, $sortby, $order);
         }
 
-        $sorted = Utils::sortArrayByArray($temp_array, $filter_type);
-        $response = Utils::arrayFlatten($sorted);
+        if ($field) {
+            $temp_array = [];
+            foreach ($response as $index => $item) {
+                $temp_array[$item['type']][$index] = $item;
+            }
+
+            $sorted = Utils::sortArrayByArray($temp_array, $filter_type);
+            $response = Utils::arrayFlatten($sorted);
+        }
 
         return [$status, $msg ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED', $response, $path];
     }

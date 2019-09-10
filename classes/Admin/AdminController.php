@@ -203,7 +203,7 @@ class AdminController
 
             $table = $this->getFlex()->getDataTable($directory, $options);
 
-            $response = new Response(200, ['Content-Type' => 'application/json'], json_encode($table));
+            $response = $this->createJsonResponse($table->jsonSerialize());
 
             $this->close($response);
         }
@@ -465,6 +465,57 @@ class AdminController
         if (!isset($data['field'])) {
             throw new RequestException($request, 'Bad Request', 400);
         }
+
+        // Base64 decode the route
+        $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
+
+        $initial = $data['initial'] ?? null;
+        if ($initial) {
+            $data['leaf_route'] = $data['route'];
+            $data['route'] = null;
+            $data['level'] = 1;
+        }
+
+        [$status, $message, $response,] = $object->getLevelListing($data);
+
+        $json = [
+            'status'  => $status,
+            'message' => $this->admin::translate($message ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED'),
+            'data' => array_values($response)
+        ];
+
+        return $this->createJsonResponse($json, 200);
+    }
+
+    /**
+     * $data['route'] = $this->grav['uri']->param('route');
+     * $data['sortby'] = $this->grav['uri']->param('sortby', null);
+     * $data['filters'] = $this->grav['uri']->param('filters', null);
+     * $data['page'] $this->grav['uri']->param('page', true);
+     * $data['base'] = $this->grav['uri']->param('base');
+     * $initial = (bool) $this->grav['uri']->param('initial');
+     *
+     * @return ResponseInterface
+     * @throws RequestException
+     * @TODO: Pages
+     */
+    protected function actionListLevel(): ResponseInterface
+    {
+        /** @var PageInterface|FlexObjectInterface $object */
+        $object = $this->getObject();
+
+        if (!$object || !method_exists($object, 'getLevelListing')) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $directory = $object->getFlexDirectory();
+        if (!$directory->isAuthorized('list')) {
+            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
+                403);
+        }
+
+        $request = $this->getRequest();
+        $data = $request->getParsedBody();
 
         // Base64 decode the route
         $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
