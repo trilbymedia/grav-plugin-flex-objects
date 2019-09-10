@@ -10,11 +10,7 @@
     {% include 'flex-objects/types/grav-pages/buttons/add.html.twig' %}
 {% endblock %}
 
-{% block content_top %}
-{% if directory and grav.user.authorize('admin.super') %}
-    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(directory.storageFolder())|trim('/') }}</b></div>
-{% endif %}
-{% endblock %}
+{% block content_top %}{% endblock %}
 
 {% block content_list %}
     {% set list_layout = grav.uri.param('layout', 'list') %}
