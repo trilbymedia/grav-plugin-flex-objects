@@ -73,6 +73,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             'isVisible' => true,
             'getCreated_Timestamp' => true,
             'getPublish_Timestamp' => true,
+            'getUnpublish_Timestamp' => true,
             'getUpdated_Timestamp' => true,
         ] + parent::getCachedMethods();
     }
@@ -82,7 +83,11 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function isPublished(): bool
     {
-        return $this->published();
+        $time = time();
+        $start = $this->getPublish_Timestamp();
+        $stop = $this->getUnpublish_Timestamp();
+
+        return $this->published() && $start <= $time && (!$stop || $time <= $stop);
     }
 
     /**
@@ -90,7 +95,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function isVisible(): bool
     {
-        return $this->published() && $this->visible();
+        return $this->isPublished() && $this->visible();
     }
 
     /**
@@ -107,6 +112,14 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     public function getPublish_Timestamp(): int
     {
         return $this->getFieldTimestamp('publish_date') ?? $this->getCreated_Timestamp();
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getUnpublish_Timestamp(): ?int
+    {
+        return $this->getFieldTimestamp('unpublish_date');
     }
 
     /**
