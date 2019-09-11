@@ -84,7 +84,7 @@ export class FlexPages {
                 status = 'translated';
             }
 
-            if (item.extras.lang === 'n/a' || item.extras.lang === 'none') {
+            if (item.extras.lang === 'n/a') {
                 status = 'not-available';
             }
 
