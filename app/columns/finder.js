@@ -79,7 +79,16 @@ export class FlexPages {
         const icon = $(`<span class="fjs-icon ${item.icon} badge-${item.extras && item.extras.published ? 'published' : 'unpublished'}" />`);
 
         if (item.extras && item.extras.lang) {
-            const lang = $(`<span class="badge-lang ${item.extras.translated ? 'translated' : ''}">${item.extras.lang}</span>`);
+            let status = '';
+            if (item.extras.translated) {
+                status = 'translated';
+            }
+
+            if (item.extras.lang === 'n/a' || item.extras.lang === 'none') {
+                status = 'not-available';
+            }
+
+            const lang = $(`<span class="badge-lang ${status}">${item.extras.lang}</span>`);
             lang.appendTo(icon);
         }
 
