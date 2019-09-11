@@ -286,8 +286,10 @@ class GravPageObject extends FlexPageObject
                     $payload = [
                         'icon' => $icon,
                         'title' => $child->title(),
-                        'route' => $child->rawRoute(),//$child->getRoute()->toString(), // FIXME: DO NOT USE ROUTE IN JS!
-                        'raw_route' => $child->rawRoute(),
+                        'route' => [
+                            'display' => $child->getRoute()->toString(true),
+                            'raw' => $child->rawRoute(),
+                        ],
                         'modified' => $page->modified(),
                         'child_count' => count($child->children()) ?: null,
                         'extras' => $extras
