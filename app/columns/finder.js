@@ -49,7 +49,7 @@ export class FlexPages {
     static createItem(config, item, finder) {
         const listItem = $('<li />');
         const listItemClasses = [config.className.item];
-        const href = `${GRAV_CONFIG.current_url}/${item.route.raw}`;
+        const href = `${GRAV_CONFIG.current_url}/${item.route.raw}`.replace('//', '/');
         const link = $('<a />');
         const createItemContent = config.createItemContent || finder.createItemContent;
         const fragment = createItemContent.call(this, item);
