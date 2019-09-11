@@ -3,7 +3,6 @@
 namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
 use Grav\Common\File\CompiledJsonFile;
-use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\Grav;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
@@ -113,11 +112,9 @@ class GravPageIndex extends FlexPageIndex
         // Load saved index file.
         $grav = Grav::instance();
         $locator = $grav['locator'];
-        $filename = $locator->findResource('user-data://flex/indexes/pages.yaml', true, true);
-        return CompiledYamlFile::instance($filename);
 
-//        $filename = $locator->findResource('user-data://flex/indexes/pages.json', true, true);
+        $filename = $locator->findResource('user-data://flex/indexes/pages.json', true, true);
 
-//        return CompiledJsonFile::instance($filename);
+        return CompiledJsonFile::instance($filename);
     }
 }
