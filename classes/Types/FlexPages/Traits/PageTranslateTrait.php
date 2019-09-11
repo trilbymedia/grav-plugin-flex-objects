@@ -54,6 +54,31 @@ trait PageTranslateTrait
      * @param bool $includeDefault
      * @return array
      */
+    public function getAllLanguages(bool $includeDefault = false): array
+    {
+        $grav = Grav::instance();
+
+        /** @var Language $language */
+        $language = $grav['language'];
+        $languages = $language->getLanguages();
+        $translated = $this->getLanguageTemplates();
+
+        if ($includeDefault) {
+            $languages[] = '';
+        } else {
+            unset($translated['']);
+        }
+
+        $languages = array_fill_keys($languages, false);
+        $translated = array_fill_keys(array_keys($translated), true);
+
+        return array_replace($languages, $translated);
+    }
+
+    /**
+     * @param bool $includeDefault
+     * @return array
+     */
     public function getLanguages(bool $includeDefault = false): array
     {
         $languages = $this->getLanguageTemplates();
