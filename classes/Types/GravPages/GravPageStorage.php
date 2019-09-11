@@ -37,7 +37,7 @@ class GravPageStorage extends FolderStorage
         $this->ignore_files = (array)$config->get('system.pages.ignore_files');
         $this->ignore_folders = (array)$config->get('system.pages.ignore_folders');
         $this->recurse = $options['recurse'] ?? true;
-        $this->regex = '/(\.(\w+))?\.md$/D';
+        $this->regex = '/(\.([\w\d_-]+))?\.md$/D';
     }
 
     /**

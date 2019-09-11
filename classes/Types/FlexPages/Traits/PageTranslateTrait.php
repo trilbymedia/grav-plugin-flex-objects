@@ -40,7 +40,7 @@ trait PageTranslateTrait
         if (null === $code) {
             $object = null;
         } elseif ('' === $code) {
-            $object = $this->getFlexDirectory()->getObject($this->getStorageKey(true), 'storage_key');
+            $object = $this->getLanguage() ? $this->getFlexDirectory()->getObject($this->getStorageKey(true), 'storage_key') : $this;
         } else {
             $key = $this->getStorageKey() . '|' . $code;
             $meta = ['storage_key' => $key, 'language' => $code] + $this->getMetaData();
@@ -50,7 +50,21 @@ trait PageTranslateTrait
         return $object;
     }
 
-    public function getLanguage(): ?string
+    /**
+     * @param bool $includeDefault
+     * @return array
+     */
+    public function getLanguages(bool $includeDefault = false): array
+    {
+        $languages = $this->getLanguageTemplates();
+        if (!$includeDefault) {
+            unset($languages['']);
+        }
+
+        return array_keys($this->getLanguageTemplates());
+    }
+
+    public function getLanguage(): string
     {
         return $this->language();
     }
@@ -62,7 +76,7 @@ trait PageTranslateTrait
      */
     protected function findTranslation(string $languageCode = null, bool $fallback = null): ?string
     {
-        $translated = $this->getTranslations();
+        $translated = $this->getLanguageTemplates();
 
         // If there's no translations (including default), we have an empty folder.
         if (!$translated) {
@@ -93,7 +107,7 @@ trait PageTranslateTrait
     public function translatedLanguages($onlyPublished = false): array
     {
         // FIXME: only published is not implemented...
-        $translated = $this->getTranslations();
+        $translated = $this->getLanguageTemplates();
         if (!$translated) {
             return $translated;
         }
@@ -140,17 +154,17 @@ trait PageTranslateTrait
      *
      * @param $var
      *
-     * @return string|null
+     * @return string
      */
-    public function language($var = null): ?string
+    public function language($var = null): string
     {
         return $this->loadHeaderProperty(
             'language',
             $var,
             function($value) {
-                $value = $value ?? $this->getMetaData()['language'] ?? null;
+                $value = $value ?? $this->getMetaData()['language'] ?? '';
 
-                return $value ? trim($value) : null;
+                return trim($value);
             }
         );
     }
@@ -158,7 +172,7 @@ trait PageTranslateTrait
     /**
      * @return array
      */
-    protected function getTranslations(): array
+    protected function getLanguageTemplates(): array
     {
         if (null === $this->_languages) {
             $template = $this->getProperty('template');
@@ -194,6 +208,9 @@ trait PageTranslateTrait
         /** @var Language $language */
         $language = $grav['language'];
         $languageCode = $languageCode ?? $language->getLanguage();
+        if ($languageCode === '' && $fallback) {
+            return $language->getFallbackLanguages(null, true);
+        }
 
         return $fallback ? $language->getFallbackLanguages($languageCode, true) : [$languageCode];
     }

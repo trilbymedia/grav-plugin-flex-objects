@@ -50,7 +50,7 @@ trait PageRoutableTrait
             'routable',
             $var,
             function($value) {
-                return ($value ?? true) && $this->published() && $this->getTranslations();
+                return ($value ?? true) && $this->published() && $this->getLanguages(true);
             }
         );
     }

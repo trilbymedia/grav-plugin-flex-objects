@@ -31,7 +31,7 @@ trait PageTranslateTrait
             return $this->translatedLanguages();
         }
 
-        $translated = $this->getlanguages();
+        $translated = $this->getlanguages(true);
         if (!$translated) {
             return $translated;
         }

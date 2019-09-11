@@ -441,6 +441,9 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
     {
         try {
             $value = $this->getProperty($field);
+            if (is_numeric($value)) {
+                $value = '@' . $value;
+            }
             $date = $value ? new DateTime($value) : null;
         } catch (\Exception $e) {
             /** @var Debugger $debugger */

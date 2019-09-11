@@ -378,6 +378,7 @@ class AdminController
 
         $formatter = new YamlFormatter();
         $this->data['frontmatter'] = $formatter->encode($this->data['header'] ?? []);
+        $this->data['lang'] = $this->getLanguage();
 
         $this->object = $directory->createObject($this->data, $key);
 
@@ -468,6 +469,7 @@ class AdminController
 
         // Base64 decode the route
         $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
+        $data['filters'] = json_decode($options['filters'] ?? '{}', true) + ['type' => ['dir']];
 
         $initial = $data['initial'] ?? null;
         if ($initial) {
@@ -501,39 +503,45 @@ class AdminController
      */
     protected function actionListLevel(): ResponseInterface
     {
-        /** @var PageInterface|FlexObjectInterface $object */
-        $object = $this->getObject();
+        try {
+            /** @var PageInterface|FlexObjectInterface $object */
+            $object = $this->getObject('');
 
-        if (!$object || !method_exists($object, 'getLevelListing')) {
-            throw new \RuntimeException('Not Found', 404);
+            if (!$object || !method_exists($object, 'getLevelListing')) {
+                throw new \RuntimeException('Not Found', 404);
+            }
+
+            $directory = $object->getFlexDirectory();
+            if (!$directory->isAuthorized('list')) {
+                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
+                    403);
+            }
+
+            $request = $this->getRequest();
+            $data = $request->getParsedBody();
+
+            // Base64 decode the route
+            $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
+            $data['filters'] = json_decode($options['filters'] ?? '{}', true) + ['type' => ['dir']];
+            $data['language'] = $this->getLanguage();
+
+            $initial = $data['initial'] ?? null;
+            if ($initial) {
+                $data['leaf_route'] = $data['route'];
+                $data['route'] = null;
+                $data['level'] = 1;
+            }
+
+            [$status, $message, $response,] = $object->getLevelListing($data);
+
+            $json = [
+                'status'  => $status,
+                'message' => $this->admin::translate($message ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED'),
+                'data' => array_values($response)
+            ];
+        } catch (\Exception $e) {
+            return $this->createErrorResponse($e);
         }
-
-        $directory = $object->getFlexDirectory();
-        if (!$directory->isAuthorized('list')) {
-            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
-                403);
-        }
-
-        $request = $this->getRequest();
-        $data = $request->getParsedBody();
-
-        // Base64 decode the route
-        $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
-
-        $initial = $data['initial'] ?? null;
-        if ($initial) {
-            $data['leaf_route'] = $data['route'];
-            $data['route'] = null;
-            $data['level'] = 1;
-        }
-
-        [$status, $message, $response,] = $object->getLevelListing($data);
-
-        $json = [
-            'status'  => $status,
-            'message' => $this->admin::translate($message ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED'),
-            'data' => array_values($response)
-        ];
 
         return $this->createJsonResponse($json, 200);
     }
@@ -955,13 +963,16 @@ class AdminController
             $directory = $this->getDirectory();
             if ($directory) {
                 if (null !== $key) {
-                    $object = $directory->getObject($key) ?: $directory->createObject([], $key);
+                    $object = $directory->getObject($key) ?? $directory->createObject([], $key);
                 } elseif ($this->action === 'add') {
                     $object = $directory->createObject([], '');
                 }
 
-                if ($this->isMultilang() && $object instanceof FlexTranslateInterface && $object->hasTranslation(null, false)) {
-                    $object = $object->getTranslation(null, false);
+                if ($object instanceof FlexTranslateInterface && $this->isMultilang()) {
+                    $language = $this->getLanguage();
+                    if ($object->hasTranslation($language)) {
+                        $object = $object->getTranslation($language);
+                    }
                 }
             }
 
@@ -1091,8 +1102,9 @@ class AdminController
         $redirect = '';
         if ($this->isMultilang()) {
             // if base path does not already contain the lang code, add it
-            $langPrefix = '/' . $this->grav['session']->admin_lang;
-            if (!Utils::startsWith($base, $langPrefix . '/')) {
+            $lang = $this->getLanguage();
+            $langPrefix = '/' . $lang;
+            if ($lang && !Utils::startsWith($base, $langPrefix . '/')) {
                 $base = $langPrefix . $base;
             }
 
@@ -1211,6 +1223,14 @@ class AdminController
         }
 
         return $out;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLanguage(): string
+    {
+        return $this->admin->language ?? '';
     }
 
     /**

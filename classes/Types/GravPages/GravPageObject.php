@@ -91,7 +91,7 @@ class GravPageObject extends FlexPageObject
             case 'lang':
                 return $this->getLanguage() ?? '';
             case 'translations':
-                return array_keys($this->getTranslations());
+                return $this->getLanguages();
         }
 
         return parent::getFormValue($name, $default, $separator);
@@ -140,10 +140,10 @@ class GravPageObject extends FlexPageObject
         $default_filters = [
             'type'=> ['root', 'dir'],
             'name' => null,
-            'extension' => null
+            'extension' => null,
         ];
 
-        $filters = $default_filters + json_decode($options['filters'] ?? '{}', true);
+        $filters = ($options['filters'] ?? []) + $default_filters;
         $filter_type = (array)$filters['type'];
 
         $field = $options['field'] ?? null;
@@ -151,6 +151,7 @@ class GravPageObject extends FlexPageObject
         $leaf_route = $options['leaf_route'] ?? null;
         $sortby = $options['sortby'] ?? null;
         $order = $options['order'] ?? SORT_ASC;
+        $language = $options['language'] ?? null;
 
         $status = 'error';
         $msg = null;
@@ -273,13 +274,14 @@ class GravPageObject extends FlexPageObject
                         'item-key' => basename($child->rawRoute()),
                         'icon' => $icon,
                         'title' => $child->title(),
-                        'route' => $child->getRoute()->toString(),
+                        'route' => $child->rawRoute(),//$child->getRoute()->toString(), // FIXME: DO NOT USE ROUTE IN JS!
                         'raw_route' => $child->rawRoute(),
                         'modified' => $page->modified(),
                         'child_count' => count($child->children()),
                         'extras' => [
                             'template' => $child->template(),
-                            'langs' => array_keys($child->translatedLanguages()),
+                            'lang' => $child->findTranslation($language) ?? 'none',
+                            'langs' => [$child->findTranslation($language) ?? 'none'],
                             'published' => $child->published(),
                             'published_date' => $child->getPublish_Timestamp(),
                             'unpublished_date' => $child->getUnpublish_Timestamp(),
