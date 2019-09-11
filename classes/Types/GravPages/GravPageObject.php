@@ -270,11 +270,12 @@ class GravPageObject extends FlexPageObject
                         $child->visible() ? 'visible' : 'non-visible',
                         $child->routable() ? 'routable' : 'non-routable'
                     ];
+                    $lang = $child->findTranslation($language) ?? 'none';
                     $extras = [
                         'template' => $child->template(),
-                        'lang' => $child->findTranslation($language) ?? 'none',
-                        'translated' => $child->hasTranslation($language, false),
-                        'langs' => $child->getLanguages(true),
+                        'lang' => $lang ?: null,
+                        'translated' => $lang ? $child->hasTranslation($language, false) : null,
+                        'langs' => $child->getLanguages(true) ?: null,
                         'published' => $child->published(),
                         'published_date' => $child->getPublish_Timestamp(),
                         'unpublished_date' => $child->getUnpublish_Timestamp(),
