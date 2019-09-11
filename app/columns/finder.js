@@ -2,13 +2,13 @@ import $ from 'jquery';
 import Finder from '../utils/finder';
 
 let XHRUUID = 0;
-export const Instances = {};
+const GRAV_CONFIG = typeof global.GravConfig !== 'undefined' ? global.GravConfig : global.GravAdmin.config;
 
+export const Instances = {};
 export class FlexPages {
     constructor(container, data) {
         this.container = $(container);
         this.data = data;
-
         const dataLoad = this.dataLoad;
 
         this.finder = new Finder(
@@ -20,8 +20,11 @@ export class FlexPages {
                 labelKey: 'title',
                 defaultPath: '',
                 itemTrigger: '[data-flexpages-expand]',
+                createItem: function(item) {
+                    return FlexPages.createItem(this.config, item, this);
+                },
                 createItemContent: function(item) {
-                    return FlexPages.createItemContent(this.config, item);
+                    return FlexPages.createItemContent(this.config, item, this);
                 }
             }
         );
@@ -43,38 +46,36 @@ export class FlexPages {
         });
     }
 
+    static createItem(config, item, finder) {
+        const listItem = $('<li />');
+        const listItemClasses = [config.className.item];
+        const href = `${GRAV_CONFIG.current_url}/${item.route.raw}`;
+        const link = $('<a />');
+        const createItemContent = config.createItemContent || finder.createItemContent;
+        const fragment = createItemContent.call(this, item);
+        link.append(fragment)
+            .attr('href', href)
+            .attr('tabindex', -1);
+
+        if (item.url) {
+            link.attr('href', item.url);
+            listItemClasses.push(item.className);
+        }
+
+        if (item[config.childKey]) {
+            listItemClasses.push(config.className[config.childKey]);
+        }
+
+        listItem.addClass(listItemClasses.join(' '));
+        listItem.append(link)
+            .attr('data-fjs-item', item[config.itemKey]);
+
+        listItem[0]._item = item;
+
+        return listItem;
+    }
+
     static createItemContent(config, item) {
-        /* const frag = document.createDocumentFragment();
-
-        const label = $(`<span title="${item[config.labelKey]}" />`);
-        const iconPrepend = $('<i />');
-        const iconAppend = $('<i />');
-        const prependClasses = ['fa'];
-        const appendClasses = ['fa'];
-
-        // prepend icon
-        if (item.children || item.type === 'dir') {
-            prependClasses.push('fa-folder');
-        } else if (item.type === 'root') {
-            prependClasses.push('fa-sitemap');
-        } else if (item.type === 'file') {
-            prependClasses.push('fa-file-o');
-        }
-
-        iconPrepend.addClass(prependClasses.join(' '));
-
-        // text label
-        label.text(item[config.labelKey]).prepend(iconPrepend);
-        label.appendTo(frag);
-
-        // append icon
-        if (item.children || item.type === 'dir') {
-            appendClasses.push('fa-caret-right');
-        }
-
-        iconAppend.addClass(appendClasses.join(' '));
-        iconAppend.appendTo(frag);*/
-
         const frag = document.createDocumentFragment();
         const icon = $(`<span class="fjs-icon ${item.icon} badge-${item.extras && item.extras.published ? 'published' : 'unpublished'}" />`);
 
@@ -101,12 +102,12 @@ export class FlexPages {
         }
 
         if (item.extras) {
-            const dotdotdot = $('<i class="fa fa-ellipsis-v fjs-action-toggle" data-flexpages-dotx3></i>');
+            const dotdotdot = $('<i class="fa fa-ellipsis-v fjs-action-toggle" data-flexpages-dotx3 data-flexpages-prevent></i>');
             dotdotdot.appendTo(actions);
         }
 
         if (item.child_count) {
-            const arrow = $('<i class="fa fa-chevron-right fjs-children" data-flexpages-expand></i>');
+            const arrow = $('<i class="fa fa-chevron-right fjs-children" data-flexpages-expand data-flexpages-prevent></i>');
             arrow.appendTo(actions);
         }
 
@@ -152,9 +153,8 @@ export class FlexPages {
         const UUID = ++XHRUUID;
         this.startLoader();
 
-        const gravConfig = typeof global.GravConfig !== 'undefined' ? global.GravConfig : global.GravAdmin.config;
         $.ajax({
-            url: `${gravConfig.current_url}`,
+            url: `${GRAV_CONFIG.current_url}`,
             method: 'post',
             data: Object.assign({}, {
                 route: b64_encode_unicode(parent.route.raw),

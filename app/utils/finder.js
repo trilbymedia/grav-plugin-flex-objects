@@ -39,7 +39,6 @@ class Finder {
         this.data = data;
 
         this.config = $.extend(true, {}, DEFAULTS, options);
-        console.log(this.config);
 
         // dom events
         this.container.on('click', this.clickEvent.bind(this));
@@ -88,9 +87,9 @@ class Finder {
             if (typeof data === 'object') {
                 data = Array.from(data);
             }
-            const list = this.createList(data);
+            const list = this.config.createList || this.createList;
             const div = $('<div />');
-            div.append(list).addClass(this.config.className.col);
+            div.append(list.call(this, data)).addClass(this.config.className.col);
             this.$emitter.emit('create-column', div);
 
             return div;
@@ -108,14 +107,16 @@ class Finder {
     }
 
     clickEvent(event) {
-        event.stopPropagation();
-        event.preventDefault();
-
         const target = $(event.target);
         const column = target.closest(`.${this.config.className.col}`);
         const item = target.closest(`.${this.config.className.item}`);
 
-        console.log(target);
+        if (target.data('flexpagesPrevent') === undefined) {
+            return true;
+        }
+
+        event.stopPropagation();
+        event.preventDefault();
 
         if (this.config.itemTrigger) {
             if (target.is(this.config.itemTrigger)) {
@@ -259,7 +260,8 @@ class Finder {
 
     createList(data) {
         const list = $('<ul />');
-        const items = data.map((item) => this.createItem(item));
+        const createItem = this.config.createItem || this.createItem;
+        const items = data.map((item) => createItem.call(this, item));
 
         const fragments = items.reduce((fragment, current) => {
             fragment.appendChild(current[0] || current);
@@ -275,7 +277,7 @@ class Finder {
     createItem(item) {
         const listItem = $('<li />');
         const listItemClasses = [this.config.className.item];
-        const link = $('<a />');
+        const link = $(`<a href="${item.href || ''}" />`);
         const createItemContent = this.config.createItemContent || this.createItemContent;
         const fragment = createItemContent.call(this, item);
         link.append(fragment)
