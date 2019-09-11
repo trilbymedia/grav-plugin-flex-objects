@@ -270,27 +270,29 @@ class GravPageObject extends FlexPageObject
                         $child->visible() ? 'visible' : 'non-visible',
                         $child->routable() ? 'routable' : 'non-routable'
                     ];
+                    $extras = [
+                        'template' => $child->template(),
+                        'lang' => $child->findTranslation($language) ?? 'none',
+                        'langs' => [$child->findTranslation($language) ?? 'none'],
+                        'published' => $child->published(),
+                        'published_date' => $child->getPublish_Timestamp(),
+                        'unpublished_date' => $child->getUnpublish_Timestamp(),
+                        'visible' => $child->visible(),
+                        'routable' => $child->routable(),
+                        'tags' => $tags,
+                        'actions' => null,
+                    ];
+                    $extras = array_filter($extras, static function($v) { return $v !== null; });
                     $payload = [
-                        'item-key' => basename($child->rawRoute()),
                         'icon' => $icon,
                         'title' => $child->title(),
                         'route' => $child->rawRoute(),//$child->getRoute()->toString(), // FIXME: DO NOT USE ROUTE IN JS!
                         'raw_route' => $child->rawRoute(),
                         'modified' => $page->modified(),
-                        'child_count' => count($child->children()),
-                        'extras' => [
-                            'template' => $child->template(),
-                            'lang' => $child->findTranslation($language) ?? 'none',
-                            'langs' => [$child->findTranslation($language) ?? 'none'],
-                            'published' => $child->published(),
-                            'published_date' => $child->getPublish_Timestamp(),
-                            'unpublished_date' => $child->getUnpublish_Timestamp(),
-                            'visible' => $child->visible(),
-                            'routable' => $child->routable(),
-                            'tags' => $tags,
-                            'actions' => true,
-                        ]
+                        'child_count' => count($child->children()) ?: null,
+                        'extras' => $extras
                     ];
+                    $payload = array_filter($payload, static function($v) { return $v !== null; });
                 }
 
                 // Add children if any
