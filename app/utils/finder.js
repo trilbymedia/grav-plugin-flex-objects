@@ -291,7 +291,6 @@ class Finder {
             listItemClasses.push(this.config.className[this.config.childKey]);
         }
 
-        listItemClasses.push(`fjs-item-${item.type}`);
         listItem.addClass(listItemClasses.join(' '));
         listItem.append(link)
             .attr('data-fjs-item', item[this.config.itemKey]);

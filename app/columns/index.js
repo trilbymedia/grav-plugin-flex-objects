@@ -19,8 +19,7 @@ if (container) {
             data: Object.assign({}, {
                 route: '',
                 initial: true,
-                action: 'listLevel',
-                id: 'flex-pages'
+                action: 'listLevel'
             }),
             success(response) {
                 loader.style.display = 'none';

@@ -78,8 +78,8 @@ export class FlexPages {
         const frag = document.createDocumentFragment();
         const icon = $(`<span class="fjs-icon ${item.icon} badge-${item.extras && item.extras.published ? 'published' : 'unpublished'}" />`);
 
-        if (item.extras && item.extras.langs && item.extras.langs.length) {
-            const lang = $(`<span class="badge-lang">${item.extras.langs[0]}</span>`);
+        if (item.extras && item.extras.lang) {
+            const lang = $(`<span class="badge-lang ${item.extras.translated ? 'translated' : ''}">${item.extras.lang}</span>`);
             lang.appendTo(icon);
         }
 
@@ -149,8 +149,7 @@ export class FlexPages {
             method: 'post',
             data: Object.assign({}, {
                 route: b64_encode_unicode(parent.route.raw),
-                action: 'listLevel',
-                id: 'flex-pages'
+                action: 'listLevel'
             }),
             success: (response) => {
                 this.stopLoader();
