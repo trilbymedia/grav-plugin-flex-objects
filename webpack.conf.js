@@ -59,7 +59,8 @@ module.exports = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 query: {
-                    presets: ['es2015', 'stage-3']
+                    presets: ['@babel/preset-env'],
+                    plugins: ['@babel/plugin-proposal-object-rest-spread']
                 }
             },
             { test: /\.vue$/, loader: 'vue-loader', options: {} },
