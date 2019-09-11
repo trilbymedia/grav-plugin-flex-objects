@@ -13,7 +13,7 @@
 {% block content_top %}{% endblock %}
 
 {% block content_list %}
-    {% set list_layout = grav.uri.param('layout', 'list') %}
+    {% set list_layout = grav.uri.param('layout', 'columns') %}
     {% include [
         'flex-objects/types/grav-pages/list/' ~ list_layout ~ '.html.twig',
         'flex-objects/types/grav-pages/list/list.html.twig'
