@@ -72,7 +72,7 @@
         </div>
 
         <div class="grav-loading"><div class="grav-loader">Loading...</div></div>
-        <div id="pages-columns"></div>
+        <div id="pages-columns" data-lang-url="{{ grav.uri.getCurrentRoute.withoutParams.withExtension('').withLanguage('%LANG%').toString(true) }}"></div>
 
         <div id="pages-columns" class="parents-content fjs-container" tabindex="0">
         <div class="fjs-col">
