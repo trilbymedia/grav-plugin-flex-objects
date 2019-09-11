@@ -83,7 +83,7 @@ export class FlexPages {
             lang.appendTo(icon);
         }
 
-        const info = $(`<span class="fjs-info"><b>${item.title}</b> <em>${item.route}</em></span>`);
+        const info = $(`<span class="fjs-info"><b>${item.title}</b> <em>${item.route.display}</em></span>`);
         const actions = $('<span class="fjs-actions" />');
 
         if (item.child_count) {
@@ -148,7 +148,7 @@ export class FlexPages {
             url: `${gravConfig.current_url}`,
             method: 'post',
             data: Object.assign({}, {
-                route: b64_encode_unicode(parent.route),
+                route: b64_encode_unicode(parent.route.raw),
                 action: 'listLevel',
                 id: 'flex-pages'
             }),
