@@ -50,7 +50,7 @@
         <div class="alert warning">
             This page does not exist yet!
         </div>
-    {% elseif not object.hasTranslation(selected_language, false) %}
+    {% elseif can_translate and not object.hasTranslation(selected_language, false) %}
         <div class="alert warning">
             {% set selected_language_title = all_languages[selected_language] ?? selected_language %}
             This page has not been translated to <i class="fa fa-flag-o"></i> <strong>{{ selected_language_title }}</strong> language yet!
