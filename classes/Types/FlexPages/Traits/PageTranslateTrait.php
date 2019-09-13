@@ -147,7 +147,8 @@ trait PageTranslateTrait
         $translated = array_intersect_key($translated, array_flip($languages));
         $list = [];
         foreach ($translated as $languageCode => $languageFile) {
-            $list[$languageCode] = "/{$languageCode}/{$this->getKey()}";
+            $languageCode = ($languageCode ? '/' : '') . $languageCode;
+            $list[$languageCode] = "{$languageCode}/{$this->getKey()}";
         }
 
         return $list;

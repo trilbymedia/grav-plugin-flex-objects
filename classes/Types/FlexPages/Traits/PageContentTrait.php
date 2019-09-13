@@ -242,13 +242,13 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function publishDate($var = null): int
+    public function publishDate($var = null): ?int
     {
         return $this->loadHeaderProperty(
             'publish_date',
             $var,
             function($value) {
-                return Utils::date2timestamp($value, $this->getProperty('dateformat'));
+                return $value ? Utils::date2timestamp($value, $this->getProperty('dateformat')) : null;
             }
         );
     }
@@ -256,13 +256,13 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function unpublishDate($var = null): int
+    public function unpublishDate($var = null): ?int
     {
         return $this->loadHeaderProperty(
             'unpublish_date',
             $var,
             function($value) {
-                return Utils::date2timestamp($value, $this->getProperty('dateformat'));
+                return $value ? Utils::date2timestamp($value, $this->getProperty('dateformat')) : null;
             }
         );
     }
@@ -302,11 +302,10 @@ trait PageContentTrait
 
     /**
      * @inheritdoc
-     * FIXME: Not fully compatible, returns 2 not '02.'
      */
     public function order($var = null)
     {
-        return $this->loadProperty(
+        $property = $this->loadProperty(
             'order',
             $var,
             function($value) {
@@ -321,6 +320,8 @@ trait PageContentTrait
                 return $value ?: false;
             }
         );
+
+        return $property ? sprintf('%02d.', $property) : '';
     }
 
     /**
@@ -331,8 +332,7 @@ trait PageContentTrait
         $property = 'id';
         $value = null === $var ? $this->getProperty($property) : null;
         if (null === $value) {
-            // TODO: make sure this works also with languages enabled; id should be unique per language.
-            $value = $var ?? $this->modified() . md5( 'flex-' . $this->getFlexType() . '-' . $this->getKey());
+            $value = $this->language() . ($var ?? ($this->modified() . md5( 'flex-' . $this->getFlexType() . '-' . $this->getKey())));
 
             $this->setProperty($property, $value);
             if ($this->doHasProperty($property)) {
@@ -385,7 +385,9 @@ trait PageContentTrait
             'date',
             $var,
             function($value) {
-                return Utils::date2timestamp($value, $this->getProperty('dateformat')) ?: $this->modified();
+                $value = $value ? Utils::date2timestamp($value, $this->getProperty('dateformat')) : false;
+
+                return $value ?: ($this->getMetaData()['storage_created'] ?? 0);
             }
         );
     }
@@ -393,13 +395,13 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function dateformat($var = null): string
+    public function dateformat($var = null): ?string
     {
         return $this->loadHeaderProperty(
             'dateformat',
             $var,
             static function($value) {
-                return $value ?? '';
+                return $value ?? null;
             }
         );
     }
@@ -502,11 +504,11 @@ trait PageContentTrait
             case 'content':
                 return $this->getProperty('markdown');
             case 'order':
-                return (string)$this->order();
+                return (int)$this->order();
             case 'menu':
                 return $this->menu();
             case 'ordering':
-                return $this->order() !== false;
+                return (bool)$this->order();
             case 'folder':
                 return preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->folder());
             case 'slug':

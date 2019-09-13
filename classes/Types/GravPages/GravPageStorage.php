@@ -180,6 +180,7 @@ class GravPageStorage extends FolderStorage
                 'key' => $route,
                 'storage_key' => $key,
                 'storage_file' => $file,
+                'storage_created' => filectime($path),
                 'storage_timestamp' => $modified,
             ];
             if ($markdown) {

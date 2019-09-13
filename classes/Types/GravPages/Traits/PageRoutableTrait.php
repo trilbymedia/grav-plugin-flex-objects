@@ -72,14 +72,14 @@ trait PageRoutableTrait
     /**
      * Returns the item in the current position.
      *
-     * @return int   the index of the current page.
+     * @return int|null   the index of the current page.
      */
-    public function currentPosition(): int
+    public function currentPosition(): ?int
     {
         $parent = $this->parent();
         $collection = $parent ? $parent->collection('content', false) : null;
         if ($collection instanceof PageCollectionInterface) {
-            return $collection->currentPosition($this->path());
+            return $collection->currentPosition($this->path()) ?? null;
         }
 
         return 1;

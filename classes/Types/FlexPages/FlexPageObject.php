@@ -146,7 +146,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             case 'name':
                 return $this->getProperty('template');
             case 'route':
-                return $this->hasKey() ? '/' . $this->getKey() : '';
+                return $this->hasKey() ? '/' . $this->getKey() : null;
         }
 
         return parent::getFormValue($name, $default, $separator);
@@ -186,7 +186,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
             $reorder = $instance->_reorder ?? false;
         }
         if (is_array($reorder)) {
-            $instance->doReorder($reorder, $key ?: $this->getStorageKey());
+            $instance->doReorder($reorder, $key ?: $this->getStorageKey(true));
         }
 
         return $instance;

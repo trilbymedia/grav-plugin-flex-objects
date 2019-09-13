@@ -148,9 +148,9 @@ trait PageRoutableTrait
      *
      * @param  string $var Set new default route.
      *
-     * @return string  The route for the Page.
+     * @return string|null  The route for the Page.
      */
-    public function route($var = null): string
+    public function route($var = null): ?string
     {
         // TODO:
         if (null !== $var) {
@@ -235,7 +235,7 @@ trait PageRoutableTrait
             'redirect',
             $var,
             static function($value) {
-                return trim($value);
+                return trim($value) ?: null;
             }
         );
     }
@@ -247,7 +247,10 @@ trait PageRoutableTrait
      */
     public function relativePagePath(): ?string
     {
-        return $this->getMediaFolder();
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
+        return $locator->findResource($this->getMediaFolder(), false);
     }
 
     /**
@@ -340,9 +343,9 @@ trait PageRoutableTrait
     /**
      * Returns the item in the current position.
      *
-     * @return int   the index of the current page.
+     * @return int|null   the index of the current page.
      */
-    public function currentPosition(): int
+    public function currentPosition(): ?int
     {
         $parent = $this->parent();
         $collection = $parent ? $parent->collection('content', false) : null;

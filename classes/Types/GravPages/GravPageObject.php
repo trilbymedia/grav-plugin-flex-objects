@@ -11,6 +11,7 @@ use Grav\Framework\Route\Route;
 use Grav\Framework\Route\RouteFactory;
 use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
+use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageLegacyTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageRoutableTrait;
 
@@ -27,6 +28,7 @@ use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageRoutableTrait;
  */
 class GravPageObject extends FlexPageObject
 {
+    use PageContentTrait;
     use PageLegacyTrait;
     use PageRoutableTrait;
 
