@@ -5,6 +5,19 @@ let XHRUUID = 0;
 const GRAV_CONFIG = typeof global.GravConfig !== 'undefined' ? global.GravConfig : global.GravAdmin.config;
 
 export const Instances = {};
+
+const isInViewport = (elem) => {
+    const bounding = elem.getBoundingClientRect();
+    const titlebar = document.querySelector('#titlebar');
+    const offset = titlebar ? titlebar.getBoundingClientRect().height : 0;
+    return (
+        bounding.top >= offset &&
+        bounding.left >= 0 &&
+        bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        bounding.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+};
+
 export class FlexPages {
     constructor(container, data) {
         this.container = $(container);
@@ -102,8 +115,60 @@ export class FlexPages {
         }
 
         if (item.extras) {
-            const dotdotdot = $('<i class="fa fa-ellipsis-v fjs-action-toggle" data-flexpages-dotx3 data-flexpages-prevent></i>');
+            const LANG_URL = $('[data-lang-url]').data('langUrl');
+            const dotdotdot = $('<div class="button-group" data-flexpages-dotx3 data-flexpages-prevent><button class="button dropdown-toggle" data-toggle="dropdown"><i class="fa fa-ellipsis-v fjs-action-toggle"></i></button></div>');
             dotdotdot.appendTo(actions);
+            dotdotdot.on('click', (event) => {
+                if (!dotdotdot.find('.dropdown-menu').length) {
+                    let tags = '';
+                    let langs = '';
+
+                    item.extras.tags.forEach((tag) => {
+                        tags += `<span class="badge tag tag-${tag}">${tag}</span>`;
+                    });
+
+                    const translations = item.extras.langs || {};
+                    Object.keys(translations).forEach((lang) => {
+                        const translated = translations[lang];
+                        langs += `<a class="lang" href="${LANG_URL.replace(/%LANG%/g, lang).replace('//', '/')}"><span class="badge lang-${lang ? lang : 'default'} lang-${translated ? 'translated' : 'non-translated'}">${lang ? lang : 'default'}</span></a>`;
+                    });
+
+                    const route = `${GRAV_CONFIG.current_url}/${item.route.raw}`.replace('//', '/');
+                    const ul = $(`<div class="dropdown-menu">
+    <div class="action-bar">
+        <a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Delete"><i class="fa fa-fw fa-trash"></i></a></li>
+        <a href="#" class="dropdown-item" title="Move"><i class="fa fa-fw fa-arrows"></i></a></li>
+        <a href="#" class="dropdown-item" title="Duplicate"><i class="fa fa-fw fa-copy"></i></a></li>
+        <a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a></li>
+        <a href="${route}/?preview=1" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a></li>
+    </div>
+    <div class="divider"></div>
+    <div class="tags">${tags}</div>
+    <div class="divider"></div>
+    <div class="langs">${langs}</div>
+    <div class="divider"></div>
+    <div class="details">
+        <div class="infos">
+            <table>
+                <tr>
+                    <td><b>route</b></td>
+                    <td>${item.route.display}</td>
+                </tr>
+                <tr>
+                    <td><b>template</b></td>
+                    <td>${item.extras.template}</td>
+                </tr>
+                <tr>
+                    <td><b>modified</b></td>
+                    <td>${new Date(item.modified * 1000).toLocaleString('en-US')}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>`);
+                    ul.appendTo(dotdotdot);
+                }
+            });
         }
 
         if (item.child_count) {
@@ -201,3 +266,71 @@ export const b64_decode_unicode = (str) => {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 };
+
+const updatePosition = (scrollingColumn) => {
+    const group = document.querySelector('#pages-columns .button-group.open');
+    if (group) {
+        const button = group.querySelector('[data-toggle="dropdown"]');
+        const dropdown = group.querySelector('.dropdown-menu');
+        const buttonInView = isInViewport(button);
+
+        if (button && dropdown) {
+            if (!buttonInView) {
+                $(dropdown).css({ display: 'none' });
+            } else {
+                $(dropdown).css({display: 'inherit'});
+
+                const buttonClientRect = button.getBoundingClientRect();
+                const dropdownClientRect = dropdown.getBoundingClientRect();
+                const scrollTop = (window.pageYOffset || document.documentElement.scrollTop);
+                const scrollLeft = (window.pageXOffset || document.documentElement.scrollLeft);
+                const top = buttonClientRect.height + buttonClientRect.top + scrollTop;
+                const left = buttonClientRect.right - dropdownClientRect.width + scrollLeft;
+
+                $(dropdown).css({top, left});
+
+                if (scrollingColumn) {
+                    const targetClientRect = event.target.getBoundingClientRect();
+                    if ((top < targetClientRect.top + scrollTop) || (top > targetClientRect.top + scrollTop + targetClientRect.height)) {
+                        $(dropdown).css({display: 'none'});
+                    }
+                }
+            }
+        }
+    }
+};
+
+const closeGhostDropdowns = () => {
+    const opened = document.querySelectorAll('#pages-columns .button-group:not(.open) .dropdown-menu') || [];
+    opened.forEach((item) => { item.style.display = 'none'; });
+};
+
+document.addEventListener('scroll', (event) => {
+    if (event.target && !event.target.classList) { return true; }
+    const scrollingDocument = event.target.classList.contains('gm-scroll-view');
+    const scrollingColumn = event.target.classList.contains('fjs-col');
+    if (scrollingDocument || scrollingColumn) {
+        closeGhostDropdowns();
+        updatePosition(scrollingColumn);
+    }
+}, true);
+
+document.addEventListener('click', (event) => {
+    closeGhostDropdowns();
+    if (event.target.dataset.toggle || event.target.closest('[data-toggle="dropdown"]')) {
+        // const scrollEvent = new Event('scroll');
+        // document.dispatchEvent(scrollEvent);
+        (document.querySelectorAll('.gm-scroll-view') || []).forEach((scroll) => {
+            const scrollEvent = new Event('scroll');
+            scroll.dispatchEvent(scrollEvent);
+        });
+    }
+
+    // const dropdown = (event.target.classList && event.target.classList.contains('dropdown-menu')) ? event.target : event.target.closest('.dropdown-menu');
+    if ((event.target.classList && event.target.classList.contains('dropdown-menu')) || (event.target.closest('.dropdown-menu'))) {
+        if (!$(event.target).closest('.dropdown-menu').find(event.target).length) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
+});

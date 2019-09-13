@@ -255,4 +255,23 @@
             </div>
         </form>
     </div>
+
+    <div class="remodal" data-remodal-id="delete" data-remodal-options="hashTracking: false">
+        <form>
+            <h1>{{ "PLUGIN_ADMIN.MODAL_DELETE_PAGE_CONFIRMATION_REQUIRED_TITLE"|tu }}</h1>
+            <p class="bigger">
+                {% if context %}
+                    <strong>{{ "PLUGIN_ADMIN.PAGE"|tu }}: {{ context.title }}</strong>
+                {% endif %}
+            </p>
+            <p class="bigger">
+                {{ "PLUGIN_ADMIN.MODAL_DELETE_PAGE_CONFIRMATION_REQUIRED_DESC"|tu }}
+            </p>
+            <br>
+            <div class="button-bar">
+                <button data-remodal-action="cancel" class="button secondary remodal-cancel"><i class="fa fa-fw fa-close"></i> {{ "PLUGIN_ADMIN.CANCEL"|tu }}</button>
+                <a class="button disable-after-click" data-delete-action href="#"><i class="fa fa-fw fa-check"></i> {{ "PLUGIN_ADMIN.CONTINUE"|tu }}</a>
+            </div>
+        </form>
+    </div>
 {% endblock %}
