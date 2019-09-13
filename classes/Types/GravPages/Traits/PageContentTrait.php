@@ -30,4 +30,13 @@ trait PageContentTrait
 
         return $value;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function isPage(): bool
+    {
+        // FIXME: needs to be better
+        return !$this->exists() || !empty($this->getLanguages()) || $this->modular();
+    }
 }

@@ -85,7 +85,7 @@ class GravPageObject extends FlexPageObject
                 return $this->getProperty('template');
             case 'route':
                 $key = dirname($this->hasKey() ? '/' . $this->getKey() : '/');
-                return $key !== '/' ? $key : '';
+                return $key !== '/' ? $key : null;
             case 'full_route':
                 return $this->hasKey() ? '/' . $this->getKey() : '';
             case 'full_order':

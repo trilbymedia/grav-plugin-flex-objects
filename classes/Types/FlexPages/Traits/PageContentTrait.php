@@ -220,7 +220,7 @@ trait PageContentTrait
             'visible',
             $var,
             function($value) {
-                return (bool)($value ?? $this->order() !== false);
+                return ($value ?? $this->order() !== false) && !$this->modular();
             }
         );
     }
@@ -321,7 +321,7 @@ trait PageContentTrait
             }
         );
 
-        return $property ? sprintf('%02d.', $property) : '';
+        return $property ? sprintf('%02d.', $property) : false;
     }
 
     /**
@@ -504,7 +504,7 @@ trait PageContentTrait
             case 'content':
                 return $this->getProperty('markdown');
             case 'order':
-                return (int)$this->order();
+                return ((int)$this->order()) ?: '';
             case 'menu':
                 return $this->menu();
             case 'ordering':

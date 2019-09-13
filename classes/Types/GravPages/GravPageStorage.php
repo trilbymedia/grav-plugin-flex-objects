@@ -70,6 +70,32 @@ class GravPageStorage extends FolderStorage
         return $keys;
     }
 
+    public function readFrontmatter($key): string
+    {
+        $path = $this->getPathFromKey($key);
+        $file = $this->getFile($path);
+        try {
+            $frontmatter = $file->frontmatter();
+        } catch (\RuntimeException $e) {
+            $frontmatter = 'ERROR: ' . $e->getMessage();
+        }
+
+        return $frontmatter;
+    }
+
+    public function readRaw($key): string
+    {
+        $path = $this->getPathFromKey($key);
+        $file = $this->getFile($path);
+        try {
+            $raw = $file->raw();
+        } catch (\RuntimeException $e) {
+            $raw = 'ERROR: ' . $e->getMessage();
+        }
+
+        return $raw;
+    }
+
     protected function canDeleteFolder(string $key): bool
     {
         $parts = $this->parseKey($key);
@@ -180,7 +206,7 @@ class GravPageStorage extends FolderStorage
                 'key' => $route,
                 'storage_key' => $key,
                 'storage_file' => $file,
-                'storage_created' => filectime($path),
+                'storage_created' => ($file ? filectime($path . '/' . $file . '.md') : 0) ?: filectime($path),
                 'storage_timestamp' => $modified,
             ];
             if ($markdown) {

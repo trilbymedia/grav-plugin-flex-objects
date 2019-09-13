@@ -49,14 +49,18 @@ trait PageLegacyTrait
      */
     public function raw($var = null): string
     {
-        $formatter = new MarkdownFormatter();
-
         // TODO:
         if (null !== $var) {
             throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
+        $storage = $this->getFlexDirectory()->getStorage();
+        if (method_exists($storage, 'readRaw')) {
+            return $storage->readRaw($this->getStorageKey());
+        }
+
         $array = $this->prepareStorage();
+        $formatter = new MarkdownFormatter();
 
         return $formatter->encode($array);
     }
@@ -70,14 +74,18 @@ trait PageLegacyTrait
      */
     public function frontmatter($var = null): string
     {
-        $formatter = new YamlFormatter();
-
         // TODO:
         if (null !== $var) {
             throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
+        $storage = $this->getFlexDirectory()->getStorage();
+        if (method_exists($storage, 'readRaw')) {
+            return $storage->readFrontmatter($this->getStorageKey());
+        }
+
         $array = $this->prepareStorage();
+        $formatter = new YamlFormatter();
 
         return $formatter->encode($array['header'] ?? []);
     }
@@ -676,7 +684,7 @@ trait PageLegacyTrait
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];
 
-        return $locator->findResource($this->getStorageFolder() .  '/' . $this->name());
+        return $locator->findResource($this->getStorageFolder(), true, true) . '/' . ($this->isPage() ? $this->name() : '');
     }
 
     /**
@@ -689,7 +697,7 @@ trait PageLegacyTrait
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];
 
-        return $locator->findResource($this->getStorageFolder() .  '/' . $this->name(), false);
+        return $locator->findResource($this->getStorageFolder(), false, true) .  '/' . ($this->isPage() ? $this->name() : '');
     }
 
     /**
@@ -705,7 +713,7 @@ trait PageLegacyTrait
             'order_dir',
             $var,
             static function($value) {
-                return strtolower(trim($value)) === 'desc' ? 'desc' : 'asc';
+                return strtolower(trim($value) ?: Grav::instance()['config']->get('system.pages.order.dir')) === 'desc' ? 'desc' : 'asc';
             }
         );
     }
@@ -728,7 +736,7 @@ trait PageLegacyTrait
             'order_by',
             $var,
             static function($value) {
-                return trim($value);
+                return trim($value) ?: Grav::instance()['config']->get('system.pages.order.by');
             }
         );
     }
