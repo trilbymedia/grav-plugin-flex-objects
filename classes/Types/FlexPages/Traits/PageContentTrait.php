@@ -415,6 +415,15 @@ trait PageContentTrait
             'taxonomy',
             $var,
             static function($value) {
+                // make sure first level are arrays
+                array_walk($value, static function(&$val) {
+                    $val = (array) $val;
+                });
+                // make sure all values are strings
+                array_walk_recursive($value, static function(&$val) {
+                    $val = (string) $val;
+                });
+
                 return $value ?? [];
             }
         );
