@@ -2,17 +2,12 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
-use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageContentTrait as ParentTrait;
-
-
 /**
  * Implements PageContentInterface.
  */
 trait PageContentTrait
 {
-    use ParentTrait;
-
-        /**
+    /**
      * @inheritdoc
      */
     public function id($var = null): string

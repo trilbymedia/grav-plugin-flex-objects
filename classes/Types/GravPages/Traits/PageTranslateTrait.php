@@ -1,12 +1,11 @@
 <?php
 
-namespace Grav\Plugin\FlexObjects\Types\FlexPages\Traits;
+namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Page;
 use Grav\Common\Utils;
-use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageTranslateTrait as ParentTrait;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 
 /**
@@ -14,10 +13,6 @@ use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
  */
 trait PageTranslateTrait
 {
-    use ParentTrait {
-        ParentTrait::translatedLanguages as translatedLanguagesTrait;
-    }
-
     /**
      * Return an array with the routes of other translated languages
      *

@@ -7,17 +7,12 @@ use Grav\Common\Page\Interfaces\PageCollectionInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
 use Grav\Common\Utils;
-use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageRoutableTrait as ParentTrait;
 
 /**
  * Implements PageRoutableInterface.
  */
 trait PageRoutableTrait
 {
-    use ParentTrait {
-        ParentTrait::parent as parentTrait;
-    }
-
     /**
      * Gets the route for the page based on the route headers if available, else from
      * the parents route and the current Page's slug.
@@ -53,7 +48,7 @@ trait PageRoutableTrait
     public function parent(PageInterface $var = null)
     {
         if (Utils::isAdminPlugin()) {
-            return $this->parentTrait();
+            return parent::parent();
         }
 
         if (null !== $var) {

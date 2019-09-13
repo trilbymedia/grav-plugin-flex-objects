@@ -241,16 +241,5 @@ trait PageTranslateTrait
         return $fallback ? $language->getFallbackLanguages($languageCode, true) : [$languageCode];
     }
 
-    /**
-     * @param string $value
-     * @return string|null
-     */
-    protected function offsetLoad_language($value): ?string
-    {
-        $value = (string)($value ?? trim(basename($this->extension(), 'md'), '.'));
-
-        return $value !== '' ? $value : null;
-    }
-
     abstract protected function loadHeaderProperty(string $property, $var, callable $filter);
 }

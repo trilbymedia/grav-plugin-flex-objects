@@ -545,7 +545,7 @@ trait PageContentTrait
             $config = array_merge($config, $config_page);
         }
 
-        // Return summary based on settings in site config file.
+        // Summary is not enabled, return the whole content.
         if (empty($config['enabled'])) {
             return $this->content();
         }
@@ -559,17 +559,18 @@ trait PageContentTrait
 
         // Return calculated summary based on summary divider's position.
         $format = $config['format'] ?? '';
-        if ($format === 'short' && $summary_size) {
+
+        // Return entire page content on wrong/unknown format.
+        if ($format !== 'long' && $format !== 'short') {
+            return $content;
+        }
+
+        if ($format === 'short' && null !== $summary_size) {
             // Slice the string on breakpoint.
             if ($content_size > $summary_size) {
                 return mb_substr($content, 0, $summary_size);
             }
 
-            return $content;
-        }
-
-        // Return entire page content on wrong/unknown format or if format=short and summary_size=0.
-        if ($format !== 'long') {
             return $content;
         }
 
@@ -692,8 +693,6 @@ trait PageContentTrait
                 $this->cachePageContent();
             }
         }
-
-//        $this->_content = $this->processMarkdown($this->_content, $markdown_options);
 
         // Handle summary divider
         $delimiter = $config->get('site.summary.delimiter', '===');

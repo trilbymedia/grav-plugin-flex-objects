@@ -8,17 +8,12 @@ use Grav\Common\Page\Interfaces\PageCollectionInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
 use Grav\Common\Utils;
-use Grav\Plugin\FlexObjects\Types\FlexPages\Traits\PageLegacyTrait as ParentTrait;
 
 /**
  * Implements PageLegacyInterface.
  */
 trait PageLegacyTrait
 {
-    use ParentTrait {
-        ParentTrait::children as childrenTrait;
-    }
-
     /**
      * Returns children of this page.
      *
@@ -27,7 +22,7 @@ trait PageLegacyTrait
     public function children()
     {
         if (Utils::isAdminPlugin()) {
-            return $this->childrenTrait();
+            return parent::children();
         }
 
         /** @var Pages $pages */
