@@ -130,10 +130,9 @@ export class FlexPages {
                     const translations = item.extras.langs || {};
                     Object.keys(translations).forEach((lang) => {
                         const translated = translations[lang];
-                        langs += `<a class="lang" href="${LANG_URL.replace(/%LANG%/g, lang).replace('//', '/')}"><span class="badge lang-${lang ? lang : 'default'} lang-${translated ? 'translated' : 'non-translated'}">${lang ? lang : 'default'}</span></a>`;
+                        langs += `<a class="lang" href="${LANG_URL.replace(/%LANG%/g, lang).replace('//', '/')}${item.route.raw}"><span class="badge lang-${lang ? lang : 'default'} lang-${translated ? 'translated' : 'non-translated'}">${lang ? lang : 'default'}</span></a>`;
                     });
 
-                    const route = `${GRAV_CONFIG.current_url}/${item.route.raw}`.replace('//', '/');
                     const ul = $(`<div class="dropdown-menu">
     <div class="action-bar">
         <a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Delete"><i class="fa fa-fw fa-trash"></i></a></li>
@@ -160,7 +159,7 @@ export class FlexPages {
                 </tr>
                 <tr>
                     <td><b>modified</b></td>
-                    <td>${new Date(item.modified * 1000).toLocaleString('en-US')}</td>
+                    <td>${item.modified}</td>
                 </tr>
             </table>
         </div>
