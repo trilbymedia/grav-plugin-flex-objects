@@ -387,7 +387,7 @@ trait PageContentTrait
             function($value) {
                 $value = $value ? Utils::date2timestamp($value, $this->getProperty('dateformat')) : false;
 
-                return $value ?: ($this->getMetaData()['storage_created'] ?? 0);
+                return $value ?: $this->modified();
             }
         );
     }

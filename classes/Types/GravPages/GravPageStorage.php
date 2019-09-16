@@ -201,13 +201,11 @@ class GravPageStorage extends FolderStorage
             ksort($children, SORT_NATURAL);
 
             $file = array_key_first($markdown[''] ?? reset($markdown) ?: []);
-            $filename = $path . '/' . $file . '.md';
 
             $meta = [
                 'key' => $route,
                 'storage_key' => $key,
                 'storage_file' => $file,
-                'storage_created' => (file_exists($filename) ? filectime($filename) : 0) ?: filectime($path),
                 'storage_timestamp' => $modified,
             ];
             if ($markdown) {
