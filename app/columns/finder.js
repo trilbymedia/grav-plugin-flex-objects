@@ -109,6 +109,11 @@ export class FlexPages {
             lang.appendTo(icon);
         }
 
+        if (item.extras && item.extras && (item.extras.published_date || item.extras.unpublished_date)) {
+            const clock = $('<span class="badge-clock" />');
+            clock.appendTo(icon);
+        }
+
         const info = $(`<span class="fjs-info"><b>${item.title}</b> <em>${item.route.display}</em></span>`);
         const actions = $('<span class="fjs-actions" />');
 
@@ -160,6 +165,18 @@ export class FlexPages {
                     <td><b>template</b></td>
                     <td>${item.extras.template}</td>
                 </tr>
+                ${item.extras && item.extras.published_date ? `
+                <tr>
+                    <td><b>publish</b></td>
+                    <td>${item.extras.published_date}</td>
+                </tr>
+                ` : ''}
+                ${item.extras && item.extras.unpublished_date ? `
+                <tr>
+                    <td><b>unpublish</b></td>
+                    <td>${item.extras.unpublished_date}</td>
+                </tr>
+                ` : ''}
                 <tr>
                     <td><b>modified</b></td>
                     <td>${item.modified}</td>
