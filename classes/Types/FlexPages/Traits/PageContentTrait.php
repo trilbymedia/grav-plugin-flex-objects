@@ -8,6 +8,7 @@ use Grav\Common\Markdown\Parsedown;
 use Grav\Common\Markdown\ParsedownExtra;
 use Grav\Common\Page\Header;
 use Grav\Common\Page\Interfaces\PageInterface;
+use Grav\Common\Page\Markdown\Excerpts;
 use Grav\Common\Page\Media;
 use Grav\Common\Twig\Twig;
 use Grav\Common\Utils;
@@ -667,6 +668,10 @@ trait PageContentTrait
                     }
                 }
             }
+            $options = [
+                'markdown' => $markdown_options,
+                'images' => $config->get('system.images', [])
+            ];
 
             $this->_content = $content;
             $grav->fireEvent('onPageContentRaw', new Event(['page' => $this]));
@@ -677,7 +682,7 @@ trait PageContentTrait
                 }
 
                 if ($process_markdown) {
-                    $this->_content = $this->processMarkdown($this->_content, $markdown_options);
+                    $this->_content = $this->processMarkdown($this->_content, $options);
                 }
 
                 // Content Processed but not cached yet
@@ -685,7 +690,7 @@ trait PageContentTrait
 
             } else {
                 if ($process_markdown) {
-                    $this->_content = $this->processMarkdown($this->_content, $markdown_options);
+                    $this->_content = $this->processMarkdown($this->_content, $options);
                 }
 
                 // Content Processed but not cached yet
@@ -746,11 +751,14 @@ trait PageContentTrait
      */
     protected function processMarkdown($content, array $options = []): string
     {
+        /** @var PageInterface $this */
+        $excerpts = new Excerpts($this, $options);
+
         // Initialize the preferred variant of markdown parser.
         if (isset($defaults['extra'])) {
-            $parsedown = new ParsedownExtra($this, $options);
+            $parsedown = new ParsedownExtra($excerpts);
         } else {
-            $parsedown = new Parsedown($this, $options);
+            $parsedown = new Parsedown($excerpts);
         }
 
         return $parsedown->text($content);
