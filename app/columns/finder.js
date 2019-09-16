@@ -138,7 +138,7 @@ export class FlexPages {
                     const translations = item.extras.langs || {};
                     Object.keys(translations).forEach((lang) => {
                         const translated = translations[lang];
-                        langs += `<a class="lang" href="${LANG_URL.replace(/%LANG%/g, lang).replace('//', '/')}${item.route.raw}"><span class="badge lang-${lang ? lang : 'default'} lang-${translated ? 'translated' : 'non-translated'}">${lang ? lang : 'default'}</span></a>`;
+                        langs += `<a class="lang" href="${LANG_URL.replace(/%LANG%/g, lang).replace('//', '/')}${item.route.raw}"><span class="badge lang-${lang ? lang : 'default'} lang-${translated ? 'translated' : 'non-translated'}"><i class="fa fa-fw fa-circle"></i> ${lang ? lang : 'default'}</span></a>`;
                     });
 
                     const canPreview = !(item.extras.tags.includes('non-routable') || item.extras.tags.includes('unpublished'));
