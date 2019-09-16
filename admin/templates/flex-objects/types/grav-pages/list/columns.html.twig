@@ -1,279 +1,308 @@
 {% block directory %}
-    <div id="pages-content-wrapper">
-        <div id="pages-filters">
-        <form>
-            <div class="filters-bar">
-                <input type="text" placeholder="Filter..." name="filter"/>
-                <a href="#" class="button-border">Advanced Options</a>
-            </div>
+  <div id="pages-content-wrapper">
+    <div id="pages-filters">
+      <form>
+        <div class="filters-bar">
+          <input type="text" placeholder="Filter..." name="filter"/>
+          <a href="#" class="button-border">Advanced Options</a>
+        </div>
 
-            <div class="filters-advanced hide">
-                <fieldset>
-                    <legend>Page Attributes</legend>
-                    <span class="checkboxes toggleable">
+        <div class="filters-advanced hide">
+          <fieldset>
+            <legend>Page Attributes</legend>
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.modular" name="filters[modular]">
                         <label for="filters.modular">Modular</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.visible" name="filters[visible]">
                         <label for="filters.visible">Visible</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.routable" name="filters[routable]">
                         <label for="filters.routable">Routable</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.published" name="filters[published]">
                         <label for="filters.published">Published</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.non-modular" name="filters[non-modular]">
                         <label for="filters.non-modular">Non-Modular</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.non-visible" name="filters[non-visible]">
                         <label for="filters.non-visible">Non-Visible</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.non-routable" name="filters[non-routable]">
                         <label for="filters.non-routable">Non-Routable</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.non-published" name="filters[non-published]">
                         <label for="filters.non-published">Non-Published</label>
                     </span>
-                </fieldset>
+          </fieldset>
 
-                <fieldset>
-                    <legend>Page Types</legend>
-                    <span class="checkboxes toggleable">
+          <fieldset>
+            <legend>Page Types</legend>
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.default" name="filters[default]">
                         <label for="filters.default">Default</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.blog-item" name="filters[blog-item]">
                         <label for="filters.blog-item">Blog Item</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.blog-listing" name="filters[blog-listing]">
                         <label for="filters.blog-listing">Blog Listing</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.error" name="filters[error]">
                         <label for="filters.error">Error</label>
                     </span>
-                    <span class="checkboxes toggleable">
+            <span class="checkboxes toggleable">
                         <input type="checkbox" id="filters.form" name="filters[form]">
                         <label for="filters.form">Form</label>
                     </span>
-                </fieldset>
-            </div>
-        </form>
-    </div>
-
-    <div class="grav-loading"><div class="grav-loader">Loading...</div></div>
-    <div id="pages-columns" data-lang-url="{{ grav.uri.getCurrentRoute.withoutParams.withExtension('').withLanguage('%LANG%').toString(true) }}"></div>
-
-        {#
-        <div id="pages-columns" class="parents-content fjs-container" tabindex="0">
-        <div class="fjs-col">
-            <ul class="fjs-list">
-                <li class="fjs-item" data-fjs-item="">
-                    <a href="" tabindex="-1">
-                        <span class="fjs-icon home badge-published"></span>
-                        <span class="fjs-info">
-              <b>Home</b>
-              <em>/blog</em>
-            </span>
-                        <span class="fjs-actions">
-              <span class="child-count">17</span>
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children"></i>
-            </span>
-                    </a>
-                </li>
-                <li class="fjs-item" data-fjs-item="">
-                    <a href="" tabindex="-1">
-            <span class="fjs-icon visible badge-published">
-              <span class="badge-clock"></span>
-              <span class="badge-lang default">en</span>
-            </span>
-                        <span class="fjs-info">
-              <b>Apple</b>
-              <em>/apple</em>
-            </span>
-                        <span class="fjs-actions">
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children disabled"></i>
-            </span>
-                    </a>
-                </li>
-                <li class="fjs-item active" data-fjs-item="">
-                    <a href="" tabindex="-1">
-            <span class="fjs-icon modular badge-unpublished">
-              <span class="badge-lang">fr</span>
-            </span>
-                        <span class="fjs-info">
-              <b>Modular Page with a really long title</b>
-              <em>/_some-modular-page-with-a-really-long-slug</em>
-            </span>
-                        <span class="fjs-actions">
-              <span class="child-count">6</span>
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children"></i>
-            </span>
-
-                    </a>
-                </li>
-            </ul>
+          </fieldset>
         </div>
-        <div class="fjs-col">
-            <ul class="fjs-list">
-                <li class="fjs-item" data-fjs-item="">
-                    <a href="" tabindex="-1">
-            <span class="fjs-icon visible badge-published">
-              <span class="badge-lang default">en</span>
-            </span>
-                        <span class="fjs-info">
-              <b>Regular Page</b>
-              <em>/regular-page</em>
-            </span>
-                        <span class="fjs-actions">
-              <span class="child-count">9</span>
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children"></i>
-            </span>
-                    </a>
-                </li>
-                <li class="fjs-item" data-fjs-item="">
-                    <a href="" tabindex="-1">
-            <span class="fjs-icon visible badge-published">
-              <span class="badge-lang">fr</span>
-            </span>
-                        <span class="fjs-info">
-              <b>Regular Page</b>
-              <em>/regular-page</em>
-            </span>
-                        <span class="fjs-actions">
-              <span class="child-count">25</span>
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children"></i>
-            </span>
-                    </a>
-                </li>
-                <li class="fjs-item" data-fjs-item="">
-                    <a href="" tabindex="-1">
-                        <span class="fjs-icon visible badge-published"></span>
-                        <span class="fjs-info">
-              <b>Foo Bar</b>
-              <em>/foo-bar</em>
-            </span>
-                        <span class="fjs-actions">
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children disabled"></i>
-            </span>
-                    </a>
-                </li>
-                <li class="fjs-item" data-fjs-item="">
-                    <a href="" tabindex="-1">
-                        <span class="fjs-icon visible badge-published"></span>
-                        <span class="fjs-info">
-              <b>Regular Page</b>
-              <em>/regular-page</em>
-            </span>
-                        <span class="fjs-actions">
-              <span class="child-count">124</span>
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children"></i>
-            </span>
-                    </a>
-                </li>
-                <li class="fjs-item active" data-fjs-item="">
-                    <a href="" tabindex="-1">
-                        <span class="fjs-icon lock badge-published"></span>
-                        <span class="fjs-info">
-              <b>Regular Page</b>
-              <em>/regular-page</em>
-            </span>
-                        <span class="fjs-actions">
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children disabled"></i>
-            </span>
-                    </a>
-                </li>
-                <li class="fjs-item" data-fjs-item="">
-                    <a href="" tabindex="-1">
-            <span class="fjs-icon visible badge-unpublished">
-              <span class="badge-clock"></span>
-            </span>
-                        <span class="fjs-info">
-              <b>Regular Page</b>
-              <em>/regular-page</em>
-            </span>
-                        <span class="fjs-actions">
-              <span class="child-count">3</span>
-              <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
-              <i class="fa fa-chevron-right fjs-children"></i>
-            </span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="fjs-col">
-            <ul class="fjs-list"></ul>
-        </div>
-    </div>
-    #}
+      </form>
     </div>
 
-    {# Modals #}
-    <div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking: false">
-        {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/new'), data: obj_data, form_id:'new-page' } %}
+    <div class="grav-loading">
+      <div class="grav-loader">Loading...</div>
     </div>
+    <div id="pages-columns"
+         data-lang-url="{{ grav.uri.getCurrentRoute.withoutParams.withExtension('').withLanguage('%LANG%').toString(true) }}"></div>
 
-    <div class="remodal" data-remodal-id="modal-folder" data-remodal-options="hashTracking: false">
-        {% include 'partials/blueprints-new-folder.html.twig' with { blueprints: admin.blueprints('admin/pages/new_folder'), data: obj_data, form_id:'new-folder' } %}
-    </div>
 
-    <div class="remodal" data-remodal-id="modular" data-remodal-options="hashTracking: false">
-        {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/modular_new'), data: obj_data, form_id:'new-modular' } %}
-    </div>
-
-    {# TODO: regular pages support extra modals from admin config #}
-
-    <div class="remodal parents-container" data-remodal-id="parents"
-         data-remodal-options="hashTracking: false, stack: true">
-        <form>
-            <h1>Parents</h1>
-            <div class="grav-loading">
-                <div class="grav-loader">Loading...</div>
+    <div id="pages-columns" class="parents-content fjs-container" tabindex="0">
+      <div class="fjs-col">
+        <ul class="fjs-list">
+          <li class="fjs-item" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+                <a href="" tabindex="-1">
+                    <span class="fjs-icon home badge-published"></span>
+                    <span class="fjs-info">
+                      <b>Home</b>
+                      <em>/blog</em>
+                    </span>
+                </a>
+                <span class="fjs-actions">
+                  <span class="child-count">17</span>
+                  <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                  <i class="fa fa-chevron-right fjs-children"></i>
+                </span>
             </div>
-            <div class="parents-content"></div>
-            <div class="button-bar">
-                <a class="button secondary remodal-cancel" data-remodal-action="cancel" href="#">
-                    <i class="fa fa-fw fa-close"></i> {{ "PLUGIN_ADMIN.CANCEL"|tu }}</a>
-                <a class="button" data-parents-select href="#">
-                    <i class="fa fa-fw fa-check"></i> {{ "PLUGIN_ADMIN.CONTINUE"|tu }}</a>
+          </li>
+          <li class="fjs-item" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+              <a href="" tabindex="-1">
+                <span class="fjs-icon visible badge-published">
+                  <span class="badge-clock"></span>
+                  <span class="badge-lang default">en</span>
+                </span>
+                  <span class="fjs-info">
+                      <b>Apple</b>
+                      <em>/apple</em>
+                    </span>
+                </a>
+                <span class="fjs-actions">
+                      <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                      <i class="fa fa-chevron-right fjs-children disabled"></i>
+                </span>
             </div>
-        </form>
+          </li>
+          <li class="fjs-item active" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+              <a href="" tabindex="-1">
+                <span class="fjs-icon modular badge-unpublished">
+                  <span class="badge-lang">fr</span>
+                </span>
+              <span class="fjs-info">
+                  <b>Modular Page with a really long title</b>
+                  <em>/_some-modular-page-with-a-really-long-slug</em>
+                </span>
+            </a>
+            <span class="fjs-actions">
+                  <span class="child-count">6</span>
+                  <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                  <i class="fa fa-chevron-right fjs-children"></i>
+                </span>
+
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="fjs-col">
+        <ul class="fjs-list">
+          <li class="fjs-item" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+            <a href="" tabindex="-1">
+                <span class="fjs-icon visible badge-published">
+                  <span class="badge-lang default">en</span>
+                </span>
+              <span class="fjs-info">
+                  <b>Regular Page</b>
+                  <em>/regular-page</em>
+                </span>
+            </a>
+              <span class="fjs-actions">
+                  <span class="child-count">9</span>
+                  <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                  <i class="fa fa-chevron-right fjs-children"></i>
+                </span>
+
+            </div>
+          </li>
+          <li class="fjs-item" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+            <a href="" tabindex="-1">
+                <span class="fjs-icon visible badge-published">
+                  <span class="badge-lang">fr</span>
+                </span>
+              <span class="fjs-info">
+                  <b>Regular Page</b>
+                  <em>/regular-page</em>
+                </span>
+            </a>
+              <span class="fjs-actions">
+                  <span class="child-count">25</span>
+                  <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                  <i class="fa fa-chevron-right fjs-children"></i>
+                </span>
+
+            </div>
+          </li>
+          <li class="fjs-item" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+            <a href="" tabindex="-1">
+              <span class="fjs-icon visible badge-published"></span>
+              <span class="fjs-info">
+                  <b>Foo Bar</b>
+                  <em>/foo-bar</em>
+                </span>
+            </a>
+              <span class="fjs-actions">
+                  <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                  <i class="fa fa-chevron-right fjs-children disabled"></i>
+                </span>
+
+            </div>
+          </li>
+          <li class="fjs-item" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+            <a href="" tabindex="-1">
+              <span class="fjs-icon visible badge-published"></span>
+              <span class="fjs-info">
+                  <b>Regular Page</b>
+                  <em>/regular-page</em>
+                </span>
+            </a>
+              <span class="fjs-actions">
+                  <span class="child-count">124</span>
+                  <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                  <i class="fa fa-chevron-right fjs-children"></i>
+                </span>
+
+            </div>
+          </li>
+          <li class="fjs-item active" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+            <a href="" tabindex="-1">
+              <span class="fjs-icon lock badge-published"></span>
+              <span class="fjs-info">
+                  <b>Regular Page</b>
+                  <em>/regular-page</em>
+                </span>
+            </a>
+              <span class="fjs-actions">
+                  <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                  <i class="fa fa-chevron-right fjs-children disabled"></i>
+                </span>
+
+            </div>
+          </li>
+          <li class="fjs-item" data-fjs-item="">
+            <div class="fjs-item-wrapper">
+            <a href="" tabindex="-1">
+                <span class="fjs-icon visible badge-unpublished">
+                  <span class="badge-clock"></span>
+                </span>
+              <span class="fjs-info">
+                  <b>Regular Page</b>
+                  <em>/regular-page</em>
+                </span>
+            </a>
+              <span class="fjs-actions">
+                  <span class="child-count">3</span>
+                  <i class="fa fa-ellipsis-v fjs-action-toggle"></i>
+                  <i class="fa fa-chevron-right fjs-children"></i>
+                </span>
+
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="fjs-col">
+        <ul class="fjs-list"></ul>
+      </div>
     </div>
 
-    <div class="remodal" data-remodal-id="delete" data-remodal-options="hashTracking: false">
-        <form>
-            <h1>{{ "PLUGIN_ADMIN.MODAL_DELETE_PAGE_CONFIRMATION_REQUIRED_TITLE"|tu }}</h1>
-            <p class="bigger">
-                {% if context %}
-                    <strong>{{ "PLUGIN_ADMIN.PAGE"|tu }}: {{ context.title }}</strong>
-                {% endif %}
-            </p>
-            <p class="bigger">
-                {{ "PLUGIN_ADMIN.MODAL_DELETE_PAGE_CONFIRMATION_REQUIRED_DESC"|tu }}
-            </p>
-            <br>
-            <div class="button-bar">
-                <button data-remodal-action="cancel" class="button secondary remodal-cancel"><i class="fa fa-fw fa-close"></i> {{ "PLUGIN_ADMIN.CANCEL"|tu }}</button>
-                <a class="button disable-after-click" data-delete-action href="#"><i class="fa fa-fw fa-check"></i> {{ "PLUGIN_ADMIN.CONTINUE"|tu }}</a>
-            </div>
-        </form>
-    </div>
+  </div>
+
+  {# Modals #}
+  <div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking: false">
+    {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/new'), data: obj_data, form_id:'new-page' } %}
+  </div>
+
+  <div class="remodal" data-remodal-id="modal-folder" data-remodal-options="hashTracking: false">
+    {% include 'partials/blueprints-new-folder.html.twig' with { blueprints: admin.blueprints('admin/pages/new_folder'), data: obj_data, form_id:'new-folder' } %}
+  </div>
+
+  <div class="remodal" data-remodal-id="modular" data-remodal-options="hashTracking: false">
+    {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/modular_new'), data: obj_data, form_id:'new-modular' } %}
+  </div>
+
+  {# TODO: regular pages support extra modals from admin config #}
+
+  <div class="remodal parents-container" data-remodal-id="parents"
+       data-remodal-options="hashTracking: false, stack: true">
+    <form>
+      <h1>Parents</h1>
+      <div class="grav-loading">
+        <div class="grav-loader">Loading...</div>
+      </div>
+      <div class="parents-content"></div>
+      <div class="button-bar">
+        <a class="button secondary remodal-cancel" data-remodal-action="cancel" href="#">
+          <i class="fa fa-fw fa-close"></i> {{ "PLUGIN_ADMIN.CANCEL"|tu }}</a>
+        <a class="button" data-parents-select href="#">
+          <i class="fa fa-fw fa-check"></i> {{ "PLUGIN_ADMIN.CONTINUE"|tu }}</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="remodal" data-remodal-id="delete" data-remodal-options="hashTracking: false">
+    <form>
+      <h1>{{ "PLUGIN_ADMIN.MODAL_DELETE_PAGE_CONFIRMATION_REQUIRED_TITLE"|tu }}</h1>
+      <p class="bigger">
+        {% if context %}
+          <strong>{{ "PLUGIN_ADMIN.PAGE"|tu }}: {{ context.title }}</strong>
+        {% endif %}
+      </p>
+      <p class="bigger">
+        {{ "PLUGIN_ADMIN.MODAL_DELETE_PAGE_CONFIRMATION_REQUIRED_DESC"|tu }}
+      </p>
+      <br>
+      <div class="button-bar">
+        <button data-remodal-action="cancel" class="button secondary remodal-cancel"><i
+              class="fa fa-fw fa-close"></i> {{ "PLUGIN_ADMIN.CANCEL"|tu }}</button>
+        <a class="button disable-after-click" data-delete-action href="#"><i
+              class="fa fa-fw fa-check"></i> {{ "PLUGIN_ADMIN.CONTINUE"|tu }}</a>
+      </div>
+    </form>
+  </div>
 {% endblock %}
