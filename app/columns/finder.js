@@ -134,13 +134,14 @@ export class FlexPages {
                         langs += `<a class="lang" href="${LANG_URL.replace(/%LANG%/g, lang).replace('//', '/')}${item.route.raw}"><span class="badge lang-${lang ? lang : 'default'} lang-${translated ? 'translated' : 'non-translated'}">${lang ? lang : 'default'}</span></a>`;
                     });
 
+                    const canPreview = !(item.extras.tags.includes('non-routable') || item.extras.tags.includes('unpublished'));
                     const ul = $(`<div class="dropdown-menu">
     <div class="action-bar">
         <a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Delete"><i class="fa fa-fw fa-trash"></i></a></li>
         <a href="#" class="dropdown-item" title="Move"><i class="fa fa-fw fa-arrows"></i></a></li>
         <a href="#" class="dropdown-item" title="Duplicate"><i class="fa fa-fw fa-copy"></i></a></li>
         <a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a></li>
-        <a href="${route}/?preview=1" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a></li>
+        ${canPreview ? `<a href="${route}/?preview=1" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a></li>` : ''}
     </div>
     <div class="divider"></div>
     <div class="tags">${tags}</div>
