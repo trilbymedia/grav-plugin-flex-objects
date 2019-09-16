@@ -91,6 +91,7 @@ export class FlexPages {
     static createItemContent(config, item) {
         const frag = document.createDocumentFragment();
         const icon = $(`<span class="fjs-icon ${item.icon} badge-${item.extras && item.extras.published ? 'published' : 'unpublished'}" />`);
+        const route = `${GRAV_CONFIG.current_url}/${item.route.raw}`.replace('//', '/');
 
         if (item.extras && item.extras.lang) {
             let status = '';
