@@ -26,6 +26,8 @@ use Grav\Framework\Flex\Interfaces\FlexTranslateInterface;
 use Grav\Framework\Object\Interfaces\ObjectInterface;
 use Grav\Framework\Psr7\Response;
 use Grav\Framework\RequestHandler\Exception\RequestException;
+use Grav\Framework\Route\Route;
+use Grav\Framework\Route\RouteFactory;
 use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Controllers\MediaController;
 use Grav\Plugin\FlexObjects\Flex;
@@ -76,8 +78,12 @@ class AdminController
     /** @var int */
     protected $redirectCode;
 
-    protected $currentUri;
-    protected $referrerUri;
+    /** @var Route */
+    protected $currentRoute;
+
+    /** @var Route */
+    protected $referrerRoute;
+
     protected $action;
     protected $location;
     protected $target;
@@ -269,11 +275,10 @@ class AdminController
 
                 $this->admin->setMessage($this->admin::translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
 
-                $redirect = $this->referrerUri;
-                if ($this->currentUri === $this->referrerUri) {
-                    $redirect = dirname($this->currentUri);
+                $redirect = $this->referrerRoute->toString(true);
+                if ($this->currentRoute === $this->referrerRoute) {
+                    $redirect = dirname($this->currentRoute->toString(true));
                 }
-                $redirect = $this->admin->adminUrl($redirect);
 
                 $this->setRedirect($redirect);
 
@@ -284,7 +289,7 @@ class AdminController
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Delete Failed: ' . $e->getMessage(), 'error');
 
-            $this->setRedirect($this->admin->adminUrl($this->referrerUri), 302);
+            $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 
         return $object ? true : false;
@@ -324,7 +329,7 @@ class AdminController
 
         $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
-        $this->setRedirect($this->admin->adminUrl($this->referrerUri));
+        $this->setRedirect($this->referrerRoute->toString(true));
     }
 
     /**
@@ -428,7 +433,7 @@ class AdminController
 
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Copy Failed: ' . $e->getMessage(), 'error');
-            $this->setRedirect($this->admin->adminUrl($this->referrerUri), 302);
+            $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 
         return true;
@@ -604,22 +609,23 @@ class AdminController
 
             if (!$this->redirect) {
                 // TODO: remove 'action:add' after save.
-                if (strpos($this->referrerUri, 'action:add') && !Utils::endsWith($this->currentUri, $object->getKey())) {
-                    $this->referrerUri = $this->currentUri . '/' . $object->getKey();
+                if ($this->referrerRoute->getGravParam('action') === 'add' && !Utils::endsWith($this->currentRoute->toString(false), '/' . $object->getKey())) {
+                    $this->referrerRoute = $this->currentRoute->withAddedPath($object->getKey())->withGravParam('action', null);
                 } elseif ($key !== $object->getKey()) {
-                    $this->referrerUri = dirname($this->currentUri) . '/' . $object->getKey();
+                    $this->referrerRoute = $this->currentRoute->withRoute($this->currentRoute->getRoute(0, -1) . '/' . $object->getKey());
                 }
                 $postAction = $request->getParsedBody()['data']['_post_entries_save'] ?? 'edit';
                 if ($postAction === 'list') {
-                    $this->referrerUri = dirname($this->currentUri);
+                    $this->referrerRoute = $this->currentRoute->withRoute($this->currentRoute->getRoute(0, -1));
                 }
 
                 $lang = null;
-                if ($this->referrerUri && $object instanceof FlexTranslateInterface) {
-                    $lang = $object->getLanguage() ?: null;
+                if ($object instanceof FlexTranslateInterface) {
+                    $lang = $object->getLanguage();
+                    $this->referrerRoute = $this->referrerRoute->withLanguage($lang);
                 }
 
-                $this->setRedirect($this->admin->adminUrl($this->referrerUri, $lang));
+                $this->setRedirect($this->referrerRoute->toString(true));
             }
 
             $grav = Grav::instance();
@@ -627,7 +633,7 @@ class AdminController
             $grav->fireEvent('gitsync');
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
-            $this->setRedirect($this->admin->adminUrl($this->referrerUri), 302);
+            $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 
         return true;
@@ -793,30 +799,10 @@ class AdminController
             $this->action = $this->post['action'] ?? $uri->param('action');
             $this->active = true;
             $this->admin = Grav::instance()['admin'];
-            $this->currentUri = $this->makeRelativeUri($uri->route());
-            $this->referrerUri = $this->makeRelativeUri($uri->referrer()) ?: $this->currentUri;
+            $this->currentRoute = $uri::getCurrentRoute();
+            $referrer = $uri->referrer();
+            $this->referrerRoute = $referrer ? RouteFactory::createFromString($referrer) : $this->currentRoute;
         }
-    }
-
-    protected function makeRelativeUri(string $url)
-    {
-        $base = $this->admin->base;
-
-        if (mb_strpos($url, $base) === 0) {
-            return mb_substr($url, mb_strlen($base));
-        }
-
-        /** @var Language $language */
-        $language = $this->grav['language'];
-        $lang = $language->getLanguage();
-        if ($lang) {
-            $base = '/' . $lang . $base;
-            if (mb_strpos($url, $base) === 0) {
-                return mb_substr($url, mb_strlen($base));
-            }
-        }
-
-        return '';
     }
 
     /**
@@ -1079,7 +1065,7 @@ class AdminController
     public function setRedirect($path, $code = 303)
     {
         $this->redirect     = $path;
-        $this->redirectCode = $code;
+        $this->redirectCode = (int)$code;
     }
 
     /**
@@ -1087,50 +1073,7 @@ class AdminController
      */
     public function redirect()
     {
-        if (!$this->redirect) {
-            return;
-        }
-
-        $base = $this->admin->base;
-        $this->redirect = '/' . ltrim($this->redirect, '/');
-
-        // Redirect contains full path, so just use it.
-        if (Utils::startsWith($this->redirect, $base)) {
-            $this->grav->redirect($this->redirect, $this->redirectCode);
-        }
-
-        $redirect = '';
-        if ($this->isMultilang()) {
-            // if base path does not already contain the lang code, add it
-            $lang = $this->getLanguage();
-            $langPrefix = '/' . $lang;
-            if ($lang && !Utils::startsWith($base, $langPrefix . '/')) {
-                $base = $langPrefix . $base;
-            }
-
-            // now the first 4 chars of base contain the lang code.
-            // if redirect path already contains the lang code, and is != than the base lang code, then use redirect path as-is
-            if (Utils::pathPrefixedByLangCode($base) && Utils::pathPrefixedByLangCode($this->redirect)
-                && !Utils::startsWith($this->redirect, $base)
-            ) {
-                $redirect = $this->redirect;
-            } else {
-                if (!Utils::startsWith($this->redirect, $base)) {
-                    $this->redirect = $base . $this->redirect;
-                }
-            }
-
-        } else {
-            if (!Utils::startsWith($this->redirect, $base)) {
-                $this->redirect = $base . $this->redirect;
-            }
-        }
-
-        if (!$redirect) {
-            $redirect = $this->redirect;
-        }
-
-        $this->grav->redirect($redirect, $this->redirectCode);
+        $this->admin->redirect($this->redirect, $this->redirectCode);
     }
 
     /**

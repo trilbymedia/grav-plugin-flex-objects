@@ -58,6 +58,7 @@ trait PageRoutableTrait
         /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
 
+        // FIXME: this does not work, needs to use $pages->get() with cached parent id!
         $key = $this->getKey();
         $parent_route = dirname('/' . $key);
 

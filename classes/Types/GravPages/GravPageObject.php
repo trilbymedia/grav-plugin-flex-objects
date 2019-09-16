@@ -400,6 +400,7 @@ class GravPageObject extends FlexPageObject
             $folder = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
             $parts[] = $folder;
             $language = $elements['lang'] ?? $this->getLanguage();
+            $elements['language'] = $language;
 
             // Finally update the storage key.
             $storage_key = implode('/', $parts) . ($language ? '|' . $language : '');
