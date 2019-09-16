@@ -61,6 +61,10 @@ trait PageTranslateTrait
         /** @var Language $language */
         $language = $grav['language'];
         $languages = $language->getLanguages();
+        if (!$languages) {
+            return [];
+        }
+
         $translated = $this->getLanguageTemplates();
 
         if ($includeDefault) {
