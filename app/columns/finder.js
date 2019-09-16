@@ -345,11 +345,15 @@ document.addEventListener('click', (event) => {
         });
     }
 
-    // const dropdown = (event.target.classList && event.target.classList.contains('dropdown-menu')) ? event.target : event.target.closest('.dropdown-menu');
     if ((event.target.classList && event.target.classList.contains('dropdown-menu')) || (event.target.closest('.dropdown-menu'))) {
         if (!$(event.target).closest('.dropdown-menu').find(event.target).length) {
             event.preventDefault();
             event.stopPropagation();
         }
     }
+});
+
+// Prevent dropdowns from closing when clicking within
+$(document).on('click.bs.dropdown.data-api', '.fjs-item-wrapper .dropdown-menu', (event) => {
+    event.stopPropagation();
 });
