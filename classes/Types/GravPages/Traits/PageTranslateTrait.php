@@ -23,7 +23,7 @@ trait PageTranslateTrait
     public function translatedLanguages($onlyPublished = false): array
     {
         if (Utils::isAdminPlugin()) {
-            return $this->translatedLanguages();
+            return parent::translatedLanguages();
         }
 
         $translated = $this->getlanguages(true);
