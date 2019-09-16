@@ -146,8 +146,7 @@ export class FlexPages {
     <div class="divider"></div>
     <div class="tags">${tags}</div>
     <div class="divider"></div>
-    <div class="langs">${langs}</div>
-    <div class="divider"></div>
+    ${item.extras.lang || typeof item.extras.langs !== 'undefined' ? `<div class="langs">${langs}</div><div class="divider"></div>` : ''}
     <div class="details">
         <div class="infos">
             <table>
