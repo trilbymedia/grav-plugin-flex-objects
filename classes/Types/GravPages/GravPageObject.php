@@ -280,9 +280,9 @@ class GravPageObject extends FlexPageObject
                         'lang' => $lang ?: null,
                         'translated' => $lang ? $child->hasTranslation($language, false) : null,
                         'langs' => $child->getAllLanguages(true) ?: null,
-                        'published' => $child->published(),
-                        'published_date' => $child->getPublish_Timestamp(),
-                        'unpublished_date' => $child->getUnpublish_Timestamp(),
+                        'published' => $this->jsDate($child->published()),
+                        'published_date' => $this->jsDate($child->publishDate()),
+                        'unpublished_date' => $this->jsDate($child->unpublishDate()),
                         'visible' => $child->visible(),
                         'routable' => $child->routable(),
                         'tags' => $tags,
@@ -296,7 +296,7 @@ class GravPageObject extends FlexPageObject
                             'display' => $child->getRoute()->toString(true),
                             'raw' => $child->rawRoute(),
                         ],
-                        'modified' => $page->modified(),
+                        'modified' => $this->jsDate($child->modified()),
                         'child_count' => count($child->children()) ?: null,
                         'extras' => $extras
                     ];
@@ -330,6 +330,18 @@ class GravPageObject extends FlexPageObject
         }
 
         return [$status, $msg ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED', $response, $path];
+    }
+
+    private function jsDate(int $timestamp = null)
+    {
+        if (!$timestamp) {
+            return null;
+        }
+
+        $config = Grav::instance()['config'];
+        $dateFormat = $config->get('system.pages.dateformat.long');
+
+        return date($dateFormat, $timestamp);
     }
 
     public function __debugInfo(): array
