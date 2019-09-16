@@ -2,6 +2,8 @@
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages\Traits;
 
+use Grav\Common\Utils;
+
 /**
  * Implements PageContentInterface.
  */
@@ -24,6 +26,31 @@ trait PageContentTrait
         }
 
         return $value;
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function date($var = null): int
+    {
+        return $this->loadHeaderProperty(
+            'date',
+            $var,
+            function($value) {
+                $value = $value ? Utils::date2timestamp($value, $this->getProperty('dateformat')) : false;
+
+                if (!$value) {
+                    // Get the specific translation updated date.
+                    $meta = $this->getMetaData();
+                    $language = $meta['language'] ?? '';
+                    $template = $this->getProperty('template');
+                    $value = $meta['markdown'][$language][$template] ?? 0;
+                }
+
+                return $value ?: $this->modified();
+            }
+        );
     }
 
     /**
