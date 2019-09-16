@@ -293,7 +293,7 @@ class GravPageObject extends FlexPageObject
                         'icon' => $icon,
                         'title' => $child->title(),
                         'route' => [
-                            'display' => $child->getRoute()->toString(false),
+                            'display' => $child->getRoute()->toString(false) ?: '/',
                             'raw' => $child->rawRoute(),
                         ],
                         'modified' => $this->jsDate($child->modified()),
