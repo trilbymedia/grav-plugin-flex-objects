@@ -62,12 +62,12 @@ export class FlexPages {
     static createItem(config, item, finder) {
         const listItem = $('<li />');
         const listItemClasses = [config.className.item];
-        const href = `${GRAV_CONFIG.current_url}/${item.route.raw}`.replace('//', '/');
-        const link = $('<a />');
+        // const href = `${GRAV_CONFIG.current_url}/${item.route.raw}`.replace('//', '/');
+        const link = $('<div class="fjs-item-wrapper" />');
         const createItemContent = config.createItemContent || finder.createItemContent;
         const fragment = createItemContent.call(this, item);
         link.append(fragment)
-            .attr('href', href)
+            // .attr('href', href)
             .attr('tabindex', -1);
 
         if (item.url) {
@@ -90,9 +90,11 @@ export class FlexPages {
 
     static createItemContent(config, item) {
         const frag = document.createDocumentFragment();
-        const icon = $(`<span class="fjs-icon ${item.icon} badge-${item.extras && item.extras.published ? 'published' : 'unpublished'}" />`);
         const route = `${GRAV_CONFIG.current_url}/${item.route.raw}`.replace('//', '/');
+        const link = $(`<a href="${route}" />`);
+        const icon = $(`<span class="fjs-icon ${item.icon} badge-${item.extras && item.extras.published ? 'published' : 'unpublished'}" />`);
 
+        link.appendTo(frag);
         if (item.extras && item.extras.lang) {
             let status = '';
             if (item.extras.translated) {
@@ -176,8 +178,8 @@ export class FlexPages {
             arrow.appendTo(actions);
         }
 
-        icon.appendTo(frag);
-        info.appendTo(frag);
+        icon.appendTo(link);
+        info.appendTo(link);
         actions.appendTo(frag);
 
         return frag;
