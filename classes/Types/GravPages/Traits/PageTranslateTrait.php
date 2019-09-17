@@ -49,10 +49,16 @@ trait PageTranslateTrait
 
         $translated = array_intersect_key($translated, array_flip($languages));
 
+        $folder = $this->getStorageFolder();
+        if (!$folder) {
+            return [];
+        }
+        $folder = $locator($folder);
+
         $translatedLanguages = [];
         foreach ($translated as $languageCode => $languageFile) {
             $languageExtension = ".{$languageCode}.md";
-            $path = $locator($this->getStorageFolder()) . "/$languageFile";
+            $path = "{$folder}/{$languageFile}";
 
             // FIXME: use flex, also rawRoute() does not fully work?
             $aPage = new Page();

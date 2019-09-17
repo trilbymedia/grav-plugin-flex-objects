@@ -247,10 +247,15 @@ trait PageRoutableTrait
      */
     public function relativePagePath(): ?string
     {
+        $folder = $this->getMediaFolder();
+        if (!$folder) {
+            return null;
+        }
+
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];
 
-        return $locator->findResource($this->getMediaFolder(), false);
+        return $locator->findResource($folder, false);
     }
 
     /**
@@ -269,7 +274,7 @@ trait PageRoutableTrait
         }
 
         if ($this->root()) {
-            $folder = $this->getFlexDirectory($this->getStorageKey(true))->getStorageFolder();
+            $folder = $this->getFlexDirectory()->getStorageFolder();
         } else {
             $folder = $this->getStorageFolder();
         }
@@ -277,7 +282,7 @@ trait PageRoutableTrait
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];
 
-        return $folder ? $locator($folder) : '';
+        return $folder ? $locator($folder) : null;
     }
 
     /**

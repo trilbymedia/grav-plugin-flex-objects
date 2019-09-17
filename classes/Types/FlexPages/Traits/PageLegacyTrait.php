@@ -681,23 +681,33 @@ trait PageLegacyTrait
             throw new \RuntimeException(__METHOD__ . '(string): Not Implemented');
         }
 
+        $folder = $this->getStorageFolder();
+        if (!$folder) {
+            return null;
+        }
+
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];
 
-        return $locator->findResource($this->getStorageFolder(), true, true) . '/' . ($this->isPage() ? $this->name() : '');
+        return $locator->findResource($folder, true, true) . '/' . ($this->isPage() ? $this->name() : '');
     }
 
     /**
      * Gets the relative path to the .md file
      *
-     * @return string The relative file path
+     * @return string|null The relative file path
      */
-    public function filePathClean(): string
+    public function filePathClean(): ?string
     {
+        $folder = $this->getStorageFolder();
+        if (!$folder) {
+            return null;
+        }
+
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];
 
-        return $locator->findResource($this->getStorageFolder(), false, true) .  '/' . ($this->isPage() ? $this->name() : '');
+        return $locator->findResource($folder, false, true) .  '/' . ($this->isPage() ? $this->name() : '');
     }
 
     /**
@@ -1049,7 +1059,7 @@ trait PageLegacyTrait
      */
     public function folderExists(): bool
     {
-        return $this->exists() || is_dir($this->getStorageFolder());
+        return $this->exists() || is_dir($this->getStorageFolder() ?? '');
     }
 
     /**
