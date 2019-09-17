@@ -1,7 +1,25 @@
 import $ from 'jquery';
-import { FlexPages } from './finder';
+import { b64_decode_unicode, b64_encode_unicode, FlexPages } from './finder';
+import { isEnabled, getCookie, setCookie } from 'tiny-cookie';
 
 const container = document.querySelector('#pages-content-wrapper');
+
+export const getInitialRoute = () => {
+    if (!isEnabled) {
+        return '';
+    }
+
+    const parsed = JSON.parse(b64_decode_unicode(getCookie('grav-admin-flexpages') || 'e30='));
+    return parsed.route || '';
+};
+
+export const setInitialRoute = ({ route = '', filters = {}, options = { expires: '1Y' } } = {}) => {
+    if (!isEnabled) {
+        return '';
+    }
+
+    return setCookie('grav-admin-flexpages', b64_encode_unicode(JSON.stringify({ route, filters })), options);
+};
 
 if (container) {
     const loader = container.querySelector('.grav-loading');
@@ -17,7 +35,7 @@ if (container) {
             url: `${gravConfig.current_url}`,
             method: 'post',
             data: Object.assign({}, {
-                route: '',
+                route: b64_encode_unicode(getInitialRoute()),
                 initial: true,
                 action: 'listLevel'
             }),

@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import Finder from '../utils/finder';
+import { getInitialRoute, setInitialRoute } from './index';
 
 let XHRUUID = 0;
 const GRAV_CONFIG = typeof global.GravConfig !== 'undefined' ? global.GravConfig : global.GravAdmin.config;
@@ -31,7 +32,7 @@ export class FlexPages {
             },
             {
                 labelKey: 'title',
-                defaultPath: '',
+                defaultPath: getInitialRoute(),
                 itemTrigger: '[data-flexpages-expand]',
                 createItem: function(item) {
                     return FlexPages.createItem(this.config, item, this);
@@ -41,6 +42,18 @@ export class FlexPages {
                 }
             }
         );
+
+        this.finder.$emitter.on('leaf-selected', (item) => {
+            setInitialRoute({
+                route: item.route.raw
+            });
+        });
+
+        this.finder.$emitter.on('interior-selected', (item) => {
+            setInitialRoute({
+                route: item.route.raw
+            });
+        });
 
         /*
         this.finder.$emitter.on('leaf-selected', (item) => {
@@ -145,8 +158,8 @@ export class FlexPages {
                     const ul = $(`<div class="dropdown-menu">
     <div class="action-bar">
         <a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Delete"><i class="fa fa-fw fa-trash"></i></a></li>
-        <a href="#" class="dropdown-item" title="Move"><i class="fa fa-fw fa-arrows"></i></a></li>
-        <a href="#" class="dropdown-item" title="Duplicate"><i class="fa fa-fw fa-copy"></i></a></li>
+        <a href="#" class="dropdown-item" title="Move (coming soon)"><i class="fa fa-fw fa-arrows"></i></a></li>
+        <a href="#" class="dropdown-item" title="Duplicate (coming soon)"><i class="fa fa-fw fa-copy"></i></a></li>
         <a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a></li>
         ${canPreview ? `<a href="${route}/?preview=1" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a></li>` : ''}
     </div>

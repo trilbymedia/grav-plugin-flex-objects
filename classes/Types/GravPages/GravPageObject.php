@@ -290,6 +290,7 @@ class GravPageObject extends FlexPageObject
                     ];
                     $extras = array_filter($extras, static function($v) { return $v !== null; });
                     $payload = [
+                        'item-key' => basename($child->rawRoute()),
                         'icon' => $icon,
                         'title' => $child->title(),
                         'route' => [
