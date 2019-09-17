@@ -313,7 +313,7 @@ class Finder {
             const isLast = (index + 1) === activeItems.length;
             itemKeys += `/${item[this.config.itemKey]}`;
             this.pathBar.append(`
-                <span class="breadcrumb-node breadcrumb-node-${item.type}" ${item.type === 'dir' ? `data-breadcrumb-node="${itemKeys}"` : ''}>
+                <span class="breadcrumb-node ${item.icon}" ${item.type === 'dir' || item.child_count > 0 ? `data-breadcrumb-node="${itemKeys}"` : ''}>
                     <i class="fa fa-fw ${this.getIcon(item.type)}"></i>
                     <span class="breadcrumb-node-name">${$('<div />').text(item[this.config.labelKey]).html()}</span>
                     ${!isLast ? '<i class="fa fa-fw fa-chevron-right"></i>' : ''}
