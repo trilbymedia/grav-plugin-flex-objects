@@ -61,7 +61,7 @@ object:
       timeout: 60
 
 directories:
-  - plugin://flex-objects/blueprints/flex-objects/contacts.yaml
+  - blueprints://flex-objects/contacts.yaml
 ```
 
 Simply edit the **Flex Objects** plugin options in the Admin plugin, or copy the `flex-objects.yaml` default file to your `user/config/plugins/` folder and edit the values there.   Read below for more help on what these fields do and how they can help you modify the plugin.
@@ -128,7 +128,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
             first_name:
               link: edit
             email:
-            website:
+            phone:
       data:
         storage:
             class: 'Grav\Framework\Flex\Storage\SimpleStorage'
@@ -178,7 +178,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
           label: Phone Number  
     ```
 
-    Notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject.
+   See how we replaced `tags:` with `phone:` in the `config.admin.list.fields` section at the top.  Also, notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject. 
 
 1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has its `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-objects/templates/flex-objects/layouts/contacts/object/default.html.twig` file to `user/themes/quark/templates/flex-objects/layouts/contacts/object/default.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one. We are also assuming you are using `Quark` theme, so you may have to change this to reference the theme you are using.
 
@@ -196,7 +196,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
         {% endif %}
         {% if object.phone %}
             <p class="phone">{{ object.phone }}</p>
-        {%endif
+        {% endif %}
     </div>
     ```
     
@@ -210,8 +210,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
     <script>
         var options = {
             valueNames: [ 'name', 'email', 'website', 'phone' ]
-        };
-    
+        };    
         var userList = new List('flex-objects', options);
     </script>
     ```
