@@ -157,7 +157,7 @@ export class FlexPages {
                     const canPreview = !(item.extras.tags.includes('non-routable') || item.extras.tags.includes('unpublished'));
                     const ul = $(`<div class="dropdown-menu">
     <div class="action-bar">
-        <a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Delete"><i class="fa fa-fw fa-trash"></i></a></li>
+        <a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item danger" title="Delete"><i class="fa fa-fw fa-trash-o"></i></a></li>
         <a href="#" class="dropdown-item" title="Move (coming soon)"><i class="fa fa-fw fa-arrows"></i></a></li>
         <a href="#" class="dropdown-item" title="Duplicate (coming soon)"><i class="fa fa-fw fa-copy"></i></a></li>
         <a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a></li>
