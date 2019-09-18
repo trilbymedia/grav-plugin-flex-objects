@@ -17,22 +17,33 @@
 {% import _self as macro %}
 
 {% block body %}
-    {% set parent_url = parent_url ?? admin_route(back_route) %}
     {% set current_route = '/' ~ route.getRoute(1) %}
-    {% set child_url = object.children.count ? admin_route(current_route ~ '/' ~ object.children.first.slug) %}
-    {% set prev_url = not object.isFirst ? admin_route(back_route ~ '/' ~ object.prevSibling.slug) %}
-    {% set next_url = not object.isLast ? admin_route(back_route ~ '/' ~ object.nextSibling.slug) %}
+
+    {% set parent = object.parent %}
+    {% set child = object.children.first %}
+    {% set prev = object.prevSibling %}
+    {% set next = object.nextSibling %}
+
+    {% set parent_url = parent and not parent.root ? admin_route(back_route) %}
+    {% set child_url = child ? admin_route(current_route ~ '/' ~ child.slug) %}
+    {% set prev_url = prev ? admin_route(back_route ~ '/' ~ prev.slug) %}
+    {% set next_url = next ? admin_route(back_route ~ '/' ~ next.slug) %}
     {% set back_url = back_url ?? admin_route(flex.adminRoute(directory.getFlexType())) %}
 
     {{ parent() }}
 {% endblock body %}
 
 {% block back_button %}
-    {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/grav-pages/buttons/back.html.twig'] %}
-    {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-prev.html.twig', 'flex-objects/types/grav-pages/buttons/nav-prev.html.twig'] %}
-    {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-parent.html.twig', 'flex-objects/types/grav-pages/buttons/nav-parent.html.twig'] %}
-    {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-child.html.twig', 'flex-objects/types/grav-pages/buttons/nav-child.html.twig'] %}
-    {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-next.html.twig', 'flex-objects/types/grav-pages/buttons/nav-next.html.twig'] %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/grav-pages/buttons/back.html.twig']
+        with { back_url: back_url } %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-prev.html.twig', 'flex-objects/types/grav-pages/buttons/nav-prev.html.twig']
+        with { prev_url: prev_url, title: prev.route } %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-parent.html.twig', 'flex-objects/types/grav-pages/buttons/nav-parent.html.twig']
+        with { parent_url: parent_url, title: parent.route } %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-child.html.twig', 'flex-objects/types/grav-pages/buttons/nav-child.html.twig']
+        with { child_url: child_url, title: child.route } %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-next.html.twig', 'flex-objects/types/grav-pages/buttons/nav-next.html.twig']
+        with { next_url: next_url, title: next.route } %}
 {% endblock back_button %}
 
 {% block preview_button %}
