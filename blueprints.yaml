@@ -13,7 +13,7 @@ license: MIT
 
 dependencies:
     - { name: grav, version: '>=1.7.0-beta.6' }
-    - { name: form, version: '>=3.0.3' }
+    - { name: form, version: '>=4.0.0-rc.5' }
 
 form:
   validation: strict
