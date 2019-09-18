@@ -196,7 +196,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
         {% endif %}
         {% if object.phone %}
             <p class="phone">{{ object.phone }}</p>
-        {%endif
+        {% endif %}
     </div>
     ```
     
@@ -210,8 +210,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
     <script>
         var options = {
             valueNames: [ 'name', 'email', 'website', 'phone' ]
-        };
-    
+        };    
         var userList = new List('flex-objects', options);
     </script>
     ```
