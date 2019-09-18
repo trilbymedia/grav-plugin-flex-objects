@@ -132,7 +132,7 @@ class Finder {
     }
 
     keydownEvent(event) {
-        const codes = { 37: 'left', 38: 'up', 39: 'right', 40: 'down' };
+        const codes = { 37: 'left', 38: 'up', 39: 'right', 40: 'down', 13: 'enter' };
 
         if (event.keyCode in codes) {
             event.stopPropagation();
@@ -187,6 +187,7 @@ class Finder {
         let item;
         let target;
 
+
         if (active) {
             item = active.item;
             column = active.column;
@@ -205,6 +206,13 @@ class Finder {
         } else {
             column = this.container.find(`.${this.config.className.col}`).first();
             target = column.find(`.${this.config.className.item}`).first();
+        }
+
+        if (active && direction === 'enter') {
+            const href = active.item.find('a').prop('href');
+            if (href) {
+                window.location = href;
+            }
         }
 
         if (target) {
