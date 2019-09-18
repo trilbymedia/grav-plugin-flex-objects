@@ -848,12 +848,8 @@ trait PageLegacyTrait
     public function isFirst(): bool
     {
         $parent = $this->parent();
-        $collection = $parent ? $parent->collection('content', false) : null;
-        if ($collection instanceof PageCollectionInterface) {
-            return $collection->isFirst($this->path());
-        }
 
-        return true;
+        return $parent ? $parent->children()->withKeyField()->isFirst($this->getKey()) : true;
     }
 
     /**
@@ -864,12 +860,8 @@ trait PageLegacyTrait
     public function isLast(): bool
     {
         $parent = $this->parent();
-        $collection = $parent ? $parent->collection('content', false) : null;
-        if ($collection instanceof PageCollectionInterface) {
-            return $collection->isLast($this->path());
-        }
 
-        return true;
+        return $parent ? $parent->children()->withKeyField()->isLast($this->getKey()) : true;
     }
 
     /**
@@ -902,12 +894,8 @@ trait PageLegacyTrait
     public function adjacentSibling($direction = 1)
     {
         $parent = $this->parent();
-        $collection = $parent ? $parent->collection('content', false) : null;
-        if ($collection instanceof PageCollectionInterface) {
-            return $collection->adjacentSibling($this->path(), $direction);
-        }
 
-        return false;
+        return $parent ? $parent->children()->withKeyField()->adjacentSibling($this->getKey(), $direction) : false;
     }
 
     /**

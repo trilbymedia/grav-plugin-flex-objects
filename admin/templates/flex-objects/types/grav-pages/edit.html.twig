@@ -20,8 +20,8 @@
     {% set parent_url = parent_url ?? admin_route(back_route) %}
     {% set current_route = '/' ~ route.getRoute(1) %}
     {% set child_url = object.children.count ? admin_route(current_route ~ '/' ~ object.children.first.slug) %}
-    {% set prev_url = object.prevSibling ? admin_route(back_route ~ '/' ~ object.prevSibling.slug) %}
-    {% set next_url = object.nextSibling ? admin_route(back_route ~ '/' ~ object.nextSibling.slug) %}
+    {% set prev_url = not object.isFirst ? admin_route(back_route ~ '/' ~ object.prevSibling.slug) %}
+    {% set next_url = not object.isLast ? admin_route(back_route ~ '/' ~ object.nextSibling.slug) %}
     {% set back_url = back_url ?? admin_route(flex.adminRoute(directory.getFlexType())) %}
 
     {{ parent() }}
@@ -29,14 +29,10 @@
 
 {% block back_button %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/grav-pages/buttons/back.html.twig'] %}
-    {#
     {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-prev.html.twig', 'flex-objects/types/grav-pages/buttons/nav-prev.html.twig'] %}
-    #}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-parent.html.twig', 'flex-objects/types/grav-pages/buttons/nav-parent.html.twig'] %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-child.html.twig', 'flex-objects/types/grav-pages/buttons/nav-child.html.twig'] %}
-    {#
     {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-next.html.twig', 'flex-objects/types/grav-pages/buttons/nav-next.html.twig'] %}
-    #}
 {% endblock back_button %}
 
 {% block preview_button %}
