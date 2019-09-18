@@ -344,6 +344,10 @@ class Finder {
     }
 
     isInView(element, container, partial) {
+        if (!element.length || !container.length) {
+            return true;
+        }
+
         const containerHeight = container.height();
         const elementTop = $(element).offset().top - container.offset().top;
         const elementBottom = elementTop + $(element).height();
