@@ -16,7 +16,7 @@
 {% set title = title ?? object.form.getValue('title') ?? object.title ?? key %}
 
 {% block body %}
-    {% set back_url = admin_route(back_route) ?: (base_url ~ back_route) %}
+    {% set back_url = back_url ?? admin_route(back_route) %}
     {% set id = key %}
     {% set blueprint = blueprint ?? object.blueprint ?? directory.blueprint %}
 

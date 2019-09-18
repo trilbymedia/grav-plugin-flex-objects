@@ -2,3 +2,4 @@ PLUGIN_FLEX_OBJECTS:
   CREATED_SUCCESSFULLY: "Successfully created"
   UPDATED_SUCCESSFULLY: "Successfully updated"
   DELETED_SUCCESSFULLY: "Successfully deleted"
+  BUTTON_UP: "Go Up"
