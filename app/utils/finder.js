@@ -316,7 +316,7 @@ class Finder {
 
         const activeItems = this.container.find(`.${this.config.className.active}`);
         let itemKeys = '';
-        this.pathBar.children().empty();
+        this.pathBar.empty();
         activeItems.each((index, activeItem) => {
             const item = activeItem._item;
             const isLast = (index + 1) === activeItems.length;
