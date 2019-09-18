@@ -1,0 +1,9 @@
+{% if next_url %}
+<a class="button" href="{{ next_url }}" title="{{ 'PLUGIN_FLEX_OBJECTS.BUTTON_NEXT'|tu }}">
+    <i class="fa fa-arrow-right"></i>
+</a>
+{% else %}
+    <span class="button" title="{{ 'PLUGIN_FLEX_OBJECTS.BUTTON_NEXT'|tu }}">
+        <i class="fa fa-arrow-right"></i>
+    </span>
+{% endif %}

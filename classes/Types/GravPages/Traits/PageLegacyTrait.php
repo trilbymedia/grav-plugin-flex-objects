@@ -38,6 +38,10 @@ trait PageLegacyTrait
      */
     public function isFirst(): bool
     {
+        if (Utils::isAdminPlugin()) {
+            return parent::isFirst();
+        }
+
         $parent = $this->parent();
         $collection = $parent ? $parent->collection('content', false) : null;
         if ($collection instanceof PageCollectionInterface) {
@@ -54,6 +58,10 @@ trait PageLegacyTrait
      */
     public function isLast(): bool
     {
+        if (Utils::isAdminPlugin()) {
+            return parent::isLast();
+        }
+
         $parent = $this->parent();
         $collection = $parent ? $parent->collection('content', false) : null;
         if ($collection instanceof PageCollectionInterface) {
@@ -72,6 +80,10 @@ trait PageLegacyTrait
      */
     public function adjacentSibling($direction = 1)
     {
+        if (Utils::isAdminPlugin()) {
+            return parent::adjacentSibling($direction);
+        }
+
         $parent = $this->parent();
         $collection = $parent ? $parent->collection('content', false) : null;
         if ($collection instanceof PageCollectionInterface) {
@@ -90,6 +102,10 @@ trait PageLegacyTrait
      */
     public function ancestor($lookup = null)
     {
+        if (Utils::isAdminPlugin()) {
+            return parent::ancestor($lookup);
+        }
+
         /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
 
@@ -105,6 +121,10 @@ trait PageLegacyTrait
      */
     protected function getInheritedParams($field): array
     {
+        if (Utils::isAdminPlugin()) {
+            return parent::getInheritedParams($field);
+        }
+
         /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
 
@@ -129,6 +149,10 @@ trait PageLegacyTrait
      */
     public function find($url, $all = false)
     {
+        if (Utils::isAdminPlugin()) {
+            return parent::find($url, $all);
+        }
+
         /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
 
@@ -146,6 +170,10 @@ trait PageLegacyTrait
      */
     public function collection($params = 'content', $pagination = true)
     {
+        if (Utils::isAdminPlugin()) {
+            return parent::collection($params, $pagination);
+        }
+
         if (is_string($params)) {
             // Look into a page header field.
             $params = (array)$this->value('header.' . $params);
@@ -171,6 +199,10 @@ trait PageLegacyTrait
      */
     public function evaluate($value, $only_published = true)
     {
+        if (Utils::isAdminPlugin()) {
+            return parent::collection($value, $only_published);
+        }
+
         $params = [
             'items' => $value,
             'published' => $only_published

@@ -1,0 +1,9 @@
+{% if prev_url %}
+<a class="button" href="{{ prev_url }}" title="{{ 'PLUGIN_FLEX_OBJECTS.BUTTON_PREV'|tu }}">
+    <i class="fa fa-arrow-left"></i>
+</a>
+{% else %}
+<span class="button" title="{{ 'PLUGIN_FLEX_OBJECTS.BUTTON_PREV'|tu }}">
+    <i class="fa fa-arrow-left"></i>
+</span>
+{% endif %}
