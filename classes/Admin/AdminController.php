@@ -542,6 +542,8 @@ class AdminController
             $json = [
                 'status'  => $status,
                 'message' => $this->admin::translate($message ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED'),
+                'route' => $data['route'] ?? $data['leaf_route'] ?? null,
+                'initial' => (bool)$initial,
                 'data' => array_values($response)
             ];
         } catch (\Exception $e) {
