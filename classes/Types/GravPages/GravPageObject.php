@@ -305,7 +305,7 @@ class GravPageObject extends FlexPageObject
                 }
 
                 // Add children if any
-                if (\is_array($leaf) && $child->path() === $extra) {
+                if (\is_array($leaf) && !empty($leaf) && $child->path() === $extra) {
                     $payload['children'] = array_values($leaf);
                 }
 
