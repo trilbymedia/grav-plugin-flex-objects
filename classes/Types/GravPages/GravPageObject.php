@@ -142,7 +142,7 @@ class GravPageObject extends FlexPageObject
     public function getLevelListing(array $options): array
     {
         $default_filters = [
-            'type'=> ['root', 'dir'],
+            'type' => ['root', 'dir'],
             'name' => null,
             'extension' => null,
         ];
