@@ -1,3 +1,15 @@
 {% extends 'flex-objects/pages/preview.html.twig' %}
 
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate')) %}
+
+{% block back_button %}
+    {% include 'flex-objects/types/grav-pages/buttons/back.html.twig' %}
+    {% include 'flex-objects/types/grav-pages/buttons/up.html.twig' %}
+{% endblock back_button %}
+
+{% block body %}
+    {% set up_url = up_url ?? admin_route(back_route) %}
+    {% set back_url = back_url ?? admin_route(flex.adminRoute(directory.getFlexType())) %}
+
+    {{ parent() }}
+{% endblock body %}

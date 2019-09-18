@@ -20,7 +20,7 @@
     {% endif %}
     {% set id = key %}
     {% set blueprint = object.blueprint ?? directory.blueprint %}
-    {% set back_url = admin_route(back_route) ?: (base_url ~ back_route) %}
+    {% set back_url = back_url ?? admin_route(back_route) %}
 
     {{ parent() }}
 {% endblock body %}
