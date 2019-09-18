@@ -451,18 +451,13 @@ class AdminController
          * @throws RequestException
          * @TODO: Pages
          */
-    protected function taskGetLevelListing(): ResponseInterface
+    protected function actionGetLevelListing(): ResponseInterface
     {
         /** @var PageInterface|FlexObjectInterface $object */
-        $object = $this->getObject();
+        $object = $this->getObject($this->id ?? '');
 
         if (!$object || !method_exists($object, 'getLevelListing')) {
             throw new \RuntimeException('Not Found', 404);
-        }
-
-        if ($object->exists() && !$object->isAuthorized('save')) {
-            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
-                403);
         }
 
         $request = $this->getRequest();
