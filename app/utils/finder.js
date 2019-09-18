@@ -212,6 +212,10 @@ class Finder {
                 column,
                 item: target
             });
+
+            if (!this.isInView(target, column, true)) {
+                this.scrollToView(target[0], column[0]);
+            }
         }
     }
 
@@ -234,10 +238,15 @@ class Finder {
 
         const current = path[0] || '';
         const children = data.find((item) => item[this.config.itemKey] === current);
+        const item = column.find(`[data-fjs-item="${current}"]`).first();
         const newColumn = this.itemSelected({
             column,
-            item: column.find(`[data-fjs-item="${current}"]`).first()
+            item
         });
+
+        if (!this.isInView(item, column, true)) {
+            this.scrollToView(item[0], column[0]);
+        }
 
         path.shift();
 
@@ -331,6 +340,36 @@ class Finder {
             case 'dir':
             default:
                 return 'fa-folder';
+        }
+    }
+
+    isInView(element, container, partial) {
+        const containerHeight = container.height();
+        const elementTop = $(element).offset().top - container.offset().top;
+        const elementBottom = elementTop + $(element).height();
+
+        const isTotal = (elementTop >= 0 && elementBottom <= containerHeight);
+        const isPartial = ((elementTop < 0 && elementBottom > 0) || (elementTop > 0 && elementTop <= container.height())) && partial;
+
+        return isTotal || isPartial;
+    }
+
+    scrollToView(element, container) {
+        const top = parseInt(container.getBoundingClientRect().top, 10);
+        const bot = parseInt(container.getBoundingClientRect().bottom, 10);
+
+        const now_top = parseInt(element.getBoundingClientRect().top, 10);
+        const now_bot = parseInt(element.getBoundingClientRect().bottom, 10);
+
+        let scroll_by = 0;
+        if (now_top < top) {
+            scroll_by = -(top - now_top);
+        } else if (now_bot > bot) {
+            scroll_by = now_bot - bot;
+        }
+
+        if (scroll_by !== 0) {
+            container.scrollTop += scroll_by;
         }
     }
 }
