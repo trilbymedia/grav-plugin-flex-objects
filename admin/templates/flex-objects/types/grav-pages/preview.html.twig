@@ -1,10 +1,10 @@
-{% extends 'flex-objects/pages/preview.html.twig' %}
+{% extends 'flex-objects/types/default/preview.html.twig' %}
 
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate')) %}
 
 {% block back_button %}
-    {% include 'flex-objects/types/grav-pages/buttons/back.html.twig' %}
-    {% include 'flex-objects/types/grav-pages/buttons/up.html.twig' %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/grav-pages/buttons/back.html.twig'] %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/up.html.twig', 'flex-objects/types/grav-pages/buttons/up.html.twig'] %}
 {% endblock back_button %}
 
 {% block body %}

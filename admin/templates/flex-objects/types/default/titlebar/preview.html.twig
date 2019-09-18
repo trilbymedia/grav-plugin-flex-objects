@@ -3,13 +3,13 @@
     <div class="button-bar">
         {# BACK #}
         {% block back_button %}
-            {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/pages/buttons/back.html.twig'] %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/default/buttons/back.html.twig'] %}
         {% endblock back_button %}
 
         {# PREVIEW #}
         {% if can_preview %}
         {% block preview_button %}
-            {% include ['flex-objects/types/' ~ target ~ '/buttons/preview-open.html.twig', 'flex-objects/pages/buttons/preview-open.html.twig'] %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/preview-open.html.twig', 'flex-objects/types/default/buttons/preview-open.html.twig'] %}
         {% endblock preview_button %}
         {% endif %}
     </div>

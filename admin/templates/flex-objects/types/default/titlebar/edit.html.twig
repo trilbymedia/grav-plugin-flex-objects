@@ -3,13 +3,13 @@
     <div class="button-bar">
         {# BACK #}
         {% block back_button %}
-            {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/pages/buttons/back.html.twig'] %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/default/buttons/back.html.twig'] %}
         {% endblock back_button %}
 
         {# PREVIEW #}
         {% if can_preview %}
         {% block preview_button %}
-            {% include ['flex-objects/types/' ~ target ~ '/buttons/preview.html.twig', 'flex-objects/pages/buttons/preview.html.twig'] %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/preview.html.twig', 'flex-objects/types/default/buttons/preview.html.twig'] %}
         {% endblock preview_button %}
         {% endif %}
 
@@ -18,14 +18,14 @@
         {# DELETE #}
         {% if can_delete %}
         {% block delete_button %}
-            {% include ['flex-objects/types/' ~ target ~ '/buttons/delete.html.twig', 'flex-objects/pages/buttons/delete.html.twig'] %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/delete.html.twig', 'flex-objects/types/default/buttons/delete.html.twig'] %}
         {% endblock delete_button %}
         {% endif %}
 
         {# SAVE #}
         {% if can_save %}
         {% block save_button %}
-            {% include ['flex-objects/types/' ~ target ~ '/buttons/save.html.twig', 'flex-objects/pages/buttons/save.html.twig'] %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/save.html.twig', 'flex-objects/types/default/buttons/save.html.twig'] %}
         {% endblock save_button %}
         {% endif %}
     </div>

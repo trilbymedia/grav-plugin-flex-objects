@@ -1,4 +1,4 @@
-{% extends 'flex-objects/pages/edit.html.twig' %}
+{% extends 'flex-objects/types/default/edit.html.twig' %}
 
 {% set form = object.form(admin.session.expert != '0' ? 'raw') %}
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}

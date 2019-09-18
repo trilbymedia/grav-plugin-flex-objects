@@ -1,13 +1,13 @@
-{% extends 'flex-objects/pages/list.html.twig' %}
+{% extends 'flex-objects/types/default/list.html.twig' %}
 
 {% set can_translate = can_translate ?? (admin.multilang and directory.object.hasFlexFeature('page-translate')) %}
 
 {% block back_button %}
-    {% include 'flex-objects/types/grav-pages/buttons/back.html.twig' %}
-{% endblock %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/grav-pages/buttons/back.html.twig'] %}
+{% endblock back_button %}
 
 {% block create_button %}
-    {% include 'flex-objects/types/grav-pages/buttons/add.html.twig' %}
+    {% include ['flex-objects/types/' ~ target ~ '/buttons/add.html.twig', 'flex-objects/types/grav-pages/buttons/add.html.twig'] %}
 {% endblock %}
 
 {% block content_top %}{% endblock %}
@@ -15,7 +15,9 @@
 {% block content_list %}
     {% set list_layout = grav.uri.param('layout', 'columns') %}
     {% include [
+        'flex-objects/types/' ~ target ~ '/list/' ~ list_layout ~ '.html.twig',
         'flex-objects/types/grav-pages/list/' ~ list_layout ~ '.html.twig',
+        'flex-objects/types/' ~ target ~ '/list/list.html.twig'
         'flex-objects/types/grav-pages/list/list.html.twig'
         ] %}
 {% endblock %}
