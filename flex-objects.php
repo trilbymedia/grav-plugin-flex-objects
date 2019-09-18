@@ -248,9 +248,12 @@ class FlexObjectsPlugin extends Plugin
         $flex = $this->grav['flex_objects'];
 
         foreach ($this->getAdminMenu() as $route => $item) {
-            $directory = isset($item['directory']) ? $flex->getDirectory($item['directory']) : null;
-            if (!$directory) {
-                continue;
+            $directory = null;
+            if (isset($item['directory'])) {
+                $directory = $flex->getDirectory($item['directory']);
+                if (!$directory) {
+                    continue;
+                }
             }
 
             $hidden = $item['hidden'] ?? false;
@@ -258,10 +261,10 @@ class FlexObjectsPlugin extends Plugin
             $icon = $item['icon'] ?? 'fa-list';
             $authorize = $item['authorize'] ?? ($directory ? null : ['admin.flex-objects', 'admin.super']);
             if ($hidden || (null === $authorize && $directory->isAuthorized('list', 'admin'))) {
-                continue;
+               continue;
             }
-            $cache = $directory->getCache('index');
-            $count = $cache->get('admin-count');
+            $cache = $directory ? $directory->getCache('index') : null;
+            $count = $cache ? $cache->get('admin-count') : false;
             if (null === $count) {
                 $collection = $directory->getCollection();
                 $count = $collection->isAuthorized('list')->count();
