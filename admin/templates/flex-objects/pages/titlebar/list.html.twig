@@ -3,27 +3,27 @@
     <div class="button-bar">
         {# BACK #}
         {% block back_button %}
-            {% include 'flex-objects/pages/buttons/back.html.twig' %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/pages/buttons/back.html.twig'] %}
         {% endblock back_button %}
 
         {# EXPORT #}
         {% if can_export %}
         {% block export_button %}
-            {% include 'flex-objects/pages/buttons/export-csv.html.twig' %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/export-csv.html.twig', 'flex-objects/pages/buttons/export-csv.html.twig'] %}
         {% endblock export_button %}
         {% endif %}
 
         {# CREATE #}
         {% if can_create %}
         {% block create_button %}
-            {% include 'flex-objects/pages/buttons/add.html.twig' %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/add.html.twig', 'flex-objects/pages/buttons/add.html.twig'] %}
         {% endblock create_button %}
         {% endif %}
 
         {# LANGUAGES #}
         {% if can_translate %}
         {% block languages_button %}
-            {% include 'flex-objects/pages/buttons/languages.html.twig' %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/languages.html.twig', 'flex-objects/pages/buttons/languages.html.twig'] %}
         {% endblock languages_button %}
         {% endif %}
     </div>

@@ -48,7 +48,7 @@
 {% block content %}
 {% if directory %}
     {% block content_list %}
-    {% include 'flex-objects/pages/list/list.html.twig' %}
+    {% include ['flex-objects/types/' ~ target ~ '/list/list.html.twig', 'flex-objects/pages/list/list.html.twig'] %}
     {% endblock %}
 {% else %}
     {% do page.modifyHeader('http_response_code', 404) %}

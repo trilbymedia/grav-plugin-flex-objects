@@ -47,7 +47,7 @@
         {% include 'partials/modal-changes-detected.html.twig' %}
 
         {% if can_delete %}
-            {% include 'flex-objects/pages/modals/remove.html.twig' with { name: target } %}
+            {% include ['flex-objects/types/' ~ target ~ '/modals/remove.html.twig', 'flex-objects/pages/modals/remove.html.twig'] with { name: target } %}
         {% endif %}
 
     {% else %}
