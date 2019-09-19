@@ -251,7 +251,7 @@ class FlexObjectsPlugin extends Plugin
             $directory = null;
             if (isset($item['directory'])) {
                 $directory = $flex->getDirectory($item['directory']);
-                if (!$directory) {
+                if (!$directory || !$directory->isEnabled()) {
                     continue;
                 }
             }
@@ -266,9 +266,13 @@ class FlexObjectsPlugin extends Plugin
             $cache = $directory ? $directory->getCache('index') : null;
             $count = $cache ? $cache->get('admin-count') : false;
             if (null === $count) {
-                $collection = $directory->getCollection();
-                $count = $collection->isAuthorized('list')->count();
-                $cache->set('admin-count', $count);
+                try {
+                    $collection = $directory->getCollection();
+                    $count = $collection->isAuthorized('list')->count();
+                    $cache->set('admin-count', $count);
+                } catch (\InvalidArgumentException $e) {
+                    continue;
+                }
             }
             $badge = $directory ? ['badge' => ['count' => $count]] : [];
             $priority = $item['priority'] ?? 0;
