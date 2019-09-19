@@ -19,7 +19,7 @@
     {% if all|count %}
     {% for label, directory in all %}
         {% set url = directory.blueprintFile %}
-        {% set found = directory.blueprintFile in value or directory.enabled %}
+        {% set found = directory.blueprintFile in value %}
         <div class="form-data block size-2-3" data-grav-field="toggle" data-grav-disabled="" data-grav-default="null" data-grav-field-name="{{ (scope ~ field.name)|fieldName }}[{{ loop.index0 }}]">
         <div class="switch-toggle switch-grav switch-2">
             {% set maxLen = 0 %}
