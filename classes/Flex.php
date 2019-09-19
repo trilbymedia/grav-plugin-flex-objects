@@ -22,6 +22,14 @@ class Flex extends \Grav\Framework\Flex\Flex
     /** @var array */
     protected $adminRoutes;
     protected $adminMenu;
+    protected $managed;
+
+    public function __construct(array $types, array $config)
+    {
+        parent::__construct($types, $config);
+
+        $this->managed = array_keys($types);
+    }
 
     /**
      * @return array
@@ -34,7 +42,7 @@ class Flex extends \Grav\Framework\Flex\Flex
             'recursive' => false
         ];
 
-        $directories = $this->getDirectories();
+        $directories = $this->getDirectories($this->managed);
         $all = Folder::all('blueprints://flex-objects', $params);
 
         foreach ($all as $url) {
