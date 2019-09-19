@@ -431,16 +431,16 @@ class GravPageObject extends FlexPageObject
      */
     public function prepareStorage(): array
     {
+        // Make sure that certain elements are always sent to the storage layer.
         $elements = [
             '__META' => $this->getStorage(),
             'storage_key' => $this->getStorageKey(),
             'folder' => $this->getProperty('folder'),
             'order' => $this->getProperty('order'),
+            'template' => $this->getProperty('template'),
             'format' => $this->getProperty('format'),
             'language' => $this->getProperty('language')
         ] + parent::prepareStorage();
-
-        unset($elements['name']);
 
         return $elements;
     }
