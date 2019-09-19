@@ -17,7 +17,7 @@
     <h1>{{ 'PLUGIN_FLEX_OBJECTS.TYPES_TITLE'|tu }}</h1>
 
     <div id="types" class="card-row grid fixed-blocks pure-g">
-        {% for directory in flex.directories if directory.config('admin.hidden') != true and not directory.config('admin.menu') %}
+        {% for directory in flex.directories if directory.enabled and directory.config('admin.hidden') != true and not directory.config('admin.menu') %}
             {% set collection = directory.collection %}
             {% if flex.adminRoute(collection) %}
             <div class="card-item pure-u-1-3">
