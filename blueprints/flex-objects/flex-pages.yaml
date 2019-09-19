@@ -1,5 +1,5 @@
-title: Flex Pages
-description: Flex Pages emulate Grav pages in Flex. Useful base type if you want to move flat folder of single page type into flex.
+title: Articles
+description: Flex Articles emulate simple pages in Flex. Useful base type if you want to move flat folder of single page type into flex.
 type: flex-objects
 
 config:
