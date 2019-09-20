@@ -405,7 +405,8 @@ class GravPageObject extends FlexPageObject
                     throw new \RuntimeException(sprintf('Page %s cannot be moved to non-existing path %s', '/' . $key, $parentRoute));
                 }
 
-                $parts[] = $parent->getStorageKey();
+                $parentKey = $parent->getStorageKey();
+                $parts[] = $elements['parent_key'] = $parentKey;
             }
 
             // Get the folder name.
@@ -435,11 +436,12 @@ class GravPageObject extends FlexPageObject
         $elements = [
             '__META' => $this->getStorage(),
             'storage_key' => $this->getStorageKey(),
-            'folder' => $this->getProperty('folder'),
+            'parent_key' => $this->getProperty('parent_key'),
             'order' => $this->getProperty('order'),
-            'template' => $this->getProperty('template'),
-            'format' => $this->getProperty('format'),
-            'language' => $this->getProperty('language')
+            'folder' => $this->getProperty('folder'),
+            'template' => preg_replace('|modular/|', '', $this->getProperty('template')),
+            'language' => $this->getProperty('language'),
+            'format' => $this->getProperty('format')
         ] + parent::prepareStorage();
 
         return $elements;

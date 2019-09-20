@@ -421,7 +421,7 @@ trait PageLegacyTrait
             'name',
             $var,
             function ($value) {
-                $value = $value ?? $this->getMetaData()['storage_file'] ?? 'default.md';
+                $value = $value ?? $this->getMetaData()['template'] ?? 'default';
                 if (!preg_match('/\.md$/', $value)) {
                     $language = $this->language();
                     if ($language) {

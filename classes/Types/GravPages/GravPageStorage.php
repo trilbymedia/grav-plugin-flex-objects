@@ -47,24 +47,17 @@ class GravPageStorage extends FolderStorage
      */
     public function parseKey(string $key, bool $variations = true): array
     {
-        $key = trim($key, '/');
-        $code = '';
-        $language = '';
         if (strpos($key, '|')) {
-            [$key, $language] = explode('|', $key, 2);
-            $code = '.' . $language;
+            [$key, $params] = explode('|', $key, 2);
+        } else {
+            $params = '';
         }
+        $key = ltrim($key, '/');
 
-        $keys = parent::parseKey($key, false);
+        $keys = parent::parseKey($key, false) + ['params' => $params];
 
         if ($variations) {
-            $meta = $this->getObjectMeta($key);
-            $file = basename(($meta['storage_file'] ?? 'folder') . $code, $this->dataExt);
-
-            $keys += [
-                'file' => $file,
-                'lang' => $language
-            ];
+            $keys += $this->parseParams($key, $params);
         }
 
         return $keys;
@@ -94,6 +87,60 @@ class GravPageStorage extends FolderStorage
         }
 
         return $raw;
+    }
+
+    /**
+     * @param string $key
+     * @param string $params
+     * @return array
+     */
+    protected function parseParams(string $key, string $params): array
+    {
+        if (strpos($params, '.')) {
+            [$template, $language] = explode('.', $params, 2);
+        } else {
+            $template = $params;
+            $language = '';
+        }
+
+        if ($template === '') {
+            $meta = $this->getObjectMeta($key);
+            $template = $meta['template'] ?? 'folder';
+        }
+
+        return [
+            'file' => $template . ($language ? '.' . $language : ''),
+            'template' => $template,
+            'lang' => $language
+        ];
+    }
+
+    /**
+     * Prepares the row for saving and returns the storage key for the record.
+     *
+     * @param array $row
+     * @param string $key
+     * @return string
+     */
+    protected function prepareRow(array &$row, string $key = '@@'): string
+    {
+        // Always generate key from the row.
+        $key = $row['parent_key'] ?? '';
+        if ($key !== '') {
+            $key .= '/';
+        }
+        $order = $row['order'] ?? '';
+        $folder = $row['folder'] ?? 'undefined';
+        $key .= $order ? sprintf('%02d.%s', $order, $folder) : $folder;
+        $key .= '|' . $row['template'] ?? '';
+        if (!empty($row['language'])) {
+            $key .= '.' . $row['language'];
+        }
+        $row['storage_key'] = $key;
+
+        unset($row['parent'], $row['order'], $row['folder'], $row['template'], $row['language']);
+
+        return parent::prepareRow($row, $key);
     }
 
     protected function canDeleteFolder(string $key): bool
@@ -138,9 +185,8 @@ class GravPageStorage extends FolderStorage
      */
     protected function getObjectMeta(string $key, bool $reload = false): array
     {
-        if (strpos($key, '|')) {
-            [$key, $variant] = explode('|', $key, 2);
-        }
+        $keys = $this->parseKey($key, false);
+        $key = $keys['key'];
 
         if ($reload || !isset($this->meta[$key])) {
             /** @var UniformResourceLocator $locator */
@@ -205,7 +251,7 @@ class GravPageStorage extends FolderStorage
             $meta = [
                 'key' => $route,
                 'storage_key' => $key,
-                'storage_file' => $file,
+                'template' => $file,
                 'storage_timestamp' => $modified,
             ];
             if ($markdown) {
@@ -222,11 +268,15 @@ class GravPageStorage extends FolderStorage
             $meta = $this->meta[$key];
         }
 
-        if (isset($variant)) {
-            $file = $meta['storage_file'];
-            $meta['exists'] = (null === $file && !empty($meta['children'])) || isset($meta['markdown'][$variant][$file]);
-            $meta['storage_key'] .= '|' . $variant;
-            $meta['language'] = $variant;
+        $params = $keys['params'];
+        if ($params) {
+            $parts = $this->parseParams($key, $params);
+            $language = $parts['lang'];
+            $template = $parts['template'];
+            $meta['exists'] = ($template && !empty($meta['children'])) || isset($meta['markdown'][$language][$template]);
+            $meta['storage_key'] .= '|' . $params;
+            $meta['template'] = $template;
+            $meta['language'] = $language;
         }
 
         return $meta;

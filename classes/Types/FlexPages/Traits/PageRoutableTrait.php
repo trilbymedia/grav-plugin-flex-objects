@@ -308,6 +308,29 @@ trait PageRoutableTrait
     }
 
     /**
+     * Get/set the folder.
+     *
+     * @param string $var Optional path, including numeric prefix.
+     *
+     * @return string|null
+     */
+    public function parentStorageKey($var = null): ?string
+    {
+        return $this->loadProperty(
+            'parent_key',
+            $var,
+            function($value) {
+                if (null === $value) {
+                    $value = $this->getStorageKey(true) ?: $this->getKey();
+                    $value = ltrim(dirname("/{$value}"), '/') ?: '';
+                }
+
+                return $value;
+            }
+        );
+    }
+
+    /**
      * Gets and Sets the parent object for this page
      *
      * @param  PageInterface $var the parent page object

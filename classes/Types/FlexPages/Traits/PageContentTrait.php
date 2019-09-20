@@ -55,6 +55,7 @@ trait PageContentTrait
     static protected $calculatedProperties = [
         'name' => 'name',
         'parent' => 'parent',
+        'parent_key' => 'parentStorageKey',
         'folder' => 'folder',
         'order' => 'order',
         'template' => 'template',

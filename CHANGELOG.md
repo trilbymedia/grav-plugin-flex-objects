@@ -1,8 +1,10 @@
-# v1.0.0-beta.8
-##  09/19/2019
+# v1.0.0-beta.9
+##  mm/dd/2019
 
 1. [](#bugfix)
     * PHP 7.1: Fixed error when activating `Flex Pages` in Plugin parameters [#13](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/13)
+    * Flex Pages: Page template cannot be changed [#4](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/4)
+    * Flex Pages: Fixed new pages being created with wrong template [#22](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/22)
 
 # v1.0.0-beta.8
 ##  09/19/2019
