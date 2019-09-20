@@ -112,7 +112,7 @@ class GravPageObject extends FlexPageObject
      * @param string $name
      * @return Blueprint
      */
-    public function getBlueprint(string $name = ''): Blueprint
+    protected function doGetBlueprint(string $name = ''): Blueprint
     {
         try {
             // Make sure that pages has been initialized.
