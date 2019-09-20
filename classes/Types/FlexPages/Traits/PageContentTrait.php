@@ -461,7 +461,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    abstract public function exists();
+    abstract public function exists(): bool;
 
     abstract public function getProperty($property, $default = null);
     abstract public function setProperty($property, $value);
