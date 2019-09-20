@@ -350,16 +350,21 @@ class AdminController
 
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
-        $name = $this->data['folder'] ?? 'undefined';
-        $key = trim("{$route}/{$name}", '/');
+        $folder = $this->data['folder'] ?? 'undefined';
         if (isset($this->data['title'])) {
             $this->data['header']['title'] = $this->data['title'];
             unset($this->data['title']);
         }
-        if (isset($this->data['name']) && $this->data['name'] === 'modular') {
+
+        if (isset($this->data['name']) && strpos($this->data['name'], 'modular/') === 0) {
             $this->data['header']['body_classes'] = 'modular';
+            if ($folder[0] !== '_') {
+                $folder = '_' . $folder;
+                $this->data['folder'] = $folder;
+            }
         }
         unset($this->data['blueprint']);
+        $key = trim("{$route}/{$folder}", '/');
 
         /*
         if (isset($data['visible'])) {
