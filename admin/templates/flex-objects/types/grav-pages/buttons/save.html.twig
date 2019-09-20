@@ -1,19 +1,19 @@
 <div class="button-group">
-    <button class="button success" type="submit" name="task" value="save" form="blueprints">
+    <button class="button success" type="submit" name="task" value="save" lang="{{ selected_language }}" form="blueprints">
         <i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}
     </button>
     {% if admin.multilang %}
-        {% set untranslated = object.untranslatedLanguages(true) %}
+        {% set untranslated = object.getAllLanguages(true) %}
         {% if untranslated %}
             <button type="button" class="button success dropdown-toggle" data-toggle="dropdown">
                 <i class="fa fa-caret-down"></i>
             </button>
             <ul class="dropdown-menu lang-switcher">
-                {% for langCode in untranslated %}
-                    {% set langName = admin.siteLanguages[langCode] %}
-                    {% if langCode != page_lang %}
+                {% for langCode, enabled in untranslated %}
+                    {% set langName = all_languages[langCode] %}
+                    {% if langCode != selected_language %}
                         <li>
-                            <button class="button success task" name="task" value="saveas" lang="{{langCode}}" form="blueprints" type="submit">
+                            <button class="button success task" type="submit" name="task" value="saveas" lang="{{ langCode }}" form="blueprints">
                                 {{ "PLUGIN_ADMIN.SAVE_AS"|tu }} {{ langName[:1]|upper ~ langName[1:] }}
                             </button>
                         </li>
