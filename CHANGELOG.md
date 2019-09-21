@@ -1,6 +1,9 @@
 # v1.0.0-beta.9
 ##  mm/dd/2019
 
+1. [](#improved)
+    * Show/hide dropdown menu as needed when scrolling the page columns container left and right
+
 1. [](#bugfix)
     * PHP 7.1: Fixed error when activating `Flex Pages` in Plugin parameters [#13](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/13)
     * Flex Pages: Fixed page template cannot be changed [#4](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/4)

@@ -299,7 +299,7 @@ export const b64_decode_unicode = (str) => {
     }).join(''));
 };
 
-const updatePosition = (scrollingColumn) => {
+const updatePosition = (scrollingColumn, pageColumns) => {
     const group = document.querySelector('#pages-columns .button-group.open');
     if (group) {
         const button = group.querySelector('[data-toggle="dropdown"]');
@@ -327,6 +327,13 @@ const updatePosition = (scrollingColumn) => {
                         $(dropdown).css({display: 'none'});
                     }
                 }
+
+                if (pageColumns) {
+                    const targetClientRect = event.target.getBoundingClientRect();
+                    if ((left < targetClientRect.left + scrollLeft) || (left > targetClientRect.left + scrollLeft + targetClientRect.width)) {
+                        $(dropdown).css({display: 'none'});
+                    }
+                }
             }
         }
     }
@@ -341,9 +348,12 @@ document.addEventListener('scroll', (event) => {
     if (event.target && !event.target.classList) { return true; }
     const scrollingDocument = event.target.classList.contains('gm-scroll-view');
     const scrollingColumn = event.target.classList.contains('fjs-col');
-    if (scrollingDocument || scrollingColumn) {
+    const pageColumns = event.target.id === 'pages-columns';
+
+    console.log(scrollingDocument, scrollingColumn);
+    if (scrollingDocument || scrollingColumn || pageColumns) {
         closeGhostDropdowns();
-        updatePosition(scrollingColumn);
+        updatePosition(scrollingColumn, pageColumns);
     }
 }, true);
 
