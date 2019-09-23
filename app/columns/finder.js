@@ -269,6 +269,10 @@ export class FlexPages {
                     return false;
                 }
 
+                if (response.data.length) {
+                    parent.children = response.data;
+                }
+
                 return callback(response.data);
             }
         });
