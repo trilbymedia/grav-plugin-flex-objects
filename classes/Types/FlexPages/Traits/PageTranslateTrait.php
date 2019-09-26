@@ -43,7 +43,7 @@ trait PageTranslateTrait
             $object = $this->getLanguage() ? $this->getFlexDirectory()->getObject($this->getStorageKey(true), 'storage_key') : $this;
         } else {
             $key = $this->getStorageKey() . '|' . $code;
-            $meta = ['storage_key' => $key, 'language' => $code] + $this->getMetaData();
+            $meta = ['storage_key' => $key, 'lang' => $code] + $this->getMetaData();
             $object = $this->getFlexDirectory()->loadObjects([$key => $meta])[$key] ?? null;
         }
 
@@ -189,10 +189,10 @@ trait PageTranslateTrait
     public function language($var = null): string
     {
         return $this->loadHeaderProperty(
-            'language',
+            'lang',
             $var,
             function($value) {
-                $value = $value ?? $this->getMetaData()['language'] ?? '';
+                $value = $value ?? $this->getMetaData()['lang'] ?? '';
 
                 return trim($value);
             }
@@ -211,7 +211,11 @@ trait PageTranslateTrait
             $list = [];
             foreach ($translations as $code => $search) {
                 if (isset($search[$template])) {
+                    // Use main template if possible.
                     $list[$code] = $template;
+                } elseif (!empty($search)) {
+                    // Fall back to first matching template.
+                    $list[$code] = key($search);
                 }
             }
 

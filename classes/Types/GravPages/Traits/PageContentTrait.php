@@ -43,7 +43,7 @@ trait PageContentTrait
                 if (!$value) {
                     // Get the specific translation updated date.
                     $meta = $this->getMetaData();
-                    $language = $meta['language'] ?? '';
+                    $language = $meta['lang'] ?? '';
                     $template = $this->getProperty('template');
                     $value = $meta['markdown'][$language][$template] ?? 0;
                 }

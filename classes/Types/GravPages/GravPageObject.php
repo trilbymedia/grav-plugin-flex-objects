@@ -7,9 +7,11 @@ use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Pages;
 use Grav\Common\Utils;
+use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Route\Route;
 use Grav\Framework\Route\RouteFactory;
 use Grav\Plugin\Admin\Admin;
+use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageCollection;
 use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageObject;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageLegacyTrait;
@@ -101,6 +103,93 @@ class GravPageObject extends FlexPageObject
         return parent::getFormValue($name, $default, $separator);
     }
 
+    /**
+     * @param array|bool $reorder
+     * @return FlexObject|\Grav\Framework\Flex\Interfaces\FlexObjectInterface
+     */
+    public function save($reorder = true)
+    {
+        $oldKey = $this->exists() ? $this->getStorageKey(true) : null;
+
+        /** @var static $instance */
+        $instance = parent::save();
+
+        // Reorder items.
+        if ($reorder === true) {
+            $reorder = $instance->_reorder ?: false;
+        }
+        if (is_array($reorder)) {
+            $instance->doReorder($reorder, $oldKey ?? $instance->getStorageKey(true));
+        }
+
+        return $instance;
+    }
+
+    protected function doReorder(array $ordering, string $key = null)
+    {
+        // TODO: Fix orderings when parent changes (add to last, reorder old location).
+        $ordering = array_values($ordering);
+        $slug = basename($key);
+        $order = $this->order();
+        $k = $slug !== '' ? array_search($slug, $ordering, true) : false;
+        if ($order === false) {
+            if ($k !== false) {
+                unset($ordering[$k]);
+            }
+        } elseif ($k === false) {
+            $ordering[999999] = $slug;
+        }
+
+        $parent = $this->parent();
+
+        /** @var FlexPageCollection $children */
+        $children = $parent ? $parent->children()->withVisible()->getCollection() : null;
+        if (null !== $children) {
+            $ordering = array_flip($ordering);
+            if ($key !== null) {
+                $children->remove($key);
+                if (isset($ordering[basename($key)])) {
+                    $children->set($key, $this);
+                }
+            }
+            $count = count($ordering);
+            foreach ($children as $child) {
+                $order = $ordering[basename($child->getKey())] ?? null;
+                $child->order(null !== $order ? $order + 1 : $child->order() + $count);
+            }
+            $children = $children->orderBy(['order' => 'ASC']);
+
+            $i = 0;
+            foreach ($children as $child) {
+                $child->reorder(++$i);
+            }
+        }
+    }
+
+    protected function reorder(int $order)
+    {
+        $storage = $this->getFlexDirectory()->getStorage();
+        $oldKey = $this->getStorageKey(true);
+        $newKey = $this->buildStorageKey($order);
+        if ($oldKey !== $newKey) {
+            $storage->renameRow($oldKey, $newKey);
+            if (method_exists($this, 'clearMediaCache')) {
+                $this->clearMediaCache();
+            }
+        }
+    }
+
+    protected function buildStorageKey(int $order)
+    {
+        $this->order($order);
+        $key = $this->getStorageKey();
+        $slug = basename($this->getKey());
+        $parent = ltrim(dirname("/{$key}"), '/');
+        $folder = $order ? sprintf('%02d.%s', $order, $slug) : $slug;
+
+        return ($parent ? $parent . '/' : '') . $folder;
+    }
+
     public function full_order(): string
     {
         $path = $this->path();
@@ -155,7 +244,7 @@ class GravPageObject extends FlexPageObject
         $leaf_route = $options['leaf_route'] ?? null;
         $sortby = $options['sortby'] ?? null;
         $order = $options['order'] ?? SORT_ASC;
-        $language = $options['language'] ?? null;
+        $language = $options['lang'] ?? null;
 
         $status = 'error';
         $msg = null;
@@ -383,15 +472,11 @@ class GravPageObject extends FlexPageObject
 
         // Change storage location if needed.
         if (array_key_exists('route', $elements) && isset($elements['folder'], $elements['name'])) {
-            $parentRoute = $elements['route'];
-            $folder = trim($elements['folder']) ?: preg_replace(PAGE_ORDER_PREFIX_REGEX, '', $this->getProperty('folder'));
             $elements['template'] = $elements['name'];
-            unset($elements['route']);
-
-            $parts = [];
-            $parentKey = trim($parentRoute, '/');
+            $parentRoute = $elements['route'];
 
             // Figure out storage path to the new route.
+            $parentKey = trim($parentRoute, '/');
             if ($parentKey !== '') {
                 // Make sure page isn't being moved under itself.
                 $key = $this->getKey();
@@ -406,24 +491,10 @@ class GravPageObject extends FlexPageObject
                 }
 
                 $parentKey = $parent->getStorageKey();
-                $parts[] = $elements['parent_key'] = $parentKey;
             }
 
-            // Get the folder name.
-            $order = $elements['order'] ?? false;
-            $folder = $order ? sprintf('%02d.%s', $order, $folder) : $folder;
-            $parts[] = $folder;
-            $language = $elements['lang'] ?? $this->getLanguage();
-            $elements['language'] = $language;
-
-            // Finally update the storage key.
-            $storage_key = implode('/', $parts) . ($language ? '|' . $language : '');
-            if ($storage_key !== $this->getStorageKey()) {
-                $this->setStorageKey($storage_key);
-                $this->setKey($parentKey ? "{$parentKey}/$folder" : $folder);
-            }
+            $elements['parent_key'] = $parentKey;
         }
-
         parent::filterElements($elements, true);
     }
 
@@ -440,26 +511,9 @@ class GravPageObject extends FlexPageObject
             'order' => $this->getProperty('order'),
             'folder' => $this->getProperty('folder'),
             'template' => preg_replace('|modular/|', '', $this->getProperty('template')),
-            'language' => $this->getProperty('language'),
-            'format' => $this->getProperty('format')
+            'lang' => $this->getProperty('lang')
         ] + parent::prepareStorage();
 
         return $elements;
-    }
-
-    /**
-     * Strip filename from its extensions.
-     *
-     * @param string $value
-     * @return string
-     */
-    protected function stripNameExtension(string $value): string
-    {
-        // Also accept name with file extension: .en.md
-        $language = $this->language() ? '.' . $this->language() : '';
-        $format = $this->getProperty('format');
-        $pattern = '%(' . preg_quote($language, '%') . ')?\.' . preg_quote($format, '%'). '$%';
-
-        return preg_replace($pattern, '', $value);
     }
 }

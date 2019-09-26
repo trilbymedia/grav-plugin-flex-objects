@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Types\GravPages;
 
+use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Framework\Flex\Storage\FolderStorage;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
@@ -63,7 +64,7 @@ class GravPageStorage extends FolderStorage
         return $keys;
     }
 
-    public function readFrontmatter($key): string
+    public function readFrontmatter(string $key): string
     {
         $path = $this->getPathFromKey($key);
         $file = $this->getFile($path);
@@ -76,7 +77,7 @@ class GravPageStorage extends FolderStorage
         return $frontmatter;
     }
 
-    public function readRaw($key): string
+    public function readRaw(string $key): string
     {
         $path = $this->getPathFromKey($key);
         $file = $this->getFile($path);
@@ -87,6 +88,141 @@ class GravPageStorage extends FolderStorage
         }
 
         return $raw;
+    }
+
+    /**
+     * @param array $keys
+     * @param bool $includeParams
+     * @return string
+     */
+    public function buildStorageKey(array $keys, bool $includeParams = true): string
+    {
+        $key = $keys['key'] ?? null;
+        if (null === $key) {
+            $key = $keys['parent_key'] ?? '';
+            if ($key !== '') {
+                $key .= '/';
+            }
+            $order = $keys['order'] ?? 0;
+            $folder = $keys['folder'] ?? 'undefined';
+            $key .= $order ? sprintf('%02d.%s', $order, $folder) : $folder;
+        }
+
+        $params = $includeParams ? $this->buildStorageKeyParams($keys) : '';
+
+        return $params ? "{$key}|{$params}" : $key;
+    }
+
+    /**
+     * @param array $keys
+     * @return string
+     */
+    public function buildStorageKeyParams(array $keys): string
+    {
+        $params = $keys['template'] ?? '';
+        $language = $keys['lang'] ?? '';
+        if ($language) {
+            $params .= '.' . $language;
+        }
+
+        return $params;
+    }
+
+    /**
+     * @param array $keys
+     * @return string
+     */
+    public function buildFolder(array $keys): string
+    {
+        return $this->dataFolder . '/' . $this->buildStorageKey($keys, false);
+    }
+
+    /**
+     * @param array $keys
+     * @return string
+     */
+    public function buildFilename(array $keys): string
+    {
+        $file = $this->buildStorageKeyParams($keys);
+
+        // Template is optional; if it is missing, we need to have to load the object metadata.
+        if ($file && $file[0] === '.') {
+            $meta = $this->getObjectMeta($this->buildStorageKey($keys, false));
+            $file = ($meta['template'] ?? 'folder') . $file;
+        }
+
+        return $file . $this->dataExt;
+    }
+
+    /**
+     * @param array $keys
+     * @return string
+     */
+    public function buildFilepath(array $keys): string
+    {
+        return $this->buildFolder($keys) . '/' . $this->buildFilename($keys);
+    }
+
+    /**
+     * @param array $row
+     * @return array
+     */
+    public function extractKeysFromRow(array $row): array
+    {
+        $meta = $row['__META'] ?? null;
+        $storageKey = $row['storage_key'] ?? $meta['storage_key']  ?? '';
+        $keyMeta = $storageKey !== '' ? $this->extractKeysFromStorageKey($storageKey) : null;
+        $parentKey = $row['parent_key'] ?? $meta['parent_key'] ?? $keyMeta['parent_key'] ?? '';
+        $order = $row['order'] ?? $meta['order']  ?? $keyMeta['order'] ?? '';
+        $folder = $row['folder'] ?? $meta['folder']  ?? $keyMeta['folder'] ?? '';
+        $template = $row['template'] ?? $meta['template'] ?? $keyMeta['template'] ?? '';
+        $lang = $row['lang'] ?? $meta['lang'] ?? $keyMeta['lang'] ?? '';
+
+        $keys = [
+            'key' => null,
+            'params' => null,
+            'parent_key' => $parentKey,
+            'order' => (int)$order,
+            'folder' => $folder,
+            'template' => $template,
+            'lang' => $lang
+        ];
+
+        $keys['key'] = $this->buildStorageKey($keys, false);
+        $keys['params'] = $this->buildStorageKeyParams($keys);
+
+        return $keys;
+    }
+
+    /**
+     * @param string $key
+     * @return array
+     */
+    public function extractKeysFromStorageKey(string $key): array
+    {
+        if (strpos($key, '|')) {
+            [$key, $params] = explode('|', $key, 2);
+            [$template, $language] = strpos($params, '.') ? explode('.', $params, 2) : [$params, ''];
+        } else {
+            $params = $template = $language = '';
+        }
+        $objectKey = basename($key);
+        if (preg_match('|^(\d+)\.(.+)$|', $objectKey, $matches)) {
+            [, $order, $folder] = $matches;
+        } else {
+            [$order, $folder] = ['', $objectKey];
+        }
+        $parentKey = ltrim(dirname('/' . $key), '/');
+
+        return [
+            'key' => $key,
+            'params' => $params,
+            'parent_key' => $parentKey,
+            'order' => (int)$order,
+            'folder' => $folder,
+            'template' => $template,
+            'lang' => $language
+        ];
     }
 
     /**
@@ -119,34 +255,110 @@ class GravPageStorage extends FolderStorage
      * Prepares the row for saving and returns the storage key for the record.
      *
      * @param array $row
-     * @param string $key
-     * @return string
      */
-    protected function prepareRow(array &$row, string $key = '@@'): string
+    protected function prepareRow(array &$row): void
     {
-        // Always generate key from the row.
-        $key = $row['parent_key'] ?? '';
-        if ($key !== '') {
-            $key .= '/';
-        }
-        $order = $row['order'] ?? '';
-        $folder = $row['folder'] ?? 'undefined';
-        $key .= $order ? sprintf('%02d.%s', $order, $folder) : $folder;
-        $key .= '|' . $row['template'] ?? '';
-        if (!empty($row['language'])) {
-            $key .= '.' . $row['language'];
-        }
-        $row['storage_key'] = $key;
+        // Remove keys used in the filesystem.
+        unset($row['parent_key'], $row['order'], $row['folder'], $row['template'], $row['lang']);
+    }
 
-        unset($row['parent'], $row['order'], $row['folder'], $row['template'], $row['language']);
+    /**
+     * Page storage supports moving and copying the pages and their languages.
+     *
+     * $row['__META']['copy'] = true       Use this if you want to copy the whole folder, otherwise it will be moved
+     * $row['__META']['clone'] = true      Use this if you want to clone the file, otherwise it will be renamed
+     *
+     * @param string $key
+     * @param array $row
+     * @return array
+     */
+    protected function saveRow(string $key, array $row): array
+    {
+        $grav = Grav::instance();
 
-        return parent::prepareRow($row, $key);
+        /** @var Debugger $debugger */
+        $debugger = $grav['debugger'];
+
+        try {
+            // Initialize all key-related variables.
+            $newKeys = $this->extractKeysFromRow($row);
+            $newKey = $this->buildStorageKey($newKeys);
+            $newFolder = $this->buildFolder($newKeys);
+            $newFilename = $this->buildFilename($newKeys);
+            $newFilepath = "{$newFolder}/{$newFilename}";
+
+            // Check if the row already exists.
+            $oldKey = $row['__META']['storage_key'] ?? null;
+            if (is_string($oldKey)) {
+                // Initialize all old key-related variables.
+                $oldKeys = $this->extractKeysFromRow(['__META' => $row['__META']]);
+                $oldFolder = $this->buildFolder($oldKeys);
+                $oldFilename = $this->buildFilename($oldKeys);
+
+                // Check if folder has changed.
+                if ($oldFolder !== $newFolder && file_exists($oldFolder)) {
+                    $isCopy = $row['__META']['copy'] ?? false;
+                    if ($isCopy) {
+                        $this->copyRow($oldKey, $newKey);
+                        $debugger->addMessage("Page copied: {$oldFolder} => {$newFolder}", 'debug');
+                    } else {
+                        $this->renameRow($oldKey, $newKey);
+                        $debugger->addMessage("Page moved: {$oldFolder} => {$newFolder}", 'debug');
+                    }
+                }
+
+                // Check if filename has changed.
+                if ($oldFilename !== $newFilename) {
+                    // Get instance of the old file (we have already copied/moved it).
+                    $oldFilepath = "{$newFolder}/{$oldFilename}";
+                    $file = $this->getFile($oldFilepath);
+
+                    // Rename the file if we aren't supposed to clone it.
+                    $isClone = $row['__META']['clone'] ?? false;
+                    if (!$isClone && $file->exists()) {
+                        /** @var UniformResourceLocator $locator */
+                        $locator = $grav['locator'];
+                        $toPath = $locator->isStream($newFilepath) ? $locator->findResource($newFilepath, true, true) : $newFilepath;
+                        $success = $file->rename($toPath);
+                        if (!$success) {
+                            throw new \RuntimeException("Changing page template failed: {$oldFilepath} => {$newFilepath}");
+                        }
+                        $debugger->addMessage("Page template changed: {$oldFilename} => {$newFilename}", 'debug');
+                    } else {
+                        $debugger->addMessage("Page template created: {$newFilename}", 'debug');
+                    }
+                }
+            }
+
+            // Clean up the data to be saved.
+            $this->prepareRow($row);
+            unset($row['__META'], $row['__ERROR']);
+
+            if (!isset($file)) {
+                $file = $this->getFile($newFilepath);
+            }
+
+            $file->save($row);
+            $debugger->addMessage("Page saved: {$newFilepath}", 'debug');
+
+            /** @var UniformResourceLocator $locator */
+            $locator = Grav::instance()['locator'];
+            if ($locator->isStream($newFolder)) {
+                $locator->clearCache();
+            }
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException(sprintf('Flex saveFile(%s): %s', $file->filename(), $e->getMessage()));
+        }
+
+        $row['__META'] = $this->getObjectMeta($newKey, true);
+
+        return $row;
     }
 
     protected function canDeleteFolder(string $key): bool
     {
-        $parts = $this->parseKey($key);
-        if ($parts['lang']) {
+        $keys = $this->extractKeysFromStorageKey($key);
+        if ($keys['lang']) {
             return false;
         }
 
@@ -185,7 +397,7 @@ class GravPageStorage extends FolderStorage
      */
     protected function getObjectMeta(string $key, bool $reload = false): array
     {
-        $keys = $this->parseKey($key, false);
+        $keys = $this->extractKeysFromStorageKey($key);
         $key = $keys['key'];
 
         if ($reload || !isset($this->meta[$key])) {
@@ -270,13 +482,12 @@ class GravPageStorage extends FolderStorage
 
         $params = $keys['params'];
         if ($params) {
-            $parts = $this->parseParams($key, $params);
-            $language = $parts['lang'];
-            $template = $parts['template'];
+            $language = $keys['lang'];
+            $template = $keys['template'] ?? $meta['template'];
             $meta['exists'] = ($template && !empty($meta['children'])) || isset($meta['markdown'][$language][$template]);
             $meta['storage_key'] .= '|' . $params;
             $meta['template'] = $template;
-            $meta['language'] = $language;
+            $meta['lang'] = $language;
         }
 
         return $meta;

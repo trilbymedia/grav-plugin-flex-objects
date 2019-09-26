@@ -95,7 +95,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function isVisible(): bool
     {
-        return $this->isPublished() && $this->visible();
+        return $this->visible();
     }
 
     /**
@@ -178,83 +178,7 @@ class FlexPageObject extends FlexObject implements PageInterface, MediaManipulat
      */
     public function save($reorder = true)
     {
-        $key = $this->getMetaData()['storage_key'] ?? $this->getStorageKey();
-
-        /** @var static $instance */
-        $instance = parent::save();
-        if ($reorder === true) {
-            $reorder = $instance->_reorder ?? false;
-        }
-        if (is_array($reorder)) {
-            $instance->doReorder($reorder, $key ?: $this->getStorageKey(true));
-        }
-
-        return $instance;
-    }
-
-    protected function doReorder(array $ordering, string $key = null)
-    {
-        // TODO: Fix orderings when parent changes (add to last, reorder old location).
-        $ordering = array_values($ordering);
-        $slug = basename($key);
-        $order = $this->order();
-        $k = $slug !== '' ? array_search($slug, $ordering, true) : false;
-        if ($order === false) {
-            if ($k !== false) {
-                unset($ordering[$k]);
-            }
-        } elseif ($k === false) {
-            $ordering[999999] = $slug;
-        }
-
-        $parent = $this->parent();
-
-        /** @var FlexPageCollection $children */
-        $children = $parent ? $parent->children()->withVisible()->getCollection() : null;
-        if (null !== $children) {
-            $ordering = array_flip($ordering);
-            if ($key !== null) {
-                $children->remove($key);
-                if (isset($ordering[basename($key)])) {
-                    $children->set($key, $this);
-                }
-            }
-            $count = count($ordering);
-            foreach ($children as $child) {
-                $order = $ordering[basename($child->getKey())] ?? null;
-                $child->order(null !== $order ? $order + 1 : $child->order() + $count);
-            }
-            $children = $children->orderBy(['order' => 'ASC']);
-
-            $i = 0;
-            foreach ($children as $child) {
-                $child->reorder(++$i);
-            }
-        }
-    }
-
-    protected function reorder(int $order)
-    {
-        $oldKey = $this->getStorageKey(true);
-        $newKey = $this->buildStorageKey($order);
-        $storage = $this->getFlexDirectory()->getStorage();
-        if ($oldKey !== $newKey) {
-            $storage->renameRow($oldKey, $newKey);
-            if (method_exists($this, 'clearMediaCache')) {
-                $this->clearMediaCache();
-            }
-        }
-    }
-
-    protected function buildStorageKey(int $order)
-    {
-        $this->order($order);
-        $key = $this->getStorageKey();
-        $slug = basename($this->getKey());
-        $parent = trim(dirname("/{$key}"), '/');
-        $folder = $order ? sprintf('%02d.%s', $order, $slug) : $slug;
-
-        return ($parent ? $parent . '/' : '') . $folder;
+        return parent::save();
     }
 
     /**
