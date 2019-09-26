@@ -15,7 +15,7 @@ use Grav\Plugin\FlexObjects\Types\FlexPages\FlexPageIndex;
  */
 class GravPageIndex extends FlexPageIndex
 {
-    const VERSION = parent::VERSION . '.4';
+    const VERSION = parent::VERSION . '.5';
     const ORDER_LIST_REGEX = '/(\/\d+)\.[^\/]+/u';
     const PAGE_ROUTE_REGEX = '/\/\d+\./u';
 
