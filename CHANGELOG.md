@@ -1,5 +1,5 @@
 # v1.0.0-beta.9
-##  mm/dd/2019
+##  09/26/2019
 
 1. [](#improved)
     * Show/hide dropdown menu as needed when scrolling the page columns container left and right
