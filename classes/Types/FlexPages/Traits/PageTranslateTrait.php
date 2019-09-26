@@ -42,7 +42,7 @@ trait PageTranslateTrait
         } elseif ('' === $code) {
             $object = $this->getLanguage() ? $this->getFlexDirectory()->getObject($this->getStorageKey(true), 'storage_key') : $this;
         } else {
-            $key = $this->getStorageKey() . '|' . $code;
+            $key = $this->getStorageKey() . '|.' . $code;
             $meta = ['storage_key' => $key, 'lang' => $code] + $this->getMetaData();
             $object = $this->getFlexDirectory()->loadObjects([$key => $meta])[$key] ?? null;
         }

@@ -48,7 +48,7 @@ class GravPageStorage extends FolderStorage
      */
     public function parseKey(string $key, bool $variations = true): array
     {
-        if (strpos($key, '|')) {
+        if (mb_strpos($key, '|') !== false) {
             [$key, $params] = explode('|', $key, 2);
         } else {
             $params = '';
@@ -200,9 +200,9 @@ class GravPageStorage extends FolderStorage
      */
     public function extractKeysFromStorageKey(string $key): array
     {
-        if (strpos($key, '|')) {
+        if (mb_strpos($key, '|') !== false) {
             [$key, $params] = explode('|', $key, 2);
-            [$template, $language] = strpos($params, '.') ? explode('.', $params, 2) : [$params, ''];
+            [$template, $language] = mb_strpos($params, '.') !== false ? explode('.', $params, 2) : [$params, ''];
         } else {
             $params = $template = $language = '';
         }
@@ -232,7 +232,7 @@ class GravPageStorage extends FolderStorage
      */
     protected function parseParams(string $key, string $params): array
     {
-        if (strpos($params, '.')) {
+        if (mb_strpos($params, '.') !== false) {
             [$template, $language] = explode('.', $params, 2);
         } else {
             $template = $params;
@@ -404,7 +404,7 @@ class GravPageStorage extends FolderStorage
         if ($reload || !isset($this->meta[$key])) {
             /** @var UniformResourceLocator $locator */
             $locator = Grav::instance()['locator'];
-            if (strpos($key, '@@') === false) {
+            if (mb_strpos($key, '@@') === false) {
                 $path = $locator->findResource($this->getStoragePath($key), true, true);
             } else {
                 $path = null;
@@ -484,7 +484,7 @@ class GravPageStorage extends FolderStorage
         $params = $keys['params'];
         if ($params) {
             $language = $keys['lang'];
-            $template = $keys['template'] ?? $meta['template'];
+            $template = $keys['template'] ?: array_key_first($meta['markdown'][$language]) ?? $meta['template'];
             $meta['exists'] = ($template && !empty($meta['children'])) || isset($meta['markdown'][$language][$template]);
             $meta['storage_key'] .= '|' . $params;
             $meta['template'] = $template;
