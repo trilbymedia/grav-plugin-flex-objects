@@ -46,13 +46,15 @@ trait PageRoutableTrait
      */
     public function routable($var = null): bool
     {
-        return $this->loadHeaderProperty(
+        $value = $this->loadHeaderProperty(
             'routable',
             $var,
             function($value) {
                 return ($value ?? true) && $this->published() && $this->getLanguages(true);
             }
         );
+
+        return $value && $this->published() && !$this->modular();
     }
 
     /**

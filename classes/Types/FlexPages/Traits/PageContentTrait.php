@@ -218,13 +218,15 @@ trait PageContentTrait
      */
     public function visible($var = null): bool
     {
-        return $this->loadHeaderProperty(
+        $value = $this->loadHeaderProperty(
             'visible',
             $var,
             function($value) {
                 return ($value ?? $this->order() !== false) && !$this->modular();
             }
         );
+
+        return $value && $this->published();
     }
 
     /**

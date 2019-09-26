@@ -430,6 +430,7 @@ trait PageLegacyTrait
                     }
                     $value .= '.md';
                 }
+                $value = preg_replace('|^modular/|', '', $value);
 
                 $this->unsetProperty('template');
 
