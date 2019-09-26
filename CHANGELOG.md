@@ -13,6 +13,7 @@
     * Flex Pages: Fixed unable to change page template [#4](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/4)
     * Fixed `Error 404` when adding new contact [#14](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/14)
     * Flex Pages: Non-visible items appear in Nav menu [#24](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/24)
+    * Disabling plugin breaks saving plugin configuration [#11](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/11)
 
 # v1.0.0-beta.8
 ##  09/19/2019

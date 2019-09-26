@@ -142,7 +142,9 @@ class FlexObjectsPlugin extends Plugin
 
             $list = [];
             foreach ($blueprints as $blueprint) {
-                $list[basename($blueprint, '.yaml')] = $blueprint;
+                if ($blueprint) {
+                    $list[basename($blueprint, '.yaml')] = $blueprint;
+                }
             }
 
             $flex = new Flex($list, $config);
