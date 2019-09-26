@@ -611,8 +611,11 @@ class AdminController
 
             if (!$this->redirect) {
                 // TODO: remove 'action:add' after save.
-                if ($this->referrerRoute->getGravParam('action') === 'add' && !Utils::endsWith($this->currentRoute->toString(false), '/' . $object->getKey())) {
-                    $this->referrerRoute = $this->currentRoute->withAddedPath($object->getKey())->withGravParam('action', null);
+                if ($this->referrerRoute->getGravParam('action') === 'add') {
+                    $this->referrerRoute = $this->currentRoute->withGravParam('action', null);
+                    if (!Utils::endsWith($this->referrerRoute->toString(false), '/' . $object->getKey())) {
+                        $this->referrerRoute = $this->referrerRoute->withAddedPath($object->getKey());
+                    }
                 } elseif ($key !== $object->getKey()) {
                     $this->referrerRoute = $this->currentRoute->withRoute($this->currentRoute->getRoute(0, -1) . '/' . $object->getKey());
                 }
