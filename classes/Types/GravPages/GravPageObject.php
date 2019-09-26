@@ -503,15 +503,24 @@ class GravPageObject extends FlexPageObject
      */
     public function prepareStorage(): array
     {
+        $meta = $this->getMetaData();
+        $oldLang = $meta['lang'] ?? '';
+        $newLang = $this->getProperty('lang');
+
+        // Always clone the page to the new language.
+        if ($oldLang !== $newLang) {
+            $meta['clone'] = true;
+        }
+
         // Make sure that certain elements are always sent to the storage layer.
         $elements = [
-            '__META' => $this->getStorage(),
+            '__META' => $meta,
             'storage_key' => $this->getStorageKey(),
             'parent_key' => $this->getProperty('parent_key'),
             'order' => $this->getProperty('order'),
             'folder' => $this->getProperty('folder'),
             'template' => preg_replace('|modular/|', '', $this->getProperty('template')),
-            'lang' => $this->getProperty('lang')
+            'lang' => $newLang
         ] + parent::prepareStorage();
 
         return $elements;

@@ -325,6 +325,7 @@ class GravPageStorage extends FolderStorage
                         }
                         $debugger->addMessage("Page template changed: {$oldFilename} => {$newFilename}", 'debug');
                     } else {
+                        $file = null;
                         $debugger->addMessage("Page template created: {$newFilename}", 'debug');
                     }
                 }
@@ -347,7 +348,7 @@ class GravPageStorage extends FolderStorage
                 $locator->clearCache();
             }
         } catch (\RuntimeException $e) {
-            throw new \RuntimeException(sprintf('Flex saveFile(%s): %s', $file->filename(), $e->getMessage()));
+            throw new \RuntimeException(sprintf('Flex saveRow(%s): %s', $file->filename(), $e->getMessage()));
         }
 
         $row['__META'] = $this->getObjectMeta($newKey, true);
