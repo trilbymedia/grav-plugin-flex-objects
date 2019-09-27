@@ -287,6 +287,8 @@ class GravPageStorage extends FolderStorage
             $newFilename = $this->buildFilename($newKeys);
             $newFilepath = "{$newFolder}/{$newFilename}";
 
+            $debugger->addMessage("Save page: {$newKey}", 'debug');
+
             // Check if the row already exists.
             $oldKey = $row['__META']['storage_key'] ?? null;
             if (is_string($oldKey)) {
@@ -339,8 +341,17 @@ class GravPageStorage extends FolderStorage
                 $file = $this->getFile($newFilepath);
             }
 
-            $file->save($row);
-            $debugger->addMessage("Page saved: {$newFilepath}", 'debug');
+            // Compare existing file content to the new one and save the file only if content has been changed.
+            $file->free();
+            $oldRaw = $file->raw();
+            $file->content($row);
+            $newRaw = $file->raw();
+            if ($oldRaw !== $newRaw) {
+                $file->save($row);
+                $debugger->addMessage("Page content saved: {$newFilepath}", 'debug');
+            } else {
+                $debugger->addMessage('Page content has not been changed, do not update the file', 'debug');
+            }
 
             /** @var UniformResourceLocator $locator */
             $locator = Grav::instance()['locator'];

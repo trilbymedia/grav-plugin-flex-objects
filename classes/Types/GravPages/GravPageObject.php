@@ -109,28 +109,30 @@ class GravPageObject extends FlexPageObject
      */
     public function save($reorder = true)
     {
-        $oldKey = $this->exists() ? $this->getStorageKey(true) : null;
+        // Reorder siblings.
+        if ($reorder === true) {
+            $reorder = $this->_reorder ?: false;
+        }
+        $siblings = is_array($reorder) ? $this->reorderSiblings($reorder) : [];
 
         /** @var static $instance */
         $instance = parent::save();
 
-        // Reorder items.
-        if ($reorder === true) {
-            $reorder = $instance->_reorder ?: false;
-        }
-        if (is_array($reorder)) {
-            $instance->doReorder($reorder, $oldKey ?? $instance->getStorageKey(true));
+        foreach ($siblings as $sibling) {
+            $sibling->save(false);
         }
 
         return $instance;
     }
 
-    protected function doReorder(array $ordering, string $key = null)
+    protected function reorderSiblings(array $ordering)
     {
-        // TODO: Fix orderings when parent changes (add to last, reorder old location).
-        $ordering = array_values($ordering);
-        $slug = basename($key);
-        $order = $this->order();
+        $storageKey = $this->getStorageKey();
+        $oldParentKey = ltrim(dirname("/$storageKey"), '/');
+        $newParentKey = $this->getProperty('parent_key');
+
+        $slug = basename($this->getKey());
+        $order = $oldParentKey === $newParentKey ? $this->order() : false;
         $k = $slug !== '' ? array_search($slug, $ordering, true) : false;
         if ($order === false) {
             if ($k !== false) {
@@ -139,55 +141,31 @@ class GravPageObject extends FlexPageObject
         } elseif ($k === false) {
             $ordering[999999] = $slug;
         }
+        $ordering = array_values($ordering);
 
         $parent = $this->parent();
 
-        /** @var FlexPageCollection $children */
-        $children = $parent ? $parent->children()->withVisible()->getCollection() : null;
-        if (null !== $children) {
+        /** @var FlexPageCollection $siblings */
+        $siblings = $parent ? $parent->children()->withVisible()->getCollection() : [];
+        if ($siblings) {
             $ordering = array_flip($ordering);
-            if ($key !== null) {
-                $children->remove($key);
-                if (isset($ordering[basename($key)])) {
-                    $children->set($key, $this);
+            if ($storageKey !== null) {
+                $siblings->remove($storageKey);
+                if (isset($ordering[$slug])) {
+                    $siblings->set($storageKey, $this);
                 }
             }
             $count = count($ordering);
-            foreach ($children as $child) {
-                $order = $ordering[basename($child->getKey())] ?? null;
-                $child->order(null !== $order ? $order + 1 : $child->order() + $count);
+            foreach ($siblings as $sibling) {
+                $newOrder = $ordering[basename($sibling->getKey())] ?? null;
+                $oldOrder = $sibling->order();
+                $sibling->order(null !== $newOrder ? $newOrder + 1 : $oldOrder + $count);
             }
-            $children = $children->orderBy(['order' => 'ASC']);
-
-            $i = 0;
-            foreach ($children as $child) {
-                $child->reorder(++$i);
-            }
+            $siblings = $siblings->orderBy(['order' => 'ASC']);
+            $siblings->removeElement($this);
         }
-    }
 
-    protected function reorder(int $order)
-    {
-        $storage = $this->getFlexDirectory()->getStorage();
-        $oldKey = $this->getStorageKey(true);
-        $newKey = $this->buildStorageKey($order);
-        if ($oldKey !== $newKey) {
-            $storage->renameRow($oldKey, $newKey);
-            if (method_exists($this, 'clearMediaCache')) {
-                $this->clearMediaCache();
-            }
-        }
-    }
-
-    protected function buildStorageKey(int $order)
-    {
-        $this->order($order);
-        $key = $this->getStorageKey();
-        $slug = basename($this->getKey());
-        $parent = ltrim(dirname("/{$key}"), '/');
-        $folder = $order ? sprintf('%02d.%s', $order, $slug) : $slug;
-
-        return ($parent ? $parent . '/' : '') . $folder;
+        return $siblings;
     }
 
     public function full_order(): string
@@ -490,6 +468,11 @@ class GravPageObject extends FlexPageObject
                     throw new \RuntimeException(sprintf('Page %s cannot be moved to non-existing path %s', '/' . $key, $parentRoute));
                 }
 
+                // If parent changes and page is visible, move it to be the last item.
+                if (!empty($elements['order']) && $parent !== $this->parent()) {
+                    $elements['order'] = ((int)$parent->children()->visible()->sort(['order' => 'ASC'])->last()->order()) + 1;
+                }
+
                 $parentKey = $parent->getStorageKey();
             }
 
@@ -518,7 +501,7 @@ class GravPageObject extends FlexPageObject
             'storage_key' => $this->getStorageKey(),
             'parent_key' => $this->getProperty('parent_key'),
             'order' => $this->getProperty('order'),
-            'folder' => $this->getProperty('folder'),
+            'folder' => preg_replace('|^\d+\.|', '', $this->getProperty('folder')),
             'template' => preg_replace('|modular/|', '', $this->getProperty('template')),
             'lang' => $newLang
         ] + parent::prepareStorage();

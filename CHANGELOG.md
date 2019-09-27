@@ -1,3 +1,9 @@
+# v1.0.0-beta.10
+##  mm/dd/2019
+
+1. [](#bugfix)
+    * Flex Pages: Fixed moving visible page in admin causing ordering issues [#6](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/6)
+
 # v1.0.0-beta.9
 ##  09/26/2019
 
