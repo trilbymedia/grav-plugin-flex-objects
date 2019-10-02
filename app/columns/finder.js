@@ -350,11 +350,10 @@ const closeGhostDropdowns = () => {
 
 document.addEventListener('scroll', (event) => {
     if (event.target && !event.target.classList) { return true; }
-    const scrollingDocument = event.target.classList.contains('gm-scroll-view');
+    const scrollingDocument = event.target.classList.contains('gm-scroll-view') || event.target.classList.contains('content-wrapper');
     const scrollingColumn = event.target.classList.contains('fjs-col');
     const pageColumns = event.target.id === 'pages-columns';
 
-    console.log(scrollingDocument, scrollingColumn);
     if (scrollingDocument || scrollingColumn || pageColumns) {
         closeGhostDropdowns();
         updatePosition(scrollingColumn, pageColumns);
@@ -364,9 +363,9 @@ document.addEventListener('scroll', (event) => {
 document.addEventListener('click', (event) => {
     closeGhostDropdowns();
     if (event.target.dataset.toggle || event.target.closest('[data-toggle="dropdown"]')) {
-        // const scrollEvent = new Event('scroll');
-        // document.dispatchEvent(scrollEvent);
-        (document.querySelectorAll('.gm-scroll-view') || []).forEach((scroll) => {
+        const containerScroller = document.querySelectorAll('.gm-scroll-view');
+
+        ((containerScroller.length ? containerScroller : document.querySelectorAll('.content-wrapper')) || []).forEach((scroll) => {
             const scrollEvent = new Event('scroll');
             scroll.dispatchEvent(scrollEvent);
         });
