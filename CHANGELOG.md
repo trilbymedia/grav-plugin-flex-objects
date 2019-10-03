@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
     * Flex Pages: Fixed moving visible page in admin causing ordering issues [#6](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/6)
+    * Flex Pages: Fixed prev/next page missing pages if pagination was turned on in page header
 
 # v1.0.0-beta.9
 ##  09/26/2019

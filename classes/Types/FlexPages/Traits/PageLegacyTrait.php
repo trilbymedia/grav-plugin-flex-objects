@@ -1002,6 +1002,9 @@ trait PageLegacyTrait
             throw new \InvalidArgumentException('Argument should be either header variable name or array of parameters');
         }
 
+        if (!$pagination) {
+            $params['pagination'] = false;
+        }
         $context = [
             'pagination' => $pagination,
             'self' => $this
@@ -1009,10 +1012,6 @@ trait PageLegacyTrait
 
         /** @var Pages $pages */
         $pages = Grav::instance()['pages'];
-
-        //$collection = $pages->getCollection($params, $context);
-        //$first = $collection->first();
-        //Grav::instance()->close(new Response(200, ['Content-Type' => 'application/json'], json_encode($first)));
 
         return $pages->getCollection($params, $context);
     }

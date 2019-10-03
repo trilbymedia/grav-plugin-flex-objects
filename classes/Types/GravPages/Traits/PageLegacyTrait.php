@@ -181,6 +181,9 @@ trait PageLegacyTrait
             throw new \InvalidArgumentException('Argument should be either header variable name or array of parameters');
         }
 
+        if (!$pagination) {
+            $params['pagination'] = false;
+        }
         $context = [
             'pagination' => $pagination,
             'self' => $this
