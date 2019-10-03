@@ -1,5 +1,5 @@
 # v1.0.0-beta.10
-##  mm/dd/2019
+## 10/03/2019
 
 1. [](#bugfix)
     * Flex Pages: Fixed moving visible page in admin causing ordering issues [#6](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/6)
@@ -7,7 +7,7 @@
     * Flex Pages: Fixed prev/next page missing pages if pagination was turned on in page header
 
 # v1.0.0-beta.9
-##  09/26/2019
+## 09/26/2019
 
 1. [](#improved)
     * Show/hide dropdown menu as needed when scrolling the page columns container left and right
@@ -24,7 +24,7 @@
     * Disabling plugin breaks saving plugin configuration [#11](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/11)
 
 # v1.0.0-beta.8
-##  09/19/2019
+## 09/19/2019
 
 1. [](#new)
     * Initial public release (all previous versions were in a private repo)
