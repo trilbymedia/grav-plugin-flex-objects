@@ -10,7 +10,7 @@
             </button>
             <ul class="dropdown-menu lang-switcher">
                 {% for langCode, enabled in untranslated %}
-                    {% set langName = all_languages[langCode] %}
+                    {% set langName = all_languages[langCode] ?? langCode %}
                     {% if langCode != selected_language %}
                         <li>
                             <button class="button success task" type="submit" name="task" value="saveas" lang="{{ langCode }}" form="blueprints">
