@@ -4,6 +4,7 @@
 1. [](#bugfix)
     * Flex Pages: Fixed default language not being translated in both `translatedLanguages()` and `untranslatedLanguages()` results
     * Flex Pages: Language interface compatibility fixes
+    * Flex Pages: Fixed frontend issues with plugin events [#5](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/5)
 
 # v1.0.0-beta.10
 ## 10/03/2019

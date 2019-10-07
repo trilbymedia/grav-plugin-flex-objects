@@ -17,6 +17,7 @@ use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageContentTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageLegacyTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageRoutableTrait;
 use Grav\Plugin\FlexObjects\Types\GravPages\Traits\PageTranslateTrait;
+use RocketTheme\Toolbox\Event\Event;
 
 /**
  * Class GravPageObject
@@ -42,6 +43,8 @@ class GravPageObject extends FlexPageObject
     /** @var string File format, eg. 'md' */
     protected $format;
 
+    private $_initialized = false;
+
     /**
      * @return array
      */
@@ -51,6 +54,14 @@ class GravPageObject extends FlexPageObject
             'path' => true,
             'full_order' => true
         ] + parent::getCachedMethods();
+    }
+
+    public function initialize(): void
+    {
+        if (!$this->_initialized) {
+            Grav::instance()->fireEvent('onPageProcessed', new Event(['page' => $this]));
+            $this->_initialized = true;
+        }
     }
 
     /**
