@@ -26,7 +26,7 @@ trait PageTranslateTrait
             return parent::translatedLanguages();
         }
 
-        $translated = $this->getlanguages(true);
+        $translated = $this->getLanguageTemplates();
         if (!$translated) {
             return $translated;
         }
@@ -40,12 +40,17 @@ trait PageTranslateTrait
         $locator = $grav['locator'];
 
         $languages = $language->getLanguages();
+        $languages[] = '';
         $defaultCode = $language->getDefault();
 
-        if (!isset($translated[$defaultCode]) && isset($translated['-'])) {
-            $translated[$defaultCode] = $translated['-'];
+        if (isset($translated[$defaultCode])) {
+            unset($translated['']);
         }
-        unset($translated['-']);
+
+        foreach ($translated as $key => &$template) {
+            $template .= $key !== '' ? ".{$key}.md" : '.md';
+        }
+        unset($template);
 
         $translated = array_intersect_key($translated, array_flip($languages));
 
@@ -55,9 +60,9 @@ trait PageTranslateTrait
         }
         $folder = $locator($folder);
 
-        $translatedLanguages = [];
+        $list = array_fill_keys($languages, null);
         foreach ($translated as $languageCode => $languageFile) {
-            $languageExtension = ".{$languageCode}.md";
+            $languageExtension = $languageCode ? ".{$languageCode}.md" : '.md';
             $path = "{$folder}/{$languageFile}";
 
             // FIXME: use flex, also rawRoute() does not fully work?
@@ -72,9 +77,9 @@ trait PageTranslateTrait
                 $route = $aPage->route();
             }
 
-            $translatedLanguages[$languageCode] = $route;
+            $list[$languageCode ?: $defaultCode] = $route ?? '';
         }
 
-        return $translatedLanguages;
+        return array_filter($list, static function($var) { return null !== $var; });
     }
 }

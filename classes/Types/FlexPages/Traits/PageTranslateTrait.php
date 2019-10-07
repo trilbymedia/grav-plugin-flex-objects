@@ -95,7 +95,7 @@ trait PageTranslateTrait
 
     public function getLanguage(): string
     {
-        return $this->language();
+        return $this->language() ?? '';
     }
 
     /**
@@ -149,13 +149,13 @@ trait PageTranslateTrait
         $languages[] = '';
 
         $translated = array_intersect_key($translated, array_flip($languages));
-        $list = [];
+        $list = array_fill_keys($languages, null);
         foreach ($translated as $languageCode => $languageFile) {
-            $languageCode = ($languageCode ? '/' : '') . $languageCode;
-            $list[$languageCode] = "{$languageCode}/{$this->getKey()}";
+            $path = ($languageCode ? '/' : '') . $languageCode;
+            $list[$languageCode] = "{$path}/{$this->getKey()}";
         }
 
-        return $list;
+        return array_filter($list);
     }
 
     /**
@@ -167,7 +167,6 @@ trait PageTranslateTrait
      */
     public function untranslatedLanguages($includeUnpublished = false): array
     {
-        // FIXME: include unpublished is not implemented...
         $grav = Grav::instance();
 
         /** @var Language $language */
@@ -176,7 +175,7 @@ trait PageTranslateTrait
         $languages = $language->getLanguages();
         $translated = array_keys($this->translatedLanguages(!$includeUnpublished));
 
-        return array_diff($languages, $translated);
+        return array_values(array_diff($languages, $translated));
     }
 
     /**
@@ -184,9 +183,9 @@ trait PageTranslateTrait
      *
      * @param $var
      *
-     * @return string
+     * @return string|null
      */
-    public function language($var = null): string
+    public function language($var = null): ?string
     {
         return $this->loadHeaderProperty(
             'lang',
@@ -194,7 +193,7 @@ trait PageTranslateTrait
             function($value) {
                 $value = $value ?? $this->getMetaData()['lang'] ?? '';
 
-                return trim($value);
+                return trim($value) ?: null;
             }
         );
     }

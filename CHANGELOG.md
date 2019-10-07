@@ -1,3 +1,10 @@
+# v1.0.0-rc.1
+## mm/dd/2019
+
+1. [](#bugfix)
+    * Flex Pages: Fixed default language not being translated in both `translatedLanguages()` and `untranslatedLanguages()` results
+    * Flex Pages: Language interface compatibility fixes
+
 # v1.0.0-beta.10
 ## 10/03/2019
 
