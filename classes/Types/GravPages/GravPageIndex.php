@@ -63,6 +63,20 @@ class GravPageIndex extends FlexPageIndex
         return static::updateIndexFile($storage, $index['index'], $entries, ['include_missing' => true]);
     }
 
+    public function get($key)
+    {
+        if (mb_strpos($key, '|') !== false) {
+            [$key, $params] = explode('|', $key, 2);
+        }
+
+        $element = parent::get($key);
+        if (isset($params)) {
+            $element = $element->getTranslation(ltrim($params, '.'));
+        }
+
+        return $element;
+    }
+
     public function getRoot()
     {
         $root = $this->_root;

@@ -21,7 +21,7 @@ use RocketTheme\Toolbox\Event\Event;
 trait PageContentTrait
 {
     static protected $headerProperties = [
-        'slug'              => 'slug',          // Page doesn't do trim.
+        'slug'              => 'slug',
         'routes'            => false,
         'title'             => 'title',
         'language'          => 'language',
@@ -87,7 +87,7 @@ trait PageContentTrait
     /**
      * @inheritdoc
      */
-    public function header($var = null)
+    public function header($var = null): Header
     {
         if (null !== $var) {
             $this->setProperty('header', $var);
@@ -105,9 +105,7 @@ trait PageContentTrait
     }
 
     /**
-     * Sets the summary of the page
-     *
-     * @param string $summary Summary
+     * @inheritdoc
      */
     public function setSummary($summary): void
     {
@@ -170,11 +168,7 @@ trait PageContentTrait
     abstract public function value($name, $default = null, $separator = null);
 
     /**
-     * Gets and sets the associated media as found in the page folder.
-     *
-     * @param  Media $var Representation of associated media.
-     *
-     * @return Media      Representation of associated media.
+     * @inheritdoc
      */
     public function media($var = null): Media
     {
