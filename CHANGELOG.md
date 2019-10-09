@@ -1,6 +1,9 @@
 # v1.0.0-rc.1
 ## mm/dd/2019
 
+1. [](#new)
+    * Added directory configuration option for custom admin templates
+    * Added `Flex Accounts (Admin)` type to administer user accounts in Flex independently from Grav system setting
 1. [](#bugfix)
     * Flex Pages: Fixed default language not being translated in both `translatedLanguages()` and `untranslatedLanguages()` results
     * Flex Pages: Language interface compatibility fixes
