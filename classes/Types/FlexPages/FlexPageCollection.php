@@ -2,164 +2,17 @@
 
 namespace Grav\Plugin\FlexObjects\Types\FlexPages;
 
-use Grav\Common\Page\Interfaces\PageCollectionInterface;
-use Grav\Common\Page\Interfaces\PageInterface;
-use Grav\Framework\Flex\FlexCollection;
-use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
+use Grav\Framework\Flex\FlexDirectory;
 
 /**
- * Class FlexPageCollection
- * @package Grav\Plugin\FlexObjects\Types\FlexPages
+ * @deprecated Use \Grav\Framework\Flex\Pages\FlexPageCollection instead.
  */
-class FlexPageCollection extends FlexCollection
+class FlexPageCollection extends \Grav\Framework\Flex\Pages\FlexPageCollection
 {
-    /**
-     * @return array
-     */
-    public static function getCachedMethods(): array
+    public function __construct(array $entries = [], FlexDirectory $directory = null)
     {
-        return [
-            'withPublished' => true,
-            'withVisible' => true,
-            'isFirst' => true,
-            'isLast' => true,
-            'currentPosition' => true,
-            'getNextOrder' => false,
-        ] + parent::getCachedMethods();
-    }
+        user_error(__CLASS__ . ' is deprecated since Grav 1.7, use \Grav\Framework\Flex\Pages\FlexPageCollection instead', E_USER_DEPRECATED);
 
-    /**
-     * @param bool $bool
-     * @return FlexCollection|FlexPageCollection
-     */
-    public function withPublished($bool = true): FlexCollectionInterface
-    {
-        $list = array_keys(array_filter($this->call('isPublished', [$bool])));
-
-        return $this->select($list);
-    }
-
-    public function withVisible($bool = true): FlexCollectionInterface
-    {
-        $list = array_keys(array_filter($this->call('isVisible', [$bool])));
-
-        return $this->select($list);
-    }
-
-
-    /**
-     * Check to see if this item is the first in the collection.
-     *
-     * @param  string $path
-     *
-     * @return bool True if item is first.
-     */
-    public function isFirst($path): bool
-    {
-        $keys = $this->getKeys();
-        $first = reset($keys);
-
-        return $path === $first;
-    }
-
-    /**
-     * Check to see if this item is the last in the collection.
-     *
-     * @param  string $path
-     *
-     * @return bool True if item is last.
-     */
-    public function isLast($path): bool
-    {
-        $keys = $this->getKeys();
-        $last = end($keys);
-
-        return $path === $last;
-    }
-
-    /**
-     * Gets the previous sibling based on current position.
-     *
-     * @param  string $path
-     *
-     * @return PageInterface  The previous item.
-     */
-    public function prevSibling($path)
-    {
-        return $this->adjacentSibling($path, -1);
-    }
-
-    /**
-     * Gets the next sibling based on current position.
-     *
-     * @param  string $path
-     *
-     * @return PageInterface The next item.
-     */
-    public function nextSibling($path)
-    {
-        return $this->adjacentSibling($path, 1);
-    }
-
-    /**
-     * Returns the adjacent sibling based on a direction.
-     *
-     * @param  string  $path
-     * @param  int $direction either -1 or +1
-     *
-     * @return PageInterface|PageCollectionInterface|null    The sibling item.
-     */
-    public function adjacentSibling($path, $direction = 1)
-    {
-        $keys = $this->getKeys();
-        $pos = \array_search($path, $keys, true);
-
-        if ($pos !== false) {
-            $pos += $direction;
-            if (isset($keys[$pos])) {
-                return $this[$keys[$pos]];
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Returns the item in the current position.
-     *
-     * @param  string $path the path the item
-     *
-     * @return int|null The index of the current page, null if not found.
-     */
-    public function currentPosition($path): ?int
-    {
-        $pos = \array_search($path, $this->getKeys(), true);
-
-        return $pos !== false ? $pos : null;
-    }
-
-    public function getNextOrder()
-    {
-        $directory = $this->getFlexDirectory();
-
-        /** @var FlexPageObject $last */
-        $collection = $directory->getIndex();
-        $keys = $collection->getStorageKeys();
-
-        // Assign next free order.
-        $last = null;
-        $order = 0;
-        foreach ($keys as $folder => $key) {
-            preg_match(PAGE_ORDER_PREFIX_REGEX, $folder, $test);
-            $test = $test[0] ?? null;
-            if ($test && $test > $order) {
-                $order = $test;
-                $last = $key;
-            }
-        }
-
-        $last = $collection[$last];
-
-        return sprintf('%d.', $last ? $last->value('order') + 1 : 1);
+        parent::__construct($entries, $directory);
     }
 }
