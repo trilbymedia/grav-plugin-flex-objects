@@ -1,10 +1,11 @@
+{% set type = directory.config('admin.template') ?? target %}
 {% set template = grav.route.queryParam('preview') ? 'preview' : (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: task ?: 'types' %}
 
 {% set separator = config.system.param_sep %}
 {% set route = grav.route.withExtension('') %}
 
 {% extends target ? [
-        'flex-objects/types/' ~ target ~ '/' ~ template ~ '.html.twig',
+        'flex-objects/types/' ~ type ~ '/' ~ template ~ '.html.twig',
         'flex-objects/types/default/' ~ template ~ '.html.twig',
         'flex-objects/layouts/404.html.twig'
     ] : [

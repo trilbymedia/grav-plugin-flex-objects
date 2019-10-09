@@ -165,6 +165,8 @@ class FlexObjectsPlugin extends Plugin
     public function onAdminPage(Event $event): void
     {
         if ($this->controller->isActive()) {
+            $event->stopPropagation();
+
             /** @var PageInterface $page */
             $page = $event['page'];
             $page->init(new \SplFileInfo(__DIR__ . '/admin/pages/flex-objects.md'));

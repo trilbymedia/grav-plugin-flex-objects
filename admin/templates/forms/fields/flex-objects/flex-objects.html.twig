@@ -54,10 +54,10 @@
             {% set translation = (grav.twig.twig.filters['tu'] is defined ? text|tu : text|t)|trim %}
             <label for="{{ id ~ '_no' }}">{{ (macro.spanToggle(translation, maxLen)|trim)|raw }}</label>
         </div>
-        <span>{{ directory.title }}</span>
+        <span title="{{ directory.description }}">{{ directory.title }}</span>
         </div>
     {% endfor %}
     {% else %}
-        <div>No custom flex directories created</div>
+        <div>No custom flex directories detected</div>
     {% endif %}
 {% endblock %}
