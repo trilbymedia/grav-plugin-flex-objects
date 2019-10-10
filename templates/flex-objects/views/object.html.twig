@@ -3,7 +3,7 @@
 {% set object = directory.getObject(id) %}
 
 {% if object %}
-    {% render object layout: options.layout ?: 'default' %}
+    {% render object layout: options.layout %}
 {% else %}
     <h2>Entry Not Found</h2>
 {% endif %}

@@ -1,4 +1,4 @@
-{% set mailto = object.fullname ~ ' <' ~ object.email ~ '>' %}
+{% set mailto = object.fullname|default(object.key) ~ ' <' ~ object.email ~ '>' %}
 {% set avatar = object.getAvatarUrl %}
 
 <div>

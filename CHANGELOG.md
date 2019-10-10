@@ -6,6 +6,7 @@
     * Added `Flex Accounts (Admin)` type to administer user accounts in Flex independently from Grav system setting
     * Added `Flex Pages (Admin)` type to administer pages in Flex independently from Grav system setting
     * Deprecated all `Flex Page` classes and traits in favor of the new classes in Grav core
+    * Moved flex object/collection templates to `templates/flex/{TYPE}` which is easier to remember
 1. [](#bugfix)
     * Flex Pages: Fixed default language not being translated in both `translatedLanguages()` and `untranslatedLanguages()` results
     * Flex Pages: Language interface compatibility fixes
