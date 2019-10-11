@@ -13,6 +13,28 @@
 {% set can_delete = can_delete ?? (object.exists and object.isAuthorized('delete')) %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('flex-translate')) %}
 
+{# Translations #}
+{% if can_translate %}
+    {% set translate_include_default = translate_include_default ?? grav.config.get('system.languages.include_default_lang_file_extension', true) %}
+    {% set all_languages = grav.admin.siteLanguages %}
+    {% set admin_languages = admin.languages_enabled %}
+    {% set default_language = grav.language.default %}
+    {% set object_language = object.language %}
+    {% set language = controller.language %}
+    {% set has_translation = object.hasTranslation(language, false) %}
+
+    {% if translate_include_default %}
+        {% set all_languages = all_languages|merge({'': 'Default'}) %}
+        {% set admin_languages = admin_languages|merge({'': ''}) %}
+        {% set object_languages = object.languages(true) %}
+    {% else %}
+        {% set language = language ?: default_language %}
+        {% set object_language = object_language ?: default_language %}
+        {% set object_languages = object.languages(false) %}
+        {% set has_translation = has_translation ?: object.hasTranslation(language, false) %}
+    {% endif %}
+{% endif %}
+
 {# These variables can be overridden from the main template file #}
 {% set allowed = allowed ?? (directory and (object.exists or action == 'add')) %}
 {% set back_route = back_route ?? ('/' ~ (action != 'edit' and not key ? route.getRoute(1) : route.getRoute(1, -1))) %}

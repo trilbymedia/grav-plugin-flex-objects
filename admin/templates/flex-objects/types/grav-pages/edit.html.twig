@@ -3,13 +3,6 @@
 {% set form = object.form(admin.session.expert != '0' ? 'raw') %}
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate')) %}
-{% if can_translate %}
-    {% set all_languages = grav.admin.siteLanguages|merge({'': 'Default'}) %}
-    {% set selected_language = controller.language ?? '' %}
-    {% set object_language = object.language %}
-    {% set language_title = all_languages[object_language] ?? object_language %}
-    {% set translations = object.languages %}
-{% endif %}
 
 {% macro spanToggle(input, length) %}
     {{ (repeat('&nbsp;&nbsp;', (length - input|length) / 2) ~ input ~ repeat('&nbsp;&nbsp;', (length - input|length) / 2))|raw }}
@@ -76,17 +69,14 @@
         <div class="alert warning">
             This page does not exist yet!
         </div>
-    {% elseif can_translate and not object.hasTranslation(selected_language, false) %}
+    {% elseif object.exists and can_translate and not has_translation %}
         <div class="alert warning">
-            {% set selected_language_title = all_languages[selected_language] ?? selected_language %}
-            This page has not been translated to <i class="fa fa-flag-o"></i> <strong>{{ selected_language_title }}</strong> language yet!
-            {% if selected_language == object_language %}
+            This page has not been translated to <i class="fa fa-flag-o"></i> <strong>{{ all_languages[language] ?? language }}</strong> language yet!
+            {% if language == object_language %}
                 No Fallback translations found.
             {% else %}
-                Falling back to <strong>{{ language_title }}</strong> language.
+                Falling back to <strong>{{ all_languages[object_language] ?? object_language }}</strong> language.
             {% endif %}
-            <br />
-            Please translate and select [ <b>Save as {{ selected_language_title }} ]</b> from the dropdown.
         </div>
     {% endif %}
 {% endblock content_top %}
@@ -96,18 +86,17 @@
         <div id="admin-lang-toggle" class="button-group">
             <button type="button" class="button disabled">
                 <i class="fa fa-flag-o"></i>
-                {{ language_title }}
+                {{ all_languages[object_language] ?? object_language }}
             </button>
-            {% if count(translations) > 1 %}
+            {% if count(object_languages) > (object_language in object_languages)|int %}
                 <button type="button" class="button dropdown-toggle" data-toggle="dropdown">
                     <i class="fa fa-caret-down"></i>
                 </button>
                 <ul class="dropdown-menu language-switcher">
-                {% for langCode in translations %}
-                    {% set langName = (all_languages[langCode] ?? langCode) ?: 'default' %}
-                    {% if langCode != object_language %}
+                {% for lang_code in object_languages %}
+                    {% if lang_code != object_language %}
                     <li>
-                        <a href="{{ admin_route(grav.route.getRoute(1), langCode) }}">{{ langName }}</a>
+                        <a href="{{ admin_route(grav.route.getRoute(1), lang_code) }}">{{ all_languages[lang_code] ?? lang_code }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}
