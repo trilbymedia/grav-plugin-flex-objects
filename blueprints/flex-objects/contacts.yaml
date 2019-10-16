@@ -44,9 +44,9 @@ config:
 
     # Preview View
     preview:
-      enabled: true
+      enabled: false
       route:
-        template: '/plugins/flex-objects/directory:contacts'
+        #template: '/plugins/flex-objects/directory:contacts'
 
     # Data Export
     export:
