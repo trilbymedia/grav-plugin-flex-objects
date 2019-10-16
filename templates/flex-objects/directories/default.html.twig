@@ -10,7 +10,8 @@
     </tr>
     </thead>
     <tbody>
-    {% for type,directory in directories %}
+    {% for type, directory in directories %}
+        {% if not directory.config('site.hidden', false) %}
         <tr>
             <td>
                 <a href="{{ directory_url ~ '/directory:' ~ type }}">{{ directory.title }}</a>
@@ -19,6 +20,7 @@
                 {{ directory.description }}
             </td>
         </tr>
+        {% endif %}
     {% endfor %}
     </tbody>
 </table>

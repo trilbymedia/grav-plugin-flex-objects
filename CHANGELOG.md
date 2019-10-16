@@ -5,9 +5,10 @@
     * Added directory configuration option for custom admin templates
     * Added `Flex Accounts (Admin)` type to administer user accounts in Flex independently from Grav system setting
     * Added `Flex Pages (Admin)` type to administer pages in Flex independently from Grav system setting
+    * Added blueprint option to hide directory from Flex Objects types page in frontend 
     * Deprecated all `Flex Page` classes and traits in favor of the new classes in Grav core
     * Moved flex object/collection templates to `templates/flex/{TYPE}` which is easier to remember
-1. [](#bugfix)
+1. [](#bugfix) 
     * Flex Pages: Fixed default language not being translated in both `translatedLanguages()` and `untranslatedLanguages()` results
     * Flex Pages: Language interface compatibility fixes
     * Flex Pages: Fixed frontend issues with plugin events [#5](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/5)

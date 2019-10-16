@@ -2,8 +2,25 @@ title: Contacts
 description: Simple contact directory with tags.
 type: flex-objects
 
+# Flex Configuration
 config:
+  # Administration Configuration
   admin:
+    # Admin menu (optional)
+    menu:
+      list:
+        route: '/contacts'
+        title: Contacts
+        icon: fa-address-card-o
+        # Authorization to collection admin
+        authorize: ['admin.pages', 'admin.super']
+        # Priority -10 .. 10 (highest goes up)
+        priority: 2
+
+    # Admin template type / folder
+    template: default
+
+    # List view
     list:
       title: name
       fields:
@@ -19,13 +36,59 @@ config:
         email:
         website:
         tags:
+
+    # Edit view
+    edit:
+      title: '{$last_name}, {$first_name}'
+
+    # Preview view
+    preview:
+      enabled: true
+      route: /plugins/flex-objects/directory:contacts
+
+  # Site Configuration
+  site:
+    templates:
+      collection:
+        # Lookup for the template layout files for collections of objects
+        paths:
+          - 'flex/{TYPE}/collection/{LAYOUT}{EXT}'
+      object:
+        # Lookup for the template layout files for objects
+        paths:
+          - 'flex/{TYPE}/object/{LAYOUT}{EXT}'
+      defaults:
+        # Default template {TYPE}; overridden by filename of this blueprint if template folder exists
+        type: contacts
+        # Default template {LAYOUT}; can be overridden in render calls (usually Twig in templates)
+        layout: default
+
+  # Data Configuration
   data:
+    # Object class to be used, allowing custom methods for the object
+    object: 'Grav\Framework\Flex\FlexObject'
+    # Collection class to be used, allowing custom methods for the collections
+    collection: 'Grav\Framework\Flex\FlexCollection'
+    # Index class to be used, works as a quick database-like lookup index
+    index: 'Grav\Framework\Flex\FlexIndex'
     storage:
-        class: 'Grav\Framework\Flex\Storage\SimpleStorage'
-        options:
-          formatter:
-            class: 'Grav\Framework\File\Formatter\JsonFormatter'
-          folder: user-data://flex-objects/contacts.json
+      # Storage class, use single file storage (does not support images and assets)
+      class: 'Grav\Framework\Flex\Storage\SimpleStorage'
+      options:
+        formatter:
+          # File formatter class, in this case the file is stored in markdown
+          class: 'Grav\Framework\File\Formatter\JsonFormatter'
+        # JSON file where all the objects will be stored
+        folder: user-data://flex-objects/contacts.json
+    search:
+      # Search options
+      options:
+        contains: 1
+      # Fields to be searched
+      fields:
+        - last_name
+        - first_name
+        - email
 
 form:
   validation: loose
@@ -52,6 +115,8 @@ form:
     first_name:
       type: text
       label: First Name
+      validate:
+        required: true
 
     email:
       type: email
