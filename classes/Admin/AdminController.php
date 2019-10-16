@@ -16,6 +16,7 @@ use Grav\Common\Utils;
 use Grav\Framework\Controller\Traits\ControllerResponseTrait;
 use Grav\Framework\File\Formatter\CsvFormatter;
 use Grav\Framework\File\Formatter\YamlFormatter;
+use Grav\Framework\File\Interfaces\FileFormatterInterface;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\FlexFormFlash;
@@ -221,16 +222,33 @@ class AdminController
         if (!$collection) {
             throw new \RuntimeException('Internal Error', 500);
         }
+        if (!$collection->isAuthorized('list')) {
+            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' list.', 403);
+        }
 
-        if (method_exists($collection, 'csvSerialize')) {
-            $list = $collection->csvSerialize();
+        $config = $collection->getFlexDirectory()->getConfig('admin.export', false);
+        if (!$config || empty($config['enabled'])) {
+            throw new \RuntimeException($this->admin::translate('Not Found'), 404);
+        }
+
+        $method = $config['method'] ?? 'csvSerialize';
+        $class = $config['formatter']['class'] ?? 'Grav\Framework\File\Formatter\CsvFormatter';
+        if (!class_exists($class)) {
+            throw new \RuntimeException($this->admin::translate('Formatter Not Found'), 404);
+        }
+        /** @var FileFormatterInterface $formatter */
+        $formatter = new $class($config['formatter']['options'] ?? []);
+        $filename = ($config['filename'] ?? 'export') . $formatter->getDefaultFileExtension();
+
+        if (method_exists($collection, $method)) {
+            $list = $collection->{$method}();
         } else {
             $list = [];
 
             /** @var ObjectInterface $object */
             foreach ($collection as $object) {
-                if (method_exists($object, 'csvSerialize')) {
-                    $data = $object->csvSerialize();
+                if (method_exists($object, $method)) {
+                    $data = $object->{$method}();
                     if ($data) {
                         $list[] = $data;
                     }
@@ -240,19 +258,17 @@ class AdminController
             }
         }
 
-        $csv = new CsvFormatter();
-
         $response = new Response(
             200,
             [
-                'Content-Type' => 'text/x-csv',
-                'Content-Disposition' => 'inline; filename="export.csv"',
+                'Content-Type' => $formatter->getMimeType(),
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
                 'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
                 'Last-Modified' => gmdate('D, d M Y H:i:s') . ' GMT',
                 'Cache-Control' => 'no-store, no-cache, must-revalidate',
                 'Pragma' => 'no-cache',
             ],
-            $csv->encode($list)
+            $formatter->encode($list)
         );
 
         $this->close($response);

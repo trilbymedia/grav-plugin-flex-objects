@@ -37,14 +37,24 @@ config:
         website:
         tags:
 
-    # Edit view
+    # Edit View
     edit:
-      title: '{$last_name}, {$first_name}'
+      title:
+        template: '{{ object.last_name ?? ''Last'' }}, {{ object.first_name ?? ''First Name'' }}'
 
-    # Preview view
+    # Preview View
     preview:
       enabled: true
-      route: /plugins/flex-objects/directory:contacts
+      route:
+        template: '/plugins/flex-objects/directory:contacts'
+
+    # Data Export
+    export:
+      enabled: true
+      method: 'jsonSerialize'
+      formatter:
+        class: 'Grav\Framework\File\Formatter\YamlFormatter'
+      filename: 'contacts'
 
   # Site Configuration
   site:

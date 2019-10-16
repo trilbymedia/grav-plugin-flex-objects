@@ -8,7 +8,7 @@
 {% set route = grav.route.withExtension('') %}
 
 {# Allowed actions #}
-{% set can_preview = can_preview ?? (object.exists and object.getRoute()) %}
+{% set can_preview = can_preview ?? (object.exists and directory.config('admin.preview.enabled', false)) %}
 {% set can_save = can_save ?? (object.exists ? object.isAuthorized('save') : directory.isAuthorized('create')) %}
 {% set can_delete = can_delete ?? (object.exists and object.isAuthorized('delete')) %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('flex-translate')) %}
@@ -39,7 +39,14 @@
 {% set allowed = allowed ?? (directory and (object.exists or action == 'add')) %}
 {% set back_route = back_route ?? ('/' ~ (action != 'edit' and not key ? route.getRoute(1) : route.getRoute(1, -1))) %}
 {% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
-{% set title = title ?? object.form.getValue('title') ?? object.title ?? key %}
+{% set title -%}
+    {%- set title_config = directory.config('admin.edit.title') -%}
+    {%- if title_config.template -%}
+        {{- include(template_from_string(title_config.template, 'edit title template')) -}}
+    {%- else -%}
+        {{- title ?? object.form.getValue('title') ?? object.title ?? key -}}
+    {% endif %}
+{%- endset %}
 
 {% block body %}
     {% set back_url = back_url ?? admin_route(back_route) %}

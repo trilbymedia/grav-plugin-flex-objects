@@ -8,6 +8,9 @@
     * Added blueprint option to hide directory from Flex Objects types page in frontend 
     * Deprecated all `Flex Page` classes and traits in favor of the new classes in Grav core
     * Moved flex object/collection templates to `templates/flex/{TYPE}` which is easier to remember
+    * Admin: Added support customizable preview and export
+1. [](#improved)
+    * Admin: Allow custom title template when editing object
 1. [](#bugfix) 
     * Flex Pages: Fixed default language not being translated in both `translatedLanguages()` and `untranslatedLanguages()` results
     * Flex Pages: Language interface compatibility fixes
