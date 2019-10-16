@@ -43,10 +43,10 @@ class MediaController extends AbstractController
             $parts = explode('.', $field);
             $last = array_pop($parts);
             foreach ($parts as $name) {
-                if (!is_array($files['name'])) {
+                if (!is_array($files[$name])) {
                     throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
                 }
-                $files = $files['name'];
+                $files = $files[$name];
             }
             $file = $files[$last] ?? null;
 
