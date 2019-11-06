@@ -17,6 +17,7 @@
     * Flex Pages: Fixed frontend issues with plugin events [#5](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/5)
     * Flex Pages: Fixed `filePathClean()` and `filePathClean()` not returning file for folder
     * Flex Pages: Fixed multiple multi-language related issues in admin [#10](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/10)
+    * Flex Pages: Fixed raw edit mode
     * File upload is broken for nested fields [#34](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/34)
 
 # v1.0.0-beta.10
