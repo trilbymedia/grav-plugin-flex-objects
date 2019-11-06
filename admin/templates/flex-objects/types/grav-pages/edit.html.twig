@@ -1,6 +1,6 @@
 {% extends 'flex-objects/types/default/edit.html.twig' %}
 
-{% set form = object.form(admin.session.expert != '0' ? 'raw') %}
+{% set form = form ?? object.form(admin.session.expert != '0' ? 'raw') %}
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate')) %}
 
