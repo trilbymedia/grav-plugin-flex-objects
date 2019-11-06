@@ -1,5 +1,5 @@
 # v1.0.0-rc.1
-## mm/dd/2019
+## 10/06/2019
 
 1. [](#new)
     * Added directory configuration option for custom admin templates
