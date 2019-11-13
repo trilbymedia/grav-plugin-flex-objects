@@ -1,3 +1,9 @@
+# v1.0.0-rc.2
+## mm/dd/2019
+
+1. [](#new)
+    * Admin: Added support for editing `User Groups`
+
 # v1.0.0-rc.1
 ## 11/06/2019
 
