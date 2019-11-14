@@ -7,67 +7,51 @@
           <a href="#" class="button-border">Advanced Options</a>
         </div>
 
-        {#<div class="filters-advanced hide">
+        <div class="filters-advanced {#hide#}">
           <fieldset>
             <legend>Page Attributes</legend>
             <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.modular" name="filters[modular]">
-                        <label for="filters.modular">Modular</label>
-                    </span>
+                <input type="checkbox" id="filters.page" name="filters[page]" value="1">
+                <input type="checkbox" id="filters.page" name="filters[page]" value="0">
+                <label for="filters.published">Page</label>
+            </span>
             <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.visible" name="filters[visible]">
-                        <label for="filters.visible">Visible</label>
-                    </span>
+                <input type="checkbox" id="filters.modular" name="filters[modular]" value="1">
+                <input type="checkbox" id="filters.modular" name="filters[modular]" value="0">
+                <label for="filters.modular">Modular</label>
+            </span>
             <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.routable" name="filters[routable]">
-                        <label for="filters.routable">Routable</label>
-                    </span>
+                <input type="checkbox" id="filters.visible" name="filters[visible]" value="1">
+                <input type="checkbox" id="filters.visible" name="filters[visible]" value="0">
+                <label for="filters.visible">Visible</label>
+            </span>
             <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.published" name="filters[published]">
-                        <label for="filters.published">Published</label>
-                    </span>
+                <input type="checkbox" id="filters.routable" name="filters[routable]" value="1">
+                <input type="checkbox" id="filters.routable" name="filters[routable]" value="0">
+                <label for="filters.routable">Routable</label>
+            </span>
             <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.non-modular" name="filters[non-modular]">
-                        <label for="filters.non-modular">Non-Modular</label>
-                    </span>
+                <input type="checkbox" id="filters.published" name="filters[published]" value="1">
+                <input type="checkbox" id="filters.published" name="filters[published]" value="0">
+                <label for="filters.published">Published</label>
+            </span>
             <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.non-visible" name="filters[non-visible]">
-                        <label for="filters.non-visible">Non-Visible</label>
-                    </span>
-            <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.non-routable" name="filters[non-routable]">
-                        <label for="filters.non-routable">Non-Routable</label>
-                    </span>
-            <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.non-published" name="filters[non-published]">
-                        <label for="filters.non-published">Non-Published</label>
-                    </span>
+                <input type="checkbox" id="filters.translated" name="filters[translated]" value="1">
+                <input type="checkbox" id="filters.translated" name="filters[translated]" value="0">
+                <label for="filters.published">Translated</label>
+            </span>
           </fieldset>
 
           <fieldset>
             <legend>Page Types</legend>
-            <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.default" name="filters[default]">
-                        <label for="filters.default">Default</label>
-                    </span>
-            <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.blog-item" name="filters[blog-item]">
-                        <label for="filters.blog-item">Blog Item</label>
-                    </span>
-            <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.blog-listing" name="filters[blog-listing]">
-                        <label for="filters.blog-listing">Blog Listing</label>
-                    </span>
-            <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.error" name="filters[error]">
-                        <label for="filters.error">Error</label>
-                    </span>
-            <span class="checkboxes toggleable">
-                        <input type="checkbox" id="filters.form" name="filters[form]">
-                        <label for="filters.form">Form</label>
-                    </span>
+            {% for name,title in admin.types %}
+              <span class="checkboxes toggleable">
+                <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}">
+                <label for="filters.type.{{ name }}">{{ title }}</label>
+              </span>
+            {% endfor %}
           </fieldset>
-        </div>#}
+        </div>
       </form>
     </div>
 
