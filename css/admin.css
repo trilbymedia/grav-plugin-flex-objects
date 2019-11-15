@@ -115,7 +115,7 @@
           margin: 0; }
 
 /* FILTERS */
-.checkboxes.indeterminate {
+#pages-filters .checkboxes {
   -webkit-touch-callout: none;
   /* iOS Safari */
   -webkit-user-select: none;
@@ -127,12 +127,11 @@
   -ms-user-select: none;
   /* Internet Explorer/Edge */
   user-select: none; }
-
-.checkboxes.status-indeterminate input[type="checkbox"] + label:before {
-  content: "\f00d";
-  font-family: "FontAwesome", sans-serif;
-  font-size: 1.2rem;
-  line-height: 1;
-  text-align: center; }
+  #pages-filters .checkboxes.status-indeterminate input[type="checkbox"] + label:before {
+    content: "\f00d";
+    font-family: "FontAwesome", sans-serif;
+    font-size: 1.2rem;
+    line-height: 1;
+    text-align: center; }
 
 /*# sourceMappingURL=../css/admin.css.map */

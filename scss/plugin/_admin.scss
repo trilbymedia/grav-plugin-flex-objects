@@ -172,23 +172,23 @@
 
 /* FILTERS */
 // form .checkboxes input[type=checkbox]:checked+label:before
-.checkboxes {
-    &.indeterminate {
+#pages-filters {
+    .checkboxes {
         -webkit-touch-callout: none; /* iOS Safari */
         -webkit-user-select: none; /* Safari */
         -khtml-user-select: none; /* Konqueror HTML */
         -moz-user-select: none; /* Firefox */
         -ms-user-select: none; /* Internet Explorer/Edge */
         user-select: none;
-    }
 
-    &.status-indeterminate {
-        input[type="checkbox"] + label:before {
-            content: "\f00d";
-            font-family: "FontAwesome", sans-serif;
-            font-size: 1.2rem;
-            line-height: 1;
-            text-align: center;
+        &.status-indeterminate {
+            input[type="checkbox"] + label:before {
+                content: "\f00d";
+                font-family: "FontAwesome", sans-serif;
+                font-size: 1.2rem;
+                line-height: 1;
+                text-align: center;
+            }
         }
     }
 }
