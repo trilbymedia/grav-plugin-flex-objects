@@ -10,28 +10,24 @@
         <div class="filters-advanced {#hide#}">
           <fieldset>
             <legend>Page Attributes</legend>
-            <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.page" name="filters[page]" value="0">
-                <label for="filters.page">Page</label>
+            <span class="checkboxes indeterminate toggleable status-checked">
+                <input type="checkbox" id="filters.routable" name="filters[routable]" indeterminate="false" value="1"data-_check-status="1" checked="checked">
+                <label for="filters.routable">Routable</label>
             </span>
-            <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.module" name="filters[module]" value="0">
+            <span class="checkboxes indeterminate toggleable status-indeterminate">
+                <input type="checkbox" id="filters.module" name="filters[module]" indeterminate="true" value="0" data-_check-status="2">
                 <label for="filters.module">Module</label>
             </span>
             <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.visible" name="filters[visible]" value="0">
+                <input type="checkbox" id="filters.visible" name="filters[visible]" indeterminate="false" value="" data-_check-status="0">
                 <label for="filters.visible">Visible</label>
             </span>
             <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.routable" name="filters[routable]" value="0">
-                <label for="filters.routable">Routable</label>
-            </span>
-            <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.published" name="filters[published]" value="0">
+                <input type="checkbox" id="filters.published" name="filters[published]" indeterminate="false" value="" data-_check-status="0">
                 <label for="filters.published">Published</label>
             </span>
             <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.translated" name="filters[translated]" value="0">
+                <input type="checkbox" id="filters.translated" name="filters[translated]" indeterminate="false" value="" data-_check-status="0">
                 <label for="filters.translated">Translated</label>
             </span>
           </fieldset>
