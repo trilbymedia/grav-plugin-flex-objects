@@ -35,5 +35,10 @@ document.addEventListener('click', (event) => {
                 wrapper.classList.add('status-checked');
                 break;
         }
+
+        const input = new CustomEvent('input', { detail: { target: checkbox }});
+        document.dispatchEvent(input);
     }
 });
+
+(document.querySelectorAll('input[type="checkbox"][indeterminate="true"]') || []).forEach((input) => { input.indeterminate = true; });

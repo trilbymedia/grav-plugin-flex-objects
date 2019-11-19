@@ -21,6 +21,8 @@ export const setInitialRoute = ({ route = '', filters = {}, options = { expires:
     return setCookie('grav-admin-flexpages', b64_encode_unicode(JSON.stringify({ route, filters })), options);
 };
 
+export let FlexPagesInstance = null;
+
 if (container) {
     const loader = container.querySelector('.grav-loading');
     const content = container.querySelector('#pages-columns');
@@ -47,7 +49,8 @@ if (container) {
                     return true;
                 }
 
-                return new FlexPages(content, response.data);
+                FlexPagesInstance = new FlexPages(content, response.data);
+                return FlexPagesInstance;
             }
         });
     }

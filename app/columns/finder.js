@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import Finder from '../utils/finder';
 import { getInitialRoute, setInitialRoute } from './index';
+import getFilters from '../utils/get-filters';
 
 let XHRUUID = 0;
 const GRAV_CONFIG = typeof global.GravConfig !== 'undefined' ? global.GravConfig : global.GravAdmin.config;
@@ -238,7 +239,11 @@ export class FlexPages {
 
     createSimpleColumn(item) {}
 
-    dataLoad(parent, callback) {
+    dataLoad(parent, callback, filters = getFilters()) {
+        if (!parent && Object.keys(filters).length) {
+            parent = { child_count: 1, route: { raw: '' } };
+        }
+
         if (!parent) {
             return callback(this.data);
         }
@@ -250,13 +255,15 @@ export class FlexPages {
         const UUID = ++XHRUUID;
         this.startLoader();
 
+        const withFilters = Object.keys(filters).length ? { ...filters, initial: true } : { initial: true };
+
         $.ajax({
             url: `${GRAV_CONFIG.current_url}`,
             method: 'post',
             data: Object.assign({}, {
                 route: b64_encode_unicode(parent.route.raw),
                 action: 'listLevel'
-            }),
+            }, withFilters),
             success: (response) => {
                 this.stopLoader();
 
@@ -279,6 +286,10 @@ export class FlexPages {
     }
 
     startLoader() {
+        if (!this.finder) {
+            return null;
+        }
+
         this.loadingIndicator = FlexPages.createLoadingColumn();
         this.finder.$emitter.emit('create-column', this.loadingIndicator[0]);
 

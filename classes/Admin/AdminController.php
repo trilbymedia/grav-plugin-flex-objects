@@ -543,7 +543,7 @@ class AdminController
 
             // Base64 decode the route
             $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
-            $data['filters'] = json_decode($options['filters'] ?? '{}', true) + ['type' => ['dir']];
+            $data['filters'] = ($data['filters'] ?? []) + ['type' => ['dir']];
             $data['lang'] = $this->getLanguage();
 
             $initial = $data['initial'] ?? null;

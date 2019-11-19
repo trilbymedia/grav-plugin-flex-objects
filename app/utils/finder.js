@@ -149,7 +149,7 @@ class Finder {
         if (!element.length) { return false; }
         const item = element[0]._item;
         const column = value.column;
-        const data = item[this.config.childKey] || this.data;
+        const data = item[this.config.childKey] || this.data; // TODO: this.data for constant refresh
         const active = $(column).find(`.${this.config.className.active}`);
 
         if (active.length) {

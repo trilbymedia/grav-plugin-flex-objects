@@ -10,12 +10,12 @@
         <div class="filters-advanced {#hide#}">
           <fieldset>
             <legend>Page Attributes</legend>
-            <span class="checkboxes indeterminate toggleable status-checked">
-                <input type="checkbox" id="filters.routable" name="filters[routable]" indeterminate="false" value="1"data-_check-status="1" checked="checked">
+            <span class="checkboxes indeterminate toggleable">
+                <input type="checkbox" id="filters.routable" name="filters[routable]" indeterminate="false" value="" data-_check-status="0">
                 <label for="filters.routable">Routable</label>
             </span>
-            <span class="checkboxes indeterminate toggleable status-indeterminate">
-                <input type="checkbox" id="filters.module" name="filters[module]" indeterminate="true" value="0" data-_check-status="2">
+            <span class="checkboxes indeterminate toggleable">
+                <input type="checkbox" id="filters.module" name="filters[module]" indeterminate="false" value="" data-_check-status="0">
                 <label for="filters.module">Module</label>
             </span>
             <span class="checkboxes indeterminate toggleable">
@@ -42,8 +42,8 @@
             {% endfor %}
           </fieldset>
 
-          <a href="#" class="apply-filters button-border">Apply Filters</a>
-          <a href="#" class="reset-defaults button-border">Reset to Defaults</a>
+          <a href="#" class="apply-filters button-border" data-filters="apply">Apply Filters</a>
+          {#<a href="#" class="reset-defaults button-border" data-filters="reset">Reset to Defaults</a>#}
         </div>
       </form>
     </div>
