@@ -9,8 +9,8 @@
     {% include 'partials/blueprints-new-folder.html.twig' with { blueprints: admin.blueprints('admin/pages/new_folder'), data: obj_data, form_id:'new-folder' } %}
   </div>
 
-  <div class="remodal" data-remodal-id="modular" data-remodal-options="hashTracking: false">
-    {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/modular_new'), data: obj_data, form_id:'new-modular' } %}
+  <div class="remodal" data-remodal-id="module" data-remodal-options="hashTracking: false">
+    {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/modular_new'), data: obj_data, form_id:'new-module' } %}
   </div>
 
   {# TODO: regular pages support extra modals from admin config #}
