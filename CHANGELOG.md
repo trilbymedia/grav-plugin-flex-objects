@@ -17,6 +17,7 @@
     * Admin: Added support customizable preview and export
 1. [](#improved)
     * Admin: Allow custom title template when editing object
+    * Translations: rename MODULAR to MODULE everywhere
 1. [](#bugfix) 
     * Flex Pages: Fixed default language not being translated in both `translatedLanguages()` and `untranslatedLanguages()` results
     * Flex Pages: Language interface compatibility fixes
