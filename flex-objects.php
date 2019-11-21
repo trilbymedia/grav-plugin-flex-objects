@@ -220,7 +220,9 @@ class FlexObjectsPlugin extends Plugin
          * @var FlexDirectory $directory
          */
         foreach ($directories as $type => $directory) {
-            $list[$type] = $directory->getTitle();
+            if (!$directory->getConfig('site.hidden')) {
+                $list[$type] = $directory->getTitle();
+            }
         }
 
         return $list;
@@ -265,7 +267,7 @@ class FlexObjectsPlugin extends Plugin
             $icon = $item['icon'] ?? 'fa-list';
             $authorize = $item['authorize'] ?? ($directory ? null : ['admin.flex-objects', 'admin.super']);
             if ($hidden || (null === $authorize && $directory->isAuthorized('list', 'admin'))) {
-               continue;
+                continue;
             }
             $cache = $directory ? $directory->getCache('index') : null;
             $count = $cache ? $cache->get('admin-count') : false;

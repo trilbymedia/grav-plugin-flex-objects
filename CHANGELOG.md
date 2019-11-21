@@ -3,6 +3,8 @@
 
 1. [](#new)
     * Admin: Added support for editing `User Groups`
+1. [](#bugfix)     
+    * Hide hidden/system types (pages, accounts, user groups) from Flex Objects page type [#38](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/38)
 
 # v1.0.0-rc.1
 ## 11/06/2019
