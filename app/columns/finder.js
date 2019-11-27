@@ -286,7 +286,7 @@ export class FlexPages {
     }
 
     startLoader() {
-        if (!this.finder) {
+         if (!this.finder) {
             return null;
         }
 
