@@ -32,15 +32,29 @@
             </span>
           </fieldset>
 
+          {% set page_types = admin.types %}
           <fieldset>
             <legend>Page Types</legend>
-            {% for name,title in admin.types %}
+            {% for name,title in page_types %}
               <span class="checkboxes toggleable">
                 <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}">
                 <label for="filters.type.{{ name }}">{{ title }}</label>
               </span>
             {% endfor %}
           </fieldset>
+
+          {% set module_types = admin.modularTypes %}
+          {% if module_types %}
+          <fieldset>
+            <legend>Module Types</legend>
+            {% for name,title in module_types %}
+              <span class="checkboxes toggleable">
+                <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}">
+                <label for="filters.type.{{ name }}">{{ title }}</label>
+              </span>
+            {% endfor %}
+          </fieldset>
+          {% endif %}
 
           <a href="#" class="apply-filters button-border" data-filters="apply">Apply Filters</a>
           <a href="#" class="reset-defaults button-border" data-filters="reset">Reset to Defaults</a>

@@ -9,7 +9,7 @@
 
 {# Allowed actions #}
 {% set can_preview = can_preview ?? (object.exists and directory.config('admin.preview.enabled', false)) %}
-{% set can_save = can_save ?? (object.exists ? object.isAuthorized('save') : directory.isAuthorized('create')) %}
+{% set can_save = can_save ?? (object.exists ? object.isAuthorized('update') : directory.isAuthorized('create')) %}
 {% set can_delete = can_delete ?? (object.exists and object.isAuthorized('delete')) %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('flex-translate')) %}
 
