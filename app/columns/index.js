@@ -5,21 +5,29 @@ import getFilters from '../utils/get-filters';
 
 const container = document.querySelector('#pages-content-wrapper');
 
-export const getInitialRoute = () => {
+export const getStore = () => {
     if (!isEnabled) {
         return '';
     }
 
-    const parsed = JSON.parse(b64_decode_unicode(getCookie('grav-admin-flexpages') || 'e30='));
+    return JSON.parse(b64_decode_unicode(getCookie('grav-admin-flexpages') || 'e30='));
+};
+
+export const setStore = (store = {}, options = { expires: '1Y' }) => {
+    if (!isEnabled) {
+        return '';
+    }
+
+    return setCookie('grav-admin-flexpages', b64_encode_unicode(JSON.stringify(store)), options);
+};
+
+export const getInitialRoute = () => {
+    const parsed = getStore();
     return parsed.route || '';
 };
 
-export const setInitialRoute = ({ route = '', filters = {}, options = { expires: '1Y' } } = {}) => {
-    if (!isEnabled) {
-        return '';
-    }
-
-    return setCookie('grav-admin-flexpages', b64_encode_unicode(JSON.stringify({ route, filters })), options);
+export const setInitialRoute = ({ route = '', filters = {}, options = {}} = {}) => {
+    return setStore({ route, filters }, options);
 };
 
 export let FlexPagesInstance = null;
@@ -36,6 +44,10 @@ export const ReLoad = () => {
 
         const filters = getFilters();
         const withFilters = Object.keys(filters).length ? { ...filters, initial: true } : {};
+
+        const store = getStore();
+        store.filters = filters;
+        setStore(store);
 
         $.ajax({
             url: `${gravConfig.current_url}`,
