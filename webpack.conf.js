@@ -57,7 +57,6 @@ module.exports = {
             {
                 test: /\.js$/,
                 loader: 'babel-loader',
-                exclude: /node_modules/,
                 query: {
                     presets: ['@babel/preset-env'],
                     plugins: ['@babel/plugin-proposal-object-rest-spread']

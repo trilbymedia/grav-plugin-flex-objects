@@ -240,9 +240,9 @@ export class FlexPages {
     createSimpleColumn(item) {}
 
     dataLoad(parent, callback, filters = getFilters()) {
-        if (!parent && Object.keys(filters).length) {
+        /* if (!parent && Object.keys(filters).length) {
             parent = { child_count: 1, route: { raw: '' } };
-        }
+        }*/
 
         if (!parent) {
             return callback(this.data);
@@ -255,7 +255,7 @@ export class FlexPages {
         const UUID = ++XHRUUID;
         this.startLoader();
 
-        const withFilters = Object.keys(filters).length ? { ...filters, initial: true } : { initial: true };
+        const withFilters = Object.keys(filters).length ? { ...filters } : {};
 
         $.ajax({
             url: `${GRAV_CONFIG.current_url}`,
