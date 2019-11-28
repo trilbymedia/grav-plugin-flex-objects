@@ -94,7 +94,7 @@ export class FlexPages {
         }
 
         if (item.filters_hit) {
-            listItemClasses.push('filters_hit');
+            listItemClasses.push('filters-hit');
         }
 
 
