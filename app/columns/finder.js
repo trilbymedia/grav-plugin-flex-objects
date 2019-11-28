@@ -81,7 +81,7 @@ export class FlexPages {
         const createItemContent = config.createItemContent || finder.createItemContent;
         const fragment = createItemContent.call(this, item);
         link.append(fragment)
-            // .attr('href', href)
+        // .attr('href', href)
             .attr('tabindex', -1);
 
         if (item.url) {
@@ -96,7 +96,6 @@ export class FlexPages {
         if (item.filters_hit) {
             listItemClasses.push('filters-hit');
         }
-
 
         listItem.addClass(listItemClasses.join(' '));
         listItem.append(link)
@@ -205,7 +204,7 @@ export class FlexPages {
         }
 
         if (item.child_count) {
-            const button = $(`<button class="fjs-children" data-flexpages-expand data-flexpages-prevent />`);
+            const button = $('<button class="fjs-children" data-flexpages-expand data-flexpages-prevent />');
             const count = $(`<span class="badge child-count">${typeof item.count !== undefined ? `${item.count} / ` : ''}${item.child_count}</span>`);
             const arrow = $('<i class="fa fa-chevron-right"></i>');
             count.appendTo(button);
@@ -294,7 +293,7 @@ export class FlexPages {
     }
 
     startLoader() {
-         if (!this.finder) {
+        if (!this.finder) {
             return null;
         }
 
@@ -333,28 +332,32 @@ const updatePosition = (scrollingColumn, pageColumns) => {
             if (!buttonInView) {
                 $(dropdown).css({ display: 'none' });
             } else {
-                $(dropdown).css({display: 'inherit'});
+                $(dropdown).css({ display: 'inherit' });
 
                 const buttonClientRect = button.getBoundingClientRect();
                 const dropdownClientRect = dropdown.getBoundingClientRect();
                 const scrollTop = (window.pageYOffset || document.documentElement.scrollTop);
                 const scrollLeft = (window.pageXOffset || document.documentElement.scrollLeft);
                 const top = buttonClientRect.height + buttonClientRect.top + scrollTop;
-                const left = buttonClientRect.right - dropdownClientRect.width + scrollLeft;
+                let left = buttonClientRect.left + scrollLeft; //  - dropdownClientRect.width
 
-                $(dropdown).css({top, left});
+                if (left + dropdownClientRect.width > window.innerWidth) {
+                    left = window.innerWidth - dropdownClientRect.width - 5;
+                }
+
+                $(dropdown).css({ top, left });
 
                 if (scrollingColumn) {
                     const targetClientRect = event.target.getBoundingClientRect();
                     if ((top < targetClientRect.top + scrollTop) || (top > targetClientRect.top + scrollTop + targetClientRect.height)) {
-                        $(dropdown).css({display: 'none'});
+                        $(dropdown).css({ display: 'none' });
                     }
                 }
 
                 if (pageColumns) {
                     const targetClientRect = event.target.getBoundingClientRect();
                     if ((left < targetClientRect.left + scrollLeft) || (left > targetClientRect.left + scrollLeft + targetClientRect.width)) {
-                        $(dropdown).css({display: 'none'});
+                        $(dropdown).css({ display: 'none' });
                     }
                 }
             }

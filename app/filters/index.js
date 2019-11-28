@@ -1,6 +1,5 @@
 import '../utils/indeterminate';
-import { FlexPagesInstance, getInitialRoute, ReLoad } from '../columns';
-import getFilters from '../utils/get-filters';
+import { ReLoad } from '../columns';
 
 document.addEventListener('click', (event) => {
     const filterType = event.target && event.target.dataset.filters;
