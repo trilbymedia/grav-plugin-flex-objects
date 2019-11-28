@@ -14,7 +14,6 @@
 
 {% block directory %}
     {% set filters = grav.request.getCookieParams()['grav-admin-flexpages']|base64_decode|json_decode(true)['filters'] %}
-    {{ filters|json_encode }}
     <div id="pages-content-wrapper">
         <div id="pages-filters">
             <form>
