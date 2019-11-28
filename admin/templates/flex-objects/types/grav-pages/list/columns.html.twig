@@ -1,4 +1,19 @@
+{% macro toggle(id, title, filters) %}
+    {% set name = id|fieldName %}
+    {% set filter = filters[name] ?? null %}
+    {% set value = filter is null ? 0 : (not filter)|int+1 %}
+
+    <span class="checkboxes indeterminate toggleable">
+        <input type="checkbox" id="{{ id }}" name="{{ name }}" {% if value == 0 %}indeterminate="false"{% endif %} value="{{ filter }}"
+               data-_check-status="{{ value }}">
+        <label for="{{ id }}">{{ title }}</label>
+    </span>
+{% endmacro %}
+
+{% import _self as macros %}
+
 {% block directory %}
+    {% set filters = grav.request.getCookieParams()['grav-admin-flexpages']|base64_decode|json_decode(true)['filters'] %}
     <div id="pages-content-wrapper">
         <div id="pages-filters">
             <form>
@@ -10,31 +25,12 @@
                 <div class="filters-advanced {#hide#}">
                     <fieldset>
                         <legend>Page Attributes</legend>
-                        <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.routable" name="filters[routable]" indeterminate="false" value=""
-                       data-_check-status="0">
-                <label for="filters.routable">Routable</label>
-            </span>
-                        <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.module" name="filters[module]" indeterminate="false" value=""
-                       data-_check-status="0">
-                <label for="filters.module">Module</label>
-            </span>
-                        <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.visible" name="filters[visible]" indeterminate="false" value=""
-                       data-_check-status="0">
-                <label for="filters.visible">Visible</label>
-            </span>
-                        <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.published" name="filters[published]" indeterminate="false" value=""
-                       data-_check-status="0">
-                <label for="filters.published">Published</label>
-            </span>
-                        <span class="checkboxes indeterminate toggleable">
-                <input type="checkbox" id="filters.translated" name="filters[translated]" indeterminate="false" value=""
-                       data-_check-status="0">
-                <label for="filters.translated">Translated</label>
-            </span>
+                        {{ macros.toggle('filters.routable', 'Routable', filters) }}
+                        {{ macros.toggle('filters.module', 'Module', filters) }}
+                        {{ macros.toggle('filters.visible', 'Visible', filters) }}
+                        {{ macros.toggle('filters.published', 'Published', filters) }}
+                        {{ macros.toggle('filters.translated', 'Translated', filters) }}
+                        {{ macros.toggle('filters.folder', 'Empty Folder', filters) }}
                     </fieldset>
 
                     {% set page_types = admin.types %}
@@ -42,9 +38,9 @@
                         <legend>Page Types</legend>
                         {% for name,title in page_types %}
                             <span class="checkboxes toggleable">
-                <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}">
-                <label for="filters.type.{{ name }}">{{ title }}</label>
-              </span>
+                                <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}">
+                                <label for="filters.type.{{ name }}">{{ title }}</label>
+                            </span>
                         {% endfor %}
                     </fieldset>
 
@@ -54,9 +50,9 @@
                             <legend>Module Types</legend>
                             {% for name,title in module_types %}
                                 <span class="checkboxes toggleable">
-                <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}">
-                <label for="filters.type.{{ name }}">{{ title }}</label>
-              </span>
+                                    <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}">
+                                    <label for="filters.type.{{ name }}">{{ title }}</label>
+                                </span>
                             {% endfor %}
                         </fieldset>
                     {% endif %}
