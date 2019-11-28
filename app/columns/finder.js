@@ -105,10 +105,10 @@ export class FlexPages {
     static createItemContent(config, item) {
         const frag = document.createDocumentFragment();
         const route = `${GRAV_CONFIG.current_url}/${item.route.raw}`.replace('//', '/');
+        const title = $('<div class="fjs-title" />');
         const link = $(`<a href="${route}" />`);
         const icon = $(`<span class="fjs-icon ${item.icon} badge-${item.extras && item.extras.published ? 'published' : 'unpublished'}" />`);
 
-        link.appendTo(frag);
         if (item.extras && item.extras.lang) {
             let status = '';
             if (item.extras.translated) {
@@ -131,15 +131,10 @@ export class FlexPages {
         const info = $(`<span class="fjs-info"><b>${item.title}</b> <em>${item.route.display}</em></span>`);
         const actions = $('<span class="fjs-actions" />');
 
-        if (item.child_count) {
-            const count = $(`<span class="child-count">${item.child_count}</span>`);
-            count.appendTo(actions);
-        }
-
+        let dotdotdot = null;
         if (item.extras) {
             const LANG_URL = $('[data-lang-url]').data('langUrl');
-            const dotdotdot = $('<div class="button-group" data-flexpages-dotx3 data-flexpages-prevent><button class="button dropdown-toggle" data-toggle="dropdown"><i class="fa fa-ellipsis-v fjs-action-toggle"></i></button></div>');
-            dotdotdot.appendTo(actions);
+            dotdotdot = $('<div class="button-group" data-flexpages-dotx3 data-flexpages-prevent><button class="button dropdown-toggle" data-toggle="dropdown"><i class="fa fa-ellipsis-v fjs-action-toggle"></i></button></div>');
             dotdotdot.on('click', (event) => {
                 if (!dotdotdot.find('.dropdown-menu').length) {
                     let tags = '';
@@ -205,12 +200,20 @@ export class FlexPages {
         }
 
         if (item.child_count) {
-            const arrow = $('<i class="fa fa-chevron-right fjs-children" data-flexpages-expand data-flexpages-prevent></i>');
-            arrow.appendTo(actions);
+            const button = $(`<button class="fjs-children" data-flexpages-expand data-flexpages-prevent />`);
+            const count = $(`<span class="badge child-count">${item.child_count}</span>`);
+            const arrow = $('<i class="fa fa-chevron-right"></i>');
+            count.appendTo(button);
+            arrow.appendTo(button);
+            button.appendTo(actions);
         }
 
-        icon.appendTo(link);
+        icon.appendTo(title);
+        dotdotdot.appendTo(title);
+        link.appendTo(title);
         info.appendTo(link);
+
+        title.appendTo(frag);
         actions.appendTo(frag);
 
         return frag;
