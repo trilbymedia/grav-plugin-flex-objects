@@ -67,7 +67,10 @@ class FlexObjectsPlugin extends Plugin
             ],
             'onFormRegisterTypes' => [
                 ['onFormRegisterTypes', 0]
-            ]
+            ],
+            'onAdminRegisterPermissions' => [
+                ['onAdminRegisterPermissions', -10]
+            ],
         ];
     }
 
@@ -153,6 +156,29 @@ class FlexObjectsPlugin extends Plugin
 
             return $flex;
         };
+    }
+
+    /**
+     * Initial stab at registering permissions (WIP)
+     *
+     * @param Event $e
+     */
+    public function onAdminRegisterPermissions(Event $e)
+    {
+        $admin = $e['admin'];
+        if (!$admin) {
+            return;
+        }
+
+        $permissions = [
+            'admin.flex-object.list' => 'boolean',
+            'admin.flex-object.create' => 'boolean',
+            'admin.flex-object.read' => 'boolean',
+            'admin.flex-object.update' => 'boolean',
+            'admin.flex-object.delete' => 'boolean',
+        ];
+
+        $admin->addPermissions($permissions);
     }
 
     public function onFormRegisterTypes(Event $event): void
