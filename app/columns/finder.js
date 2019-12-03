@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Finder from '../utils/finder';
-import { getInitialRoute, setInitialRoute } from './index';
+import { getInitialRoute, getStore, setInitialRoute } from './index';
 import getFilters from '../utils/get-filters';
 
 let XHRUUID = 0;
@@ -246,7 +246,7 @@ export class FlexPages {
 
     createSimpleColumn(item) {}
 
-    dataLoad(parent, callback, filters = getFilters()) {
+    dataLoad(parent, callback, filters = getStore().filters) {
         /* if (!parent && Object.keys(filters).length) {
             parent = { child_count: 1, route: { raw: '' } };
         }*/
