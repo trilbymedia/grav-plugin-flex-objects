@@ -1,4 +1,4 @@
-{% set flex = grav.flex_objects %}
+{% set flex = grav['flex_objects'] %}
 {% set directory_url = base_url_relative ~ page.route() %}
 {% set directories = flex.directories(options.list|array ?: null) %}
 {% set layout = options.layout ?: 'default' %}
