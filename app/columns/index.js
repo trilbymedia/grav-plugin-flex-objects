@@ -33,16 +33,19 @@ export const setInitialRoute = ({ route = '', filters = getStore().filters || {}
 export let FlexPagesInstance = null;
 
 export const ReLoad = (fresh = false) => {
+    const search = document.querySelector('#pages-filters [name="filters[search]"]');
     const loader = container.querySelector('.grav-loading');
     const content = container.querySelector('#pages-columns');
     const gravConfig = typeof global.GravConfig !== 'undefined' ? global.GravConfig : global.GravAdmin.config;
 
-    if (loader && content) {
+    if (fresh && search) {
+        search.focus();
+    }
 
+    if (loader && content) {
         loader.style.display = 'block';
         content.innerHTML = '';
 
-        const search = document.querySelector('#pages-filters [name="filters[search]"]');
         const filters = fresh ? getStore().filters : getFilters();
         const withFilters = Object.keys(filters).length ? { ...filters, initial: true } : {};
 
