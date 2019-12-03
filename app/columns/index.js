@@ -26,13 +26,13 @@ export const getInitialRoute = () => {
     return parsed.route || '';
 };
 
-export const setInitialRoute = ({ route = '', filters = {}, options = {}} = {}) => {
+export const setInitialRoute = ({ route = '', filters = getStore().filters || {}, options = { expires: '1Y' }} = {}) => {
     return setStore({ route, filters }, options);
 };
 
 export let FlexPagesInstance = null;
 
-export const ReLoad = () => {
+export const ReLoad = (fresh = false) => {
     const loader = container.querySelector('.grav-loading');
     const content = container.querySelector('#pages-columns');
     const gravConfig = typeof global.GravConfig !== 'undefined' ? global.GravConfig : global.GravAdmin.config;
@@ -42,7 +42,7 @@ export const ReLoad = () => {
         loader.style.display = 'block';
         content.innerHTML = '';
 
-        const filters = getFilters();
+        const filters = fresh ? getStore().filters : getFilters();
         const withFilters = Object.keys(filters).length ? { ...filters, initial: true } : {};
 
         const store = getStore();
@@ -74,5 +74,5 @@ export const ReLoad = () => {
 };
 
 if (container) {
-    ReLoad();
+    ReLoad(true);
 }
