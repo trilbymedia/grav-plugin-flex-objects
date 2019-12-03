@@ -3,9 +3,8 @@
     {% set filter = filters[name] ?? null %}
     {% set value = filter is null ? 0 : (not filter)|int+1 %}
 
-    <span class="checkboxes indeterminate toggleable">
-        <input type="checkbox" id="{{ id }}" name="{{ name }}" indeterminate="{{ value == 0 ? 'true' : 'false' }}" value="{{ filter }}" {% if value == 1 %}checked{% endif %}
-               data-_check-status="{{ value }}">
+    <span class="checkboxes indeterminate toggleable" data-_check-status="{{ value }}">
+        <input type="checkbox" id="{{ id }}" name="{{ name }}" indeterminate="{{ value == 2 ? 'true' : 'false' }}" value="{{ filter }}" {% if value == 1 %}checked{% endif %}>
         <label for="{{ id }}">{{ title }}</label>
     </span>
 {% endmacro %}
