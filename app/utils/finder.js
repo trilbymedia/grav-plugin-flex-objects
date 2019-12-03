@@ -39,10 +39,11 @@ class Finder {
         this.data = data;
 
         this.config = $.extend(true, {}, DEFAULTS, options);
+        this.container.off('click.finder keydown.finder');
 
         // dom events
-        this.container.on('click', this.clickEvent.bind(this));
-        this.container.on('keydown', this.keydownEvent.bind(this));
+        this.container.on('click.finder', this.clickEvent.bind(this));
+        this.container.on('keydown.finder', this.keydownEvent.bind(this));
 
         // internal events
         this.$emitter.on('item-selected', this.itemSelected.bind(this));
@@ -56,7 +57,7 @@ class Finder {
 
         if (this.config.pathBar) {
             this.pathBar = this.createPathBar();
-            this.pathBar.on('click', '[data-breadcrumb-node]', (event) => {
+            this.pathBar.on('click.finder', '[data-breadcrumb-node]', (event) => {
                 event.preventDefault();
                 const location = $(event.currentTarget).data('breadcrumbNode');
                 this.goTo(this.data, location);
@@ -110,21 +111,25 @@ class Finder {
         const target = $(event.target);
         const column = target.closest(`.${this.config.className.col}`);
         const item = target.closest(`.${this.config.className.item}`);
+        const prevent = target.is('[data-flexpages-prevent]') ? target : target.closest('[data-flexpages-prevent]');
 
-        if (target.data('flexpagesPrevent') === undefined) {
+        if (prevent.data('flexpagesPrevent') === undefined) {
+            return true;
+        }
+
+        if (this.config.itemTrigger) {
+            if (target.is(this.config.itemTrigger) || target.closest(this.config.itemTrigger).length) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                this.$emitter.emit('item-selected', {column, item});
+            }
+
             return true;
         }
 
         event.stopPropagation();
         event.preventDefault();
-
-        if (this.config.itemTrigger) {
-            if (target.is(this.config.itemTrigger)) {
-                this.$emitter.emit('item-selected', {column, item});
-            }
-
-            return;
-        }
 
         if (item.length) {
             this.$emitter.emit('item-selected', { column, item });
