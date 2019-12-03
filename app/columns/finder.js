@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import Finder from '../utils/finder';
 import { getInitialRoute, getStore, setInitialRoute } from './index';
-import getFilters from '../utils/get-filters';
+// import getFilters from '../utils/get-filters';
 
 let XHRUUID = 0;
 const GRAV_CONFIG = typeof global.GravConfig !== 'undefined' ? global.GravConfig : global.GravAdmin.config;

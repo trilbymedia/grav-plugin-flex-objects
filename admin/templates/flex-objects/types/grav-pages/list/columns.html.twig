@@ -14,15 +14,16 @@
 
 {% block directory %}
     {% set filters = grav.request.getCookieParams()['grav-admin-flexpages']|base64_decode|json_decode(true)['filters'] %}
+    {% set hidePanel = filters|length == 0 or (filters|length == 1 and filters['filters[search]']) %}
     <div id="pages-content-wrapper">
         <div id="pages-filters">
             <form>
                 <div class="filters-bar">
                     <input type="text" placeholder="Search..." name="filters[search]" value="{{ filters['filters[search]'] }}" />
-                    <a href="#" class="adv-options button-border {{ filters|length == 0 ? 'close' : 'open' }}">Advanced Options</a>
+                    <a href="#" class="adv-options button-border {{ hidePanel ? 'close' : 'open' }}">Advanced Options</a>
                 </div>
 
-                <div class="filters-advanced {{ filters|length == 0 ? 'hide' }}">
+                <div class="filters-advanced {{ hidePanel ? 'hide' }}">
                     <fieldset>
                         <legend>Page Attributes</legend>
                         {{ macros.toggle('filters.routable', 'Routable', filters) }}

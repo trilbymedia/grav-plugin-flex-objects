@@ -1,6 +1,7 @@
 import '../utils/indeterminate';
 import './panel';
 import { ReLoad } from '../columns';
+import throttle from 'lodash/throttle';
 
 document.addEventListener('click', (event) => {
     const filterType = event.target && event.target.dataset.filters;
@@ -30,5 +31,16 @@ document.addEventListener('click', (event) => {
     if (filterType === 'apply') {
         ReLoad();
         return false;
+    }
+});
+
+const throttledReload = throttle(() => {
+    ReLoad();
+}, 350, { leading: false });
+
+document.addEventListener('input', (event) => {
+    if (event.target.getAttribute && event.target.getAttribute('name') === 'filters[search]') {
+        throttledReload.cancel();
+        throttledReload();
     }
 });

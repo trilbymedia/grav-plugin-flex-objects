@@ -42,12 +42,18 @@ export const ReLoad = (fresh = false) => {
         loader.style.display = 'block';
         content.innerHTML = '';
 
+        const search = document.querySelector('#pages-filters [name="filters[search]"]');
         const filters = fresh ? getStore().filters : getFilters();
         const withFilters = Object.keys(filters).length ? { ...filters, initial: true } : {};
 
         const store = getStore();
         store.filters = filters;
         setStore(store);
+
+        let isSearchFocused = false;
+        if (search) {
+            isSearchFocused = search === document.activeElement;
+        }
 
         $.ajax({
             url: `${gravConfig.current_url}`,
@@ -67,6 +73,11 @@ export const ReLoad = (fresh = false) => {
 
                 FlexPagesInstance = null;
                 FlexPagesInstance = new FlexPages(content, response.data);
+
+                if (search && isSearchFocused) {
+                    search.focus();
+                }
+
                 return FlexPagesInstance;
             }
         });
