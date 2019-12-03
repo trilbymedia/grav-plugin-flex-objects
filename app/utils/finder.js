@@ -39,10 +39,11 @@ class Finder {
         this.data = data;
 
         this.config = $.extend(true, {}, DEFAULTS, options);
+        this.container.off('click.finder keydown.finder');
 
         // dom events
-        this.container.on('click', this.clickEvent.bind(this));
-        this.container.on('keydown', this.keydownEvent.bind(this));
+        this.container.on('click.finder', this.clickEvent.bind(this));
+        this.container.on('keydown.finder', this.keydownEvent.bind(this));
 
         // internal events
         this.$emitter.on('item-selected', this.itemSelected.bind(this));
@@ -56,7 +57,7 @@ class Finder {
 
         if (this.config.pathBar) {
             this.pathBar = this.createPathBar();
-            this.pathBar.on('click', '[data-breadcrumb-node]', (event) => {
+            this.pathBar.on('click.finder', '[data-breadcrumb-node]', (event) => {
                 event.preventDefault();
                 const location = $(event.currentTarget).data('breadcrumbNode');
                 this.goTo(this.data, location);
