@@ -132,7 +132,7 @@ export class FlexPages {
             clock.appendTo(icon);
         }
 
-        const info = $(`<span class="fjs-info"><b>${item.title}</b> <em>${item.route.display}</em></span>`);
+        const info = $(`<span class="fjs-info"><b title="${item.title}">${item.title}</b> <em title="${item.route.display}">${item.route.display}</em></span>`);
         const actions = $('<span class="fjs-actions" />');
 
         let dotdotdot = null;
@@ -205,7 +205,7 @@ export class FlexPages {
 
         if (item.child_count) {
             const button = $('<button class="fjs-children" data-flexpages-expand data-flexpages-prevent />');
-            const count = $(`<span class="badge child-count">${typeof item.count !== undefined ? `${item.count} / ` : ''}${item.child_count}</span>`);
+            const count = $(`<span class="badge child-count">${typeof item.count !== 'undefined' ? `${item.count} / ` : ''}${item.child_count}</span>`);
             const arrow = $('<i class="fa fa-chevron-right"></i>');
             count.appendTo(button);
             arrow.appendTo(button);
