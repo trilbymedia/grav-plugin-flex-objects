@@ -2,8 +2,9 @@
     {% set name = id|fieldName %}
     {% set filter = filters[name] ?? null %}
     {% set value = filter is null ? 0 : (not filter)|int+1 %}
+    {% set classes = ['status-unchecked', 'status-checked', 'status-indeterminate'] %}
 
-    <span class="checkboxes indeterminate toggleable" data-_check-status="{{ value }}">
+    <span class="checkboxes indeterminate toggleable {{ classes[value] }}" data-_check-status="{{ value }}">
         <input type="checkbox" id="{{ id }}" name="{{ name }}" indeterminate="{{ value == 2 ? 'true' : 'false' }}" value="{{ filter }}" {% if value == 1 %}checked{% endif %}>
         <label for="{{ id }}">{{ title }}</label>
     </span>
