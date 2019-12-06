@@ -247,7 +247,7 @@ export class FlexPages {
 
     createSimpleColumn(item) {}
 
-    dataLoad(parent, callback, filters = getStore().filters) {
+    dataLoad(parent, callback, filters = getStore().filters || {}) {
         /* if (!parent && Object.keys(filters).length) {
             parent = { child_count: 1, route: { raw: '' } };
         }*/

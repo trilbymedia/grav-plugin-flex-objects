@@ -6,6 +6,7 @@
     * Admin: `Flex Pages` now support **searching** and **filtering**
 1. [](#bugfix)     
     * Hide hidden/system types (pages, accounts, user groups) from Flex Objects page type [#38](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/38)
+    * Fixed JS failing on initial filters setup due to no fallback implemented [#2724](https://github.com/getgrav/grav/issues/2724).
 
 # v1.0.0-rc.1
 ## 11/06/2019

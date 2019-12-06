@@ -46,7 +46,7 @@ export const ReLoad = (fresh = false) => {
         loader.style.display = 'block';
         content.innerHTML = '';
 
-        const filters = fresh ? getStore().filters : getFilters();
+        const filters = fresh ? getStore().filters || {} : getFilters();
         const withFilters = Object.keys(filters).length ? { ...filters, initial: true } : {};
 
         const store = getStore();
