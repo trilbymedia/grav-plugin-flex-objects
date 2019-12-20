@@ -6,6 +6,7 @@ use Grav\Common\Cache;
 use Grav\Common\Config\Config;
 use Grav\Common\Debugger;
 use Grav\Common\Filesystem\Folder;
+use Grav\Common\Flex\Pages\PageIndex;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Plugin;
@@ -541,7 +542,7 @@ class AdminController
 
             // Base64 decode the route
             $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
-            $data['filters'] = ($data['filters'] ?? []) + ['type' => ['dir']];
+            $data['filters'] = ($data['filters'] ?? []) + ['type' => ['root', 'dir']];
             $data['lang'] = $this->getLanguage();
 
             $initial = $data['initial'] ?? null;
@@ -967,7 +968,13 @@ class AdminController
 
             $directory = $this->getDirectory();
             if ($directory) {
-                if (null !== $key) {
+                // FIXME: hack for pages.
+                if ($key === '_root') {
+                    $index = $directory->getIndex();
+                    if ($index instanceof PageIndex) {
+                        $object = $index->getRoot();
+                    }
+                } elseif (null !== $key) {
                     $object = $directory->getObject($key) ?? $directory->createObject([], $key);
                 } elseif ($this->action === 'add') {
                     $object = $directory->createObject([], '');
