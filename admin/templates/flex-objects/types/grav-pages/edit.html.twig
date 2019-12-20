@@ -12,6 +12,7 @@
 {% block body %}
     {% set current_route = '/' ~ route.getRoute(1) %}
 
+    {% if not object.root() %}
     {% set parent = object.parent %}
     {% set child = object.children.first %}
     {% set prev = object.prevSibling %}
@@ -21,6 +22,7 @@
     {% set child_url = child ? admin_route(current_route ~ '/' ~ child.slug) %}
     {% set prev_url = prev ? admin_route(back_route ~ '/' ~ prev.slug) %}
     {% set next_url = next ? admin_route(back_route ~ '/' ~ next.slug) %}
+    {% endif %}
     {% set back_url = back_url ?? admin_route(flex.adminRoute(directory.getFlexType())) %}
 
     {{ parent() }}
@@ -29,6 +31,7 @@
 {% block back_button %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/grav-pages/buttons/back.html.twig']
         with { back_url: back_url } %}
+    {% if not object.root() %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-prev.html.twig', 'flex-objects/types/grav-pages/buttons/nav-prev.html.twig']
         with { prev_url: prev_url, title: prev.route } %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-parent.html.twig', 'flex-objects/types/grav-pages/buttons/nav-parent.html.twig']
@@ -37,18 +40,24 @@
         with { child_url: child_url, title: child.route } %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/nav-next.html.twig', 'flex-objects/types/grav-pages/buttons/nav-next.html.twig']
         with { next_url: next_url, title: next.route } %}
+    {% endif %}
 {% endblock back_button %}
 
 {% block preview_button %}
+    {% if object.exists and not object.root() %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/preview.html.twig', 'flex-objects/types/grav-pages/buttons/preview.html.twig'] %}
+    {% endif %}
 {% endblock preview_button %}
 
 {% block delete_button %}
+    {# FIXME: add support for deleting root file only #}
+    {% if not object.root() %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/delete.html.twig', 'flex-objects/types/grav-pages/buttons/delete.html.twig'] %}
+    {% endif %}
 {% endblock delete_button %}
 
 {% block extra_buttons %}
-    {% if object.exists %}
+    {% if object.exists and not object.root() %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/add.html.twig', 'flex-objects/types/grav-pages/buttons/add.html.twig'] %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/copy.html.twig', 'flex-objects/types/grav-pages/buttons/copy.html.twig'] %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/move.html.twig', 'flex-objects/types/grav-pages/buttons/move.html.twig'] %}
