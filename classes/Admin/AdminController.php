@@ -632,9 +632,12 @@ class AdminController
                         $this->referrerRoute = $this->referrerRoute->withAddedPath($object->getKey());
                     }
                 } elseif ($key !== $object->getKey()) {
-                    $this->referrerRoute = $this->currentRoute->withRoute($this->currentRoute->getRoute(0, -1) . '/' . $object->getKey());
+                    // TODO: remove page specific code
+                    if (!(method_exists($object, 'root') && $object->root())) {
+                        $this->referrerRoute = $this->currentRoute->withRoute($this->currentRoute->getRoute(0, -1) . '/' . $object->getKey());
+                    }
                 }
-                $postAction = $request->getParsedBody()['data']['_post_entries_save'] ?? 'edit';
+                $postAction = $request->getParsedBody()['_post_entries_save'] ?? 'edit';
                 if ($postAction === 'list') {
                     $this->referrerRoute = $this->currentRoute->withRoute($this->currentRoute->getRoute(0, -1));
                 }

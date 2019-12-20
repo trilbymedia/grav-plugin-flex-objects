@@ -3,6 +3,8 @@
 
 1. [](#new)
     * Added root page support for `Flex Pages`
+1. [](#bugfix)   
+    * Fixed after save: Edit
 
 # v1.0.0-rc.2
 ## 12/04/2019
