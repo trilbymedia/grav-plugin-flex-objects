@@ -2,7 +2,7 @@
 
 {% set form = form ?? object.form(admin.session.expert != '0' ? 'raw') %}
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
-{% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate')) %}
+{% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate') and not object.root()) %}
 
 {% macro spanToggle(input, length) %}
     {{ (repeat('&nbsp;&nbsp;', (length - input|length) / 2) ~ input ~ repeat('&nbsp;&nbsp;', (length - input|length) / 2))|raw }}
