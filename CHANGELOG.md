@@ -1,3 +1,9 @@
+# v1.0.0-rc.4
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fixed empty directory entries in plugin configuration
+
 # v1.0.0-rc.3
 ## 01/02/2020
 

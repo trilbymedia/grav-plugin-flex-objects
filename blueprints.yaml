@@ -101,7 +101,8 @@ form:
 
     directories:
       type: flex-objects
-      array: true
       label: Directories
+      array: true
+      ignore_empty: true
       validate:
-        type: commalist
+        type: array
