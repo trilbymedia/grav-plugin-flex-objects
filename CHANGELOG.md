@@ -1,6 +1,8 @@
 # v1.0.0-rc.4
 ## mm/dd/2020
 
+1. [](#new)
+    * Added support for new improved ACL
 1. [](#bugfix)
     * Fixed empty directory entries in plugin configuration
 

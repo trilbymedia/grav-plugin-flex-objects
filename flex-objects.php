@@ -7,6 +7,8 @@ use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Types;
 use Grav\Common\Plugin;
 use Grav\Common\User\Interfaces\UserInterface;
+use Grav\Framework\Acl\Events\RegisterPermissionsEvent;
+use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
@@ -20,7 +22,7 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexObjectsPlugin extends Plugin
 {
-    const MIN_GRAV_VERSION = '1.7.0-beta.7';
+    const MIN_GRAV_VERSION = '1.7.0-rc.3';
 
     public $features = [
         'blueprints' => 1000,
@@ -70,6 +72,9 @@ class FlexObjectsPlugin extends Plugin
             ],
             'onAdminRegisterPermissions' => [
                 ['onAdminRegisterPermissions', -10]
+            ],
+            RegisterPermissionsEvent::class => [
+                ['onRegisterPermissions', 100]
             ],
         ];
     }
@@ -156,6 +161,22 @@ class FlexObjectsPlugin extends Plugin
 
             return $flex;
         };
+    }
+
+    /**
+     * Initial stab at registering permissions (WIP)
+     *
+     * @param RegisterPermissionsEvent $event
+     */
+    public function onRegisterPermissions(RegisterPermissionsEvent $event)
+    {
+        $actions = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
+
+        // TODO: add support for dynamic directories
+        //$actions += PermissionsReader::fromArray($actions, $types);
+
+        $permissions = $event->permissions;
+        $permissions->addActions($actions);
     }
 
     /**
