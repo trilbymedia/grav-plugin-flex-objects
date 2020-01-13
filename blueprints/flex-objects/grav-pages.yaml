@@ -5,3 +5,18 @@ type: flex-objects
 extends@:
   type: pages
   context: blueprints://flex
+
+form:
+  fields:
+    lang:
+      type: hidden
+      value: ''
+
+    tabs:
+      fields:
+        security:
+          type: tab
+          title: PLUGIN_ADMIN.SECURITY
+          import@:
+            type: partials/security
+            context: blueprints://pages
