@@ -4,6 +4,7 @@
 1. [](#new)
     * Added support for new improved ACL
     * Enabled `Pages`, `Accounts` and `User Groups` by default
+    * Stop using deprecated `onAdminRegisterPermissions` event
 1. [](#bugfix)
     * Fixed empty directory entries in plugin configuration
     * Fixed plugin configuration displaying directories outside of the plugin
