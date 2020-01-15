@@ -6,6 +6,7 @@
     * Enabled `Pages`, `Accounts` and `User Groups` by default
 1. [](#bugfix)
     * Fixed empty directory entries in plugin configuration
+    * Fixed plugin configuration displaying directories outside of the plugin
 
 # v1.0.0-rc.3
 ## 01/02/2020

@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block input %}
-    {% set all = grav['flex_objects'].all %}
+    {% set all = grav['flex_objects'].blueprints %}
     {% if all|count %}
     {% for label, directory in all %}
         {% set url = directory.blueprintFile %}

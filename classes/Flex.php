@@ -36,20 +36,36 @@ class Flex extends \Grav\Framework\Flex\Flex
      */
     public function getAll(): array
     {
+        $directories = $this->getDirectories($this->managed);
+        $all = $this->getBlueprints();
+
+        /** @var FlexDirectory $directory */
+        foreach ($all as $type => $directory) {
+            if (!isset($directories[$type])) {
+                $directories[$type] = $directory;
+            }
+        }
+
+        ksort($directories);
+
+        return $directories;
+    }
+
+    /**
+     * @return array
+     */
+    public function getBlueprints(): array
+    {
         $params = [
             'pattern' => '|\.yaml|',
             'value' => 'Url',
             'recursive' => false
         ];
 
-        $directories = $this->getDirectories($this->managed);
         $all = Folder::all('blueprints://flex-objects', $params);
-
         foreach ($all as $url) {
             $type = basename($url, '.yaml');
-            if (!isset($directories[$type])) {
-                $directories[$type] = new FlexDirectory($type, $url);
-            }
+            $directories[$type] = new FlexDirectory($type, $url);
         }
 
         ksort($directories);
