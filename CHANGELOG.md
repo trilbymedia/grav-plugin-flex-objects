@@ -3,6 +3,7 @@
 
 1. [](#new)
     * Added support for new improved ACL
+    * Enabled `Pages`, `Accounts` and `User Groups` by default
 1. [](#bugfix)
     * Fixed empty directory entries in plugin configuration
 
