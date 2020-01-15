@@ -3,6 +3,7 @@ description: Flex Articles emulate simple pages in Flex. Useful base type if you
 type: flex-objects
 
 config:
+  hidden: true
   admin:
     list:
       fields:

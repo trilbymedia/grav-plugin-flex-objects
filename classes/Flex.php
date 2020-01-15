@@ -59,13 +59,17 @@ class Flex extends \Grav\Framework\Flex\Flex
         $params = [
             'pattern' => '|\.yaml|',
             'value' => 'Url',
-            'recursive' => false
+            'recursive' => false,
+            'folders' => false
         ];
 
         $all = Folder::all('blueprints://flex-objects', $params);
         foreach ($all as $url) {
             $type = basename($url, '.yaml');
-            $directories[$type] = new FlexDirectory($type, $url);
+            $directory = new FlexDirectory($type, $url);
+            if ($directory->getConfig('hidden') !== true) {
+                $directories[$type] = $directory;
+            }
         }
 
         ksort($directories);

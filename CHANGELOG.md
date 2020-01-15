@@ -7,6 +7,7 @@
 1. [](#bugfix)
     * Fixed empty directory entries in plugin configuration
     * Fixed plugin configuration displaying directories outside of the plugin
+    * Fixed broken blueprints if there's folder with the name of the blueprint file
 
 # v1.0.0-rc.3
 ## 01/02/2020
