@@ -7,7 +7,7 @@ use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Types;
 use Grav\Common\Plugin;
 use Grav\Common\User\Interfaces\UserInterface;
-use Grav\Framework\Acl\Events\RegisterPermissionsEvent;
+use Grav\Events\RegisterPermissionsEvent;
 use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
@@ -165,7 +165,7 @@ class FlexObjectsPlugin extends Plugin
      *
      * @param RegisterPermissionsEvent $event
      */
-    public function onRegisterPermissions(RegisterPermissionsEvent $event)
+    public function onRegisterPermissions(RegisterPermissionsEvent $event): void
     {
         $actions = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
 

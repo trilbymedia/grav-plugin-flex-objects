@@ -13,11 +13,6 @@ actions:
     label: User Groups
 
 types:
-  alias:
-    type: alias
-    hidden: true
-    use: default
-
   crudpl:
     type: crud
     use:
