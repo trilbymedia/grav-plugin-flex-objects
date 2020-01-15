@@ -17,7 +17,7 @@ dependencies:
     - { name: form, version: '>=4.0.1' }
 
 form:
-  validation: strict
+  validation: loose
   fields:
     enabled:
       type: toggle
