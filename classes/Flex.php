@@ -72,7 +72,16 @@ class Flex extends \Grav\Framework\Flex\Flex
             }
         }
 
-        ksort($directories);
+        // Order blueprints by title.
+        usort($directories, static function (FlexDirectory $a, FlexDirectory $b) {
+            $at = $a->getTitle();
+            $bt = $b->getTitle();
+            if ($at === $bt) {
+                return 0;
+            }
+
+            return $at < $bt ? -1 : 1;
+        });
 
         return $directories;
     }
