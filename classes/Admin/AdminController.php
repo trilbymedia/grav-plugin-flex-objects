@@ -777,18 +777,58 @@ class AdminController
 
         // Ensure the controller should be running
         if (Utils::isAdminPlugin()) {
-            list(, $location, $target) = $this->grav['admin']->getRouteDetails();
-
-            $menu = $plugin->getAdminMenu();
-
-            // return null if this is not running
-            if (!isset($menu[$location]))  {
+            [, $location, $target] = $this->grav['admin']->getRouteDetails();
+            if (!$location) {
                 return;
             }
 
-            $this->menu = $menu[$location];
+            // Build all routes.
+            $menu = $plugin->getAdminMenu();
+            $routes = [];
+            foreach ($menu as $item) {
+                $routes[$item['route'] . '/'] = $item;
+                $aliases = (array)($item['alias'] ?? null);
+                foreach ($aliases as $alias) {
+                    $routes[$alias . '/'] = $item;
+                }
+            }
 
-            $directory = $menu[$location]['directory'] ?? '';
+            // Match route to the directory.
+            $path = '/' . ($target ? $location . '/' . $target : $location) . '/';
+            $match = $routes[$path] ?? null;
+            if ($match)  {
+                $location = trim($path, '/');
+                $target = '';
+            } else {
+                krsort($routes);
+                foreach ($routes as $route => $item) {
+                    if (strpos($path, $route) === 0) {
+                        $match = $item;
+                        $location = trim($route, '/');
+                        $target = trim(substr($path, strlen($route)), '/');
+                        break;
+                    }
+                }
+            }
+
+            // Stop if controller is not running.
+            if (!$match) {
+                return;
+            }
+
+            $this->admin = Grav::instance()['admin'];
+
+            // Redirect aliases.
+            $route = trim($match['route'], '/');
+            if ($location !== $route) {
+                $redirect = '/' . $route . ($target ? '/' . $target : '');
+                $this->setRedirect($redirect, 302);
+                $this->redirect();
+            }
+
+            $this->menu = $match;
+
+            $directory = $match['directory'] ?? '';
             $location = 'flex-objects';
             if ($directory) {
                 $id = $target;
@@ -821,7 +861,6 @@ class AdminController
             $this->id = $this->post['id'] ?? $id;
             $this->action = $this->post['action'] ?? $uri->param('action');
             $this->active = true;
-            $this->admin = Grav::instance()['admin'];
             $this->currentRoute = $uri::getCurrentRoute();
             $referrer = $uri->referrer();
             $this->referrerRoute = $referrer ? RouteFactory::createFromString($referrer) : $this->currentRoute;

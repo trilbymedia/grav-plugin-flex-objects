@@ -2,6 +2,7 @@
 ## mm/dd/2020
 
 1. [](#new)
+    * Added support for arbitrary admin menu route for editing a flex type
     * Added support for new improved ACL
     * Enabled `Pages`, `Accounts` and `User Groups` by default
     * Stop using deprecated `onAdminRegisterPermissions` event
