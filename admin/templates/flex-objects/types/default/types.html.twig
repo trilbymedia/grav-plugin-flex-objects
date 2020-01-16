@@ -1,6 +1,7 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/types/default/titlebar/types.html.twig' %}
 
+{% set flex = grav['flex_objects'] %}
 {% set route = grav.route.withExtension('') %}
 
 {# These variables can be overridden from the main template file #}
@@ -17,12 +18,12 @@
     <h1>{{ 'PLUGIN_FLEX_OBJECTS.TYPES_TITLE'|tu }}</h1>
 
     <div id="types" class="card-row grid fixed-blocks pure-g">
-        {% for directory in flex.directories if directory.enabled and directory.config('admin.hidden') != true and not directory.config('admin.menu') %}
+        {% for directory in flex.directories if directory.enabled and directory.config('admin.hidden', false) is not same as(true) and not directory.config('admin.menu') %}
             {% set collection = directory.collection %}
             {% if flex.adminRoute(collection) %}
             <div class="card-item pure-u-1-3">
 
-                <h2><a href="{{ base_url ~ flex.adminRoute(collection) }}">{{ directory.title|tu }}</a> <span class="badge">{{ collection.isAuthorized('list').count }}</span></h2>
+                <h2><a href="{{ admin_route(flex.adminRoute(collection)) }}">{{ directory.title|tu }}</a> <span class="badge">{{ collection.isAuthorized('list').count }}</span></h2>
                 <p>
                     {{ directory.description }}
                 </p>

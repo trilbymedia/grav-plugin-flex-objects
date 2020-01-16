@@ -1,0 +1,24 @@
+{% set active_html = 'class="active"' %}
+
+<div class="form-tabs">
+    <div class="tabs-nav">
+        {% set current = flex.directory('grav-accounts') %}
+        {% if current and current.isAuthorized('list') %}
+        {% set active = nav_route|starts_with(flex.adminRoute(current)|trim('/') ~ '/') %}
+        <a {{active ? active_html|raw }} href="{{ admin_route(flex.adminRoute(current)) }}">
+            <span>{{ 'PLUGIN_ADMIN.USERS'|tu }}</span>
+        </a>
+        {% endif %}
+        {% set current = flex.directory('grav-user-groups') %}
+        {% if current and current.isAuthorized('list') %}
+        {% set active = nav_route|starts_with(flex.adminRoute(current)|trim('/') ~ '/') %}
+        <a {{active ? active_html|raw }} href="{{ admin_route(flex.adminRoute(current)) }}">
+            <span>{{ 'PLUGIN_ADMIN.GROUPS'|tu }}</span>
+        </a>
+        {% endif %}
+        {% set active = nav_route|starts_with('/accounts/config'|trim('/') ~ '/') %}
+        <a {{active ? active_html|raw }} href="{{ admin_route('/accounts/config') }}">
+            <span>{{ 'PLUGIN_ADMIN.ACL'|tu }}</span>
+        </a>
+    </div>
+</div>
