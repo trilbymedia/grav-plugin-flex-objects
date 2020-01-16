@@ -167,13 +167,21 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onRegisterPermissions(RegisterPermissionsEvent $event): void
     {
-        $actions = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
-
-        // TODO: add support for dynamic directories
-        //$actions += PermissionsReader::fromArray($actions, $types);
+        /** @var Flex $flex */
+        $flex = $this->grav['flex_objects'];
+        $directories = $flex->getDirectories();
 
         $permissions = $event->permissions;
-        $permissions->addActions($actions);
+
+        $actions = [];
+        foreach ($directories as $directory) {
+            $data = $directory->getConfig('admin.permissions');
+            $actions[] = PermissionsReader::fromArray($data, $permissions->getTypes());
+
+        }
+        $actions[] = PermissionsReader::fromYaml("plugin://{$this->name}/permissions.yaml");
+
+        $permissions->addActions(array_replace(...$actions));
     }
 
     public function onFormRegisterTypes(Event $event): void
