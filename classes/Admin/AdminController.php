@@ -782,28 +782,38 @@ class AdminController
                 return;
             }
 
+            $flex = $this->getFlex();
+            $directories = $flex->getDirectories();
+
             // Build all routes.
-            $menu = $plugin->getAdminMenu();
             $routes = [];
-            foreach ($menu as $item) {
-                $routes[$item['route'] . '/'] = $item;
-                $aliases = (array)($item['alias'] ?? null);
+            /** @var FlexDirectory $directory */
+            foreach ($directories as $directory) {
+                // Alias under flex-objects (always exists, but can be redirected).
+                $routes['/flex-objects/' . $directory->getFlexType() . '/'] = $directory;
+
+                $config = $directory->getConfig('admin');
+                $route = $config['route'] ?? $config['menu']['list']['route'] ?? null;
+                if ($route) {
+                    $routes[$route . '/'] = $directory;
+                }
+                $aliases = (array)($config['redirect_from'] ?? null);
                 foreach ($aliases as $alias) {
-                    $routes[$alias . '/'] = $item;
+                    $routes[$alias . '/'] = $directory;
                 }
             }
 
-            // Match route to the directory.
+            // Match route to the flex directory.
             $path = '/' . ($target ? $location . '/' . $target : $location) . '/';
-            $match = $routes[$path] ?? null;
-            if ($match)  {
+            $directory = $routes[$path] ?? null;
+            if ($directory)  {
                 $location = trim($path, '/');
                 $target = '';
             } else {
                 krsort($routes);
-                foreach ($routes as $route => $item) {
+                foreach ($routes as $route => $test) {
                     if (strpos($path, $route) === 0) {
-                        $match = $item;
+                        $directory = $test;
                         $location = trim($route, '/');
                         $target = trim(substr($path, strlen($route)), '/');
                         break;
@@ -811,29 +821,32 @@ class AdminController
                 }
             }
 
-            // Stop if controller is not running.
-            if (!$match) {
-                return;
-            }
-
             $this->admin = Grav::instance()['admin'];
 
-            // Redirect aliases.
-            $route = trim($match['route'], '/');
-            if ($location !== $route) {
-                $redirect = '/' . $route . ($target ? '/' . $target : '');
-                $this->setRedirect($redirect, 302);
-                $this->redirect();
-            }
-
-            $this->menu = $match;
-
-            $directory = $match['directory'] ?? '';
-            $location = 'flex-objects';
             if ($directory) {
+                // Redirect aliases.
+                $config = $directory->getConfig('admin');
+                $route = trim($config['route'] ?? $config['menu']['list']['route'] ?? null, '/');
+                if ($route && $location !== $route) {
+                    // If directory route starts with alias and path continues, stop.
+                    if ($target && strpos($route, $location) === 0) {
+                        // We are not in a directory.
+                        return;
+                    }
+                    $redirect = '/' . $route . ($target ? '/' . $target : '');
+                    $this->setRedirect($redirect, 302);
+                    $this->redirect();
+                }
+
+                $this->menu = $config['menu']['list'] ?? null;
+
                 $id = $target;
-                $target = $directory;
+                $target = $directory->getFlexType();
             } else {
+                // We are not in a directory.
+                if ($location !== 'flex-objects') {
+                    return;
+                }
                 $array = explode('/', $target, 2);
                 $target = array_shift($array) ?: null;
                 $id = array_shift($array) ?: null;
@@ -856,7 +869,7 @@ class AdminController
             }
 
             $this->post = $this->getPost($post);
-            $this->location = $location;
+            $this->location = 'flex-objects';
             $this->target = $target;
             $this->id = $this->post['id'] ?? $id;
             $this->action = $this->post['action'] ?? $uri->param('action');
