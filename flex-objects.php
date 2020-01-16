@@ -175,7 +175,7 @@ class FlexObjectsPlugin extends Plugin
 
         $actions = [];
         foreach ($directories as $directory) {
-            $data = $directory->getConfig('admin.permissions');
+            $data = $directory->getConfig('admin.permissions', []);
             $actions[] = PermissionsReader::fromArray($data, $permissions->getTypes());
 
         }
@@ -291,8 +291,14 @@ class FlexObjectsPlugin extends Plugin
                 }
             }
 
-            $hidden = $item['hidden'] ?? false;
             $title = $item['title'] ?? 'PLUGIN_FLEX_OBJECTS.TITLE';
+            $index = $item['index'] ?? 0;
+            if (($this->grav['twig']->plugins_hooked_nav[$title]['index'] ?? 1000) <= $index) {
+                continue;
+            }
+
+            $location = $item['location'] ?? $route;
+            $hidden = $item['hidden'] ?? false;
             $icon = $item['icon'] ?? 'fa-list';
             $authorize = $item['authorize'] ?? ($directory ? null : ['admin.flex-objects', 'admin.super']);
             if ($hidden || (null === $authorize && $directory->isAuthorized('list', 'admin'))) {
@@ -313,7 +319,9 @@ class FlexObjectsPlugin extends Plugin
             $priority = $item['priority'] ?? 0;
 
             $this->grav['twig']->plugins_hooked_nav[$title] = [
+                'location' => $location,
                 'route' => $route,
+                'index' => $index,
                 'icon' => $icon,
                 'authorize' => $authorize,
                 'priority' => $priority
