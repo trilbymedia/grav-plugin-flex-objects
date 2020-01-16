@@ -187,8 +187,19 @@ class Flex extends \Grav\Framework\Flex\Flex
     {
         if (null === $this->adminRoutes) {
             $routes = [];
-            foreach ($this->getAdminMenuItems() as $name => $item) {
-                $routes[$name] = !isset($item['disabled']) || $item['disabled'] !== true ? $item['route'] : null;
+            /** @var FlexDirectory $directory */
+            foreach ($this->getDirectories() as $directory) {
+                $config = $directory->getConfig('admin');
+                if (!empty($config['disabled'])) {
+                    continue;
+                }
+
+                // Resolve route.
+                $route = $config['route']
+                    ?? $config['menu']['list']['route']
+                    ?? "/flex-objects/{$directory->getFlexType()}";
+
+                $routes[$directory->getFlexType()] = $route;
             }
 
             $this->adminRoutes = $routes;
