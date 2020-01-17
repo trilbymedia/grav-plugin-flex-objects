@@ -25,7 +25,7 @@
 
 {% block body %}
     {% set back_url = back_url ?? admin_route(back_route) %}
-    {% set blueprint = blueprint ?? object.blueprint ?? directory.blueprint %}
+    {% set blueprint = blueprint ?? directory.configureBlueprint %}
 
     {{ parent() }}
 {% endblock body %}
@@ -39,14 +39,14 @@
 {% endblock %}
 
 {% block content %}
-    {% if allowed %}
+    {% if allowed and blueprint %}
         <div class="clear directory admin-pages">
             <div class="admin-form-wrapper">
                 <div id="admin-topbar">
                     {% block topbar %}{% endblock %}
                 </div>
                 {% block edit %}
-                    {% include 'partials/blueprints.html.twig' with { form: form, context: object, data: object, blueprints: blueprint } %}
+                    {% include 'partials/blueprints.html.twig' with { form: form, data: object, blueprints: blueprint } %}
                 {% endblock %}
             </div>
         </div>
