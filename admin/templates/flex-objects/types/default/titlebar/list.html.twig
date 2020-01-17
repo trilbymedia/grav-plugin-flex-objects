@@ -26,6 +26,11 @@
             {% include ['flex-objects/types/' ~ target ~ '/buttons/languages.html.twig', 'flex-objects/types/default/buttons/languages.html.twig'] %}
         {% endblock languages_button %}
         {% endif %}
+
+        {# CONFIGURE #}
+        {% block configure %}
+            {% include 'flex-objects/types/default/buttons/configuration.html.twig' %}
+        {% endblock configure %}
     </div>
     {% endblock titlebar_button_bar %}
 

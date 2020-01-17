@@ -6,11 +6,13 @@
 
 {# These variables can be overridden from the main template file #}
 {% set back_route = back_route ?? ('/' ~ route.getRoute(1, -1)) %}
+{% set configure_route = '/plugins/flex-objects' %}
 
 {% block body %}
-    {{ parent() }}
-
     {% set back_url = admin_route(back_route) ?: (base_url ~ back_route) %}
+    {% set configure_url = configure_route ? admin_route(configure_route) : null %}
+
+    {{ parent() }}
 {% endblock body %}
 
 {% block content %}

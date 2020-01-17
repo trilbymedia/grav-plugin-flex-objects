@@ -5,6 +5,7 @@
     * Added support for arbitrary admin menu route for editing a flex type
     * Added support for new improved ACL
     * Added support for custom layouts by adding `/:layout_name` in url
+    * Added Flex type `Configuration`
     * Enabled `Pages`, `Accounts` and `User Groups` by default
     * Stop using deprecated `onAdminRegisterPermissions` event
 1. [](#bugfix)
