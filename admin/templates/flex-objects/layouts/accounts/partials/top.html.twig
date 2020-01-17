@@ -18,7 +18,7 @@
         {% endif %}
         {% set active = nav_route|starts_with('/accounts/config'|trim('/') ~ '/') %}
         <a {{active ? active_html|raw }} href="{{ admin_route('/accounts/config') }}">
-            <span>{{ 'PLUGIN_ADMIN.ACL'|tu }}</span>
+            <span>{{ 'PLUGIN_ADMIN.CONFIGURATION'|tu }}</span>
         </a>
     </div>
 </div>
