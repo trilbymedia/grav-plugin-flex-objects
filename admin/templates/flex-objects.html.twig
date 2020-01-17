@@ -1,5 +1,17 @@
 {% set type = directory.config('admin.template') ?? target %}
-{% set template = grav.route.queryParam('preview') ? 'preview' : (action == 'add') ? 'edit' : (action == 'delete') ? 'list' : action ?: task ?: 'types' %}
+{% set template -%}
+    {%- if key and grav.route.queryParam('preview') is not null -%}
+        preview
+    {%- elseif grav.route.gravParam('') is not null -%}
+        {{- grav.route.gravParam('') -}}
+    {%- elseif action == 'add' -%}
+        edit
+    {%- elseif action == 'delete' -%}
+        list
+    {%- else -%}
+        {{- action ?: task ?: 'types' -}}
+    {%- endif -%}
+{%- endset %}
 
 {% set separator = config.system.param_sep %}
 {% set route = grav.route.withExtension('') %}

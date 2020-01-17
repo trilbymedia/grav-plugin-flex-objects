@@ -273,7 +273,7 @@ class DataTable implements \JsonSerializable
     {
         $grav = Grav::instance();
         $type = $object->getFlexType();
-        $template = $this->twig->resolveTemplate(["flex-objects/types/{$type}/list_actions.html.twig", 'flex-objects/types/default/list_actions.html.twig']);
+        $template = $this->twig->resolveTemplate(["flex-objects/types/{$type}/list/list_actions.html.twig", 'flex-objects/types/default/list/list_actions.html.twig']);
 
         return $this->twig->load($template)->render([
             'object' => $object,
