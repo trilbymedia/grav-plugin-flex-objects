@@ -10,25 +10,157 @@ use Grav\Common\Grav;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
+use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexCommonInterface;
+use Grav\Framework\Flex\Interfaces\FlexInterface;
+use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Plugin\FlexObjects\Table\DataTable;
 
 /**
  * Class Flex
  * @package Grav\Plugin\FlexObjects
  */
-class Flex extends \Grav\Framework\Flex\Flex
+class Flex implements FlexInterface
 {
+    /** @var FlexInterface */
+    protected $flex;
     /** @var array */
     protected $adminRoutes;
+    /** @var array */
     protected $adminMenu;
+    /** @var array */
     protected $managed;
 
-    public function __construct(array $types, array $config)
+    /**
+     * Flex constructor.
+     * @param FlexInterface $flex
+     * @param array $types
+     */
+    public function __construct(FlexInterface $flex, array $types)
     {
-        parent::__construct($types, $config);
+        $this->flex = $flex;
+        $this->managed = [];
 
-        $this->managed = array_keys($types);
+        foreach ($types as $blueprint) {
+            $type = basename((string)$blueprint, '.yaml');
+            if ($type) {
+                $this->managed[] = $type;
+            }
+        }
+    }
+
+    /**
+     * @param string $type
+     * @param string $blueprint
+     * @param array  $config
+     * @return $this
+     */
+    public function addDirectoryType(string $type, string $blueprint, array $config = [])
+    {
+        $this->flex->addDirectoryType($type, $blueprint, $config);
+
+        return $this;
+    }
+
+    /**
+     * @param FlexDirectory $directory
+     * @return $this
+     */
+    public function addDirectory(FlexDirectory $directory)
+    {
+        $this->flex->addDirectory($directory);
+
+        return $this;
+    }
+
+    /**
+     * @param string $type
+     * @return bool
+     */
+    public function hasDirectory(string $type): bool
+    {
+        return $this->flex->hasDirectory($type);
+    }
+
+    /**
+     * @param array|string[]|null $types
+     * @param bool $keepMissing
+     * @return array<FlexDirectory|null>
+     */
+    public function getDirectories(array $types = null, bool $keepMissing = false): array
+    {
+        return $this->flex->getDirectories($types, $keepMissing);
+    }
+
+    /**
+     * @param string $type
+     * @return FlexDirectory|null
+     */
+    public function getDirectory(string $type): ?FlexDirectory
+    {
+        return $this->flex->getDirectory($type);
+    }
+
+    /**
+     * @param string $type
+     * @param array|null $keys
+     * @param string|null $keyField
+     * @return FlexCollectionInterface|null
+     */
+    public function getCollection(string $type, array $keys = null, string $keyField = null): ?FlexCollectionInterface
+    {
+        return $this->flex->getCollection($type, $keys, $keyField);
+    }
+
+    /**
+     * @param array $keys
+     * @param array $options            In addition to the options in getObjects(), following options can be passed:
+     *                                  collection_class:   Class to be used to create the collection. Defaults to ObjectCollection.
+     * @return FlexCollectionInterface
+     * @throws \RuntimeException
+     */
+    public function getMixedCollection(array $keys, array $options = []): FlexCollectionInterface
+    {
+        return $this->flex->getMixedCollection($keys, $options);
+    }
+
+    /**
+     * @param array $keys
+     * @param array $options    Following optional options can be passed:
+     *                          types:          List of allowed types.
+     *                          type:           Allowed type if types isn't defined, otherwise acts as default_type.
+     *                          default_type:   Set default type for objects given without type (only used if key_field isn't set).
+     *                          keep_missing:   Set to true if you want to return missing objects as null.
+     *                          key_field:      Key field which is used to match the objects.
+     * @return array
+     */
+    public function getObjects(array $keys, array $options = []): array
+    {
+        return $this->flex->getObjects($keys, $options);
+    }
+
+    /**
+     * @param string $key
+     * @param string|null $type
+     * @param string|null $keyField
+     * @return FlexObjectInterface|null
+     */
+    public function getObject(string $key, string $type = null, string $keyField = null): ?FlexObjectInterface
+    {
+        return $this->flex->getObject($keyField, $type, $keyField);
+    }
+
+    /**
+     * @return int
+     */
+    public function count(): int
+    {
+        return $this->flex->count();
+    }
+
+    public function isManaged(string $type): bool
+    {
+        return in_array($type, $this->managed, true);
     }
 
     /**
@@ -173,7 +305,7 @@ class Flex extends \Grav\Framework\Flex\Flex
             $p[] = $key . $separator . $val;
         }
 
-        $parts = array_filter($parts, function ($val) { return $val !== ''; });
+        $parts = array_filter($parts, static function ($val) { return $val !== ''; });
         $route = '/' . implode('/', $parts);
         $extension = $extension ? '.' . $extension : '';
 
@@ -190,7 +322,7 @@ class Flex extends \Grav\Framework\Flex\Flex
             /** @var FlexDirectory $directory */
             foreach ($this->getDirectories() as $directory) {
                 $config = $directory->getConfig('admin');
-                if (!empty($config['disabled'])) {
+                if (!$directory->isEnabled() || !empty($config['disabled'])) {
                     continue;
                 }
 
@@ -215,7 +347,11 @@ class Flex extends \Grav\Framework\Flex\Flex
             $count = 0;
 
             $directories = $this->getDirectories();
+            /** @var FlexDirectory $directory */
             foreach ($directories as $directory) {
+                if (!$directory->isEnabled() || !empty($config['disabled'])) {
+                    continue;
+                }
                 $type = $directory->getFlexType();
                 $items = $directory->getConfig('admin.menu') ?? [];
                 if ($items) {

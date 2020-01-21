@@ -7,9 +7,12 @@ use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Types;
 use Grav\Common\Plugin;
 use Grav\Common\User\Interfaces\UserInterface;
-use Grav\Events\RegisterPermissionsEvent;
+use Grav\Events\FlexRegisterEvent;
+use Grav\Events\PermissionsRegisterEvent;
+use Grav\Events\PluginsLoadedEvent;
 use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\Interfaces\FlexInterface;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
 use Grav\Plugin\FlexObjects\Admin\AdminController;
@@ -58,20 +61,25 @@ class FlexObjectsPlugin extends Plugin
         }
 
         return [
+            PluginsLoadedEvent::class => [
+                ['autoload', 100000],
+                ['initializeFlex', 10]
+            ],
+            PermissionsRegisterEvent::class => [
+                ['onRegisterPermissions', 100]
+            ],
+            FlexRegisterEvent::class => [
+                ['onRegisterFlex', 100]
+            ],
             'onCliInitialize' => [
                 ['autoload', 100000],
                 ['initializeFlex', 10]
             ],
             'onPluginsInitialized' => [
-                ['autoload', 100000],
                 ['onPluginsInitialized', 0],
-                ['initializeFlex', 10]
             ],
             'onFormRegisterTypes' => [
                 ['onFormRegisterTypes', 0]
-            ],
-            RegisterPermissionsEvent::class => [
-                ['onRegisterPermissions', 100]
             ],
         ];
     }
@@ -139,33 +147,42 @@ class FlexObjectsPlugin extends Plugin
 
     public function initializeFlex(): void
     {
-        $config = $this->config->get('plugins.flex-objects');
+        $config = $this->config->get('plugins.flex-objects.directories');
 
         // Add to DI container
         $this->grav['flex_objects'] = static function (Grav $grav) use ($config) {
-            $blueprints = $config['directories'] ?: [];
+            /** @var FlexInterface $flex */
+            $flex = $grav['flex'];
 
-            $list = [];
-            foreach ($blueprints as $blueprint) {
-                if ($blueprint) {
-                    $list[basename($blueprint, '.yaml')] = $blueprint;
-                }
-            }
+            $flexObjects = new Flex($flex, $config);
 
-            $flex = new Flex($list, $config);
+            // This event is for backwards compatibility only, do not use it!
+            $grav->fireEvent('onFlexInit', new Event(['flex' => $flexObjects]));
 
-            $grav->fireEvent('onFlexInit', new Event(['flex' => $flex]));
-
-            return $flex;
+            return $flexObjects;
         };
+    }
+
+    public function onRegisterFlex(FlexRegisterEvent $event): void
+    {
+        $flex = $event->flex;
+
+        $types = (array)$this->config->get('plugins.flex-objects.directories', []);
+        foreach ($types as $blueprint) {
+            $type = basename((string)$blueprint, '.yaml');
+            $directory = $flex->getDirectory($type);
+            if ($type && (!$directory || !$directory->isEnabled())) {
+                $flex->addDirectoryType($type, $blueprint);
+            }
+        }
     }
 
     /**
      * Initial stab at registering permissions (WIP)
      *
-     * @param RegisterPermissionsEvent $event
+     * @param PermissionsRegisterEvent $event
      */
-    public function onRegisterPermissions(RegisterPermissionsEvent $event): void
+    public function onRegisterPermissions(PermissionsRegisterEvent $event): void
     {
         /** @var Flex $flex */
         $flex = $this->grav['flex_objects'];

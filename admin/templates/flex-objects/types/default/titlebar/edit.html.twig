@@ -25,7 +25,7 @@
         {# SAVE #}
         {% if allowed and can_save %}
         {% block save_button %}
-            {% include ['flex-objects/types/' ~ target ~ '/buttons/save.html.twig', 'flex-objects/types/default/buttons/save.html.twig'] %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/save.html.twig', 'flex-objects/types/default/buttons/save.html.twig'] with {task: 'save'} %}
         {% endblock save_button %}
         {% endif %}
     </div>
