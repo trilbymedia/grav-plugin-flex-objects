@@ -8,18 +8,6 @@ admin_list:
     by: updated_timestamp
     dir: desc
 
-object:
-  cache:
-    index:
-      enabled: true
-      timeout: 60
-    object:
-      enabled: true
-      timeout: 60
-    render:
-      enabled: true
-      timeout: 60
-
 directories:
   - 'blueprints://flex-objects/grav-pages.yaml'
   - 'blueprints://flex-objects/grav-accounts.yaml'

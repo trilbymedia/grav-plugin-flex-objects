@@ -8,6 +8,8 @@
     * Added Flex type `Configuration`
     * Enabled `Pages`, `Accounts` and `User Groups` by default
     * Stop using deprecated `onAdminRegisterPermissions` event
+1. [](#improved)
+    * Flex caching settings were moved into Grav core
 1. [](#bugfix)
     * Fixed empty directory entries in plugin configuration
     * Fixed plugin configuration displaying directories outside of the plugin
