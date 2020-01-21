@@ -10,6 +10,7 @@
     * Stop using deprecated `onAdminRegisterPermissions` event
 1. [](#improved)
     * Flex caching settings were moved into Grav core
+    * Flex Objects plugin now better integrates to Grav core
 1. [](#bugfix)
     * Fixed empty directory entries in plugin configuration
     * Fixed plugin configuration displaying directories outside of the plugin

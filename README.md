@@ -271,7 +271,7 @@ Right now there are a few limitations:
 
 # Tricks and tips
 
-* You can enable and disable directories from **Plugins** > **Flex-Objects**
+* You can enable and disable directories from **Plugins** > **Flex Objects**
   * New Flex Directories can be registered by simply creating a new blueprint file in `user/blueprints/flex-objects` folder
   * You can also add types from your plugins by hooking into `onFlexInit` event (see `AccountsServiceProvider` in Grav)
 * To properly create your own custom types, you need at least the object blueprint and the template files for collections and objects
