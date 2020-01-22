@@ -106,7 +106,7 @@
                 {% for lang_code in object_languages %}
                     {% if lang_code != object_language %}
                     <li>
-                        <a href="{{ admin_route(grav.route.getRoute(1), lang_code) }}">{{ all_languages[lang_code] ?? lang_code }}</a>
+                        <a href="{{ admin_route(route.getRoute(1), lang_code) }}">{{ all_languages[lang_code] ?? lang_code }}</a>
                     </li>
                     {% endif %}
                 {% endfor %}

@@ -1,9 +1,11 @@
+{% set user = admin.user %}
+{% set route = controller.route %}
 {% set type = directory.config('admin.template') ?? target %}
 {% set template -%}
-    {%- if key and grav.route.queryParam('preview') is not null -%}
+    {%- if key and route.queryParam('preview') is not null -%}
         preview
-    {%- elseif grav.route.gravParam('') is not null -%}
-        {{- grav.route.gravParam('') -}}
+    {%- elseif route.gravParam('') is not null -%}
+        {{- route.gravParam('') -}}
     {%- elseif action == 'add' -%}
         edit
     {%- elseif action == 'delete' -%}
@@ -14,7 +16,6 @@
 {%- endset %}
 
 {% set separator = config.system.param_sep %}
-{% set route = grav.route.withExtension('') %}
 
 {% extends target ? [
         'flex-objects/types/' ~ type ~ '/' ~ template ~ '.html.twig',

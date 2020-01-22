@@ -2,7 +2,6 @@
 {% use 'flex-objects/types/default/titlebar/types.html.twig' %}
 
 {% set flex = grav['flex_objects'] %}
-{% set route = grav.route.withExtension('') %}
 
 {# These variables can be overridden from the main template file #}
 {% set back_route = back_route ?? ('/' ~ route.getRoute(1, -1)) %}

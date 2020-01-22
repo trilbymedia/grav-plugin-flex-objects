@@ -54,7 +54,7 @@ class AdminController
     /** @var string */
     public $task;
 
-    /** @var string */
+    /** @var Route|null */
     public $route;
 
     /** @var array */
@@ -662,6 +662,50 @@ class AdminController
         return true;
     }
 
+    public function taskConfigure()
+    {
+        try {
+            $grav = Grav::instance();
+
+            /** @var ServerRequestInterface $request */
+            $request = $grav['request'];
+
+            /** @var FlexForm $form */
+            $form = $this->getDirectoryForm();
+            $form->handleRequest($request);
+            $error = $form->getError();
+            $errors = $form->getErrors();
+            if ($errors) {
+                if ($error) {
+                    $this->admin->setMessage($error, 'error');
+                }
+
+                foreach ($errors as $field => $list) {
+                    foreach ((array)$list as $message) {
+                        $this->admin->setMessage($message, 'error');
+                    }
+                }
+                throw new \RuntimeException('Form validation failed, please check your input');
+            }
+            if ($error) {
+                throw new \RuntimeException($error);
+            }
+
+            $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+
+            if (!$this->redirect) {
+                $this->referrerRoute = $this->currentRoute;
+
+                $this->setRedirect($this->referrerRoute->toString(true));
+            }
+        } catch (\RuntimeException $e) {
+            $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
+            $this->setRedirect($this->referrerRoute->toString(true), 302);
+        }
+
+        return true;
+    }
+
     public function taskMediaList()
     {
         try {
@@ -782,6 +826,11 @@ class AdminController
                 return;
             }
 
+            /** @var Uri $uri */
+            $uri = $this->grav['uri'];
+            $routeObject = $uri::getCurrentRoute();
+            $routeObject->withExtension('');
+
             $flex = $this->getFlex();
             $directories = $flex->getDirectories();
 
@@ -852,9 +901,6 @@ class AdminController
                 $id = array_shift($array) ?: null;
             }
 
-            /** @var Uri $uri */
-            $uri = $this->grav['uri'];
-
             // Post
             $post = $_POST ?? [];
             if (isset($post['data'])) {
@@ -875,6 +921,7 @@ class AdminController
             $this->action = $this->post['action'] ?? $uri->param('action');
             $this->active = true;
             $this->currentRoute = $uri::getCurrentRoute();
+            $this->route = $routeObject;
             $referrer = $uri->referrer();
             $this->referrerRoute = $referrer ? RouteFactory::createFromString($referrer) : $this->currentRoute;
         }
@@ -1009,6 +1056,35 @@ class AdminController
         ];
 
         return $object->getForm($name, $options);
+    }
+
+    public function getDirectoryForm(FlexDirectory $directory = null): FlexFormInterface
+    {
+        $directory = $directory ?? $this->getDirectory();
+        if (!$directory) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $formName = $this->post['__form-name__'] ?? '';
+        $name = '';
+        $uniqueId = null;
+
+        // Get the form name. This defines the blueprint which is being used.
+        if (strpos($formName, '-')) {
+            $parts = explode('-', $formName);
+            $prefix = $parts[0] ?? '';
+            $type = $parts[1] ?? '';
+            if ($prefix === 'flex_conf' && $type === $directory->getFlexType()) {
+                $name = $parts[2] ?? '';
+                $uniqueId = $this->post['__unique_form_id__'] ?? null;
+            }
+        }
+
+        $options = [
+            'unique_id' => $uniqueId,
+        ];
+
+        return $directory->getDirectoryForm($name, $options);
     }
 
     /**

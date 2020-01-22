@@ -1,23 +1,19 @@
 {% set active_html = 'class="active"' %}
+{% set is_configure = route.gravParam('') is same as('configure') %}
 
 <div class="form-tabs">
     <div class="tabs-nav">
-        {% set current = flex.directory('grav-accounts') %}
+        {% for name,title in {'grav-accounts': 'PLUGIN_ADMIN.USERS', 'grav-user-groups': 'PLUGIN_ADMIN.GROUPS'} %}
+        {% set current = flex.directory(name) %}
         {% if current and current.isAuthorized('list') %}
-        {% set active = nav_route|starts_with(flex.adminRoute(current)|trim('/') ~ '/') %}
+        {% set active = not is_configure and nav_route|starts_with(flex.adminRoute(current)|trim('/') ~ '/') %}
         <a {{active ? active_html|raw }} href="{{ admin_route(flex.adminRoute(current)) }}">
-            <span>{{ 'PLUGIN_ADMIN.USERS'|tu }}</span>
+            <span>{{ title|tu }}</span>
         </a>
         {% endif %}
-        {% set current = flex.directory('grav-user-groups') %}
-        {% if current and current.isAuthorized('list') %}
-        {% set active = nav_route|starts_with(flex.adminRoute(current)|trim('/') ~ '/') %}
-        <a {{active ? active_html|raw }} href="{{ admin_route(flex.adminRoute(current)) }}">
-            <span>{{ 'PLUGIN_ADMIN.GROUPS'|tu }}</span>
-        </a>
-        {% endif %}
-        {% set active = nav_route|starts_with('/accounts/config'|trim('/') ~ '/') %}
-        <a {{active ? active_html|raw }} href="{{ admin_route('/accounts/config') }}">
+        {% endfor %}
+
+        <a {{is_configure ? active_html|raw }} href="{{ admin_route('/accounts/configure') }}">
             <span>{{ 'PLUGIN_ADMIN.CONFIGURATION'|tu }}</span>
         </a>
     </div>

@@ -5,8 +5,6 @@
 {% set form = form ?? object.form %}
 {% set object = form.object %}
 
-{% set route = grav.route.withExtension('') %}
-
 {# Allowed actions #}
 {% set can_preview = can_preview ?? (object.exists and directory.config('admin.preview.enabled', false)) %}
 {% set can_save = can_save ?? (object.exists ? object.isAuthorized('update') : directory.isAuthorized('create')) %}
@@ -73,7 +71,7 @@
                     {% block topbar %}{% endblock %}
                 </div>
                 {% block edit %}
-                    {% include 'partials/blueprints.html.twig' with { form: form, context: object, data: object, blueprints: blueprint } %}
+                    {% include 'partials/blueprints.html.twig' with { form: form, context: object, data: object } %}
                 {% endblock %}
             </div>
         </div>

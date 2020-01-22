@@ -1,8 +1,6 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/types/default/titlebar/list.html.twig' %}
 
-{% set route = grav.route.withExtension('') %}
-
 {# Allowed actions #}
 {% set can_export = can_export ?? directory.config('admin.export') %}
 {% set can_create = can_create ?? directory.isAuthorized('create') %}
@@ -39,7 +37,7 @@
     {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
     {% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
     {% set back_url = admin_route(back_route) ?: (base_url ~ back_route) %}
-    {% set configure_url = configure_route.toString() %}
+    {% set configure_url = directory.config('admin.configure.hidden', false) is not same as(true) ? configure_route.toString() %}
 
     {% set fields = table.getColumns() %}
     {% set fields_count = fields ? count(fields) : 0 %}

@@ -1,5 +1,6 @@
+{% set task = task ?? 'save' %}
 <div class="button-group">
-    <button class="button success" type="submit" name="task" value="save" lang="{{ language }}" form="blueprints">
+    <button class="button success" type="submit" name="task" value="{{ task }}" lang="{{ language }}" form="blueprints">
         <i class="fa fa-check"></i> {{ "PLUGIN_ADMIN.SAVE"|tu }}
     </button>
     {% if can_translate %}
