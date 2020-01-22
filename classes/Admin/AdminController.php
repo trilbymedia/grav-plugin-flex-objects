@@ -839,22 +839,26 @@ class AdminController
             /** @var FlexDirectory $directory */
             foreach ($directories as $directory) {
                 // Alias under flex-objects (always exists, but can be redirected).
-                $routes['/flex-objects/' . $directory->getFlexType() . '/'] = $directory;
+                $routes['/flex-objects/' . $directory->getFlexType() . '/'] = [$directory, true];
 
                 $config = $directory->getConfig('admin');
                 $route = $config['route'] ?? $config['menu']['list']['route'] ?? null;
                 if ($route) {
-                    $routes[$route . '/'] = $directory;
+                    $routes[$route . '/'] = [$directory, true];
                 }
-                $aliases = (array)($config['redirect_from'] ?? null);
-                foreach ($aliases as $alias) {
-                    $routes[$alias . '/'] = $directory;
+                $redirects = (array)($config['redirect_from'] ?? null);
+                foreach ($redirects as $alias) {
+                    $routes[$alias . '/'] = [$directory, false];
+                }
+                $aliases = (array)($config['aliases'] ?? null);
+                foreach ($aliases as $name => $alias) {
+                    $routes[$alias . '/'] = [$directory, $name];
                 }
             }
 
             // Match route to the flex directory.
             $path = '/' . ($target ? $location . '/' . $target : $location) . '/';
-            $directory = $routes[$path] ?? null;
+            [$directory, $action] = $routes[$path] ?? [null, null];
             if ($directory)  {
                 $location = trim($path, '/');
                 $target = '';
@@ -862,7 +866,7 @@ class AdminController
                 krsort($routes);
                 foreach ($routes as $route => $test) {
                     if (strpos($path, $route) === 0) {
-                        $directory = $test;
+                        [$directory, $action] = $test;
                         $location = trim($route, '/');
                         $target = trim(substr($path, strlen($route)), '/');
                         break;
@@ -876,7 +880,7 @@ class AdminController
                 // Redirect aliases.
                 $config = $directory->getConfig('admin');
                 $route = trim($config['route'] ?? $config['menu']['list']['route'] ?? null, '/');
-                if ($route && $location !== $route) {
+                if ($route && $action === false) {
                     // If directory route starts with alias and path continues, stop.
                     if ($target && strpos($route, $location) === 0) {
                         // We are not in a directory.
@@ -885,6 +889,8 @@ class AdminController
                     $redirect = '/' . $route . ($target ? '/' . $target : '');
                     $this->setRedirect($redirect, 302);
                     $this->redirect();
+                } elseif (is_string($action)) {
+                    $routeObject = $routeObject->withGravParam('', $action);
                 }
 
                 $this->menu = $config['menu']['list'] ?? null;

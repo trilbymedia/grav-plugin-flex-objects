@@ -6,6 +6,7 @@
     * Added support for new improved ACL
     * Added support for custom layouts by adding `/:layout_name` in url
     * Added support for Flex Directory specific Configuration
+    * Added support for action aliases (`/accounts/configure` instead of `/accounts/users/:configre`)
     * Added Flex type `Configuration`
     * Enabled `Pages`, `Accounts` and `User Groups` by default
     * Stop using deprecated `onAdminRegisterPermissions` event
