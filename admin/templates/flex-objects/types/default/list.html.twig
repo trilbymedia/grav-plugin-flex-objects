@@ -59,7 +59,8 @@
 
 {% block content_top %}
 {% if directory %}
-    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(directory.storageFolder())|trim('/') }}</b></div>
+    {% set save_location = directory.getStorageFolder() %}
+    <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }}</b></div>
 {% endif %}
 {% endblock %}
 

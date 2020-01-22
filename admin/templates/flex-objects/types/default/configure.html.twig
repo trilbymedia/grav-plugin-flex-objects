@@ -34,9 +34,8 @@
 
 {% block content_top %}
     {% if allowed and user.authorize('admin.super') %}
-        {% if directory %}
-            <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url('TODO SAVE LOCATION')|trim('/') }}</b></div>
-        {% endif %}
+        {% set save_location = directory.getDirectoryConfigUri(name) %}
+        <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }}</b></div>
     {% endif %}
 {% endblock %}
 

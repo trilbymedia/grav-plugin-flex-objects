@@ -59,7 +59,8 @@
 {% block content_top %}
     {% if allowed and user.authorize('admin.super') %}
         {% if directory and object or action == 'add' %}
-            <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(object.storageFolder ?? directory.getStorageFolder())|trim('/') }} {{ not object.exists ? '[NEW]' }}</b></div>
+            {% set save_location = object.getStorageFolder() ?? directory.getStorageFolder() %}
+            <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }} {{ not object.exists ? '[NEW]' }}</b></div>
         {% endif %}
     {% endif %}
 {% endblock %}
