@@ -66,6 +66,9 @@ class AdminController
     /** @var array */
     public $menu;
 
+    /** @var array */
+    protected $adminRoutes;
+
     /** @var Uri */
     protected $uri;
 
@@ -831,30 +834,7 @@ class AdminController
             $routeObject = $uri::getCurrentRoute();
             $routeObject->withExtension('');
 
-            $flex = $this->getFlex();
-            $directories = $flex->getDirectories();
-
-            // Build all routes.
-            $routes = [];
-            /** @var FlexDirectory $directory */
-            foreach ($directories as $directory) {
-                // Alias under flex-objects (always exists, but can be redirected).
-                $routes['/flex-objects/' . $directory->getFlexType() . '/'] = [$directory, true];
-
-                $config = $directory->getConfig('admin');
-                $route = $config['route'] ?? $config['menu']['list']['route'] ?? null;
-                if ($route) {
-                    $routes[$route . '/'] = [$directory, true];
-                }
-                $redirects = (array)($config['redirect_from'] ?? null);
-                foreach ($redirects as $alias) {
-                    $routes[$alias . '/'] = [$directory, false];
-                }
-                $aliases = (array)($config['aliases'] ?? null);
-                foreach ($aliases as $name => $alias) {
-                    $routes[$alias . '/'] = [$directory, $name];
-                }
-            }
+            $routes = $this->getAdminRoutes();
 
             // Match route to the flex directory.
             $path = '/' . ($target ? $location . '/' . $target : $location) . '/';
@@ -1237,6 +1217,45 @@ class AdminController
     public function redirect()
     {
         $this->admin->redirect($this->redirect, $this->redirectCode);
+    }
+
+    /**
+     * @return array
+     */
+    public function getAdminRoutes(): array
+    {
+        if (null === $this->adminRoutes) {
+            $routes = [];
+            /** @var FlexDirectory $directory */
+            foreach ($this->getFlex()->getDirectories() as $directory) {
+                $config = $directory->getConfig('admin');
+                if (!$directory->isEnabled() || !empty($config['disabled'])) {
+                    continue;
+                }
+
+                // Alias under flex-objects (always exists, but can be redirected).
+                $routes["/flex-objects/{$directory->getFlexType()}/"] = [$directory, true];
+
+                $route = $config['route'] ?? $config['menu']['list']['route'] ?? null;
+                if ($route) {
+                    $routes[$route . '/'] = [$directory, true];
+                }
+
+                $redirects = (array)($config['redirect_from'] ?? null);
+                foreach ($redirects as $redirect) {
+                    $routes[$redirect . '/'] = [$directory, false];
+                }
+
+                $aliases = (array)($config['aliases'] ?? null);
+                foreach ($aliases as $name => $alias) {
+                    $routes[$alias . '/'] = [$directory, $name];
+                }
+            }
+
+            $this->adminRoutes = $routes;
+        }
+
+        return $this->adminRoutes;
     }
 
     /**
