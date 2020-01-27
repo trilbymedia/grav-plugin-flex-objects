@@ -1,23 +1,25 @@
 {% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
+{% set can_read = object.isAuthorized('read') %}
+{% set can_update = object.isAuthorized('update') %}
+{% set can_delete = object.isAuthorized('delete') %}
 
-{% if object.isAuthorized('read') %}
-    {% if object.getRoute() %}
+{% if can_read and object.getRoute() %}
         <a href="{{ route.withAddedPath(object.getKey()).withoutParams().withQueryParam('preview', 1).getUri() }}" title="{{ "PLUGIN_ADMIN.PREVIEW"|tu }}" class="preview-action">
             <i class="fa fa-eye"></i>
         </a>
     {% endif %}
 
-    {% if object.isAuthorized('update') %}
+{% if can_update %}
     <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="Edit {{ object_title }}" class="edit-action">
         <i class="fa fa-pencil"></i>
     </a>
-    {% else %}
-        <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="View {{ object_title }}" class="edit-action">
-            <i class="fa fa-search"></i>
-        </a>
-    {% endif %}
+{% elseif can_read %}
+    <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="View {{ object_title }}" class="edit-action">
+        <i class="fa fa-search"></i>
+    </a>
 {% endif %}
-{% if object.isAuthorized('delete') %}
+
+{% if can_delete %}
     <a href="#delete"
        class="page-delete delete-action"
        title="Delete {{ object_title }}"
