@@ -545,8 +545,15 @@ class AdminController
 
             // Base64 decode the route
             $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
-            $data['filters'] = ($data['filters'] ?? []) + ['type' => ['root', 'dir']];
+            $data['filters'] = ($data['filters'] ?? []) + ['type' => ['dir']];
             $data['lang'] = $this->getLanguage();
+
+            // Display root if permitted.
+            $action = $directory->getConfig('admin.configure.authorize', 'admin.super');
+            $user = $this->admin->user;
+            if ($user->authorize($action)) {
+                $data['filters']['type'][] = 'root';
+            }
 
             $initial = $data['initial'] ?? null;
             if ($initial) {
