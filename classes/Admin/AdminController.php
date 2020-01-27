@@ -838,19 +838,22 @@ class AdminController
 
             // Match route to the flex directory.
             $path = '/' . ($target ? $location . '/' . $target : $location) . '/';
-            [$directory, $action] = $routes[$path] ?? [null, null];
-            if ($directory)  {
+            $test = $routes[$path] ?? null;
+            $directory = null;
+            if ($test)  {
+                $directory = $test['directory'];
                 $location = trim($path, '/');
                 $target = '';
             } else {
                 krsort($routes);
                 foreach ($routes as $route => $test) {
                     if (strpos($path, $route) === 0) {
-                        [$directory, $action] = $test;
+                        $directory = $test['directory'];
                         $location = trim($route, '/');
                         $target = trim(substr($path, strlen($route)), '/');
                         break;
                     }
+                    $test = null;
                 }
             }
 
@@ -858,9 +861,8 @@ class AdminController
 
             if ($directory) {
                 // Redirect aliases.
-                $config = $directory->getConfig('admin');
-                $route = trim($config['route'] ?? $config['menu']['list']['route'] ?? null, '/');
-                if ($route && $action === false) {
+                if (isset($test['redirect'])) {
+                    $route = $test['redirect'];
                     // If directory route starts with alias and path continues, stop.
                     if ($target && strpos($route, $location) === 0) {
                         // We are not in a directory.
@@ -869,10 +871,11 @@ class AdminController
                     $redirect = '/' . $route . ($target ? '/' . $target : '');
                     $this->setRedirect($redirect, 302);
                     $this->redirect();
-                } elseif (is_string($action)) {
-                    $routeObject = $routeObject->withGravParam('', $action);
+                } elseif (isset($test['action'])) {
+                    $routeObject = $routeObject->withGravParam('', $test['action']);
                 }
 
+                $config = $directory->getConfig('admin');
                 $this->menu = $config['menu']['list'] ?? null;
 
                 $id = $target;
@@ -1234,21 +1237,31 @@ class AdminController
                 }
 
                 // Alias under flex-objects (always exists, but can be redirected).
-                $routes["/flex-objects/{$directory->getFlexType()}/"] = [$directory, true];
+                $routes["/flex-objects/{$directory->getFlexType()}/"] = ['directory' => $directory];
 
-                $route = $config['route'] ?? $config['menu']['list']['route'] ?? null;
+                $route = $config['router']['path'] ?? $config['menu']['list']['route'] ?? null;
                 if ($route) {
-                    $routes[$route . '/'] = [$directory, true];
+                    $routes[$route . '/'] = ['directory' => $directory];
                 }
 
-                $redirects = (array)($config['redirect_from'] ?? null);
-                foreach ($redirects as $redirect) {
-                    $routes[$redirect . '/'] = [$directory, false];
+                $redirects = (array)($config['router']['redirects'] ?? null);
+                foreach ($redirects as $redirectFrom => $redirectTo) {
+                    $redirectFrom .= '/';
+                    if (!isset($routes[$redirectFrom])) {
+                        $routes[$redirectFrom] = ['directory' => $directory, 'redirect' => $redirectTo];
+                    }
                 }
 
-                $aliases = (array)($config['aliases'] ?? null);
-                foreach ($aliases as $name => $alias) {
-                    $routes[$alias . '/'] = [$directory, $name];
+                $actions = (array)($config['router']['actions'] ?? null);
+                foreach ($actions as $name => $action) {
+                    if (is_array($action)) {
+                        $path = $action['path'] ?? null;
+                    } else {
+                        $path = $action;
+                    }
+                    if ($path !== null) {
+                        $routes[$path . '/'] = ['directory' => $directory, 'action' => $name];
+                    }
                 }
             }
 

@@ -327,7 +327,7 @@ class Flex implements FlexInterface
                 }
 
                 // Resolve route.
-                $route = $config['route']
+                $route = $config['router']['path']
                     ?? $config['menu']['list']['route']
                     ?? "/flex-objects/{$directory->getFlexType()}";
 

@@ -6,6 +6,10 @@ type: flex-objects
 config:
   # Administration Configuration
   admin:
+    # Admin router (optional)
+    router:
+      path: '/contacts'
+
     # Admin menu (optional)
     menu:
       list:
@@ -13,12 +17,19 @@ config:
         title: Contacts
         icon: fa-address-card-o
         # Authorization to collection admin
-        authorize: ['admin.pages', 'admin.super']
+        authorize: ['admin.contacts.list', 'admin.super']
         # Priority -10 .. 10 (highest goes up)
         priority: 2
 
     # Admin template type / folder
     template: default
+
+    # Permissions
+    permissions:
+      # Primary permissions
+      admin.contacts:
+        type: crudpl
+        label: Contacts
 
     # List view
     list:

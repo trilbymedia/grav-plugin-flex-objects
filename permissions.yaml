@@ -2,15 +2,6 @@ actions:
   admin.flex-object:
     type: crudl
     label: Flex Objects
-  admin.pages:
-    type: crudpl
-    label: Pages
-  admin.users:
-    type: crudl
-    label: User Accounts
-  admin.user_groups:
-    type: crudl
-    label: User Groups
 
 types:
   crudpl:
