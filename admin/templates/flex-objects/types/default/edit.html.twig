@@ -6,6 +6,7 @@
 {% set object = form.object %}
 
 {# Allowed actions #}
+{% set can_list = can_list ?? directory.isAuthorized('list') %}
 {% set can_preview = can_preview ?? (object.exists and directory.config('admin.preview.enabled', false)) %}
 {% set can_save = can_save ?? (object.exists ? object.isAuthorized('update') : directory.isAuthorized('create')) %}
 {% set can_delete = can_delete ?? (object.exists and object.isAuthorized('delete')) %}
@@ -34,8 +35,9 @@
 {% endif %}
 
 {# These variables can be overridden from the main template file #}
-{% set allowed = allowed ?? (directory and (object.exists or action == 'add')) %}
-{% set back_route = back_route ?? ('/' ~ (action != 'edit' and not key ? route.getRoute(1) : route.getRoute(1, -1))) %}
+{% set allowed = allowed ?? (directory and ((
+    object.exists and object.isAuthorized('read')) or (action == 'add' and object.isAuthorized('create')))) %}
+{% set back_route = back_route ?? ('/' ~ (action != 'edit' and not key ? route.getRoute(1, not can_list ? -1 : null) : route.getRoute(1, not can_list ? -2 : -1))) %}
 {% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
 {% set title -%}
     {%- set title_config = directory.config('admin.edit.title') -%}

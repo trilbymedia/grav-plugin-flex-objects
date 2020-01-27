@@ -1,6 +1,7 @@
 {% set active_html = 'class="active"' %}
 {% set is_configure = route.gravParam('') is same as('configure') %}
 
+{% if allowed %}
 <div class="form-tabs">
     <div class="tabs-nav">
         {% for name,title in {'grav-accounts': 'PLUGIN_ADMIN.USERS', 'grav-user-groups': 'PLUGIN_ADMIN.GROUPS'} %}
@@ -13,8 +14,11 @@
         {% endif %}
         {% endfor %}
 
+        {% if user.authorize(directory.config('admin.configure.authorize', 'admin.super')) %}
         <a {{is_configure ? active_html|raw }} href="{{ admin_route('/accounts/configure') }}">
             <span>{{ 'PLUGIN_ADMIN.CONFIGURATION'|tu }}</span>
         </a>
+        {% endif %}
     </div>
 </div>
+{% endif %}

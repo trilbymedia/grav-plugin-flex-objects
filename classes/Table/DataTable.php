@@ -252,7 +252,7 @@ class DataTable implements \JsonSerializable
         $type = $column['field']['type'] ?? 'text';
         $hasLink = $column['link'] ?? null;
         $link = null;
-        if ($hasLink) {
+        if ($hasLink && $object->isAuthorized('read')) {
             $route = $grav['route']->withExtension('');
             $link = $route->withAddedPath($object->getKey())->withoutParams()->getUri();
         }

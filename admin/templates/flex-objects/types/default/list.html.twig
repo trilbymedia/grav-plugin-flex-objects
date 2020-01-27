@@ -22,6 +22,7 @@
 {% endif %}
 
 {# These variables can be overridden from the main template file #}
+{% set allowed = allowed ?? (directory and directory.isAuthorized('list', user)) %}
 {% set back_route = back_route ?? ('/' ~ route.getRoute(1, -1)) %}
 {% set configure_route = configure_route ?? route.withGravParam('', 'configure') %}
 
@@ -56,14 +57,14 @@
 {% endblock body %}
 
 {% block content_top %}
-{% if directory %}
+{% if allowed and user.authorize('admin.super') %}
     {% set save_location = directory.getStorageFolder() %}
     <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }}</b></div>
 {% endif %}
 {% endblock %}
 
 {% block content %}
-{% if directory %}
+{% if allowed %}
     {% block content_list %}
     {% include ['flex-objects/types/' ~ target ~ '/list/list.html.twig', 'flex-objects/types/default/list/list.html.twig'] %}
     {% endblock %}

@@ -64,9 +64,6 @@ class AdminController
     public $data;
 
     /** @var array */
-    public $menu;
-
-    /** @var array */
     protected $adminRoutes;
 
     /** @var Uri */
@@ -675,6 +672,13 @@ class AdminController
     public function taskConfigure()
     {
         try {
+            $user = $this->admin->user;
+            $directory = $this->getDirectory();
+            $config = $directory->getConfig('admin.configure.authorize', 'admin.super');
+            if (!$user->authorize($config)) {
+                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' configure.', 403);
+            }
+
             $grav = Grav::instance();
 
             /** @var ServerRequestInterface $request */
@@ -881,9 +885,6 @@ class AdminController
                 } elseif (isset($test['action'])) {
                     $routeObject = $routeObject->withGravParam('', $test['action']);
                 }
-
-                $config = $directory->getConfig('admin');
-                $this->menu = $config['menu']['list'] ?? null;
 
                 $id = $target;
                 $target = $directory->getFlexType();

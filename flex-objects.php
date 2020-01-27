@@ -217,11 +217,8 @@ class FlexObjectsPlugin extends Plugin
             $page = $event['page'];
             $page->init(new \SplFileInfo(__DIR__ . '/admin/pages/flex-objects.md'));
             $page->slug($this->controller->getLocation());
-
-            $menu = $this->controller->menu;
-
             $header = $page->header();
-            $header->access = $menu['authorize'] ?? ['admin.flex-objects', 'admin.super'];
+            $header->access = ['admin.login'];
         }
     }
 

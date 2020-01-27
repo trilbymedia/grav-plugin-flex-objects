@@ -7,9 +7,15 @@
         </a>
     {% endif %}
 
+    {% if object.isAuthorized('update') %}
     <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="Edit {{ object_title }}" class="edit-action">
         <i class="fa fa-pencil"></i>
     </a>
+    {% else %}
+        <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="View {{ object_title }}" class="edit-action">
+            <i class="fa fa-search"></i>
+        </a>
+    {% endif %}
 {% endif %}
 {% if object.isAuthorized('delete') %}
     <a href="#delete"
