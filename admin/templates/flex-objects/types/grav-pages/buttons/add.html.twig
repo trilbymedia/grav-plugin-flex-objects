@@ -11,5 +11,10 @@
         {% if admin.modularTypes is not empty %}
         <li><a class="button" href="#module" data-remodal-target="module">{{ "PLUGIN_ADMIN.ADD_MODULE"|tu }}</a></li>
         {% endif %}
+        {% for key, add_modal in config.plugins.admin.add_modals %}
+            {% if add_modal.show_in|defined('bar') == 'dropdown' %}
+                <li><a class="button {{ add_modal.link_classes }}" href="#modal-add_modal-{{ key }}" data-remodal-target="modal-add_modal-{{ key }}">{{ add_modal.label|tu }}</a></li>
+            {% endif %}
+        {% endfor %}
     </ul>
 </div>

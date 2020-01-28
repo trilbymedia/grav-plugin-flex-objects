@@ -7,6 +7,12 @@
 {% endblock back_button %}
 
 {% block create_button %}
+    {% for key, add_modal in config.plugins.admin.add_modals %}
+        {% if add_modal.show_in|default('bar') == 'bar' %}
+            <a class="button {{ add_modal.link_classes }}" href="#modal-add_modal-{{ key }}" data-remodal-target="modal-add_modal-{{ key }}"><i class="fa fa-plus"></i> {{ add_modal.label|tu }}</a>
+        {% endif %}
+    {% endfor %}
+
     {% include ['flex-objects/types/' ~ target ~ '/buttons/add.html.twig', 'flex-objects/types/grav-pages/buttons/add.html.twig'] %}
 {% endblock %}
 

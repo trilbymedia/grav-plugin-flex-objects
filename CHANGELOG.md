@@ -20,6 +20,7 @@
     * Fixed visible save button when in 404 page
     * Fixed missing save location when file does not exist
     * Fixed multiple ACL related issues (no access, bad links, information leaks)
+    * Fixed Admin Panel Page list buttons not appearing in Flex Pages
 
 # v1.0.0-rc.3
 ## 01/02/2020

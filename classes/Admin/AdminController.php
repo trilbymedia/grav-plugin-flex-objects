@@ -365,19 +365,27 @@ class AdminController
 
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
-        $folder = $this->data['folder'] ?? 'undefined';
-        if (isset($this->data['title'])) {
+        $folder = $this->data['folder'] ?? '';
+        $title = $this->data['title'] ?? null;
+        if ($title) {
             $this->data['header']['title'] = $this->data['title'];
             unset($this->data['title']);
+        }
+        if (0 === strpos($folder, '@slugify-')) {
+            $folder = \Grav\Plugin\Admin\Utils::slug($this->data[substr($folder, 9)] ?? '');
+        }
+        if (!$folder) {
+            $folder = \Grav\Plugin\Admin\Utils::slug($title) ?: 'undefined';
         }
 
         if (isset($this->data['name']) && strpos($this->data['name'], 'modular/') === 0) {
             $this->data['header']['body_classes'] = 'modular';
             if ($folder[0] !== '_') {
                 $folder = '_' . $folder;
-                $this->data['folder'] = $folder;
             }
         }
+        $this->data['folder'] = $folder;
+
         unset($this->data['blueprint']);
         $key = trim("{$route}/{$folder}", '/');
 
