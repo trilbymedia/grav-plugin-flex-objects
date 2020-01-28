@@ -22,8 +22,8 @@
 {% endif %}
 
 {# These variables can be overridden from the main template file #}
-{% set allowed = allowed ?? (directory and directory.isAuthorized('list', user)) %}
-{% set back_route = back_route ?? ('/' ~ route.getRoute(1, -1)) %}
+{% set allowed = allowed ?? (directory and directory.isAuthorized('list', null, user)) %}
+{% set back_route = back_route ?? route.getRoute(1, -1) %}
 {% set configure_route = configure_route ?? route.withGravParam('', 'configure') %}
 
 {% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
@@ -37,7 +37,7 @@
     {% set collection = directory ? collection.isAuthorized('list') %}
     {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
     {% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
-    {% set back_url = admin_route(back_route) ?: (base_url ~ back_route) %}
+    {% set back_url = admin_route(back_route) %}
     {% set configure_url = directory.config('admin.configure.hidden', false) is not same as(true) ? configure_route.toString(true) %}
 
     {% set fields = table.getColumns() %}

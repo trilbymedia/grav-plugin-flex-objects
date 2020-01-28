@@ -8,7 +8,7 @@
 {% set configure_route = '/plugins/flex-objects' %}
 
 {% block body %}
-    {% set back_url = admin_route(back_route) ?: (base_url ~ back_route) %}
+    {% set back_url = admin_route(back_route) %}
     {% set configure_url = configure_route ? admin_route(configure_route) : null %}
 
     {{ parent() }}

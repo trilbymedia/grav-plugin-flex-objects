@@ -554,7 +554,7 @@ class AdminController
             $data['lang'] = $this->getLanguage();
 
             // Display root if permitted.
-            $action = $directory->getConfig('admin.configure.authorize', 'admin.super');
+            $action = $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
             $user = $this->admin->user;
             if ($user->authorize($action)) {
                 $data['filters']['type'][] = 'root';
@@ -682,7 +682,7 @@ class AdminController
         try {
             $user = $this->admin->user;
             $directory = $this->getDirectory();
-            $config = $directory->getConfig('admin.configure.authorize', 'admin.super');
+            $config = $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
             if (!$user->authorize($config)) {
                 throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' configure.', 403);
             }

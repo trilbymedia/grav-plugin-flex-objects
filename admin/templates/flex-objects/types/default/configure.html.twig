@@ -5,7 +5,7 @@
 {% set form = form ?? directory.directoryForm(name) %}
 
 {# Allowed actions #}
-{% set can_save = can_save ?? user.authorize(directory.config('admin.configure.authorize', 'admin.super')) %}
+{% set can_save = can_save ?? user.authorize(directory.config('admin.configure.authorize') ?? 'admin.super') %}
 
 {# These variables can be overridden from the main template file #}
 {% set allowed = allowed ?? (directory and form and can_save) %}
