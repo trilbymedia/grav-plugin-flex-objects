@@ -85,13 +85,34 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
-     * [onPluginsInitialized:100000] Composer autoload.
+     * [PluginsLoadedEvent:100000] Composer autoload.
      *
      * @return ClassLoader
      */
     public function autoload(): ClassLoader
     {
         return require __DIR__ . '/vendor/autoload.php';
+    }
+
+    /**
+     * [PluginsLoadedEvent:10]: Initialize Flex
+     */
+    public function initializeFlex(): void
+    {
+        $config = $this->config->get('plugins.flex-objects.directories');
+
+        // Add to DI container
+        $this->grav['flex_objects'] = static function (Grav $grav) use ($config) {
+            /** @var FlexInterface $flex */
+            $flex = $grav['flex'];
+
+            $flexObjects = new Flex($flex, $config);
+
+            // This event is for backwards compatibility only, do not use it!
+            $grav->fireEvent('onFlexInit', new Event(['flex' => $flexObjects]));
+
+            return $flexObjects;
+        };
     }
 
     /**
@@ -145,24 +166,6 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
-    public function initializeFlex(): void
-    {
-        $config = $this->config->get('plugins.flex-objects.directories');
-
-        // Add to DI container
-        $this->grav['flex_objects'] = static function (Grav $grav) use ($config) {
-            /** @var FlexInterface $flex */
-            $flex = $grav['flex'];
-
-            $flexObjects = new Flex($flex, $config);
-
-            // This event is for backwards compatibility only, do not use it!
-            $grav->fireEvent('onFlexInit', new Event(['flex' => $flexObjects]));
-
-            return $flexObjects;
-        };
-    }
-
     public function onRegisterFlex(FlexRegisterEvent $event): void
     {
         $flex = $event->flex;
@@ -170,6 +173,23 @@ class FlexObjectsPlugin extends Plugin
         $types = (array)$this->config->get('plugins.flex-objects.directories', []);
         foreach ($types as $blueprint) {
             $type = basename((string)$blueprint, '.yaml');
+
+            // Backwards compatibility to v1.0.0-rc.3
+            switch ($type) {
+                case 'grav-pages':
+                    $type = 'pages';
+                    $blueprint = str_replace('grav-pages', $type, $blueprint);
+                    break;
+                case 'grav-accounts':
+                    $type = 'user-accounts';
+                    $blueprint = str_replace('grav-accounts', $type, $blueprint);
+                    break;
+                case 'grav-user-groups':
+                    $type = 'user-groups';
+                    $blueprint = str_replace('grav-user-groups', $type, $blueprint);
+                    break;
+            }
+
             $directory = $flex->getDirectory($type);
             if ($type && (!$directory || !$directory->isEnabled())) {
                 $flex->addDirectoryType($type, $blueprint);

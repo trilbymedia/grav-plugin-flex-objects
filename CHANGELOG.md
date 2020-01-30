@@ -10,6 +10,9 @@
     * Added Flex type `Configuration`
     * Enabled `Pages`, `Accounts` and `User Groups` by default
     * Stop using deprecated `onAdminRegisterPermissions` event
+    * Renamed directory `grav-pages` to `pages`
+    * Renamed directory `grav-accounts` to `user-accounts`
+    * Renamed directory `grav-user-groups` to `user-groups`
 1. [](#improved)
     * Flex caching settings were moved into Grav core
     * Flex Objects plugin now better integrates to Grav core

@@ -9,6 +9,6 @@ admin_list:
     dir: desc
 
 directories:
-  - 'blueprints://flex-objects/grav-pages.yaml'
-  - 'blueprints://flex-objects/grav-accounts.yaml'
-  - 'blueprints://flex-objects/grav-user-groups.yaml'
+  - 'blueprints://flex-objects/pages.yaml'
+  - 'blueprints://flex-objects/user-accounts.yaml'
+  - 'blueprints://flex-objects/user-groups.yaml'

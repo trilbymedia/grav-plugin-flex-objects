@@ -1,4 +1,4 @@
-title: Flex Pages (Admin)
+title: Pages (Admin)
 description: Manage your Grav Pages in the new Flex Pages admin. This allows you to use Flex Pages only in Admin plugin, while still using the old pages in the frontend.
 type: flex-objects
 

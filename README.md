@@ -62,9 +62,9 @@ object:
 
 directories:
   - 'blueprints://flex-objects/contacts.yaml'
-  - 'blueprints://flex-objects/grav-pages.yaml'
-  - 'blueprints://flex-objects/grav-accounts.yaml'
-  - 'blueprints://flex-objects/grav-user-groups.yaml'
+  - 'blueprints://flex-objects/pages.yaml'
+  - 'blueprints://flex-objects/user-accounts.yaml'
+  - 'blueprints://flex-objects/user-groups.yaml'
 ```
 
 Simply edit the **Flex Objects** plugin options in the Admin plugin, or copy the `flex-objects.yaml` default file to your `user/config/plugins/` folder and edit the values there.   Read below for more help on what these fields do and how they can help you modify the plugin.
