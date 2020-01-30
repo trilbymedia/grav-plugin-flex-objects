@@ -353,7 +353,7 @@ class MediaController extends AbstractController
                 throw new \LogicException(sprintf('Unsupported authorize action %s', $action), 500);
         }
 
-        if (!$object->isAuthorized($action)) {
+        if (!$object->isAuthorized($action, null, $this->user)) {
             throw new \RuntimeException('Forbidden', 403);
         }
     }

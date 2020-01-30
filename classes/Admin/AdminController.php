@@ -822,6 +822,7 @@ class AdminController
             ->withAttribute('object', $object);
 
         $controller = new MediaController();
+        $controller->setUser($this->user);
 
         return $controller->handle($request);
     }

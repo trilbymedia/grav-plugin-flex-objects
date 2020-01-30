@@ -9,6 +9,7 @@ use Grav\Common\Grav;
 use Grav\Common\Inflector;
 use Grav\Common\Language\Language;
 use Grav\Common\Session;
+use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Framework\Controller\Traits\ControllerResponseTrait;
 use Grav\Framework\Flex\FlexDirectory;
@@ -40,6 +41,9 @@ abstract class AbstractController implements RequestHandlerInterface
 
     /** @var Grav */
     protected $grav;
+
+    /** @var UserInterface|null */
+    protected $user;
 
     /** @var string */
     protected $type;
@@ -258,6 +262,11 @@ abstract class AbstractController implements RequestHandlerInterface
         $messages->add($message, $type);
 
         return $this;
+    }
+
+    public function setUser(UserInterface $user): void
+    {
+        $this->user = $user;
     }
 
     /**
