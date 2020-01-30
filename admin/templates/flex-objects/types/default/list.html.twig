@@ -3,7 +3,7 @@
 
 {# Allowed actions #}
 {% set can_export = can_export ?? directory.config('admin.export') %}
-{% set can_create = can_create ?? directory.isAuthorized('create') %}
+{% set can_create = can_create ?? directory.isAuthorized('create', 'admin', user) %}
 {% set can_translate = can_translate ?? (admin.multilang and directory.object.hasFlexFeature('flex-translate')) %}
 
 {# Translations #}
@@ -22,7 +22,7 @@
 {% endif %}
 
 {# These variables can be overridden from the main template file #}
-{% set allowed = allowed ?? (directory and directory.isAuthorized('list', null, user)) %}
+{% set allowed = allowed ?? (directory and directory.isAuthorized('list', 'admin', user)) %}
 {% set back_route = back_route ?? route.getRoute(1, -1) %}
 {% set configure_route = configure_route ?? route.withGravParam('', 'configure') %}
 
@@ -34,7 +34,7 @@
 {% do assets.addJs('plugin://flex-objects/js/flex-objects.js', { 'group': 'bottom', 'loading': 'defer' }) %}
 
 {% block body %}
-    {% set collection = directory ? collection.isAuthorized('list') %}
+    {% set collection = directory ? collection.isAuthorized('list', 'admin', user) %}
     {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
     {% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
     {% set back_url = admin_route(back_route) %}

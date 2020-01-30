@@ -1,5 +1,5 @@
 {% extends 'flex-objects/types/default/edit.html.twig' %}
 
-{% if not directory.isAuthorized('list') %}
+{% if not directory.isAuthorized('list', 'admin', user) %}
     {% set back_route = '/' %}
 {% endif %}

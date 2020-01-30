@@ -69,7 +69,7 @@
 {% endblock save_button %}
 
 {% block content_top %}
-    {% if allowed and grav.user.authorize('admin.super') %}
+    {% if allowed and user.authorize('admin.super') %}
     <div class="alert notice">
         {% set save_location = object.getStorageFolder() ?: directory.getStorageFolder() %}
         {{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }} {{ not object.exists ? '[NEW]' }}</b> (type: <b>{{ (form.getValue('name') ?: 'default') }}</b>)

@@ -14,7 +14,7 @@
         </div>
         {% elseif not collection.count %}
         <div class="no-entries">
-            {% if directory.isAuthorized('create') %}
+            {% if directory.isAuthorized('create', 'admin', user) %}
                 There are currently no entries, click the <a href="{{ admin_route(flex.adminRoute(collection, {action: 'add'})) }}">Add</a> button to create a new one...
             {% else %}
                 There are currently no entries.

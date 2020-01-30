@@ -15,11 +15,17 @@
 {% endblock %}
 
 {% block input %}
-    {% set all = grav['flex_objects'].blueprints %}
+    {% set flex = grav['flex_objects'] %}
+    {% set all = flex.blueprints %}
     {% if all|count %}
+    {% set legacy = flex.getLegacyBlueprintMap() %}
     {% for label, directory in all %}
         {% set url = directory.blueprintFile %}
-        {% set found = directory.blueprintFile in value %}
+        {% set found = url in value %}
+        {% if not found and legacy[url] is defined %}
+            {% set found = legacy[url] in value %}
+        {% endif %}
+
         <div class="form-data block size-2-3" data-grav-field="toggle" data-grav-disabled="" data-grav-default="null" data-grav-field-name="{{ (scope ~ field.name)|fieldName }}[{{ loop.index0 }}]">
         <div class="switch-toggle switch-grav switch-2">
             {% set maxLen = 0 %}

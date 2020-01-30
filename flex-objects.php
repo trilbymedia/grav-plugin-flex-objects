@@ -13,6 +13,7 @@ use Grav\Events\PluginsLoadedEvent;
 use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
+use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
 use Grav\Plugin\FlexObjects\Admin\AdminController;
@@ -169,27 +170,14 @@ class FlexObjectsPlugin extends Plugin
     public function onRegisterFlex(FlexRegisterEvent $event): void
     {
         $flex = $event->flex;
+        $map = Flex::getLegacyBlueprintMap(false);
 
         $types = (array)$this->config->get('plugins.flex-objects.directories', []);
         foreach ($types as $blueprint) {
-            $type = basename((string)$blueprint, '.yaml');
-
             // Backwards compatibility to v1.0.0-rc.3
-            switch ($type) {
-                case 'grav-pages':
-                    $type = 'pages';
-                    $blueprint = str_replace('grav-pages', $type, $blueprint);
-                    break;
-                case 'grav-accounts':
-                    $type = 'user-accounts';
-                    $blueprint = str_replace('grav-accounts', $type, $blueprint);
-                    break;
-                case 'grav-user-groups':
-                    $type = 'user-groups';
-                    $blueprint = str_replace('grav-user-groups', $type, $blueprint);
-                    break;
-            }
+            $blueprint = $map[$blueprint] ?? $blueprint;
 
+            $type = basename((string)$blueprint, '.yaml');
             $directory = $flex->getDirectory($type);
             if ($type && (!$directory || !$directory->isEnabled())) {
                 $flex->addDirectoryType($type, $blueprint);
@@ -316,6 +304,8 @@ class FlexObjectsPlugin extends Plugin
     {
         /** @var Flex $flex */
         $flex = $this->grav['flex_objects'];
+        /** @var Admin $admin */
+        $admin = $this->grav['admin'];
 
         foreach ($this->getAdminMenu() as $route => $item) {
             $directory = null;
@@ -336,7 +326,7 @@ class FlexObjectsPlugin extends Plugin
             $hidden = $item['hidden'] ?? false;
             $icon = $item['icon'] ?? 'fa-list';
             $authorize = $item['authorize'] ?? ($directory ? null : ['admin.flex-objects', 'admin.super']);
-            if ($hidden || (null === $authorize && $directory->isAuthorized('list', 'admin'))) {
+            if ($hidden || (null === $authorize && $directory->isAuthorized('list', 'admin', $admin->user))) {
                 continue;
             }
             $cache = $directory ? $directory->getCache('index') : null;
@@ -344,7 +334,7 @@ class FlexObjectsPlugin extends Plugin
             if (null === $count) {
                 try {
                     $collection = $directory->getCollection();
-                    $count = $collection->isAuthorized('list')->count();
+                    $count = $collection->isAuthorized('list', 'admin', $admin->user)->count();
                     $cache->set('admin-count', $count);
                 } catch (\InvalidArgumentException $e) {
                     continue;

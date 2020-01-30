@@ -32,6 +32,22 @@ class Flex implements FlexInterface
     protected $managed;
 
     /**
+     * @param bool $newToOld
+     * @return array
+     * @internal
+     */
+    public static function getLegacyBlueprintMap(bool $newToOld = true): array
+    {
+        $map = [
+            'blueprints://flex-objects/pages.yaml' => 'blueprints://flex-objects/grav-pages.yaml',
+            'blueprints://flex-objects/user-accounts.yaml' => 'blueprints://flex-objects/grav-accounts.yaml',
+            'blueprints://flex-objects/user-groups.yaml' => 'blueprints://flex-objects/grav-user-groups.yaml'
+        ];
+
+        return $newToOld ? $map : array_flip($map);
+    }
+
+    /**
      * Flex constructor.
      * @param FlexInterface $flex
      * @param array $types
@@ -41,7 +57,11 @@ class Flex implements FlexInterface
         $this->flex = $flex;
         $this->managed = [];
 
+        $legacy = static::getLegacyBlueprintMap(false);
         foreach ($types as $blueprint) {
+            // Backwards compatibility to v1.0.0-rc.3
+            $blueprint = $legacy[$blueprint] ?? $blueprint;
+
             $type = basename((string)$blueprint, '.yaml');
             if ($type) {
                 $this->managed[] = $type;

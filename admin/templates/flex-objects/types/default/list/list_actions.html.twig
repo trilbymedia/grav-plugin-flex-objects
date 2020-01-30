@@ -1,7 +1,7 @@
 {% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
-{% set can_read = object.isAuthorized('read') %}
-{% set can_update = object.isAuthorized('update') %}
-{% set can_delete = object.isAuthorized('delete') %}
+{% set can_read = object.isAuthorized('read', 'admin', user) %}
+{% set can_update = object.isAuthorized('update', 'admin', user) %}
+{% set can_delete = object.isAuthorized('delete', 'admin', user) %}
 
 {% if can_read and object.getRoute() %}
         <a href="{{ route.withAddedPath(object.getKey()).withoutParams().withQueryParam('preview', 1).getUri() }}" title="{{ "PLUGIN_ADMIN.PREVIEW"|tu }}" class="preview-action">

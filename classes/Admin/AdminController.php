@@ -72,6 +72,9 @@ class AdminController
     /** @var Admin */
     protected $admin;
 
+    /** @var UserInterface */
+    protected $user;
+
     /** @var string */
     protected $redirect;
 
@@ -221,7 +224,7 @@ class AdminController
         if (!$collection) {
             throw new \RuntimeException('Internal Error', 500);
         }
-        if (!$collection->isAuthorized('list')) {
+        if (!$collection->isAuthorized('list', 'admin', $this->user)) {
             throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' list.', 403);
         }
 
@@ -282,7 +285,7 @@ class AdminController
             $object = $this->getObject();
 
             if ($object && $object->exists()) {
-                if (!$object->isAuthorized('delete')) {
+                if (!$object->isAuthorized('delete', 'admin', $this->user)) {
                     throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
                 }
 
@@ -322,7 +325,7 @@ class AdminController
             throw new \RuntimeException('Not Found', 404);
         }
 
-        if (!$directory->isAuthorized('create')) {
+        if (!$directory->isAuthorized('create', 'admin', $this->user)) {
             throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
         }
 
@@ -359,7 +362,7 @@ class AdminController
             throw new \RuntimeException('Not Found', 404);
         }
 
-        if (!$directory->isAuthorized('create')) {
+        if (!$directory->isAuthorized('create', 'admin', $this->user)) {
             throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
         }
 
@@ -450,7 +453,7 @@ class AdminController
                 throw new \RuntimeException('Not Found', 404);
             }
 
-            if (!$object->isAuthorized('create')) {
+            if (!$object->isAuthorized('create', 'admin', $this->user)) {
                 throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' copy.',
                     403);
             }
@@ -540,7 +543,7 @@ class AdminController
             }
 
             $directory = $object->getFlexDirectory();
-            if (!$directory->isAuthorized('list')) {
+            if (!$directory->isAuthorized('list', 'admin', $this->user)) {
                 throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
                     403);
             }
@@ -555,8 +558,7 @@ class AdminController
 
             // Display root if permitted.
             $action = $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
-            $user = $this->admin->user;
-            if ($user->authorize($action)) {
+            if ($this->user->authorize($action)) {
                 $data['filters']['type'][] = 'root';
             }
 
@@ -599,12 +601,12 @@ class AdminController
             }
 
             if ($object->exists()) {
-                if (!$object->isAuthorized('update')) {
+                if (!$object->isAuthorized('update', 'admin', $this->user)) {
                     throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
                         403);
                 }
             } else {
-                if (!$object->isAuthorized('create')) {
+                if (!$object->isAuthorized('create', 'admin', $this->user)) {
                     throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
                         403);
                 }
@@ -680,10 +682,9 @@ class AdminController
     public function taskConfigure()
     {
         try {
-            $user = $this->admin->user;
             $directory = $this->getDirectory();
             $config = $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
-            if (!$user->authorize($config)) {
+            if (!$this->user->authorize($config)) {
                 throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' configure.', 403);
             }
 
@@ -839,6 +840,9 @@ class AdminController
     public function __construct(Plugin $plugin)
     {
         $this->grav = Grav::instance();
+        $this->admin = Grav::instance()['admin'];
+        $this->user = $this->admin->user;
+
         $this->active = false;
 
         // Ensure the controller should be running
@@ -875,8 +879,6 @@ class AdminController
                     $test = null;
                 }
             }
-
-            $this->admin = Grav::instance()['admin'];
 
             if ($directory) {
                 // Redirect aliases.
@@ -939,9 +941,7 @@ class AdminController
      */
     public function execute()
     {
-        /** @var UserInterface $user */
-        $user = $this->grav['user'];
-        if (!$user->authorize('admin.login')) {
+        if (!$this->user->authorize('admin.login')) {
             // TODO: improve
             return false;
         }

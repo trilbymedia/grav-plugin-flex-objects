@@ -6,7 +6,7 @@
     <div class="tabs-nav">
         {% for name,title in {'user-accounts': 'PLUGIN_ADMIN.USERS', 'user-groups': 'PLUGIN_ADMIN.GROUPS'} %}
         {% set current = flex.directory(name) %}
-        {% if current and current.isAuthorized('list') %}
+        {% if current and current.isAuthorized('list', 'admin', user) %}
         {% set active = not is_configure and nav_route|starts_with(flex.adminRoute(current)|trim('/') ~ '/') %}
         <a {{active ? active_html|raw }} href="{{ admin_route(flex.adminRoute(current)) }}">
             <span>{{ title|tu }}</span>
