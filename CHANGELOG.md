@@ -1,5 +1,5 @@
 # v1.0.0-rc.4
-## mm/dd/2020
+## 02/03/2020
 
 1. [](#new)
     * Added support for arbitrary admin menu route for editing a flex type
