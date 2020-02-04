@@ -215,6 +215,7 @@ class Flex implements FlexInterface
             'folders' => false
         ];
 
+        $directories = [];
         $all = Folder::all('blueprints://flex-objects', $params);
         foreach ($all as $url) {
             $type = basename($url, '.yaml');
@@ -369,6 +370,7 @@ class Flex implements FlexInterface
             $directories = $this->getDirectories();
             /** @var FlexDirectory $directory */
             foreach ($directories as $directory) {
+                $config = $directory->getConfig('admin');
                 if (!$directory->isEnabled() || !empty($config['disabled'])) {
                     continue;
                 }
@@ -387,12 +389,6 @@ class Flex implements FlexInterface
                 } else {
                     $count++;
                 }
-            }
-
-            $menu = (array)($this->config['admin']['menu'] ?? []);
-            foreach ($menu as $slug => $menuItem) {
-                $directory = $menuItem['directory'] ?? '';
-                $routes[$directory] = $menuItem + ['route' => '/' . $slug];
             }
 
             if ($count && !isset($routes[''])) {

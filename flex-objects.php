@@ -156,7 +156,7 @@ class FlexObjectsPlugin extends Plugin
 
             ]);
             /** @var AdminController controller */
-            $this->controller = new AdminController($this);
+            $this->controller = new AdminController();
 
         } else {
             $this->enable([

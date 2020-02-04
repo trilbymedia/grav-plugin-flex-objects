@@ -281,6 +281,7 @@ class AdminController
      */
     public function taskDelete()
     {
+        $object = null;
         try {
             $object = $this->getObject();
 
@@ -835,10 +836,7 @@ class AdminController
         return Grav::instance()['flex_objects'];
     }
 
-    /**
-     * @param Plugin   $plugin
-     */
-    public function __construct(Plugin $plugin)
+    public function __construct()
     {
         $this->grav = Grav::instance();
         $this->admin = Grav::instance()['admin'];

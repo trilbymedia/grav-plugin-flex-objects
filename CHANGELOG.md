@@ -1,3 +1,12 @@
+# v1.0.0-rc.6
+## mm/dd/2020
+
+1. [](#new)
+    * Removed legacy classes for pages
+1. [](#bugfix)
+    * Pass phpstan level 1 tests
+    * Minor bug fixes
+
 # v1.0.0-rc.5
 ## 02/03/2020
 
