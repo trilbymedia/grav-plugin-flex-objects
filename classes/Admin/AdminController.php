@@ -444,7 +444,6 @@ class AdminController
      *
      * @return bool True if the action was performed.
      * @throws \RuntimeException
-     * @TODO: Pages
      */
     protected function taskCopy()
     {
