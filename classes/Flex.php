@@ -167,7 +167,7 @@ class Flex implements FlexInterface
      */
     public function getObject(string $key, string $type = null, string $keyField = null): ?FlexObjectInterface
     {
-        return $this->flex->getObject($keyField, $type, $keyField);
+        return $this->flex->getObject($key, $type, $keyField);
     }
 
     /**

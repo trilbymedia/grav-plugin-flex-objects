@@ -2,9 +2,10 @@
 ## mm/dd/2020
 
 1. [](#new)
-    * Removed legacy classes for pages
-1. [](#bugfix)
     * Pass phpstan level 1 tests
+    * Removed legacy classes for pages, cleanup deprecated Flex types
+1. [](#bugfix)
+    * Fixed call to `grav.flex_objects.getObject()` causing fatal error
     * Minor bug fixes
 
 # v1.0.0-rc.5
