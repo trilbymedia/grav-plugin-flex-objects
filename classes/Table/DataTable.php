@@ -248,7 +248,7 @@ class DataTable implements \JsonSerializable
         $grav = Grav::instance();
         $flex = $grav['flex_objects'];
 
-        $value = $object->value($name) ?? $object->getNestedProperty($name, $column['field']['default'] ?? null);
+        $value = $object->getFormValue($name) ?? $object->getNestedProperty($name, $column['field']['default'] ?? null);
         $type = $column['field']['type'] ?? 'text';
         $hasLink = $column['link'] ?? null;
         $link = null;

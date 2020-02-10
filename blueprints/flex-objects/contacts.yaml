@@ -87,11 +87,11 @@ config:
   # Data Configuration
   data:
     # Object class to be used, allowing custom methods for the object
-    object: 'Grav\Framework\Flex\FlexObject'
+    object: 'Grav\Common\Flex\Types\Generic\GenericObject'
     # Collection class to be used, allowing custom methods for the collections
-    collection: 'Grav\Framework\Flex\FlexCollection'
+    collection: 'Grav\Common\Flex\Types\Generic\GenericCollection'
     # Index class to be used, works as a quick database-like lookup index
-    index: 'Grav\Framework\Flex\FlexIndex'
+    index: 'Grav\Common\Flex\Types\Generic\GenericIndex'
     storage:
       # Storage class, use single file storage (does not support images and assets)
       class: 'Grav\Framework\Flex\Storage\SimpleStorage'
