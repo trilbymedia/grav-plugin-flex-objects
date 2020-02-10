@@ -21,7 +21,7 @@
             {% endif %}
         </div>
     {% else %}
-        {% set per_page = directory_config.per_page %}
+        {% set per_page = per_page ?? directory_config.per_page %}
 
         {% set tableFields = [] %}
         {% set searchFields = [] %}

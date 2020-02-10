@@ -6,6 +6,8 @@
 {% set can_create = can_create ?? directory.isAuthorized('create', 'admin', user) %}
 {% set can_translate = can_translate ?? (admin.multilang and directory.object.hasFlexFeature('flex-translate')) %}
 
+{% set per_page = per_page ?? grav.uri.currentUri.queryParam('per_page') %}
+
 {# Translations #}
 {% if can_translate %}
     {% set translate_include_default = translate_include_default ?? grav.config.get('system.languages.include_default_lang_file_extension', true) %}
@@ -36,7 +38,8 @@
 {% block body %}
     {% set collection = directory ? collection.isAuthorized('list', 'admin', user) %}
     {% set directory_config = directory.config('admin.list.options')|default(config.get('plugins.flex-objects.admin_list', { per_page: 15, order: { by: 'updated_timestamp', dir: 'desc' }})) %}
-    {% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: directory_config.per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
+    {% set per_page = max(1, per_page ?? directory_config.per_page) %}
+    {% set table = directory ? flex.dataTable(collection.flexDirectory(), {  collection: collection, limit: per_page, sort: directory_config.order.by ~ '|' ~ directory_config.order.dir }) %}
     {% set back_url = admin_route(back_route) %}
     {% set configure_url = directory.config('admin.configure.hidden', false) is not same as(true) ? configure_route.toString(true) %}
 
