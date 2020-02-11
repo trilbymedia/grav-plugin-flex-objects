@@ -1,5 +1,5 @@
 name: Flex Objects
-version: 1.0.0-rc.5
+version: 1.0.0-rc.6
 testing: true
 description: Flex Objects plugin allows you to manage Flex Objects in Grav Admin.
 icon: list
@@ -13,7 +13,7 @@ docs: https://github.com/trilbymedia/grav-plugin-flex-objects/blob/develop/READM
 license: MIT
 
 dependencies:
-    - { name: grav, version: '>=1.7.0-rc.5' }
+    - { name: grav, version: '>=1.7.0-rc.6' }
     - { name: form, version: '>=4.0.2' }
 
 form:

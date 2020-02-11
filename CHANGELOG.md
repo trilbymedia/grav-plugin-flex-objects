@@ -1,5 +1,5 @@
 # v1.0.0-rc.6
-## mm/dd/2020
+## 02/11/2020
 
 1. [](#new)
     * Pass phpstan level 1 tests
