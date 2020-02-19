@@ -9,25 +9,25 @@
 
                   :api-mode="true"
                   :api-url="store.api"
-                  :per-page="store.perPage || perPage"
+                  :per-page="perPage"
                   :append-params="extraParams"
                   pagination-path="links.pagination"
                   :show-sort-icons="true"
                   @vuetable:pagination-data="onPaginationData"
                   @vuetable:loading="onVuetableLoading"
                   @vuetable:load-success="onVueTableLoadSuccess"
-        ></vuetable>
+        />
 
         <div class="flex-list-pagination">
             <vuetable-pagination-info ref="paginationInfo"
                                       :info-template="store.paginationInfo"
                                       :info-no-data-template="store.emptyResult"
                                       :css="css.paginationInfo"
-            ></vuetable-pagination-info>
+            />
             <vuetable-pagination ref="pagination"
                                  :css="css.pagination"
                                  @vuetable-pagination:change-page="onChangePage"
-            ></vuetable-pagination>
+            />
         </div>
     </div>
 </template>
@@ -51,12 +51,14 @@
             extraParams: {}
         }),
         created() {
+            this.perPage = this.store.perPage;
             this.data = Object.values(this.store.data);
         },
         mounted() {
             this.$refs.vuetable.setData(this.store.data);
             this.$events.$on('filter-set', event => this.onFilterSet(event));
             this.$events.$on('filter-reset', event => this.onFilterReset());
+            this.$events.$on('filter-perPage', event => this.onFilterPerPage(event));
         },
         methods: {
             onPaginationData(paginationData) {
@@ -69,6 +71,12 @@
             },
             onFilterReset () {
                 _.unset(this.extraParams, 'filter');
+                Vue.nextTick(() => this.$refs.vuetable.refresh());
+            },
+            onFilterPerPage (limit) {
+                console.log('onFilterPerPage', limit, this.store.data);
+                this.perPage = limit || this.$refs.paginationInfo.tablePagination.total;
+                // this.$refs.vuetable.perPage = limit;
                 Vue.nextTick(() => this.$refs.vuetable.refresh());
             },
             onChangePage(page) {
