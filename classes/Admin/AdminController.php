@@ -650,7 +650,9 @@ class AdminController
                 } elseif ($key !== $object->getKey()) {
                     // TODO: remove page specific code
                     if (!(method_exists($object, 'root') && $object->root())) {
-                        $this->referrerRoute = $this->currentRoute->withRoute($this->currentRoute->getRoute(0, -1) . '/' . $object->getKey());
+                        $route = preg_replace('|/' . preg_quote($key, '|') . '|u', '/' . $object->getKey(), $this->currentRoute->getRoute());
+
+                        $this->referrerRoute = $this->currentRoute->withRoute($route);
                     }
                 }
                 $postAction = $request->getParsedBody()['_post_entries_save'] ?? 'edit';
