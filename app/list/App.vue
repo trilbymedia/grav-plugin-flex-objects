@@ -1,8 +1,8 @@
 <template>
     <div>
-        <flex-filter-bar :store="store"></flex-filter-bar>
-        <flex-content-loader :store="store" v-show="loading"></flex-content-loader>
-        <flex-table :store="store" v-model="loading" v-show="!loading"></flex-table>
+        <flex-filter-bar :store="store" />
+        <flex-content-loader :store="store" v-show="loading" />
+        <flex-table :store="store" v-model="loading" v-show="!loading" />
     </div>
 </template>
 
