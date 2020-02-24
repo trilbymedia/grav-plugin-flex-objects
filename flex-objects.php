@@ -2,6 +2,7 @@
 namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
+use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Types;
@@ -26,7 +27,7 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexObjectsPlugin extends Plugin
 {
-    const MIN_GRAV_VERSION = '1.7.0-rc.3';
+    const MIN_GRAV_VERSION = '1.7.0-rc.6';
 
     public $features = [
         'blueprints' => 1000,
@@ -176,8 +177,16 @@ class FlexObjectsPlugin extends Plugin
         foreach ($types as $blueprint) {
             // Backwards compatibility to v1.0.0-rc.3
             $blueprint = $map[$blueprint] ?? $blueprint;
-
             $type = basename((string)$blueprint, '.yaml');
+
+            if (!file_exists($blueprint)) {
+                /** @var Debugger $debugger */
+                $debugger = Grav::instance()['debugger'];
+                $debugger->addMessage(sprintf('Flex: blueprint for flex type %s is missing', $type), 'error');
+
+                continue;
+            }
+
             $directory = $flex->getDirectory($type);
             if ($type && (!$directory || !$directory->isEnabled())) {
                 $flex->addDirectoryType($type, $blueprint);

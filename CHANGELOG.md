@@ -1,3 +1,9 @@
+# v1.0.0-rc.7
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fixed fatal error if there is missing blueprint [grav#2834](https://github.com/getgrav/grav/issues/2834)
+
 # v1.0.0-rc.6
 ## 02/11/2020
 
