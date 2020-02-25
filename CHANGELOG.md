@@ -3,6 +3,8 @@
 
 1. [](#new)
     * Added option to change perPage amount of items in Flex List. 'All' also available by only at runtime.
+1. [](#improved)
+    * Page filters now obey admin hide type settings
 1. [](#bugfix)
     * Fixed fatal error if there is missing blueprint [grav#2834](https://github.com/getgrav/grav/issues/2834)
     * Fixed redirect when moving a page [grav#2829](https://github.com/getgrav/grav/issues/2829)

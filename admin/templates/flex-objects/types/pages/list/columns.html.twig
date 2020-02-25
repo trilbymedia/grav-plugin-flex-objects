@@ -35,7 +35,7 @@
                     </fieldset>
 
                     {% set selected = filters['filters[page_type]']|split(',') %}
-                    {% set page_types = admin.types %}
+                    {% set page_types = admin.types(null) %} {# directory.config('filters.ignore_page_types') #}
                     <fieldset>
                         <legend>Page Types</legend>
                         {% for name,title in page_types %}
@@ -46,7 +46,7 @@
                         {% endfor %}
                     </fieldset>
 
-                    {% set module_types = admin.modularTypes %}
+                    {% set module_types = admin.modularTypes(null) %} {# directory.config('filters.ignore_module_types') #}
                     {% if module_types %}
                         <fieldset>
                             <legend>Module Types</legend>
