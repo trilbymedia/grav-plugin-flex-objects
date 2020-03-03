@@ -8,6 +8,7 @@
 1. [](#bugfix)
     * Fixed fatal error if there is missing blueprint [grav#2834](https://github.com/getgrav/grav/issues/2834)
     * Fixed redirect when moving a page [grav#2829](https://github.com/getgrav/grav/issues/2829)
+    * Fixed no default access set when creating new user from admin [#31](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/31)
 
 # v1.0.0-rc.6
 ## 02/11/2020
