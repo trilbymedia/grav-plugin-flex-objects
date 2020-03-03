@@ -11,6 +11,7 @@
     * Fixed no default access set when creating new user from admin [#31](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/31)
     * Flex Pages: Fixed page visibility issues when creating a new page [grav#2823](https://github.com/getgrav/grav/issues/2823)
     * Flex Pages: Fixed translated page having non-translated status with `system.languages.include_default_lang_file_extension: false`
+    * Flex Pages: Fixed preview on home page
 
 # v1.0.0-rc.6
 ## 02/11/2020

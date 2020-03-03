@@ -12,6 +12,7 @@
 {% block body %}
     {% set parent = object.parent %}
 
+    {% set preview_url = preview_url ?: (object.home ? '/' : '') %}
     {% set parent_url = parent and not parent.root ? admin_route(back_route) %}
     {% set back_url = back_url ?? admin_route(flex.adminRoute(directory.getFlexType())) %}
 
