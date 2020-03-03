@@ -7,6 +7,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Debugger;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Flex\Types\Pages\PageIndex;
+use Grav\Common\Flex\Types\Pages\PageObject;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Uri;
@@ -368,17 +369,17 @@ class AdminController
 
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
-        $folder = $this->data['folder'] ?? '';
+        $folder = $this->data['folder'] ?? null;
         $title = $this->data['title'] ?? null;
         if ($title) {
             $this->data['header']['title'] = $this->data['title'];
             unset($this->data['title']);
         }
-        if (0 === strpos($folder, '@slugify-')) {
+        if (null !== $folder && 0 === strpos($folder, '@slugify-')) {
             $folder = \Grav\Plugin\Admin\Utils::slug($this->data[substr($folder, 9)] ?? '');
         }
         if (!$folder) {
-            $folder = \Grav\Plugin\Admin\Utils::slug($title) ?: 'undefined';
+            $folder = \Grav\Plugin\Admin\Utils::slug($title) ?: '';
         }
 
         if (isset($this->data['name']) && strpos($this->data['name'], 'modular/') === 0) {
@@ -392,25 +393,25 @@ class AdminController
         unset($this->data['blueprint']);
         $key = trim("{$route}/{$folder}", '/');
 
-        /*
-        if (isset($data['visible'])) {
-            if ($data['visible'] === '' || $data['visible']) {
-                // if auto (ie '')
-                $pageParent = $page->parent();
-                $children = $pageParent ? $pageParent->children() : [];
+        $max = 0;
+        if (isset($this->data['visible'])) {
+            $auto = $this->data['visible'] === '';
+            $visible = (bool)($this->data['visible'] ?? false);
+            unset($this->data['visible']);
+
+            // Empty string on visible means auto.
+            if ($auto || $visible) {
+                /** @var PageObject $parent */
+                $parent = $route ? $directory->getObject($route) : $directory->getIndex()->getRoot();
+                $children = $parent ? $parent->children()->visible() : [];
+                $max = $auto ? 0 : 1;
                 foreach ($children as $child) {
-                    if ($child->order()) {
-                        // set page order
-                        $page->order(AdminController::getNextOrderInFolder($pageParent->path()));
-                        break;
-                    }
+                    $max = max($max, (int)$child->order());
                 }
             }
-            if ((int)$data['visible'] === 1 && !$page->order()) {
-                $header['visible'] = $data['visible'];
-            }
+
+            $this->data['order'] = $max ? $max + 1 : false;
         }
-         */
 
         $formatter = new YamlFormatter();
         $this->data['frontmatter'] = $formatter->encode($this->data['header'] ?? []);
