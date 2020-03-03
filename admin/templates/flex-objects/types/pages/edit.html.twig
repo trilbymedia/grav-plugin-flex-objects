@@ -83,7 +83,7 @@
         <div class="alert warning">
             This page has not been translated to <i class="fa fa-flag-o"></i> <strong>{{ all_languages[language] ?? language }}</strong> language yet!
             {% if language == object_language %}
-                No Fallback translations found.
+                No fallback translations found.
             {% else %}
                 Falling back to <strong>{{ all_languages[object_language] ?? object_language }}</strong> language.
             {% endif %}
