@@ -1,5 +1,5 @@
 # v1.0.0-rc.7
-## mm/dd/2020
+## 03/05/2020
 
 1. [](#new)
     * Added option to change perPage amount of items in Flex List. 'All' also available by only at runtime.
