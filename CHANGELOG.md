@@ -1,3 +1,9 @@
+# v1.0.0-rc.8
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fixed jump of the page when applying filters [grav-admin#1830](https://github.com/getgrav/grav-plugin-admin/issues/1830)
+
 # v1.0.0-rc.7
 ## 03/05/2020
 

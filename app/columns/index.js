@@ -58,6 +58,12 @@ export const ReLoad = (fresh = false) => {
             isSearchFocused = search === document.activeElement;
         }
 
+        const contentWrapper = document.querySelector('.content-wrapper .gm-scroll-view');
+        const scrollPosition = {
+            top: contentWrapper.scrollTop,
+            left: contentWrapper.scrollLeft
+        };
+
         $.ajax({
             url: `${gravConfig.current_url}`,
             method: 'post',
@@ -80,6 +86,8 @@ export const ReLoad = (fresh = false) => {
                 if (search && isSearchFocused) {
                     search.focus();
                 }
+
+                contentWrapper.scrollTo(scrollPosition);
 
                 return FlexPagesInstance;
             }
