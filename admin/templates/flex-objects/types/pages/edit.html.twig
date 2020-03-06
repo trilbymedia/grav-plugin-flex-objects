@@ -76,8 +76,8 @@
     </div>
     {% endif %}
     {% if not object.exists %}
-        <div class="alert warning">
-            This page does not exist yet!
+        <div class="alert secondary-accent">
+            <i class="fa fa-lightbulb-o"></i> This page will not exist until it is saved.
         </div>
     {% elseif object.exists and can_translate and not has_translation %}
         <div class="alert warning">
