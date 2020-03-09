@@ -585,6 +585,23 @@ class AdminController
         return $this->createJsonResponse($json, 200);
     }
 
+    public function taskReset()
+    {
+        $key = $this->id;
+
+        $object = $this->getObject($key);
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        /** @var FlexForm $form */
+        $form = $this->getForm($object);
+        $flash = $form->getFlash();
+        $flash->delete();
+
+        return $this->createRedirectResponse($this->referrerRoute->toString(true));
+    }
+
     public function taskSaveas()
     {
         return $this->taskSave();
@@ -675,6 +692,16 @@ class AdminController
             $grav->fireEvent('gitsync');
         } catch (\RuntimeException $e) {
             $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
+
+            $data = $form->getData();
+            if (null !== $data) {
+                $flash = $form->getFlash();
+                $flash->setObject($object);
+                $flash->setData($data->toArray());
+                $flash->save();
+            }
+
+            // $this->setRedirect($this->referrerRoute->withQueryParam('uid', $flash->getUniqueId())->toString(true), 302);
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 

@@ -63,6 +63,11 @@
             <div class="alert notice">{{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }} {{ not object.exists ? '[NEW]' }}</b></div>
         {% endif %}
     {% endif %}
+    {% if object.exists and form.flash.exists %}
+        <div class="alert secondary-accent">
+            <i class="fa fa-lightbulb-o"></i> You are editing a saved draft. <button class="button button-link" type="submit" name="task" value="reset" form="blueprints">{{ "PLUGIN_ADMIN.RESET"|tu }}</button>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block content %}

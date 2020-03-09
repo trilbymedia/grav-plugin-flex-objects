@@ -75,6 +75,11 @@
         {{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }} {{ not object.exists ? '[NEW]' }}</b> (type: <b>{{ (form.getValue('name') ?: 'default') }}</b>)
     </div>
     {% endif %}
+    {% if object.exists and form.flash.exists %}
+        <div class="alert secondary-accent">
+            <i class="fa fa-lightbulb-o"></i> You are editing a saved draft. <button class="button button-link" type="submit" name="task" value="reset" form="blueprints">{{ "PLUGIN_ADMIN.RESET"|tu }}</button>
+        </div>
+    {% endif %}
     {% if not object.exists %}
         <div class="alert secondary-accent">
             <i class="fa fa-lightbulb-o"></i> This page will not exist until it is saved.
