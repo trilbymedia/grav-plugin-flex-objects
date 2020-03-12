@@ -1,6 +1,8 @@
 # v1.0.0-rc.8
 ## mm/dd/2020
 
+1. [](#new)
+    * Added a basic **Convert Data** CLI Command.  Works with `Yaml` <-> `Json`
 1. [](#bugfix)
     * Fixed jump of the page when applying filters [grav-admin#1830](https://github.com/getgrav/grav-plugin-admin/issues/1830)
     * Fixed form resetting when validation fails [grav#2764](https://github.com/getgrav/grav/issues/2764)
