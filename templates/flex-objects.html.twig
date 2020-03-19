@@ -1,0 +1,11 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+    {{ page.content|raw }}
+
+    {% set options = page.header.flex %}
+    {% set type = options.directory ?? page.header.directory ?? uri.param('directory') %}
+    {% set id = uri.param('id') %}
+
+    {% include 'flex-objects/page.html.twig' %}
+{% endblock %}

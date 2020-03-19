@@ -1,43 +1,43 @@
-#flex-directory .text-center {
+#flex-objects .text-center {
   text-align: center; }
 
-#flex-directory .search {
+#flex-objects .search {
   display: inline-block;
   width: 50%;
   padding: 0.7rem; }
 
-#flex-directory button.sort {
+#flex-objects button.sort {
   vertical-align: top; }
-  #flex-directory button.sort:after {
+  #flex-objects button.sort:after {
     font-family: FontAwesome; }
-  #flex-directory button.sort.asc:after {
+  #flex-objects button.sort.asc:after {
     content: "\2191"; }
-  #flex-directory button.sort.desc:after {
+  #flex-objects button.sort.desc:after {
     content: "\2193"; }
 
-#flex-directory ul {
+#flex-objects ul {
   margin: 3rem 0; }
-  #flex-directory ul li {
+  #flex-objects ul li {
     display: inline-block;
     width: 33%;
     margin: 1rem 0; }
-    #flex-directory ul li .entry-details .name {
+    #flex-objects ul li .entry-details .name {
       font-weight: bold;
       font-size: 120%; }
-    #flex-directory ul li .entry-details p {
+    #flex-objects ul li .entry-details p {
       margin: 0; }
-    #flex-directory ul li .entry-extra span {
+    #flex-objects ul li .entry-extra span {
       background: #eee;
       border-radius: 4px;
       padding: 3px 5px;
       font-size: 85%; }
 
-@media only screen and (max-width: 1200px) {
-  #flex-directory ul li {
+@media only screen and (max-width: 800px) {
+  #flex-objects ul li {
     width: 50%; } }
 
-@media only screen and (max-width: 600px) {
-  #flex-directory ul li {
+@media only screen and (max-width: 500px) {
+  #flex-objects ul li {
     width: 100%; } }
 
 /*# sourceMappingURL=../css/site.css.map */

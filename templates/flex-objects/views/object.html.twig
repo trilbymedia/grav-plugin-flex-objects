@@ -1,0 +1,9 @@
+{% set flex = grav['flex_objects'] %}
+{% set directory = flex.directory(type) %}
+{% set object = directory.getObject(id) %}
+
+{% if object %}
+    {% render object layout: options.layout %}
+{% else %}
+    <h2>Entry Not Found</h2>
+{% endif %}

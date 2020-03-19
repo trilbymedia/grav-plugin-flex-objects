@@ -1,0 +1,15 @@
+<div class="entry-details">
+    {% if object.website %}
+        <a href="{{ object.website }}"><span class="name">{{ object.last_name }}, {{ object.first_name }}</span></a>
+    {% else %}
+        <span class="name">{{ object.last_name }}, {{ object.first_name }}</span>
+    {% endif %}
+    {% if object.email %}
+        <p><a href="mailto:{{ object.email }}" class="email">{{ object.email }}</a></p>
+    {% endif %}
+</div>
+<div class="entry-extra">
+    {% for tag in object.tags %}
+        <span>{{ tag }}</span>
+    {% endfor %}
+</div>

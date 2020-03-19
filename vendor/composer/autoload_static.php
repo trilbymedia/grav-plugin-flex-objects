@@ -4,27 +4,32 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit1d80fcf0c0a150c41289d296aa2c7d70
+class ComposerStaticInit69fc28174abe912f71ebf710ee161e8f
 {
     public static $prefixLengthsPsr4 = array (
         'G' => 
         array (
-            'Grav\\Plugin\\FlexDirectory\\' => 26,
+            'Grav\\Plugin\\FlexObjects\\' => 24,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Grav\\Plugin\\FlexDirectory\\' => 
+        'Grav\\Plugin\\FlexObjects\\' => 
         array (
             0 => __DIR__ . '/../..' . '/classes',
         ),
     );
 
+    public static $classMap = array (
+        'Grav\\Plugin\\FlexObjectsPlugin' => __DIR__ . '/../..' . '/flex-objects.php',
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit1d80fcf0c0a150c41289d296aa2c7d70::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit1d80fcf0c0a150c41289d296aa2c7d70::$prefixDirsPsr4;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit69fc28174abe912f71ebf710ee161e8f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit69fc28174abe912f71ebf710ee161e8f::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit69fc28174abe912f71ebf710ee161e8f::$classMap;
 
         }, null, ClassLoader::class);
     }

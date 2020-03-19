@@ -1,0 +1,27 @@
+{% set user = admin.user %}
+{% set route = controller.route %}
+{% set type = directory.config('admin.template') ?? target %}
+{% set template -%}
+    {%- if key and uri.currentUri().queryParam('preview') -%}
+        preview
+    {%- elseif route.gravParam('') is not null -%}
+        {{- route.gravParam('') -}}
+    {%- elseif action == 'add' -%}
+        edit
+    {%- elseif action == 'delete' -%}
+        list
+    {%- else -%}
+        {{- action ?: task ?: 'types' -}}
+    {%- endif -%}
+{%- endset %}
+
+{% set separator = config.system.param_sep %}
+
+{% extends target ? [
+        'flex-objects/types/' ~ type ~ '/' ~ template ~ '.html.twig',
+        'flex-objects/types/default/' ~ template ~ '.html.twig',
+        'flex-objects/layouts/404.html.twig'
+    ] : [
+        'flex-objects/types/default/' ~ template ~ '.html.twig',
+        'flex-objects/layouts/404.html.twig'
+    ] %}

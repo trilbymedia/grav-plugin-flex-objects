@@ -1,0 +1,13 @@
+{% do assets.addCss('plugin://flex-objects/css/site.css') %}
+{% do assets.addJs('plugin://flex-objects/js/list.min.js') %}
+
+{% if not type %}
+    {# Display list of directories #}
+    {% include 'flex-objects/views/directories.html.twig' with {options: options.directories } %}
+{% elseif not id %}
+    {# Display specified directory #}
+    {% include 'flex-objects/views/directory.html.twig' with {options: options.directory } %}
+{% else %}
+    {# Display specified object #}
+    {% include 'flex-objects/views/object.html.twig' with {options: options.object } %}
+{% endif %}

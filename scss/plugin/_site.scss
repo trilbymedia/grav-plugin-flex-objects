@@ -1,4 +1,4 @@
-#flex-directory {
+#flex-objects {
 
   .text-center {
     text-align: center;
@@ -55,14 +55,14 @@
   }
 }
 
-@media only screen and (max-width: 1200px) {
-  #flex-directory ul li {
+@media only screen and (max-width: 800px) {
+  #flex-objects ul li {
     width: 50%;
   }
 }
 
-@media only screen and (max-width: 600px) {
-  #flex-directory ul li {
+@media only screen and (max-width: 500px) {
+  #flex-objects ul li {
     width: 100%;
   }
 }
