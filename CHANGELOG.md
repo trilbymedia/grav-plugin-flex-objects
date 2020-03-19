@@ -1,5 +1,5 @@
 # v1.0.0-rc.8
-## mm/dd/2020
+## 03/19/2020
 
 1. [](#new)
     * Added a basic **Convert Data** CLI Command.  Works with `Yaml` <-> `Json`
