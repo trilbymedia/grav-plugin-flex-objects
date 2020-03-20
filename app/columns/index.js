@@ -60,8 +60,8 @@ export const ReLoad = (fresh = false) => {
 
         const contentWrapper = document.querySelector('.content-wrapper .gm-scroll-view');
         const scrollPosition = {
-            top: contentWrapper.scrollTop,
-            left: contentWrapper.scrollLeft
+            top: contentWrapper ? contentWrapper.scrollTop : 0,
+            left: contentWrapper ? contentWrapper.scrollLeft : 0
         };
 
         $.ajax({
@@ -87,7 +87,9 @@ export const ReLoad = (fresh = false) => {
                     search.focus();
                 }
 
-                contentWrapper.scrollTo(scrollPosition);
+                if (contentWrapper) {
+                    contentWrapper.scrollTo(scrollPosition);
+                }
 
                 return FlexPagesInstance;
             }

@@ -1,3 +1,10 @@
+# v1.0.0-rc.9
+## 03/20/2020
+
+1. [](#bugfix)
+    * Fixed issue with touch devices and scrollbars hidden, preventing native scrolling to work [admin#1857](https://github.com/getgrav/grav-plugin-admin/issues/1857) [#1858](https://github.com/getgrav/grav-plugin-admin/issues/1858)
+    
+ 
 # v1.0.0-rc.8
 ## 03/19/2020
 
