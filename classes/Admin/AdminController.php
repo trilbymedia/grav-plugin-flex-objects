@@ -952,7 +952,7 @@ class AdminController
             $this->location = 'flex-objects';
             $this->target = $target;
             $this->id = $this->post['id'] ?? $id;
-            $this->action = $this->post['action'] ?? $uri->param('action');
+            $this->action = $this->post['action'] ?? $uri->param('action', null) ?? $uri->param('', null);
             $this->active = true;
             $this->currentRoute = $uri::getCurrentRoute();
             $this->route = $routeObject;
