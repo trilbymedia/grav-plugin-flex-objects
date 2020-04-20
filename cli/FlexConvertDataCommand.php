@@ -52,7 +52,9 @@ class FlexConvertDataCommand extends ConsoleCommand
         $in = $this->input->getOption('in');
         $in_parts = pathinfo($in);
         $in_extension = $in_parts['extension'];
-        $out_extension = $this->input->getOption('out');
+        $out = $this->input->getOption('out');
+        $out_parts = pathinfo($out);
+        $out_extension = $out_parts['extension'];
 
         $io = new SymfonyStyle($this->input, $this->output);
 
@@ -114,7 +116,7 @@ class FlexConvertDataCommand extends ConsoleCommand
         } elseif ($out_extension === 'json' ) {
             $out_raw = json_encode($out_data, JSON_PRETTY_PRINT);
         } else {
-            $io->error('input files with extension ' . $out_extension . ', is not supported');
+            $io->error('output files with extension ' . $out_extension . ', is not supported');
             exit;
         }
 
