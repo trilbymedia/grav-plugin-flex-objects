@@ -214,7 +214,6 @@ class MediaController extends AbstractController
             $media = $object->getMedia();
         }
 
-        $folder = Utils::url($media->getPath()) ?: null;
         $available_files = [];
         $metadata = [];
         $thumbs = [];
@@ -237,13 +236,15 @@ class MediaController extends AbstractController
 
         // Peak in the flashObject for optimistic filepicker updates
         $pending_files = [];
-        $sessionField  = base64_encode($this->getGrav()['uri']->url());
-        $flash         = $this->getSession()->getFlashObject('files-upload');
+        $sessionField = base64_encode($this->getGrav()['uri']->url());
+        $flash = $this->getSession()->getFlashObject('files-upload');
+        $folder = $media->getPath() ?: null;
 
         if ($flash && isset($flash[$sessionField])) {
             foreach ($flash[$sessionField] as $field => $data) {
                 foreach ($data as $file) {
-                    if (\dirname($file['path']) === $folder) {
+                    $test = \dirname($file['path']);
+                    if ($test === $folder) {
                         $pending_files[] = $file['name'];
                     }
                 }
