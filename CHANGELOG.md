@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
     * Fixed custom actions not working
+    * Fixed custom folder in `mediapicker` field not working
 
 # v1.0.0-rc.9
 ## 03/20/2020

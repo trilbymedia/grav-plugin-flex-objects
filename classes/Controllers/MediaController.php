@@ -6,6 +6,7 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Form\FormFlash;
 use Grav\Common\Grav;
+use Grav\Common\Page\Media;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Session;
 use Grav\Common\Uri;
@@ -204,10 +205,16 @@ class MediaController extends AbstractController
 
         $name = $this->getPost('name');
         $settings = $object->getBlueprint()->schema()->getProperty($name);
+        $fieldFolder = $settings['folder'] ?? null;
+        if ($fieldFolder) {
+            // Custom media.
+            $media = new Media($fieldFolder, []);
+        } else {
+            // Object media.
+            $media = $object->getMedia();
+        }
 
-        $media = $object->getMedia();
-        $folder = $settings['folder'] ?? Utils::url($media->path()) ?: null;
-
+        $folder = Utils::url($media->getPath()) ?: null;
         $available_files = [];
         $metadata = [];
         $thumbs = [];
