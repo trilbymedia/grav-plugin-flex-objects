@@ -139,6 +139,9 @@ class FlexObjectsPlugin extends Plugin
                 'onAdminPage' => [
                     ['onAdminPage', 0]
                 ],
+                'onAdminCompilePresetSCSS' => [
+                    ['onAdminCompilePresetSCSS', 0]
+                ],
                 'onDataTypeExcludeFromDataManagerPluginHook' => [
                     ['onDataTypeExcludeFromDataManagerPluginHook', 0]
                 ],
@@ -254,6 +257,16 @@ class FlexObjectsPlugin extends Plugin
         foreach ($this->controller->getAdminRoutes() as $route => $info) {
             $eventController->blacklist_views[] = trim($route, '/');
         }
+    }
+
+    /**
+     * Add Flex-Object's preset.scss to the Admin Preset SCSS compile process
+     *
+     * @param Event $event
+     */
+    public function onAdminCompilePresetSCSS(Event $event): void
+    {
+        $event['scss']->add($this->grav['locator']->findResource('plugins://flex-objects/scss/preset.scss'));
     }
 
     public function onGetPageTemplates(Event $event): void
