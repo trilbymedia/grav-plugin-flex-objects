@@ -14,6 +14,7 @@ use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Framework\Controller\Traits\ControllerResponseTrait;
+use Grav\Framework\File\Formatter\CsvFormatter;
 use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\File\Interfaces\FileFormatterInterface;
 use Grav\Framework\Flex\FlexDirectory;
@@ -238,8 +239,9 @@ class AdminController
             throw new \RuntimeException($this->admin::translate('Not Found'), 404);
         }
 
-        $method = $config['method'] ?? 'csvSerialize';
-        $class = $config['formatter']['class'] ?? 'Grav\Framework\File\Formatter\CsvFormatter';
+        $defaultFormatter = CsvFormatter::class;
+        $class = trim($config['formatter']['class'] ?? $defaultFormatter, '\\');
+        $method = $config['method'] ?? ($class === $defaultFormatter ? 'csvSerialize' : 'jsonSerialize');
         if (!class_exists($class)) {
             throw new \RuntimeException($this->admin::translate('Formatter Not Found'), 404);
         }
