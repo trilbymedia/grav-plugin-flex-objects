@@ -220,6 +220,11 @@ class AdminController
 
     public function actionCsv()
     {
+        $this->actionExport();
+    }
+
+    public function actionExport()
+    {
         $collection = $this->getCollection();
         if (!$collection) {
             throw new \RuntimeException('Internal Error', 500);

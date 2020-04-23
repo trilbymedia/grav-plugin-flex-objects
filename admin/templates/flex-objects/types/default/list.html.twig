@@ -2,7 +2,7 @@
 {% use 'flex-objects/types/default/titlebar/list.html.twig' %}
 
 {# Allowed actions #}
-{% set can_export = can_export ?? directory.config('admin.export') %}
+{% set can_export = can_export ?? directory.config('admin.export')|bool %}
 {% set can_create = can_create ?? directory.isAuthorized('create', 'admin', user) %}
 {% set can_translate = can_translate ?? (admin.multilang and directory.object.hasFlexFeature('flex-translate')) %}
 
