@@ -351,12 +351,12 @@ class FlexObjectsPlugin extends Plugin
                 continue;
             }
             $cache = $directory ? $directory->getCache('index') : null;
-            $count = $cache ? $cache->get('admin-count') : false;
+            $count = $cache ? $cache->get('admin-count-' . md5($admin->user->username)) : false;
             if (null === $count) {
                 try {
                     $collection = $directory->getCollection();
                     $count = $collection->isAuthorized('list', 'admin', $admin->user)->count();
-                    $cache->set('admin-count', $count);
+                    $cache->set('admin-count-' . md5($admin->user->username), $count);
                 } catch (\InvalidArgumentException $e) {
                     continue;
                 }
