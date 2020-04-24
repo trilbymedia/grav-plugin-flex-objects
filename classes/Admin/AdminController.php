@@ -666,9 +666,8 @@ class AdminController
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect) {
-                // TODO: remove 'action:add' after save.
-                if ($this->referrerRoute->getGravParam('action') === 'add') {
-                    $this->referrerRoute = $this->currentRoute->withGravParam('action', null);
+                if ($key === '' || $this->referrerRoute->getGravParam('action') === 'add' || $this->referrerRoute->getGravParam('') === 'add') {
+                    $this->referrerRoute = $this->currentRoute->withGravParam('action', null)->withGravParam('', null);
                     if (!Utils::endsWith($this->referrerRoute->toString(false), '/' . $object->getKey())) {
                         $this->referrerRoute = $this->referrerRoute->withAddedPath($object->getKey());
                     }
