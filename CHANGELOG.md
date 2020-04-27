@@ -1,5 +1,5 @@
 # v1.0.0-rc.10
-## mm/dd/2020
+## 04/27/2020
 
 1. [](#bugfix)
     * Fixed custom actions not working
