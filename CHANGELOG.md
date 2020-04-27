@@ -1,3 +1,13 @@
+# v1.0.0-rc.10
+## 04/27/2020
+
+1. [](#bugfix)
+    * Fixed custom actions not working
+    * Fixed custom folder in `mediapicker` field not working
+    * Fixed export title when not using CVS [#51](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/51)
+    * Fixed preview in Page list view [admin#1845](https://github.com/getgrav/grav-plugin-admin/issues/1845)
+    * Fixed `404 Not Found` error after saving a new object
+
 # v1.0.0-rc.9
 ## 03/20/2020
 

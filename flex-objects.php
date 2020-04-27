@@ -27,7 +27,7 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexObjectsPlugin extends Plugin
 {
-    const MIN_GRAV_VERSION = '1.7.0-rc.6';
+    const MIN_GRAV_VERSION = '1.7.0-rc.8';
 
     public $features = [
         'blueprints' => 1000,
@@ -64,7 +64,6 @@ class FlexObjectsPlugin extends Plugin
 
         return [
             PluginsLoadedEvent::class => [
-                ['autoload', 100000],
                 ['initializeFlex', 10]
             ],
             PermissionsRegisterEvent::class => [
@@ -139,6 +138,9 @@ class FlexObjectsPlugin extends Plugin
                 ],
                 'onAdminPage' => [
                     ['onAdminPage', 0]
+                ],
+                'onAdminCompilePresetSCSS' => [
+                    ['onAdminCompilePresetSCSS', 0]
                 ],
                 'onDataTypeExcludeFromDataManagerPluginHook' => [
                     ['onDataTypeExcludeFromDataManagerPluginHook', 0]
@@ -257,6 +259,16 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
+    /**
+     * Add Flex-Object's preset.scss to the Admin Preset SCSS compile process
+     *
+     * @param Event $event
+     */
+    public function onAdminCompilePresetSCSS(Event $event): void
+    {
+        $event['scss']->add($this->grav['locator']->findResource('plugins://flex-objects/scss/preset.scss'));
+    }
+
     public function onGetPageTemplates(Event $event): void
     {
         /** @var Types $types */
@@ -339,12 +351,12 @@ class FlexObjectsPlugin extends Plugin
                 continue;
             }
             $cache = $directory ? $directory->getCache('index') : null;
-            $count = $cache ? $cache->get('admin-count') : false;
+            $count = $cache ? $cache->get('admin-count-' . md5($admin->user->username)) : false;
             if (null === $count) {
                 try {
                     $collection = $directory->getCollection();
                     $count = $collection->isAuthorized('list', 'admin', $admin->user)->count();
-                    $cache->set('admin-count', $count);
+                    $cache->set('admin-count-' . md5($admin->user->username), $count);
                 } catch (\InvalidArgumentException $e) {
                     continue;
                 }

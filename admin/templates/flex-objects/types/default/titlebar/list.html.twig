@@ -9,7 +9,7 @@
         {# EXPORT #}
         {% if can_export %}
         {% block export_button %}
-            {% include ['flex-objects/types/' ~ target ~ '/buttons/export-csv.html.twig', 'flex-objects/types/default/buttons/export-csv.html.twig'] %}
+            {% include ['flex-objects/types/' ~ target ~ '/buttons/export.html.twig', 'flex-objects/types/default/buttons/export.html.twig'] with {export: directory.config('admin.export')} %}
         {% endblock export_button %}
         {% endif %}
 

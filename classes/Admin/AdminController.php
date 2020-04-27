@@ -14,6 +14,7 @@ use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Framework\Controller\Traits\ControllerResponseTrait;
+use Grav\Framework\File\Formatter\CsvFormatter;
 use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\File\Interfaces\FileFormatterInterface;
 use Grav\Framework\Flex\FlexDirectory;
@@ -220,6 +221,11 @@ class AdminController
 
     public function actionCsv()
     {
+        $this->actionExport();
+    }
+
+    public function actionExport()
+    {
         $collection = $this->getCollection();
         if (!$collection) {
             throw new \RuntimeException('Internal Error', 500);
@@ -233,8 +239,9 @@ class AdminController
             throw new \RuntimeException($this->admin::translate('Not Found'), 404);
         }
 
-        $method = $config['method'] ?? 'csvSerialize';
-        $class = $config['formatter']['class'] ?? 'Grav\Framework\File\Formatter\CsvFormatter';
+        $defaultFormatter = CsvFormatter::class;
+        $class = trim($config['formatter']['class'] ?? $defaultFormatter, '\\');
+        $method = $config['method'] ?? ($class === $defaultFormatter ? 'csvSerialize' : 'jsonSerialize');
         if (!class_exists($class)) {
             throw new \RuntimeException($this->admin::translate('Formatter Not Found'), 404);
         }
@@ -659,9 +666,8 @@ class AdminController
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect) {
-                // TODO: remove 'action:add' after save.
-                if ($this->referrerRoute->getGravParam('action') === 'add') {
-                    $this->referrerRoute = $this->currentRoute->withGravParam('action', null);
+                if ($key === '' || $this->referrerRoute->getGravParam('action') === 'add' || $this->referrerRoute->getGravParam('') === 'add') {
+                    $this->referrerRoute = $this->currentRoute->withGravParam('action', null)->withGravParam('', null);
                     if (!Utils::endsWith($this->referrerRoute->toString(false), '/' . $object->getKey())) {
                         $this->referrerRoute = $this->referrerRoute->withAddedPath($object->getKey());
                     }
@@ -952,7 +958,7 @@ class AdminController
             $this->location = 'flex-objects';
             $this->target = $target;
             $this->id = $this->post['id'] ?? $id;
-            $this->action = $this->post['action'] ?? $uri->param('action');
+            $this->action = $this->post['action'] ?? $uri->param('action', null) ?? $uri->param('', null);
             $this->active = true;
             $this->currentRoute = $uri::getCurrentRoute();
             $this->route = $routeObject;

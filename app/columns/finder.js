@@ -157,7 +157,7 @@ export class FlexPages {
                     const canPreview = !(item.extras.tags.includes('non-routable') || item.extras.tags.includes('unpublished'));
                     const ul = $(`<div class="dropdown-menu">
     <div class="action-bar">
-        ${canPreview ? `<a href="${route}/?preview=1" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a>` : ''}
+        ${canPreview ? `<a href="${route}/:preview" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a>` : ''}
         <a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a>
         <a href="#" class="dropdown-item" title="Duplicate (coming soon)"><i class="fa fa-fw fa-copy"></i></a>
         <a href="#" class="dropdown-item" title="Move (coming soon)"><i class="fa fa-fw fa-arrows"></i></a>
