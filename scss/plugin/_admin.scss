@@ -34,12 +34,10 @@
 
     .edit-action {
         float: left;
-        color: #41bea8 !important;
     }
 
     .delete-action {
         float: right;
-        color: #da4b46 !important;
     }
 
     table {
@@ -48,18 +46,10 @@
 
     thead {
         display: table-header-group;
-
-        tr {
-            background: #e4e4e4;
-        }
     }
 
     tbody {
         display: table-row-group;
-
-        tr:nth-child(even) {
-            background: #f4f4f4;
-        }
     }
 
     tr {
@@ -91,14 +81,6 @@
         }
     }
 
-    i.published {
-        color: #00A171;
-    }
-
-    i.unpublished {
-        color: #999;
-    }
-
     .tablesorter .filtered {
         display: none;
     }
@@ -128,10 +110,8 @@
     .flex-list-pagination {
         margin: 1rem 0 -1rem;
         padding: .5rem 1rem;
-        background: #f5f5f5;
         display: flex;
         align-items: center;
-        border-top: 1px solid #ddd;
 
         .vuetable-pagination-info, .flex-objects-pagination {
             flex: 1;
@@ -139,25 +119,16 @@
 
         .flex-objects-pagination {
             text-align: right;
-
             -webkit-user-select: none;
             -moz-user-select: none;
             -khtml-user-select: none;
             -ms-user-select: none;
 
             .button {
-                color: #333;
                 border-radius: 4px;
                 background: transparent;
 
-                &.active {
-                    color: white;
-                    background: #0090D9;
-                }
-
                 &.disabled {
-                    color: #aaa;
-
                     &:active {
                         margin: 0;
                     }

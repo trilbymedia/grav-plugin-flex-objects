@@ -37,7 +37,7 @@
         "eslint-loader": "^4.0.2",
         "exports-loader": "^0.7.0",
         "gulp": "^4.0.2",
-        "gulp-autoprefixer": "latest",
+        "gulp-autoprefixer": "^7.0.1",
         "gulp-clean-css": "^4.3.0",
         "gulp-csscomb": "^3.1.0",
         "gulp-rename": "^2.0.0",
