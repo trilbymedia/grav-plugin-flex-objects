@@ -10,7 +10,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var watch_dir = './scss/**/*.scss';
 var src_dir = './scss/*.scss';
 var dest_dir = './css';
-var ignore_files = '!./scss/preset.scss';
+var ignore_files = '!./scss/_preset.scss';
 
 var paths = {
     source: [src_dir, ignore_files]
