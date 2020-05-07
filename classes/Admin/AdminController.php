@@ -895,6 +895,7 @@ class AdminController
             // Match route to the flex directory.
             $path = '/' . ($target ? $location . '/' . $target : $location) . '/';
             $test = $routes[$path] ?? null;
+
             $directory = null;
             if ($test)  {
                 $directory = $test['directory'];
@@ -958,7 +959,7 @@ class AdminController
             $this->location = 'flex-objects';
             $this->target = $target;
             $this->id = $this->post['id'] ?? $id;
-            $this->action = $this->post['action'] ?? $uri->param('action', null) ?? $uri->param('', null);
+            $this->action = $this->post['action'] ?? $uri->param('action', null) ?? $uri->param('', null) ?? $routeObject->getGravParam('');
             $this->active = true;
             $this->currentRoute = $uri::getCurrentRoute();
             $this->route = $routeObject;
