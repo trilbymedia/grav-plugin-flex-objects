@@ -10,32 +10,33 @@ var sourcemaps = require('gulp-sourcemaps');
 var watch_dir = './scss/**/*.scss';
 var src_dir = './scss/*.scss';
 var dest_dir = './css';
+var ignore_files = '!./scss/_preset.scss';
 
 var paths = {
-    source: src_dir
+    source: [src_dir, ignore_files]
 };
 
 function watch() {
-  return gulp.watch(watch_dir, build);
+    return gulp.watch(watch_dir, build);
 }
 
 function build() {
-  return gulp.src(paths.source)
-      .pipe(sourcemaps.init())
-      .pipe(sass({
+    return gulp.src(paths.source)
+        .pipe(sourcemaps.init())
+        .pipe(sass({
             outputStyle: 'compact',
             precision: 10
-          }).on('error', sass.logError)
-      )
-      .pipe(sourcemaps.write())
-      .pipe(autoprefixer())
-      .pipe(gulp.dest(dest_dir))
-      .pipe(csscomb())
-      .pipe(cleancss())
-      .pipe(rename({
-        suffix: '.min'
-      }))
-      .pipe(gulp.dest(dest_dir));
+        }).on('error', sass.logError)
+        )
+        .pipe(sourcemaps.write())
+        .pipe(autoprefixer())
+        .pipe(gulp.dest(dest_dir))
+        .pipe(csscomb())
+        .pipe(cleancss())
+        .pipe(rename({
+            suffix: '.min'
+        }))
+        .pipe(gulp.dest(dest_dir));
 }
 
 exports.watch = watch;

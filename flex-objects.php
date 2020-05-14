@@ -266,7 +266,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onAdminCompilePresetSCSS(Event $event): void
     {
-        $event['scss']->add($this->grav['locator']->findResource('plugins://flex-objects/scss/preset.scss'));
+        $event['scss']->add($this->grav['locator']->findResource('plugins://flex-objects/scss/_preset.scss'));
     }
 
     public function onGetPageTemplates(Event $event): void

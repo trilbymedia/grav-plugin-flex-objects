@@ -1,8 +1,8 @@
-var webpack = require('webpack'),
-    path = require('path'),
-    UglifyJsPlugin = require('uglifyjs-webpack-plugin'),
-    isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production-wip',
-    VueLoaderPlugin = require('vue-loader/lib/plugin');
+var webpack = require('webpack');
+var path = require('path');
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+var isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production-wip';
+var VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
     entry: {
