@@ -1,6 +1,10 @@
 # v1.0.0-rc.11
-## mm/dd/2020
+## 05/14/2020
 
+1. [](#new)
+    * Added integration with Admin's new preset events to style the CSS
+1. [](#improved)
+    * JS Maitenance    
 1. [](#bugfix)
     * Fixed `Accounts` Configuration tab
 
