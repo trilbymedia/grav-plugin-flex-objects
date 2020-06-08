@@ -14,7 +14,7 @@ use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
-use Grav\Framework\Media\Interfaces\MediaManipulationInterface;
+use Grav\Framework\Media\Interfaces\MediaInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -27,7 +27,7 @@ class MediaController extends AbstractController
     {
         $this->checkAuthorization('media.create');
 
-        /** @var FlexObjectInterface|MediaManipulationInterface|null $object */
+        /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
         if (!$object) {
             throw new \RuntimeException('Not Found', 404);
@@ -119,7 +119,7 @@ class MediaController extends AbstractController
     {
         $this->checkAuthorization('media.delete');
 
-        /** @var FlexObjectInterface|MediaManipulationInterface|null $object */
+        /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
         if (!$object) {
             throw new \RuntimeException('Not Found', 404);
@@ -157,7 +157,7 @@ class MediaController extends AbstractController
     {
         $this->checkAuthorization('media.list');
 
-        /** @var MediaManipulationInterface $object */
+        /** @var MediaInterface $object */
         $object = $this->getObject();
         if (!$object) {
             throw new \RuntimeException('Not Found', 404);
@@ -197,7 +197,7 @@ class MediaController extends AbstractController
     {
         $this->checkAuthorization('media.list');
 
-        /** @var FlexObject|MediaManipulationInterface $object */
+        /** @var FlexObject $object */
         $object = $this->getObject();
         if (!$object) {
             throw new \RuntimeException('Not Found', 404);

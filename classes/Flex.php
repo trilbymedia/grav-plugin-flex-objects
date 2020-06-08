@@ -316,7 +316,7 @@ class Flex implements FlexInterface
                 if ($object->hasKey()) {
                     $parts[] = trim($object->getKey(), '/');
                 }
-                $params = ['action' => 'add'] + $params;
+                $params = ['' => 'add'] + $params;
             }
         }
 
