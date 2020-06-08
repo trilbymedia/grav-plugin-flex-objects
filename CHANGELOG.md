@@ -1,8 +1,10 @@
 # v1.0.0-rc.12
-## mm/dd/2020
+## 06/08/2020
 
 1. [](#new)
     * Code updates to match Grav 1.7.0-rc.12
+1. [](#improved)
+    * Changed class `admin-pages` to `admin-{{ target }}` [#59](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/59)   
 
 # v1.0.0-rc.11
 ## 05/14/2020
