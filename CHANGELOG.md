@@ -1,3 +1,9 @@
+# v1.0.0-rc.13
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fix bad link in directory listing template
+
 # v1.0.0-rc.12
 ## 06/08/2020
 
