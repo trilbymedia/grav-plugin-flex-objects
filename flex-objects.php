@@ -254,6 +254,7 @@ class FlexObjectsPlugin extends Plugin
         $eventController = $event['controller'];
 
         // Blacklist all admin routes, including aliases and redirects.
+        $eventController->blacklist_views[] = 'flex-objects';
         foreach ($this->controller->getAdminRoutes() as $route => $info) {
             $eventController->blacklist_views[] = trim($route, '/');
         }

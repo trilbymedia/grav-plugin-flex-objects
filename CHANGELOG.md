@@ -2,7 +2,8 @@
 ## mm/dd/2020
 
 1. [](#bugfix)
-    * Fix bad link in directory listing template
+    * Fixed bad link in directory listing template
+    * Fixed admin save task displaying error message about non-existing data type
 
 # v1.0.0-rc.12
 ## 06/08/2020
