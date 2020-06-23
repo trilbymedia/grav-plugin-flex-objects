@@ -121,6 +121,46 @@ class MediaController extends AbstractController
     /**
      * @return ResponseInterface
      */
+    public function taskMediaDelete(): ResponseInterface
+    {
+        $this->checkAuthorization('media.delete');
+
+        /** @var FlexObjectInterface|null $object */
+        $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $filename = $this->getPost('filename');
+
+        // Handle bad filenames.
+        if (!Utils::checkFilename($filename)) {
+            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
+        }
+
+        try {
+            $field = $this->getPost('name');
+            $flash = $this->getFormFlash($object);
+            $flash->removeFile($filename, $field);
+            $flash->save();
+        } catch (\Exception $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        $response = [
+            'code'    => 200,
+            'status'  => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FILE_DELETED') . ': ' . $filename
+        ];
+
+        return $this->createJsonResponse($response);
+    }
+
+    /**
+     * Used in pagemedia field.
+     *
+     * @return ResponseInterface
+     */
     public function taskMediaCopy(): ResponseInterface
     {
         $this->checkAuthorization('media.create');
@@ -176,16 +216,23 @@ class MediaController extends AbstractController
         return $this->createJsonResponse($response);
     }
 
+
     /**
+     * Used in pagemedia field.
+     *
      * @return ResponseInterface
      */
-    public function taskMediaDelete(): ResponseInterface
+    public function taskMediaRemove(): ResponseInterface
     {
         $this->checkAuthorization('media.delete');
 
         /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
         if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if (!method_exists($object, 'deleteMediaFile')) {
             throw new \RuntimeException('Not Found', 404);
         }
 
@@ -196,14 +243,7 @@ class MediaController extends AbstractController
             throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
-        try {
-            $field = $this->getPost('name');
-            $flash = $this->getFormFlash($object);
-            $flash->removeFile($filename, $field);
-            $flash->save();
-        } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
-        }
+        $object->deleteMediaFile($filename);
 
         $response = [
             'code'    => 200,

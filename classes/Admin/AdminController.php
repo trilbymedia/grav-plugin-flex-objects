@@ -823,7 +823,15 @@ class AdminController
 
     public function taskDelmedia()
     {
-        return $this->taskMediaDelete();
+        try {
+            $response = $this->forwardMediaTask('task', 'media.remove');
+
+            $this->admin->json_response = json_decode($response->getBody(), false);
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+
+        return true;
     }
 
     public function taskFilesUpload()
