@@ -33,7 +33,11 @@ class MediaController extends AbstractController
 
         /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
-        if (!$object || !method_exists($object, 'getMedia')) {
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if (!method_exists($object, 'checkUploadedMediaFile')) {
             throw new \RuntimeException('Not Found', 404);
         }
 
@@ -42,9 +46,6 @@ class MediaController extends AbstractController
         if ($field === 'undefined') {
             $field = null;
         }
-
-        /** @var MediaInterface $media */
-        $media = $object->getMedia();
 
         $files = $this->getRequest()->getUploadedFiles();
         if ($field && isset($files['data'])) {
@@ -76,18 +77,7 @@ class MediaController extends AbstractController
 
         $filename = $file->getClientFilename();
 
-        if ($media instanceof MediaUploadInterface && method_exists($object, 'getMediaFieldSettings')) {
-            /** @var array $settings */
-            $settings = $object->getMediaFieldSettings($field ?? '');
-            $media->checkUploadedFile($file, $filename, $settings ?: null);
-        } else {
-            user_error('Media should implement MediaUploadInterface and object should use trait FlexMediaTrait', E_USER_DEPRECATED);
-
-            // Handle bad filenames.
-            if (!Utils::checkFilename($filename)) {
-                throw new \RuntimeException(sprintf($this->translate('PLUGIN_ADMIN.FILEUPLOAD_UNABLE_TO_UPLOAD'), $filename, 'Bad filename'), 400);
-            }
-        }
+        $object->checkUploadedMediaFile($file, $filename, $field);
 
         try {
             $flash = $this->getFormFlash($object);
@@ -107,6 +97,8 @@ class MediaController extends AbstractController
         $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
         if ($include_metadata) {
             $medium = MediumFactory::fromUploadedFile($file);
+
+            $media = $object->getMedia();
             $media->add($filename, $medium);
 
             $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
@@ -135,7 +127,11 @@ class MediaController extends AbstractController
 
         /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
-        if (!$object || !method_exists($object, 'uploadMediaFile')) {
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if (!method_exists($object, 'uploadMediaFile')) {
             throw new \RuntimeException('Not Found', 404);
         }
 
