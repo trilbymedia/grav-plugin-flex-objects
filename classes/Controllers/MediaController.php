@@ -7,6 +7,7 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 use Grav\Common\Form\FormFlash;
 use Grav\Common\Grav;
 use Grav\Common\Media\Interfaces\MediaUploadInterface;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Media;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Page\Medium\MediumFactory;
@@ -19,6 +20,7 @@ use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Media\Interfaces\MediaInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use RocketTheme\Toolbox\Event\Event;
 
 class MediaController extends AbstractController
 {
@@ -111,6 +113,60 @@ class MediaController extends AbstractController
             if (isset($media[$basename])) {
                 $metadata = $media[$basename]->metadata() ?: [];
             }
+        }
+
+        $response = [
+            'code'    => 200,
+            'status'  => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
+            'filename' => $filename,
+            'metadata' => $metadata
+        ];
+
+        return $this->createJsonResponse($response);
+    }
+
+    /**
+     * @return ResponseInterface
+     */
+    public function taskMediaCopy(): ResponseInterface
+    {
+        $this->checkAuthorization('media.create');
+
+        /** @var FlexObjectInterface|null $object */
+        $object = $this->getObject();
+        if (!$object || !method_exists($object, 'uploadMediaFile')) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $request = $this->getRequest();
+        $files = $request->getUploadedFiles();
+
+        $file = $files['file'] ?? null;
+        if (!$file instanceof UploadedFileInterface) {
+            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
+        }
+
+        $post = $request->getParsedBody();
+        $filename = $post['name'] ?? $file->getClientFilename();
+
+        // Upload media right away.
+        $object->uploadMediaFile($file, $filename);
+
+        // Include exif metadata into the response if configured to do so
+        $metadata = [];
+        $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
+        if ($include_metadata) {
+            $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
+            $media = $object->getMedia();
+            if (isset($media[$basename])) {
+                $metadata = $media[$basename]->metadata() ?: [];
+            }
+        }
+
+        if ($object instanceof PageInterface) {
+            // Backwards compatibility to existing plugins.
+            $this->grav->fireEvent('onAdminAfterAddMedia', new Event(['page' => $object]));
         }
 
         $response = [

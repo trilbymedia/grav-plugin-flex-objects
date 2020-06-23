@@ -810,7 +810,15 @@ class AdminController
 
     public function taskAddmedia()
     {
-        return $this->taskMediaUpload();
+        try {
+            $response = $this->forwardMediaTask('task', 'media.copy');
+
+            $this->admin->json_response = json_decode($response->getBody(), false);
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+
+        return true;
     }
 
     public function taskDelmedia()

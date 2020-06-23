@@ -4,6 +4,7 @@
 1. [](#bugfix)
     * Fixed bad link in directory listing template
     * Fixed admin save task displaying error message about non-existing data type
+    * Fixed `pagemedia` field not uploading files to the object right away
 
 # v1.0.0-rc.12
 ## 06/08/2020
