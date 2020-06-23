@@ -820,7 +820,7 @@ class AdminController
 
     public function taskFilesUpload()
     {
-        throw new \RuntimeException('Task delMedia should not be called!');
+        throw new \RuntimeException('Task filesUpload should not be called!');
     }
 
     public function taskRemoveMedia($filename = null)

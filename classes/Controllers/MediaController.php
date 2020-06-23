@@ -6,8 +6,10 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Form\FormFlash;
 use Grav\Common\Grav;
+use Grav\Common\Media\Interfaces\MediaUploadInterface;
 use Grav\Common\Page\Media;
 use Grav\Common\Page\Medium\Medium;
+use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Session;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
@@ -29,14 +31,18 @@ class MediaController extends AbstractController
 
         /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
-        if (!$object) {
+        if (!$object || !method_exists($object, 'getMedia')) {
             throw new \RuntimeException('Not Found', 404);
         }
 
+        // Get field for the uploaded media.
         $field = $this->getPost('name', 'undefined');
         if ($field === 'undefined') {
             $field = null;
         }
+
+        /** @var MediaInterface $media */
+        $media = $object->getMedia();
 
         $files = $this->getRequest()->getUploadedFiles();
         if ($field && isset($files['data'])) {
@@ -68,9 +74,17 @@ class MediaController extends AbstractController
 
         $filename = $file->getClientFilename();
 
-        // Handle bad filenames.
-        if (!Utils::checkFilename($filename)) {
-            throw new \RuntimeException(sprintf($this->translate('PLUGIN_ADMIN.FILEUPLOAD_UNABLE_TO_UPLOAD'), $filename, 'Bad filename'), 400);
+        if ($media instanceof MediaUploadInterface && method_exists($object, 'getMediaFieldSettings')) {
+            /** @var array $settings */
+            $settings = $object->getMediaFieldSettings($field ?? '');
+            $media->checkUploadedFile($file, $filename, $settings ?: null);
+        } else {
+            user_error('Media should implement MediaUploadInterface and object should use trait FlexMediaTrait', E_USER_DEPRECATED);
+
+            // Handle bad filenames.
+            if (!Utils::checkFilename($filename)) {
+                throw new \RuntimeException(sprintf($this->translate('PLUGIN_ADMIN.FILEUPLOAD_UNABLE_TO_UPLOAD'), $filename, 'Bad filename'), 400);
+            }
         }
 
         try {
@@ -86,20 +100,18 @@ class MediaController extends AbstractController
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        // TODO: add metadata support.
+        // Include exif metadata into the response if configured to do so
         $metadata = [];
-        /*
-        $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
-        $media = $object->getMedia();
-
-        // Add metadata if needed
         $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
+        if ($include_metadata) {
+            $medium = MediumFactory::fromUploadedFile($file);
+            $media->add($filename, $medium);
 
-        $metadata = [];
-        if ($include_metadata && isset($media[$basename])) {
-            $metadata = $media[$basename]->metadata() ?: [];
+            $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
+            if (isset($media[$basename])) {
+                $metadata = $media[$basename]->metadata() ?: [];
+            }
         }
-        */
 
         $response = [
             'code'    => 200,
