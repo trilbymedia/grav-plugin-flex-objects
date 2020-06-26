@@ -1,6 +1,8 @@
 # v1.0.0-rc.13
 ## mm/dd/2020
 
+1. [](#new)
+    * Added admin blueprints for the cache enabled/timeouts + included a default set of timeouts in `flex-objects.yaml`
 1. [](#bugfix)
     * Fixed bad link in directory listing template
     * Fixed admin save task displaying error message about non-existing data type
