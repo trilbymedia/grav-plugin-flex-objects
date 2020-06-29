@@ -41,78 +41,16 @@ form:
         0: PLUGIN_ADMIN.DISABLED
       validate:
         type: bool
-
     extra_admin_twig_path:
       type: text
       label: PLUGIN_FLEX_OBJECTS.EXTRA_ADMIN_TWIG_PATH
       validate:
         required: true
 
-    section_cache:
-      type: section
-      title: PLUGIN_FLEX_OBJECTS.FLEX_CACHING
-      underline: true
-
-      fields:
-        object.cache.index.enabled:
-          type: toggle
-          label: PLUGIN_FLEX_OBJECTS.INDEX_CACHE_ENABLED
-          highlight: 1
-          default: 1
-          options:
-            1: PLUGIN_ADMIN.ENABLED
-            0: PLUGIN_ADMIN.DISABLED
-          validate:
-            type: bool
-
-        object.cache.index.timeout:
-          type: number
-          append: PLUGIN_FLEX_OBJECTS.SECONDS
-          label: PLUGIN_FLEX_OBJECTS.INDEX_CACHE_TIMEOUT
-
-        object.cache.object.enabled:
-          type: toggle
-          label: PLUGIN_FLEX_OBJECTS.OBJECT_CACHE_ENABLED
-          highlight: 1
-          default: 1
-          options:
-            1: PLUGIN_ADMIN.ENABLED
-            0: PLUGIN_ADMIN.DISABLED
-          validate:
-            type: bool
-
-        object.cache.object.timeout:
-          type: number
-          append: PLUGIN_FLEX_OBJECTS.SECONDS
-          label: PLUGIN_FLEX_OBJECTS.OBJECT_CACHE_TIMEOUT
-
-        object.cache.render.enabled:
-          type: toggle
-          label: PLUGIN_FLEX_OBJECTS.RENDER_CACHE_ENABLED
-          highlight: 1
-          default: 1
-          options:
-            1: PLUGIN_ADMIN.ENABLED
-            0: PLUGIN_ADMIN.DISABLED
-          validate:
-            type: bool
-
-        object.cache.render.timeout:
-          type: number
-          append: PLUGIN_FLEX_OBJECTS.SECONDS
-          label: PLUGIN_FLEX_OBJECTS.RENDER_CACHE_TIMEOUT
-
-    section_directories:
-      type: section
-      title: PLUGIN_FLEX_OBJECTS.FLEX_DIRECTORIES
-      underline: true
-
-      fields:
-
-        directories:
-          type: flex-objects
-          label: PLUGIN_FLEX_OBJECTS.DIRECTORIES
-          array: true
-          ignore_empty: true
-          validate:
-            type: array
+    directories:
+      type: flex-objects
+      label: PLUGIN_FLEX_OBJECTS.DIRECTORIES
+      array: true
+      ignore_empty: true
+      validate:
+        type: array

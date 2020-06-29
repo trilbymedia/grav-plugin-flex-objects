@@ -9,13 +9,3 @@ PLUGIN_FLEX_OBJECTS:
   USE_BUILT_IN_CSS: "Use built in CSS"
   EXTRA_ADMIN_TWIG_PATH: "Extra Admin Twig Path"
   DIRECTORIES: "Directories"
-
-  FLEX_DIRECTORIES: "Flex Directories"
-  FLEX_CACHING: "Flex Caching"
-  SECONDS: "seconds"
-  INDEX_CACHE_ENABLED: "Index Cache Enabled"
-  INDEX_CACHE_TIMEOUT: "Index Cache Timeout"
-  OBJECT_CACHE_ENABLED: "Object Cache Enabled"
-  OBJECT_CACHE_TIMEOUT: "Object Cache Timeout"
-  RENDER_CACHE_ENABLED: "Render Cache Enabled"
-  RENDER_CACHE_TIMEOUT: "Render Cache Timeout"
