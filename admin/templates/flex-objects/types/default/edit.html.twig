@@ -9,6 +9,7 @@
 {% set can_list = can_list ?? directory.isAuthorized('list', 'admin', user) %}
 {% set can_preview = can_preview ?? (object.exists and directory.config('admin.preview.enabled', false)) %}
 {% set can_read = can_read ?? (object.exists ? object.isAuthorized('read', 'admin', user) : directory.isAuthorized('create', 'admin', user)) %}
+{% set can_create = can_create ?? object.isAuthorized('create', 'admin', user) %}
 {% set can_save = can_save ?? (object.exists ? object.isAuthorized('update', 'admin', user) : directory.isAuthorized('create', 'admin', user)) %}
 {% set can_delete = can_delete ?? (object.exists and object.isAuthorized('delete', 'admin', user)) %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('flex-translate')) %}

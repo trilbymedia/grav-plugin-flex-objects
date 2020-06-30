@@ -370,12 +370,18 @@ class AdminController
             throw new \RuntimeException('Not Found', 404);
         }
 
-        if (!$directory->isAuthorized('create', 'admin', $this->user)) {
-            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
-        }
-
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
+
+        $object = $this->getObject($route);
+        $authorized = $object && $object->isAuthorized('create', 'admin', $this->user);
+
+        if (!$authorized && !$directory->isAuthorized('create', 'admin', $this->user)) {
+            $this->setRedirect($this->referrerRoute->toString(true));
+
+            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' add.', 403);
+        }
+
         $folder = $this->data['folder'] ?? null;
         $title = $this->data['title'] ?? null;
         if ($title) {
