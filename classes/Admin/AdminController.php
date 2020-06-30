@@ -1062,6 +1062,10 @@ class AdminController
         } catch (RequestException $e) {
             $response = $this->createErrorResponse($e);
         } catch (\RuntimeException $e) {
+            // If task fails to run, redirect back to the previous page and display the error message.
+            if ($this->task && !$this->redirect) {
+                $this->setRedirect($this->referrerRoute->toString(true));
+            }
             $response = null;
             $this->setMessage($e->getMessage(), 'error');
         }
