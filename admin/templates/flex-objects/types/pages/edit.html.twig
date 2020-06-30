@@ -21,9 +21,9 @@
     {% set next = object.nextSibling %}
 
     {% set parent_url = parent and not parent.root ? admin_route(back_route) %}
-    {% set child_url = child ? admin_route(current_route ~ '/' ~ child.slug) %}
-    {% set prev_url = prev ? admin_route(back_route ~ '/' ~ prev.slug) %}
-    {% set next_url = next ? admin_route(back_route ~ '/' ~ next.slug) %}
+    {% set child_url = can_read and child ? admin_route(current_route ~ '/' ~ child.slug) %}
+    {% set prev_url = can_read and prev ? admin_route(back_route ~ '/' ~ prev.slug) %}
+    {% set next_url = can_read and next ? admin_route(back_route ~ '/' ~ next.slug) %}
     {% endif %}
     {% set back_url = back_url ?? admin_route(flex.adminRoute(directory.getFlexType())) %}
 
