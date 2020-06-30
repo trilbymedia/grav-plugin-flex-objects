@@ -300,10 +300,10 @@ class AdminController
                 $object->delete();
 
                 $this->admin->setMessage($this->admin::translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
-
-                $redirect = $this->referrerRoute->toString(true);
-                if ($this->currentRoute === $this->referrerRoute) {
-                    $redirect = dirname($this->currentRoute->toString(true));
+                if ($this->currentRoute->withoutGravParams()->getRoute() === $this->referrerRoute->getRoute()) {
+                    $redirect = dirname($this->currentRoute->withoutGravParams()->toString(true));
+                } else {
+                    $redirect = $this->referrerRoute->toString(true);
                 }
 
                 $this->setRedirect($redirect);
