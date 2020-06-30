@@ -5,6 +5,7 @@
     * Fixed bad link in directory listing template
     * Fixed admin save task displaying error message about non-existing data type
     * Fixed `pagemedia` field not uploading/deleting files right away
+    * Fixed `Flex Pages` add, copy and move buttons appearing in edit view when no permissions
 
 # v1.0.0-rc.12
 ## 06/08/2020

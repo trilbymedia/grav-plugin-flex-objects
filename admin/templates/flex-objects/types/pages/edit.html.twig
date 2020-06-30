@@ -57,7 +57,7 @@
 {% endblock delete_button %}
 
 {% block extra_buttons %}
-    {% if object.exists and not object.root() %}
+    {% if object.exists and not object.root() and can_save %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/add.html.twig', 'flex-objects/types/pages/buttons/add.html.twig'] %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/copy.html.twig', 'flex-objects/types/pages/buttons/copy.html.twig'] %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/move.html.twig', 'flex-objects/types/pages/buttons/move.html.twig'] %}
