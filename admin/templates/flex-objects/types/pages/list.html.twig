@@ -1,5 +1,7 @@
 {% extends 'flex-objects/types/default/list.html.twig' %}
 
+{% set can_create = true %}
+
 {% block back_button %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/back.html.twig', 'flex-objects/types/pages/buttons/back.html.twig'] %}
 {% endblock back_button %}
