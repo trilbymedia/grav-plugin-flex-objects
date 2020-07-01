@@ -1,5 +1,5 @@
 # v1.0.0-rc.13
-## mm/dd/2020
+## 07/01/2020
 
 1. [](#bugfix)
     * Fixed bad link in directory listing template
