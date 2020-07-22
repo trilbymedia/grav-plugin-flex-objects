@@ -1,3 +1,9 @@
+# v1.0.0-rc.15
+## 07/22/2020
+
+1. [](#new)
+    * Released with no changes to keep sync with Grav + Admin
+
 # v1.0.0-rc.14
 ## 07/09/2020
 
