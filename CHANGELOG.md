@@ -1,3 +1,26 @@
+# v1.0.0-rc.15
+## 07/22/2020
+
+1. [](#new)
+    * Released with no changes to keep sync with Grav + Admin
+
+# v1.0.0-rc.14
+## 07/09/2020
+
+1. [](#new)
+    * Released with no changes to keep sync with Grav + Admin
+
+# v1.0.0-rc.13
+## 07/01/2020
+
+1. [](#bugfix)
+    * Fixed bad link in directory listing template
+    * Fixed admin save task displaying error message about non-existing data type
+    * Fixed `pagemedia` field not uploading/deleting files right away
+    * Fixed `Flex Pages` add, copy and move buttons appearing in edit view when no permissions
+    * Fixed `Flex Pages` permission issues
+    * Fixed some admin redirect issues
+
 # v1.0.0-rc.12
 ## 06/08/2020
 

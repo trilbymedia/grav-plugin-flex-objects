@@ -300,10 +300,10 @@ class AdminController
                 $object->delete();
 
                 $this->admin->setMessage($this->admin::translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
-
-                $redirect = $this->referrerRoute->toString(true);
-                if ($this->currentRoute === $this->referrerRoute) {
-                    $redirect = dirname($this->currentRoute->toString(true));
+                if ($this->currentRoute->withoutGravParams()->getRoute() === $this->referrerRoute->getRoute()) {
+                    $redirect = dirname($this->currentRoute->withoutGravParams()->toString(true));
+                } else {
+                    $redirect = $this->referrerRoute->toString(true);
                 }
 
                 $this->setRedirect($redirect);
@@ -370,12 +370,18 @@ class AdminController
             throw new \RuntimeException('Not Found', 404);
         }
 
-        if (!$directory->isAuthorized('create', 'admin', $this->user)) {
-            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
-        }
-
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
+
+        $object = $this->getObject($route);
+        $authorized = $object && $object->isAuthorized('create', 'admin', $this->user);
+
+        if (!$authorized && !$directory->isAuthorized('create', 'admin', $this->user)) {
+            $this->setRedirect($this->referrerRoute->toString(true));
+
+            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' add.', 403);
+        }
+
         $folder = $this->data['folder'] ?? null;
         $title = $this->data['title'] ?? null;
         if ($title) {
@@ -810,17 +816,33 @@ class AdminController
 
     public function taskAddmedia()
     {
-        return $this->taskMediaUpload();
+        try {
+            $response = $this->forwardMediaTask('task', 'media.copy');
+
+            $this->admin->json_response = json_decode($response->getBody(), false);
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+
+        return true;
     }
 
     public function taskDelmedia()
     {
-        return $this->taskMediaDelete();
+        try {
+            $response = $this->forwardMediaTask('task', 'media.remove');
+
+            $this->admin->json_response = json_decode($response->getBody(), false);
+        } catch (\Exception $e) {
+            die($e->getMessage());
+        }
+
+        return true;
     }
 
     public function taskFilesUpload()
     {
-        throw new \RuntimeException('Task delMedia should not be called!');
+        throw new \RuntimeException('Task filesUpload should not be called!');
     }
 
     public function taskRemoveMedia($filename = null)
@@ -1040,6 +1062,10 @@ class AdminController
         } catch (RequestException $e) {
             $response = $this->createErrorResponse($e);
         } catch (\RuntimeException $e) {
+            // If task fails to run, redirect back to the previous page and display the error message.
+            if ($this->task && !$this->redirect) {
+                $this->setRedirect($this->referrerRoute->toString(true));
+            }
             $response = null;
             $this->setMessage($e->getMessage(), 'error');
         }

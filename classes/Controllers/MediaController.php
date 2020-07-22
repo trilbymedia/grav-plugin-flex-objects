@@ -6,8 +6,11 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Form\FormFlash;
 use Grav\Common\Grav;
+use Grav\Common\Media\Interfaces\MediaUploadInterface;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Media;
 use Grav\Common\Page\Medium\Medium;
+use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Session;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
@@ -17,6 +20,7 @@ use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Media\Interfaces\MediaInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use RocketTheme\Toolbox\Event\Event;
 
 class MediaController extends AbstractController
 {
@@ -33,6 +37,11 @@ class MediaController extends AbstractController
             throw new \RuntimeException('Not Found', 404);
         }
 
+        if (!method_exists($object, 'checkUploadedMediaFile')) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        // Get field for the uploaded media.
         $field = $this->getPost('name', 'undefined');
         if ($field === 'undefined') {
             $field = null;
@@ -68,10 +77,7 @@ class MediaController extends AbstractController
 
         $filename = $file->getClientFilename();
 
-        // Handle bad filenames.
-        if (!Utils::checkFilename($filename)) {
-            throw new \RuntimeException(sprintf($this->translate('PLUGIN_ADMIN.FILEUPLOAD_UNABLE_TO_UPLOAD'), $filename, 'Bad filename'), 400);
-        }
+        $object->checkUploadedMediaFile($file, $filename, $field);
 
         try {
             $flash = $this->getFormFlash($object);
@@ -86,20 +92,20 @@ class MediaController extends AbstractController
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        // TODO: add metadata support.
+        // Include exif metadata into the response if configured to do so
         $metadata = [];
-        /*
-        $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
-        $media = $object->getMedia();
-
-        // Add metadata if needed
         $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
+        if ($include_metadata) {
+            $medium = MediumFactory::fromUploadedFile($file);
 
-        $metadata = [];
-        if ($include_metadata && isset($media[$basename])) {
-            $metadata = $media[$basename]->metadata() ?: [];
+            $media = $object->getMedia();
+            $media->add($filename, $medium);
+
+            $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
+            if (isset($media[$basename])) {
+                $metadata = $media[$basename]->metadata() ?: [];
+            }
         }
-        */
 
         $response = [
             'code'    => 200,
@@ -140,6 +146,104 @@ class MediaController extends AbstractController
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
+
+        $response = [
+            'code'    => 200,
+            'status'  => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FILE_DELETED') . ': ' . $filename
+        ];
+
+        return $this->createJsonResponse($response);
+    }
+
+    /**
+     * Used in pagemedia field.
+     *
+     * @return ResponseInterface
+     */
+    public function taskMediaCopy(): ResponseInterface
+    {
+        $this->checkAuthorization('media.create');
+
+        /** @var FlexObjectInterface|null $object */
+        $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if (!method_exists($object, 'uploadMediaFile')) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $request = $this->getRequest();
+        $files = $request->getUploadedFiles();
+
+        $file = $files['file'] ?? null;
+        if (!$file instanceof UploadedFileInterface) {
+            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
+        }
+
+        $post = $request->getParsedBody();
+        $filename = $post['name'] ?? $file->getClientFilename();
+
+        // Upload media right away.
+        $object->uploadMediaFile($file, $filename);
+
+        // Include exif metadata into the response if configured to do so
+        $metadata = [];
+        $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
+        if ($include_metadata) {
+            $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
+            $media = $object->getMedia();
+            if (isset($media[$basename])) {
+                $metadata = $media[$basename]->metadata() ?: [];
+            }
+        }
+
+        if ($object instanceof PageInterface) {
+            // Backwards compatibility to existing plugins.
+            $this->grav->fireEvent('onAdminAfterAddMedia', new Event(['page' => $object]));
+        }
+
+        $response = [
+            'code'    => 200,
+            'status'  => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
+            'filename' => $filename,
+            'metadata' => $metadata
+        ];
+
+        return $this->createJsonResponse($response);
+    }
+
+
+    /**
+     * Used in pagemedia field.
+     *
+     * @return ResponseInterface
+     */
+    public function taskMediaRemove(): ResponseInterface
+    {
+        $this->checkAuthorization('media.delete');
+
+        /** @var FlexObjectInterface|null $object */
+        $object = $this->getObject();
+        if (!$object) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        if (!method_exists($object, 'deleteMediaFile')) {
+            throw new \RuntimeException('Not Found', 404);
+        }
+
+        $filename = $this->getPost('filename');
+
+        // Handle bad filenames.
+        if (!Utils::checkFilename($filename)) {
+            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
+        }
+
+        $object->deleteMediaFile($filename);
 
         $response = [
             'code'    => 200,
