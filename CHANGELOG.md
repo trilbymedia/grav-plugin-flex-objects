@@ -1,3 +1,9 @@
+# v1.0.0-rc.16
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fixed extra space in Flex admin pages
+
 # v1.0.0-rc.15
 ## 07/22/2020
 
