@@ -5,6 +5,7 @@
     * Simplified `Flex Pages` admin not to differentiate between default language file extensions [#47](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/47)
 1. [](#bugfix)
     * Fixed extra space in Flex admin pages
+    * Fixed folder creation with parent other than root [#66](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/66)
 
 # v1.0.0-rc.15
 ## 07/22/2020
