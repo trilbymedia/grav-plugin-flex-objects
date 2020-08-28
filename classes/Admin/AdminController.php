@@ -1180,6 +1180,8 @@ class AdminController
                     $language = $this->getLanguage();
                     if ($object->hasTranslation($language)) {
                         $object = $object->getTranslation($language);
+                    } elseif (!in_array('', $object->getLanguages(true), true)) {
+                        $object->language($language);
                     }
                 }
             }

@@ -1,6 +1,8 @@
 # v1.0.0-rc.16
 ## mm/dd/2020
 
+1. [](#improved)
+    * Simplified `Flex Pages` admin not to differentiate between default language file extensions [#47](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/47)
 1. [](#bugfix)
     * Fixed extra space in Flex admin pages
 

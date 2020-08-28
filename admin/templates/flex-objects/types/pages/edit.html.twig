@@ -90,7 +90,27 @@
         <div class="alert secondary-accent">
             <i class="fa fa-lightbulb-o"></i> This page will not exist until it is saved.
         </div>
-    {% elseif object.exists and can_translate and not has_translation %}
+    {% elseif can_translate %}
+        {% set is_default = language is same as(default_language) %}
+        {% if is_default and default_language in object_languages %}
+            {% if not translate_include_default and object.property('lang') %}
+            {# Handle default language extension #}
+            <div class="alert secondary-accent">
+                Using <strong>{{ all_languages[object_language] ?? object_language }}</strong> language override.
+                {{ object.hasTranslation('', false) ? 'Unused <strong>Default</strong> language file also exists.'|raw }}
+            </div>
+            {% elseif translate_include_default %}
+                {%  if not object.property('lang') %}
+                    <div class="alert secondary-accent">
+                        Using <strong>Default</strong> language file.
+                    </div>
+                {% elseif object.hasTranslation('', false) %}
+                    <div class="alert secondary-accent">
+                        Unused <strong>Default</strong> language file also exists.
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% elseif not has_translation %}
         <div class="alert warning">
             This page has not been translated to <i class="fa fa-flag-o"></i> <strong>{{ all_languages[language] ?? language }}</strong> language yet!
             {% if language == object_language %}
@@ -99,6 +119,7 @@
                 Falling back to <strong>{{ all_languages[object_language] ?? object_language }}</strong> language.
             {% endif %}
         </div>
+        {% endif %}
     {% endif %}
 {% endblock content_top %}
 

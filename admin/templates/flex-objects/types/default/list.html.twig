@@ -15,12 +15,14 @@
     {% set admin_languages = admin.languages_enabled %}
     {% set default_language = grav.language.default %}
     {% set language = controller.language %}
+    {#
     {% if translate_include_default %}
         {% set all_languages = all_languages|merge({'': 'Default'}) %}
         {% set admin_languages = admin_languages|merge({'': ''}) %}
     {% else %}
+    #}
         {% set language = language ?: default_language %}
-    {% endif %}
+    {# endif #}
 {% endif %}
 
 {# These variables can be overridden from the main template file #}

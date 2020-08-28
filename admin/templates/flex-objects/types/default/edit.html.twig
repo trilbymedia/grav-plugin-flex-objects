@@ -24,16 +24,17 @@
     {% set language = controller.language %}
     {% set has_translation = object.hasTranslation(language, false) %}
 
+    {#
     {% if translate_include_default %}
         {% set all_languages = all_languages|merge({'': 'Default'}) %}
         {% set admin_languages = admin_languages|merge({'': ''}) %}
         {% set object_languages = object.languages(true) %}
     {% else %}
+    #}
         {% set language = language ?: default_language %}
         {% set object_language = object_language ?: default_language %}
         {% set object_languages = object.languages(false) %}
-        {% set has_translation = has_translation ?: language is same as(default_language) %}
-    {% endif %}
+    {# endif #}
 {% endif %}
 
 {# These variables can be overridden from the main template file #}
