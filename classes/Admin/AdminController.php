@@ -343,7 +343,7 @@ class AdminController
 
         // TODO: Folder name needs to be validated!
         $folder = mb_strtolower($data['folder'] ?? '');
-        if ($folder === '') {
+        if ($folder === '' || mb_strpos($folder, '/') !== false) {
             throw new \RuntimeException('Creating folder failed, bad folder name', 400);
         }
 
@@ -417,12 +417,14 @@ class AdminController
         if (!$folder) {
             $folder = \Grav\Plugin\Admin\Utils::slug($title) ?: '';
         }
+        $folder = ltrim($folder, '_');
+        if ($folder === '' || mb_strpos($folder, '/') !== false) {
+            throw new \RuntimeException('Creating page failed: bad folder name', 400);
+        }
 
         if (isset($this->data['name']) && strpos($this->data['name'], 'modular/') === 0) {
             $this->data['header']['body_classes'] = 'modular';
-            if ($folder[0] !== '_') {
-                $folder = '_' . $folder;
-            }
+            $folder = '_' . $folder;
         }
         $this->data['folder'] = $folder;
 
