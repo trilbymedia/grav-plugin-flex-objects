@@ -241,6 +241,9 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
+    /**
+     * [onPageInitialized:0]: Run controller
+     */
     public function onAdminPageInitialized(): void
     {
         if ($this->controller->isActive()) {

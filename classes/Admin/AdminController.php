@@ -1010,7 +1010,14 @@ class AdminController
             $this->active = true;
             $this->currentRoute = $uri::getCurrentRoute();
             $this->route = $routeObject;
-            $referrer = $uri->referrer();
+
+            $base = $this->grav['pages']->base();
+            if ($base) {
+                // Fix referrer for sub-folder multi-site setups.
+                $referrer = preg_replace('`^' . $base . '`', '', $uri->referrer());
+            } else {
+                $referrer = $uri->referrer();
+            }
             $this->referrerRoute = $referrer ? RouteFactory::createFromString($referrer) : $this->currentRoute;
         }
     }
