@@ -461,6 +461,11 @@ class MediaController extends AbstractController
             throw new RuntimeException('Not Found', 404);
         }
 
+        // If object does not have ACL support ignore ACL checks.
+        if (!$object instanceof FlexAuthorizeInterface) {
+            return;
+        }
+
         switch ($action) {
             case 'media.list':
                 $action = 'read';
