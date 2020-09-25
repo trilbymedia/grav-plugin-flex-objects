@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
     * Fixed media uploads for objects which do not implement `FlexAuthorizeInterface`
+    * Fixed file picker field not recognizing `folder: @self` variants
 
 # v1.0.0-rc.16
 ## 09/01/2020

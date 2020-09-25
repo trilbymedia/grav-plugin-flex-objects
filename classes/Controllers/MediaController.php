@@ -317,7 +317,21 @@ class MediaController extends AbstractController
         $name = $this->getPost('name');
         $settings = $object->getBlueprint()->schema()->getProperty($name);
         $fieldFolder = $settings['folder'] ?? null;
-        if ($fieldFolder) {
+        $folderIsString = \is_string($fieldFolder);
+
+        // Backwards compatibility.
+        if ($folderIsString && \in_array($fieldFolder, ['@self', 'self@'])) {
+            $fieldFolder = null;
+        } elseif ($object instanceof PageInterface) {
+            // TODO: Add support for @page, @root and @taxonomy
+            if ($folderIsString && strpos($fieldFolder, '@') !== false) {
+                if (\in_array($fieldFolder, ['@page.self', 'page@.self'])) {
+                    $fieldFolder = null;
+                }
+            }
+        }
+
+        if ($folderIsString && $fieldFolder) {
             // Custom media.
             $media = new Media($fieldFolder, []);
         } else {
