@@ -1,5 +1,5 @@
 # v1.0.0-rc.17
-## mm/dd/2020
+## 10/07/2020
 
 1. [](#bugfix)
     * Fixed media uploads for objects which do not implement `FlexAuthorizeInterface`
