@@ -7,9 +7,9 @@
   </div>
 
   <ul class="list">
-    {% for object in collection if object.published %}
+    {% for object in collection.filterBy({ published: true }) %}
       <li>
-        {% render object layout: layout %}
+        {% render object layout: layout with { options: options } %}
       </li>
     {% endfor %}
   </ul>

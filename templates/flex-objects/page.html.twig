@@ -1,4 +1,8 @@
-{% do assets.addCss('plugin://flex-objects/css/site.css') %}
+{# flex-objects/page.html.twig #}
+
+{% if config.get('plugins.flex-objects.built_in_css', true) %}
+    {% do assets.addCss('plugin://flex-objects/css/site.css') %}
+{% endif %}
 {% do assets.addJs('plugin://flex-objects/js/list.min.js') %}
 
 {% if not type %}

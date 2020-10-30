@@ -1,4 +1,6 @@
-{% set flex = grav['flex_objects'] %}
+{# flex-objects/views/directories.html.twig #}
+
+{% set flex = grav.get('flex_objects') %}
 {% set directory_url = page.route() %}
 {% set directories = flex.directories(options.list|array ?: null) %}
 {% set layout = options.layout ?: 'default' %}

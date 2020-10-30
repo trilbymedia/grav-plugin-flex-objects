@@ -1,6 +1,14 @@
-{% set flex = grav['flex_objects'] %}
-{% set directory = flex.directory(type) %}
-{% set type = directory.flexType() %}
-{% set collection = directory.collection %}
+{# flex-objects/views/directory.html.twig #}
 
-{% render collection layout: options.layout %}
+{% set flex = grav.get('flex_objects') %}
+{% set directory = flex.directory(type) %}
+
+{% if directory %}
+    {% set type = directory.flexType() %}
+    {% set collection = directory.collection %}
+
+    {% render collection layout: options.layout %}
+{% else %}
+    {% do page.modifyHeader('http_response_code', 404) %}
+    <h2>Page Not Found</h2>
+{% endif %}

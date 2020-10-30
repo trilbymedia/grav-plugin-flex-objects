@@ -1,3 +1,9 @@
+# v1.0.0-rc.18
+## mm/dd/2020
+
+1. [](#improved)
+    * Improved frontend templates
+
 # v1.0.0-rc.17
 ## 10/07/2020
 

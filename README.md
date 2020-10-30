@@ -48,18 +48,6 @@ admin_list:
     by: updated_timestamp
     dir: desc
 
-object:
-  cache:
-    index:
-      enabled: true
-      timeout: 60
-    object:
-      enabled: true
-      timeout: 60
-    render:
-      enabled: true
-      timeout: 60
-
 directories:
   - 'blueprints://flex-objects/contacts.yaml'
   - 'blueprints://flex-objects/pages.yaml'
