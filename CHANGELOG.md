@@ -1,6 +1,8 @@
 # v1.0.0-rc.18
 ## mm/dd/2020
 
+1. [](#new)
+    * Require PHP 7.2.5+
 1. [](#improved)
     * Improved frontend templates
 1. [](#bugfix)
