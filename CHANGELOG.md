@@ -3,7 +3,9 @@
 
 1. [](#improved)
     * Improved frontend templates
-
+1. [](#bugfix)
+    * Fixed fatal error in admin if list view hasn't been defined
+    
 # v1.0.0-rc.17
 ## 10/07/2020
 

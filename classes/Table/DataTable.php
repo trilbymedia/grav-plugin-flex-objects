@@ -137,9 +137,10 @@ class DataTable implements \JsonSerializable
 
             $blueprint = $collection->getFlexDirectory()->getBlueprint();
             $schema = $blueprint->schema();
+            $columns = $blueprint->get('config/admin/list/fields', []);
 
             $list = [];
-            foreach ($blueprint->get('config/admin/list/fields') as $key => $options) {
+            foreach ($columns as $key => $options) {
                 if (!isset($options['field'])) {
                     $options['field'] = $schema->get($options['alias'] ?? $key);
                 }
