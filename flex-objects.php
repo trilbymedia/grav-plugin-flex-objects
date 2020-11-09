@@ -27,7 +27,7 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexObjectsPlugin extends Plugin
 {
-    const MIN_GRAV_VERSION = '1.7.0-rc.8';
+    const MIN_GRAV_VERSION = '1.7.0-rc.17';
 
     public $features = [
         'blueprints' => 1000,

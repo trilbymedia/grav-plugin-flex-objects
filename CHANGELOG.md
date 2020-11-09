@@ -9,6 +9,7 @@
 1. [](#bugfix)
     * Fixed fatal error in admin if list view hasn't been defined
     * Fixed fatal error in admin if directory throws exception
+    * Fixed attempts to add an existing page
     
 # v1.0.0-rc.17
 ## 10/07/2020

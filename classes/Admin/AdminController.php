@@ -430,6 +430,9 @@ class AdminController
 
         unset($this->data['blueprint']);
         $key = trim("{$route}/{$folder}", '/');
+        if ($directory->getObject($key)) {
+            throw new \RuntimeException("Page '/{$key}' already exists!", 403);
+        }
 
         $max = 0;
         if (isset($this->data['visible'])) {
