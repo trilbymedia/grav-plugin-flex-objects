@@ -2,15 +2,15 @@
 {% use 'flex-objects/types/default/titlebar/preview.html.twig' %}
 
 {# Allowed actions #}
-{% set can_preview = can_preview ?? (object.exists and directory.config('admin.preview.enabled', false)) %}
+{% set can_preview = can_preview ?? (object.exists and (view_config['enabled'] ?? false)) %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('flex-translate')) %}
 
 {# These variables can be overridden from the main template file #}
 {% set allowed = allowed ?? (directory and (object.exists or action == 'add')) %}
 {% set back_route = back_route ?? ('/' ~ route.getRoute(1)) %}
-{% set title_icon = title_icon ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
+{% set title_icon = title_icon ?? view_config['icon'] ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
 {% set title -%}
-    {%- set title_config = directory.config('admin.edit.title') -%}
+    {%- set title_config = view_config['title'] -%}
     {%- if title_config.template -%}
         {{- include(template_from_string(title_config.template, 'edit title template')) -}}
     {%- else -%}
@@ -18,7 +18,7 @@
     {% endif %}
 {%- endset %}
 {% set preview_url -%}
-    {%- set route_config = directory.config('admin.preview.route') -%}
+    {%- set route_config = view_config['route'] -%}
     {%- if route_config.template -%}
         {{- include(template_from_string(route_config.template, 'preview route template')) -}}
     {%- else -%}

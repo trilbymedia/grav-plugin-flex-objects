@@ -18,6 +18,7 @@
 {%- endset -%}
 
 {%- set separator = config.system.param_sep -%}
+{%- set view_config = directory.config('admin.views.' ~ template) ?? directory.config('admin.' ~ template) ?? [] -%}
 
 {%- include target ? [
         'flex-objects/types/' ~ type ~ '/' ~ template ~ '.html.twig',

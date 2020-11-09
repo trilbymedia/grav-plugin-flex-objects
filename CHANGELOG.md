@@ -5,6 +5,7 @@
     * Require PHP 7.2.5+
 1. [](#improved)
     * Improved frontend templates
+    * Improve blueprint structure
 1. [](#bugfix)
     * Fixed fatal error in admin if list view hasn't been defined
     * Fixed fatal error in admin if directory throws exception

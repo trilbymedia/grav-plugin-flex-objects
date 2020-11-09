@@ -1,5 +1,6 @@
 {% set active_html = 'class="active"' %}
 {% set is_configure = route.gravParam('') is same as('configure') %}
+{% set authorize = directory.config('admin.views.configure.authorize') ?? directory.config('admin.configure.authorize') ?? 'admin.super' %}
 
 {% if allowed %}
 <div class="form-tabs">
@@ -14,7 +15,7 @@
         {% endif %}
         {% endfor %}
 
-        {% if user.authorize(directory.config('admin.configure.authorize') ?? 'admin.super') %}
+        {% if user.authorize(authorize) %}
         <a {{is_configure ? active_html|raw }} href="{{ admin_route('/accounts/configure') }}">
             <span>{{ 'PLUGIN_ADMIN.CONFIGURATION'|tu }}</span>
         </a>

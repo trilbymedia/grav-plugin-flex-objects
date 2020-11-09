@@ -235,7 +235,7 @@ class AdminController
             throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' list.', 403);
         }
 
-        $config = $collection->getFlexDirectory()->getConfig('admin.export', false);
+        $config = $collection->getFlexDirectory()->getConfig('admin.views.export') ?? $collection->getFlexDirectory()->getConfig('admin.export') ?? false;
         if (!$config || empty($config['enabled'])) {
             throw new \RuntimeException($this->admin::translate('Not Found'), 404);
         }
@@ -595,7 +595,7 @@ class AdminController
             $data['lang'] = $this->getLanguage();
 
             // Display root if permitted.
-            $action = $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
+            $action = $directory->getConfig('admin.views.configure.authorize') ?? $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
             if ($this->user->authorize($action)) {
                 $data['filters']['type'][] = 'root';
             }
@@ -749,7 +749,7 @@ class AdminController
     {
         try {
             $directory = $this->getDirectory();
-            $config = $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
+            $config = $directory->getConfig('admin.views.configure.authorize') ?? $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
             if (!$this->user->authorize($config)) {
                 throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' configure.', 403);
             }

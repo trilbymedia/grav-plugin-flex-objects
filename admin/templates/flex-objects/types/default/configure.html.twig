@@ -1,18 +1,18 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/types/default/titlebar/configure.html.twig' %}
 
-{% set name = directory.config('admin.configure.form') %}
+{% set name = view_config['form'] %}
 {% set form = form ?? directory.directoryForm(name) %}
 
 {# Allowed actions #}
-{% set can_save = can_save ?? user.authorize(directory.config('admin.configure.authorize') ?? 'admin.super') %}
+{% set can_save = can_save ?? user.authorize(view_config['authorize'] ?? 'admin.super') %}
 
 {# These variables can be overridden from the main template file #}
 {% set allowed = allowed ?? (directory and form and can_save) %}
 {% set back_route = back_route ?? ('/' ~ route.getRoute(1)) %}
-{% set title_icon = title_icon ?? 'fa-cog' %}
+{% set title_icon = title_icon ?? view_config['icon'] ?? 'fa-cog' %}
 {% set title -%}
-    {%- set title_config = directory.config('admin.configure.title') -%}
+    {%- set title_config = view_config['title'] ?? null -%}
     {%- if title_config.template -%}
         {{- include(template_from_string(title_config.template, 'configure title template')) -}}
     {%- else -%}
