@@ -38,9 +38,17 @@ class ObjectController extends AbstractController
                 }
             }
 
+            $data = $form->getData();
+            if (null !== $data) {
+                $object = $form->getObject();
+                $flash = $form->getFlash();
+                $flash->setObject($object);
+                $flash->setData($data->toArray());
+                $flash->save();
+            }
+
             return $this->createDisplayResponse();
         }
-        $object = $form->getObject();
 
         // TODO: is there a better way to do this?
         $grav = $this->grav;
@@ -71,10 +79,17 @@ class ObjectController extends AbstractController
                 }
             }
 
+            $data = $form->getData();
+            if (null !== $data) {
+                $object = $form->getObject();
+                $flash = $form->getFlash();
+                $flash->setObject($object);
+                $flash->setData($data->toArray());
+                $flash->save();
+            }
 
             return $this->createDisplayResponse();
         }
-        $object = $form->getObject();
 
         // TODO: is there a better way to do this?
         $grav = $this->grav;
