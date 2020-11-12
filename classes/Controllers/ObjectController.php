@@ -123,6 +123,18 @@ class ObjectController extends AbstractController
         return $this->createRedirectResponse($redirect, 303);
     }
 
+    public function taskReset(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->checkAuthorization('save');
+
+        $flash = $this->getForm()->getFlash();
+        $flash->delete();
+
+        $redirect = $request->getAttribute('redirect', (string)$request->getUri()->getPath());
+
+        return $this->createRedirectResponse($redirect, 303);
+    }
+
     public function taskPreview(ServerRequestInterface $request): ResponseInterface
     {
         $this->checkAuthorization('save');
