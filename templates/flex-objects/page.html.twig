@@ -2,7 +2,7 @@
 
 {%- set options = options ?? {} %}
 {%- set flex = grav.get('flex_objects') %}
-{%- set list = options.list ?? (options.directories|keys ?: flex.directories()|keys) %}
+{%- set list = options.list ?? (options.directories ?? flex.directories())|keys %}
 
 {%- if page_assets.css ?? config.get('plugins.flex-objects.built_in_css') ?? true %}
     {% do assets.addCss('plugin://flex-objects/css/site.css') %}

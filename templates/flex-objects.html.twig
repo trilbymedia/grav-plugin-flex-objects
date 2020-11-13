@@ -1,12 +1,16 @@
 {% extends 'partials/base.html.twig' %}
 
 {% block content %}
-    {{ page.content|raw }}
+    {% block page_content %}
+        {{ page.content|raw }}
+    {% endblock %}
 
-    {% set options = page.header.flex %}
-    {% set page_assets = page.header.assets %}
-    {% set type = options.directory ?? page.header.directory ?? uri.param('directory') %}
-    {% set id = uri.param('id') %}
+    {% block flex_content %}
+        {% set options = page.header.flex %}
+        {% set page_assets = page.header.assets %}
+        {% set type = options.directory ?? page.header.directory ?? uri.param('directory') %}
+        {% set id = uri.param('id') %}
 
-    {% include 'flex-objects/page.html.twig' %}
+        {% include 'flex-objects/page.html.twig' %}
+    {% endblock %}
 {% endblock %}

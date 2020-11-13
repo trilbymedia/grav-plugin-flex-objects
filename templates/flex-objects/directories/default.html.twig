@@ -11,16 +11,15 @@
     </thead>
     <tbody>
     {% for type, directory in directories %}
-        {% if not directory.config('site.hidden', false) %}
+        {%- set directory_options = options.directories[type] ?? {} %}
         <tr>
             <td>
-                <a href="{{ url(directory_url ~ '/directory:' ~ type)|e }}">{{ directory.title|e }}</a>
+                <a href="{{ url(directory_url ~ '/directory:' ~ type)|e }}">{{ (directory_options.title ?? directory.title)|e }}</a>
             </td>
             <td>
-                {{ directory.description|e }}
+                {{ (directory_options.description ?? directory.description)|e }}
             </td>
         </tr>
-        {% endif %}
     {% endfor %}
     </tbody>
 </table>
