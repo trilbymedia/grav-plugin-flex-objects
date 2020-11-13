@@ -4,11 +4,13 @@
 {% set directory = flex.directory(type) %}
 
 {% if directory %}
+    {% set layout = options.layout ?? 'default' %}
+    {% set context = options ?? {} %}
     {% set type = directory.flexType() %}
     {% set collection = directory.collection %}
 
-    {% render collection layout: options.layout %}
+    {% render collection layout: layout with context %}
+
 {% else %}
-    {% do page.modifyHeader('http_response_code', 404) %}
-    <h2>Page Not Found</h2>
+    {% include 'flex-objects/views/404.html.twig' %}
 {% endif %}

@@ -4,6 +4,7 @@
     {{ page.content|raw }}
 
     {% set options = page.header.flex %}
+    {% set page_assets = page.header.assets %}
     {% set type = options.directory ?? page.header.directory ?? uri.param('directory') %}
     {% set id = uri.param('id') %}
 

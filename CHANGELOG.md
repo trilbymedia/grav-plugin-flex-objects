@@ -11,6 +11,7 @@
     * Fixed fatal error in admin if directory throws exception
     * Fixed attempts to add an existing page
     * Fixed form loosing its form state if saving fails when using `ObjectController`
+    * Fixed missing context when rendering collection in frontend
     
 # v1.0.0-rc.17
 ## 10/07/2020

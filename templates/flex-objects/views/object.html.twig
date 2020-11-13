@@ -5,8 +5,11 @@
 {% set object = directory.getObject(id) %}
 
 {% if object %}
-    {% render object layout: options.layout %}
+    {% set layout = options.layout ?? 'default' %}
+    {% set context = options ?? {} %}
+
+    {% render object layout: layout with context %}
+
 {% else %}
-    {% do page.modifyHeader('http_response_code', 404) %}
-    <h2>Entry Not Found</h2>
+    {% include 'flex-objects/views/404.html.twig' %}
 {% endif %}

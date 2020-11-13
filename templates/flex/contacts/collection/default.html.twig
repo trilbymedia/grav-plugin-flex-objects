@@ -1,3 +1,6 @@
+{%- set object_context = object ?? {} -%}
+{%- set object_layout = object_context.layout ?? layout -%}
+
 <div id="flex-objects">
   <div class="text-center">
     <input class="form-input search" type="text" placeholder="Search by name, email, etc" />
@@ -9,7 +12,7 @@
   <ul class="list">
     {% for object in collection.filterBy({ published: true }) %}
       <li>
-        {% render object layout: layout with { options: options } %}
+        {% render object layout: object_layout with object_context %}
       </li>
     {% endfor %}
   </ul>

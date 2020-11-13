@@ -14,10 +14,10 @@
         {% if not directory.config('site.hidden', false) %}
         <tr>
             <td>
-                <a href="{{ url(directory_url ~ '/directory:' ~ type) }}">{{ directory.title }}</a>
+                <a href="{{ url(directory_url ~ '/directory:' ~ type)|e }}">{{ directory.title|e }}</a>
             </td>
             <td>
-                {{ directory.description }}
+                {{ directory.description|e }}
             </td>
         </tr>
         {% endif %}
