@@ -132,7 +132,7 @@ export class FlexPages {
             clock.appendTo(icon);
         }
 
-        const info = $(`<span class="fjs-info"><b title="${item.title}">${item.title}</b> <em title="${item.route.display}">${item.route.display}</em></span>`);
+        const info = $(`<span class="fjs-info"><b title="${item.title.replace(/(<([^>]+)>)/gi, '')}">${item.title}</b> <em title="${item.route.display}">${item.route.display}</em></span>`);
         const actions = $('<span class="fjs-actions" />');
 
         let dotdotdot = null;
@@ -228,7 +228,7 @@ export class FlexPages {
         return $(`
             <div class="fjs-col leaf-col" style="overflow: hidden;">
                 <div class="leaf-row">
-                    <div class="grav-loading"><div class="grav-loader">Loading...</div></div>
+                    <div class="grav-loading"><div class="grav-loader">Loading…</div></div>
                 </div>
             </div>
         `);
