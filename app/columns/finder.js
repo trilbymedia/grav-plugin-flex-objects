@@ -132,8 +132,7 @@ export class FlexPages {
             clock.appendTo(icon);
         }
 
-        const info = $(`<span class="fjs-info"><b title="${item.title.replace(/(<([^>]+)>)/gi, '')}">${item.title}</b> <em title="${item.route.display}">${item.route.display}</em></span>`);
-        const actions = $('<span class="fjs-actions" />');
+        const info = $(`<span class="fjs-info"><b title="${escape(item.title.replace(/(<([^>]+)>)/gi, ''))}">${item.title.replace(/(<\/?script([^>]+)?>)/gi, '')}</b> <em title="${item.route.display}">${item.route.display}</em></span>`);        const actions = $('<span class="fjs-actions" />');
 
         let dotdotdot = null;
         if (item.extras) {
