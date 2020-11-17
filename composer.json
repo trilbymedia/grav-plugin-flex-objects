@@ -14,7 +14,7 @@
     }
   ],
   "require": {
-    "php": ">=7.2.5",
+    "php": ">=7.3.6",
     "ext-json": "*",
     "ext-mbstring": "*"
   },
@@ -26,7 +26,7 @@
   },
   "config": {
     "platform": {
-      "php": "7.2.5"
+      "php": "7.3.6"
     }
   }
 }

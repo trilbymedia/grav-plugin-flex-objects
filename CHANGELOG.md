@@ -2,7 +2,7 @@
 ## mm/dd/2020
 
 1. [](#new)
-    * Require PHP 7.2.5+
+    * Require **PHP 7.3.6**
 1. [](#improved)
     * Improved frontend templates
     * Improve blueprint structure
