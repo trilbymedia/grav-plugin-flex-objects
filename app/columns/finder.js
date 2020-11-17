@@ -154,14 +154,18 @@ export class FlexPages {
                         langs += `<a class="lang" href="${LANG_URL.replace(/%LANG%/g, lang).replace('//', '/')}${item.route.raw}"><span class="badge lang-${lang ? lang : 'default'} lang-${translated ? 'translated' : 'non-translated'}"><i class="fa fa-fw fa-circle"></i> ${lang ? lang : 'default'}</span></a>`;
                     });
 
-                    const canPreview = !(item.extras.tags.includes('non-routable') || item.extras.tags.includes('unpublished'));
+                    const canPreview = item.extras.actions.includes('preview') && (!(item.extras.tags.includes('non-routable') || item.extras.tags.includes('unpublished')));
+                    const canEdit = item.extras.actions.includes('edit');
+                    const canCopy = item.extras.actions.includes('copy');
+                    const canMove = item.extras.actions.includes('move');
+                    const canDelete = item.extras.actions.includes('delete');
                     const ul = $(`<div class="dropdown-menu">
     <div class="action-bar">
         ${canPreview ? `<a href="${route}/:preview" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a>` : ''}
-        <a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a>
-        <a href="${route}/task:copy/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Duplicate"><i class="fa fa-fw fa-copy"></i></a>
-        <a href="#" class="dropdown-item" title="Move (coming soon)"><i class="fa fa-fw fa-arrows"></i></a>
-        <a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item danger" title="Delete"><i class="fa fa-fw fa-trash-o"></i></a>
+        ${canEdit ? `<a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a>` : ''}
+        ${canCopy ? `<a href="${route}/task:copy/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Duplicate"><i class="fa fa-fw fa-copy"></i></a>` : ''}
+        ${canMove ? '<a href="#" class="dropdown-item" title="Move (coming soon)"><i class="fa fa-fw fa-arrows"></i></a>' : ''}
+        ${canDelete ? `<a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item danger" title="Delete"><i class="fa fa-fw fa-trash-o"></i></a>` : ''}
     </div>
     <div class="divider"></div>
     <div class="tags">${tags}</div>
