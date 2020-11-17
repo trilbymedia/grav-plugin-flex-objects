@@ -113,6 +113,23 @@ class Flex implements FlexInterface
     }
 
     /**
+     * Get directories which are not hidden in the site.
+     *
+     * @return array
+     */
+    public function getDefaultDirectories(): array
+    {
+        $list = $this->getDirectories();
+        foreach ($list as $type => $directory) {
+            if ($directory->getConfig('site.hidden', false)) {
+                unset($list[$type]);
+            }
+        }
+
+        return $list;
+    }
+
+    /**
      * @param string $type
      * @return FlexDirectory|null
      */

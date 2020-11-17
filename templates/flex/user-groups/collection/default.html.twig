@@ -1,6 +1,9 @@
 {%- set request = grav.request -%}
 {%- set object_context = object ?? {} -%}
 {%- set object_layout = object_context.layout ?? 'list-' ~ layout -%}
+{% if blacklist %}
+    {% set collection = collection.unselect(blacklist) %}
+{% endif %}
 
 <div id="flex-objects">
     {% if title %}
