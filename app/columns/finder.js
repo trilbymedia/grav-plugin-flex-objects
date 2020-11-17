@@ -157,7 +157,7 @@ export class FlexPages {
                     const canPreview = item.extras.actions.includes('preview') && (!(item.extras.tags.includes('non-routable') || item.extras.tags.includes('unpublished')));
                     const canEdit = item.extras.actions.includes('edit');
                     const canCopy = item.extras.actions.includes('copy');
-                    const canMove = item.extras.actions.includes('move');
+                    const canMove = false; // item.extras.actions.includes('move');
                     const canDelete = item.extras.actions.includes('delete');
                     const ul = $(`<div class="dropdown-menu">
     <div class="action-bar">
