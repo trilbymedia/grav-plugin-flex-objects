@@ -8,6 +8,7 @@
     * Improve blueprint structure
     * Hooked up Duplicate and Move from within Pages list [#81](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/81)
     * Respect CRUD ACL actions for items shortcuts in pages list [#82](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/82)
+    * Refresh object on controllers to make sure it is up to date
 1. [](#bugfix)
     * Fixed fatal error in admin if list view hasn't been defined
     * Fixed fatal error in admin if directory throws exception

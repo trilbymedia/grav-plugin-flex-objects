@@ -38,6 +38,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use RocketTheme\Toolbox\Session\Message;
+use function is_callable;
 
 /**
  * Class AdminController
@@ -1219,6 +1220,10 @@ class AdminController
                         $object->language($language);
                     }
                 }
+            }
+
+            if (is_callable([$object, 'refresh'])) {
+                $object->refresh();
             }
 
             $this->object = $object;

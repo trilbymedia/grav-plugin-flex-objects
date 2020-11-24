@@ -25,6 +25,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
+use function is_callable;
 
 abstract class AbstractController implements RequestHandlerInterface
 {
@@ -77,6 +78,9 @@ abstract class AbstractController implements RequestHandlerInterface
             $this->object = $attributes['object'] ?? null;
             if (!$this->object && $this->key && $this->directory) {
                 $this->object = $this->directory->getObject($this->key) ?? $this->directory->createObject([], $this->key ?? '');
+                if (is_callable([$this->object, 'refresh'])) {
+                    $this->object->refresh();
+                }
             }
         }
 
