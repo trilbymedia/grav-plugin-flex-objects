@@ -15,6 +15,7 @@
     * Fixed attempts to add an existing page
     * Fixed form loosing its form state if saving fails when using `ObjectController`
     * Fixed missing context when rendering collection in frontend
+    * Fixed Flex Admin activating on too old Admin plugin versions
     
 # v1.0.0-rc.17
 ## 10/07/2020
