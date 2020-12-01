@@ -3,7 +3,7 @@
 {% set flex = grav.get('flex_objects') %}
 {% set directory_url = page.route() %}
 {% set list = list ?? options.list %}
-{% set directories = flex.directories(list|array ?: null) %}
+{% set directories = list ? flex.directories(list|array) : flex.defaultDirectories() %}
 {% set layout = options.layout ?: 'default' %}
 
 {% include [

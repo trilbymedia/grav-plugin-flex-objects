@@ -16,7 +16,7 @@
     {% set layout = options.layout ?? 'default' %}
     {% set context = options ?? {} %}
 
-    {% render object layout: layout with context %}
+    {% render object layout: layout with context|merge({title: title}) %}
 
 {% else %}
     {% include 'flex-objects/views/404.html.twig' %}

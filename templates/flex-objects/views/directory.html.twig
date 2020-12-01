@@ -17,7 +17,7 @@
         {% do page.title(title) %}
     {% endif %}
 
-    {% render collection layout: layout with context %}
+    {% render collection layout: layout with context|merge({title: title}) %}
 
 {% else %}
     {% include 'flex-objects/views/404.html.twig' %}
