@@ -1,5 +1,5 @@
 {%- set object_context = object ?? {} -%}
-{%- set object_layout = object_context.layout ?? 'list-' ~ layout -%}
+{%- set object_layout = object_context.layout ?? ('list-' ~ layout) -%}
 
 <div id="flex-objects">
   <div class="text-center">

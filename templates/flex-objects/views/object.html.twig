@@ -5,6 +5,14 @@
 {% set object = directory.getObject(id) %}
 
 {% if object %}
+    {%- set title = options.title -%}
+    {%- if title matches '/\{/' -%}
+        {%- set title = include(template_from_string(title, 'object title template'))|trim -%}
+    {%- endif -%}
+    {% if title %}
+        {% do page.title(title) %}
+    {% endif %}
+
     {% set layout = options.layout ?? 'default' %}
     {% set context = options ?? {} %}
 
