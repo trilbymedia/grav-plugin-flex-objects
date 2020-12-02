@@ -30,6 +30,7 @@ Alternatively it can be installed via the [Admin Plugin](http://learn.getgrav.or
 Once installed you can either create entries manually, or you can copy the sample data set:
 
 ```shell
+$ mkdir -p user/data/flex-objects
 $ cp user/plugins/flex-objects/data/flex-objects/contacts.json user/data/flex-objects/contacts.json
 ```
 
