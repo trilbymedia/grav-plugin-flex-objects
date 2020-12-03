@@ -418,7 +418,7 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
-     * Set needed variables to display direcotry.
+     * Set needed variables to display directory.
      */
     public function onTwigAdminVariables(): void
     {
