@@ -233,7 +233,7 @@ Then you will need to make more widespread changes to the site Twig templates.  
 Here are the main benefits of using Flex objects:
 
 * CRUD is automatically handled for you by Flex Objects plugin
-* Objects can be stored using many diferent strategies, including single file, file per object or folder per object; using yaml, json etc.
+* Objects can be stored using many different strategies, including single file, file per object or folder per object; using yaml, json etc.
 * Flex types can be easily extended by custom PHP collection and object classes
 * Both Flex objects and collections know how to render themselves: `echo $object->render($layout, $context)` or `{% render object layout: layout with context %}`
 * You can easily create custom layouts for your objects and collections to be used in different pages
