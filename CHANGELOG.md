@@ -1,3 +1,9 @@
+# v1.0.0-rc.20
+## mm/dd/2020
+
+1. [](#improved)
+    * Default cookies usage to SameSite Lax [grav-plugin-admin#1998](https://github.com/getgrav/grav-plugin-admin/issues/1998)
+
 # v1.0.0-rc.19
 ## 12/02/2020
 

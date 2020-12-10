@@ -13,7 +13,7 @@ export const getStore = () => {
     return JSON.parse(b64_decode_unicode(getCookie('grav-admin-flexpages') || 'e30='));
 };
 
-export const setStore = (store = {}, options = { expires: '1Y' }) => {
+export const setStore = (store = {}, options = { expires: '1Y', samesite: 'Lax' }) => {
     if (!isEnabled) {
         return '';
     }
