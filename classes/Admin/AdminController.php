@@ -512,18 +512,18 @@ class AdminController
         return true;
     }
 
-        /**
-         * $data['route'] = $this->grav['uri']->param('route');
-         * $data['sortby'] = $this->grav['uri']->param('sortby', null);
-         * $data['filters'] = $this->grav['uri']->param('filters', null);
-         * $data['page'] $this->grav['uri']->param('page', true);
-         * $data['base'] = $this->grav['uri']->param('base');
-         * $initial = (bool) $this->grav['uri']->param('initial');
-         *
-         * @return ResponseInterface
-         * @throws RequestException
-         * @TODO: Pages
-         */
+    /**
+     * $data['route'] = $this->grav['uri']->param('route');
+     * $data['sortby'] = $this->grav['uri']->param('sortby', null);
+     * $data['filters'] = $this->grav['uri']->param('filters', null);
+     * $data['page'] $this->grav['uri']->param('page', true);
+     * $data['base'] = $this->grav['uri']->param('base');
+     * $initial = (bool) $this->grav['uri']->param('initial');
+     *
+     * @return ResponseInterface
+     * @throws RequestException
+     * @TODO: Pages
+     */
     protected function actionGetLevelListing(): ResponseInterface
     {
         /** @var PageInterface|FlexObjectInterface $object */
@@ -551,11 +551,13 @@ class AdminController
             $data['level'] = 1;
         }
 
-        [$status, $message, $response,] = $object->getLevelListing($data);
+        [$status, $message, $response,$route] = $object->getLevelListing($data);
 
         $json = [
             'status'  => $status,
             'message' => $this->admin::translate($message ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED'),
+            'route' => $route,
+            'initial' => (bool)$initial,
             'data' => array_values($response)
         ];
 
@@ -611,12 +613,12 @@ class AdminController
                 $data['level'] = 1;
             }
 
-            [$status, $message, $response,] = $object->getLevelListing($data);
+            [$status, $message, $response, $route] = $object->getLevelListing($data);
 
             $json = [
                 'status'  => $status,
                 'message' => $this->admin::translate($message ?? 'PLUGIN_ADMIN.NO_ROUTE_PROVIDED'),
-                'route' => $data['route'] ?? $data['leaf_route'] ?? null,
+                'route' => $route,
                 'initial' => (bool)$initial,
                 'data' => array_values($response)
             ];

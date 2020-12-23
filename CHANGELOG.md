@@ -1,3 +1,9 @@
+# v1.0.0
+## mm/dd/yyyy
+
+1. [](#improved)
+   * Added support for relative paths in `getLevelListing` action
+
 # v1.0.0-rc.20
 ## 12/15/2020
 
@@ -10,7 +16,6 @@
 
 1. [](#improved)
     * Just keeping sync with Grav rc.19
-
 
 # v1.0.0-rc.18
 ## 12/02/2020
