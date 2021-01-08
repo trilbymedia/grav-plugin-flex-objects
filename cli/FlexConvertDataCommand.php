@@ -20,7 +20,7 @@ class FlexConvertDataCommand extends ConsoleCommand
     protected $options = [];
 
     /**
-     *
+     * @return void
      */
     protected function configure()
     {
@@ -44,7 +44,7 @@ class FlexConvertDataCommand extends ConsoleCommand
     }
 
     /**
-     * @return int|null|void
+     * @return void
      */
     protected function serve()
     {
@@ -123,9 +123,12 @@ class FlexConvertDataCommand extends ConsoleCommand
         file_put_contents($out_filename, $out_raw);
 
         $io->success('successfully converted the file and saved as: ' . $out_filename);
-
     }
 
+    /**
+     * @return false|string
+     * @throws \Exception
+     */
     protected function generateKey()
     {
         return substr(hash('sha256', random_bytes(32)), 0, 32);

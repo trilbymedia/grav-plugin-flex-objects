@@ -20,6 +20,7 @@ use Grav\Plugin\Form\Forms;
 use Grav\Plugin\FlexObjects\Admin\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
 use RocketTheme\Toolbox\Event\Event;
+use function is_callable;
 
 /**
  * Class FlexObjectsPlugin
@@ -27,7 +28,7 @@ use RocketTheme\Toolbox\Event\Event;
  */
 class FlexObjectsPlugin extends Plugin
 {
-    const MIN_GRAV_VERSION = '1.7.0-rc.17';
+    protected const MIN_GRAV_VERSION = '1.7.0-rc.17';
 
     /** @var int[] */
     public $features = [
@@ -96,6 +97,8 @@ class FlexObjectsPlugin extends Plugin
 
     /**
      * [PluginsLoadedEvent:10]: Initialize Flex
+     *
+     * @return void
      */
     public function initializeFlex(): void
     {
@@ -117,6 +120,8 @@ class FlexObjectsPlugin extends Plugin
 
     /**
      * Initialize the plugin
+     *
+     * @return void
      */
     public function onPluginsInitialized(): void
     {
@@ -169,6 +174,10 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
+    /**
+     * @param FlexRegisterEvent $event
+     * @return void
+     */
     public function onRegisterFlex(FlexRegisterEvent $event): void
     {
         $flex = $event->flex;
@@ -199,6 +208,7 @@ class FlexObjectsPlugin extends Plugin
      * Initial stab at registering permissions (WIP)
      *
      * @param PermissionsRegisterEvent $event
+     * @return void
      */
     public function onRegisterPermissions(PermissionsRegisterEvent $event): void
     {
@@ -219,6 +229,10 @@ class FlexObjectsPlugin extends Plugin
         $permissions->addActions(array_replace(...$actions));
     }
 
+    /**
+     * @param Event $event
+     * @return void
+     */
     public function onFormRegisterTypes(Event $event): void
     {
         /** @var Forms $forms */
@@ -226,6 +240,10 @@ class FlexObjectsPlugin extends Plugin
         $forms->registerType('flex', new FlexFormFactory());
     }
 
+    /**
+     * @param Event $event
+     * @return void
+     */
     public function onAdminPage(Event $event): void
     {
         if ($this->controller->isActive()) {
@@ -242,6 +260,8 @@ class FlexObjectsPlugin extends Plugin
 
     /**
      * [onPageInitialized:0]: Run controller
+     *
+     * @return void
      */
     public function onAdminPageInitialized(): void
     {
@@ -251,6 +271,10 @@ class FlexObjectsPlugin extends Plugin
         }
     }
 
+    /**
+     * @param Event $event
+     * @return void
+     */
     public function onAdminControllerInit(Event $event): void
     {
         $eventController = $event['controller'];
@@ -266,12 +290,17 @@ class FlexObjectsPlugin extends Plugin
      * Add Flex-Object's preset.scss to the Admin Preset SCSS compile process
      *
      * @param Event $event
+     * @return void
      */
     public function onAdminCompilePresetSCSS(Event $event): void
     {
         $event['scss']->add($this->grav['locator']->findResource('plugins://flex-objects/scss/_preset.scss'));
     }
 
+    /**
+     * @param Event $event
+     * @return void
+     */
     public function onGetPageTemplates(Event $event): void
     {
         /** @var Types $types */
@@ -323,6 +352,8 @@ class FlexObjectsPlugin extends Plugin
 
     /**
      * Add Flex Directory to admin menu
+     *
+     * @return void
      */
     public function onAdminMenu(): void
     {
@@ -358,7 +389,11 @@ class FlexObjectsPlugin extends Plugin
             if (null === $count) {
                 try {
                     $collection = $directory->getCollection();
-                    $count = $collection->isAuthorized('list', 'admin', $admin->user)->count();
+                    if (is_callable([$collection, 'isAuthorized'])) {
+                        $count = $collection->isAuthorized('list', 'admin', $admin->user)->count();
+                    } else {
+                        $count = $collection->count();
+                    }
                     $cache->set('admin-count-' . md5($admin->user->username), $count);
                 } catch (\InvalidArgumentException $e) {
                     continue;
@@ -380,6 +415,8 @@ class FlexObjectsPlugin extends Plugin
 
     /**
      * Exclude Flex Directory data from the Data Manager plugin
+     *
+     * @return void
      */
     public function onDataTypeExcludeFromDataManagerPluginHook(): void
     {
@@ -388,6 +425,8 @@ class FlexObjectsPlugin extends Plugin
 
     /**
      * Add current directory to twig lookup paths.
+     *
+     * @return void
      */
     public function onTwigTemplatePaths(): void
     {
@@ -402,6 +441,9 @@ class FlexObjectsPlugin extends Plugin
 
     /**
      * Add plugin templates path
+     *
+     * @param Event $event
+     * @return void
      */
     public function onAdminTwigTemplatePaths(Event $event): void
     {
@@ -419,6 +461,8 @@ class FlexObjectsPlugin extends Plugin
 
     /**
      * Set needed variables to display directory.
+     *
+     * @return void
      */
     public function onTwigAdminVariables(): void
     {

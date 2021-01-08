@@ -27,6 +27,10 @@ use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
 use function is_callable;
 
+/**
+ * Class AbstractController
+ * @package Grav\Plugin\FlexObjects\Controllers
+ */
 abstract class AbstractController implements RequestHandlerInterface
 {
     use ControllerResponseTrait;
@@ -163,11 +167,18 @@ abstract class AbstractController implements RequestHandlerInterface
         return $body;
     }
 
+    /**
+     * @return bool
+     */
     public function isFormSubmit(): bool
     {
         return (bool)$this->getPost('__form-name__');
     }
 
+    /**
+     * @param string|null $type
+     * @return FlexFormInterface
+     */
     public function getForm(string $type = null): FlexFormInterface
     {
         $object = $this->getObject();
@@ -268,6 +279,10 @@ abstract class AbstractController implements RequestHandlerInterface
         return $this;
     }
 
+    /**
+     * @param UserInterface $user
+     * @return void
+     */
     public function setUser(UserInterface $user): void
     {
         $this->user = $user;
@@ -283,6 +298,7 @@ abstract class AbstractController implements RequestHandlerInterface
 
     /**
      * @param string $task
+     * @return void
      * @throws PageExpiredException
      */
     protected function checkNonce(string $task): void

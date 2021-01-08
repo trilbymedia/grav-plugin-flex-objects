@@ -257,6 +257,7 @@ class ObjectController extends AbstractController
 
     /**
      * @param string $action
+     * @return void
      * @throws \RuntimeException
      */
     protected function checkAuthorization(string $action): void

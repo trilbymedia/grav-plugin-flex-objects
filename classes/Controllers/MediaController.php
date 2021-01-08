@@ -465,6 +465,7 @@ class MediaController extends AbstractController
 
     /**
      * @param string $action
+     * @return void
      * @throws LogicException
      * @throws RuntimeException
      */

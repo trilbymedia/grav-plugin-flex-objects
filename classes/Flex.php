@@ -12,6 +12,7 @@ use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexCommonInterface;
+use Grav\Framework\Flex\Interfaces\FlexDirectoryInterface;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Plugin\FlexObjects\Table\DataTable;
@@ -103,9 +104,9 @@ class Flex implements FlexInterface
     }
 
     /**
-     * @param array|string[]|null $types
+     * @param string[]|null $types
      * @param bool $keepMissing
-     * @return array<FlexDirectory|null>
+     * @return array<FlexDirectoryInterface|null>
      */
     public function getDirectories(array $types = null, bool $keepMissing = false): array
     {
@@ -255,7 +256,7 @@ class Flex implements FlexInterface
      * @param array $options
      * @return DataTable
      */
-    public function getDataTable($type, array $options = [])
+    public function getDataTable($type, array $options = []): DataTable
     {
         $directory = $type instanceof FlexDirectory ? $type : $this->getDirectory($type);
         if (!$directory) {

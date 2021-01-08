@@ -16,6 +16,11 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class FlexRouter implements MiddlewareInterface
 {
+    /**
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $context = $request->getAttributes();
