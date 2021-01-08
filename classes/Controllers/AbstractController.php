@@ -13,6 +13,7 @@ use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Framework\Controller\Traits\ControllerResponseTrait;
 use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Psr7\Response;
@@ -25,6 +26,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
+use function in_array;
 use function is_callable;
 
 /**
@@ -37,28 +39,20 @@ abstract class AbstractController implements RequestHandlerInterface
 
     /** @var string */
     protected $nonce_action = 'flex-object';
-
     /** @var string */
     protected $nonce_name = 'nonce';
-
     /** @var ServerRequestInterface */
     protected $request;
-
     /** @var Grav */
     protected $grav;
-
     /** @var UserInterface|null */
     protected $user;
-
     /** @var string */
     protected $type;
-
     /** @var string */
     protected $key;
-
     /** @var FlexDirectory */
     protected $directory;
-
     /** @var FlexObjectInterface */
     protected $object;
 
@@ -177,7 +171,7 @@ abstract class AbstractController implements RequestHandlerInterface
 
     /**
      * @param string|null $type
-     * @return FlexFormInterface
+     * @return FlexForm
      */
     public function getForm(string $type = null): FlexFormInterface
     {
@@ -305,7 +299,7 @@ abstract class AbstractController implements RequestHandlerInterface
     {
         $nonce = null;
 
-        if (\in_array(strtoupper($this->request->getMethod()), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
+        if (in_array(strtoupper($this->request->getMethod()), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             $nonce = $this->getPost($this->nonce_name);
         }
 

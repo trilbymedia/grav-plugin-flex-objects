@@ -2,10 +2,12 @@
 
 namespace Grav\Plugin\FlexObjects\Admin;
 
+use Exception;
 use Grav\Common\Cache;
 use Grav\Common\Config\Config;
 use Grav\Common\Debugger;
 use Grav\Common\Filesystem\Folder;
+use Grav\Common\Flex\Types\Pages\PageCollection;
 use Grav\Common\Flex\Types\Pages\PageIndex;
 use Grav\Common\Flex\Types\Pages\PageObject;
 use Grav\Common\Grav;
@@ -39,6 +41,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use RocketTheme\Toolbox\Session\Message;
+use RuntimeException;
+use function dirname;
+use function in_array;
+use function is_array;
 use function is_callable;
 
 /**
@@ -147,7 +153,7 @@ class AdminController
             try {
                 $grav = Grav::instance();
                 $grav->fireEvent('onFlexTask' . ucfirst($this->task), $event);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 /** @var Debugger $debugger */
                 $debugger = $this->grav['debugger'];
                 $debugger->addException($e);
@@ -194,7 +200,7 @@ class AdminController
             try {
                 $grav = Grav::instance();
                 $grav->fireEvent('onFlexAction' . ucfirst($this->action), $event);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 /** @var Debugger $debugger */
                 $debugger = $this->grav['debugger'];
                 $debugger->addException($e);
@@ -261,22 +267,22 @@ class AdminController
     {
         $collection = $this->getCollection();
         if (!$collection) {
-            throw new \RuntimeException('Internal Error', 500);
+            throw new RuntimeException('Internal Error', 500);
         }
         if (is_callable([$collection, 'isAuthorized']) && !$collection->isAuthorized('list', 'admin', $this->user)) {
-            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' list.', 403);
+            throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' list.', 403);
         }
 
         $config = $collection->getFlexDirectory()->getConfig('admin.views.export') ?? $collection->getFlexDirectory()->getConfig('admin.export') ?? false;
         if (!$config || empty($config['enabled'])) {
-            throw new \RuntimeException($this->admin::translate('Not Found'), 404);
+            throw new RuntimeException($this->admin::translate('Not Found'), 404);
         }
 
         $defaultFormatter = CsvFormatter::class;
         $class = trim($config['formatter']['class'] ?? $defaultFormatter, '\\');
         $method = $config['method'] ?? ($class === $defaultFormatter ? 'csvSerialize' : 'jsonSerialize');
         if (!class_exists($class)) {
-            throw new \RuntimeException($this->admin::translate('Formatter Not Found'), 404);
+            throw new RuntimeException($this->admin::translate('Formatter Not Found'), 404);
         }
         /** @var FileFormatterInterface $formatter */
         $formatter = new $class($config['formatter']['options'] ?? []);
@@ -329,7 +335,7 @@ class AdminController
 
             if ($object && $object->exists()) {
                 if ($object instanceof FlexAuthorizeInterface && !$object->isAuthorized('delete', 'admin', $this->user)) {
-                    throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
+                    throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' delete.', 403);
                 }
 
                 $object->delete();
@@ -347,7 +353,7 @@ class AdminController
                 $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
                 $grav->fireEvent('gitsync');
             }
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             $this->admin->setMessage('Delete Failed: ' . $e->getMessage(), 'error');
 
             $this->setRedirect($this->referrerRoute->toString(true), 302);
@@ -367,11 +373,16 @@ class AdminController
     {
         $directory = $this->getDirectory();
         if (!$directory) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         if ($directory instanceof FlexAuthorizeInterface && !$directory->isAuthorized('create', 'admin', $this->user)) {
-            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
+            throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
+        }
+
+        $collection = $directory->getCollection();
+        if (!($collection instanceof PageCollection || $collection instanceof PageIndex)) {
+            throw new RuntimeException('Task saveNewFolder works only for pages', 400);
         }
 
         $data = $this->data;
@@ -380,18 +391,17 @@ class AdminController
         // TODO: Folder name needs to be validated!
         $folder = mb_strtolower($data['folder'] ?? '');
         if ($folder === '' || mb_strpos($folder, '/') !== false) {
-            throw new \RuntimeException('Creating folder failed, bad folder name', 400);
+            throw new RuntimeException('Creating folder failed, bad folder name', 400);
         }
 
-        /** @var PageObject $parent */
-        $parent = $route ? $directory->getObject($route) : $directory->getCollection()->getRoot();
-        if (!$parent) {
-            throw new \RuntimeException('Creating folder failed, bad parent route', 400);
+        $parent = $route ? $directory->getObject($route) : $collection->getRoot();
+        if (!$parent instanceof PageObject) {
+            throw new RuntimeException('Creating folder failed, bad parent route', 400);
         }
 
         $path = $parent->getFlexDirectory()->getStorageFolder($parent->getStorageKey());
         if (!$path) {
-            throw new \RuntimeException('Creating folder failed, bad parent storage path', 400);
+            throw new RuntimeException('Creating folder failed, bad parent storage path', 400);
         }
 
         // Ordering
@@ -428,7 +438,7 @@ class AdminController
     {
         $directory = $this->getDirectory();
         if (!$directory) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
@@ -440,7 +450,7 @@ class AdminController
         if (!$authorized && !$directory->isAuthorized('create', 'admin', $this->user)) {
             $this->setRedirect($this->referrerRoute->toString(true));
 
-            throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' add.', 403);
+            throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' add.', 403);
         }
 
         $folder = $this->data['folder'] ?? null;
@@ -457,7 +467,7 @@ class AdminController
         }
         $folder = ltrim($folder, '_');
         if ($folder === '' || mb_strpos($folder, '/') !== false) {
-            throw new \RuntimeException('Creating page failed: bad folder name', 400);
+            throw new RuntimeException('Creating page failed: bad folder name', 400);
         }
 
         if (isset($this->data['name']) && strpos($this->data['name'], 'modular/') === 0) {
@@ -469,7 +479,7 @@ class AdminController
         unset($this->data['blueprint']);
         $key = trim("{$route}/{$folder}", '/');
         if ($directory->getObject($key)) {
-            throw new \RuntimeException("Page '/{$key}' already exists!", 403);
+            throw new RuntimeException("Page '/{$key}' already exists!", 403);
         }
 
         $max = 0;
@@ -522,18 +532,18 @@ class AdminController
      * Route: /pages
      *
      * @return bool True if the action was performed.
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     protected function taskCopy(): bool
     {
         try {
             $object = $this->getObject();
             if (!$object || !$object->exists()) {
-                throw new \RuntimeException('Not Found', 404);
+                throw new RuntimeException('Not Found', 404);
             }
 
             if ($object instanceof FlexAuthorizeInterface && !$object->isAuthorized('create', 'admin', $this->user)) {
-                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' copy.',
+                throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' copy.',
                     403);
             }
 
@@ -541,7 +551,7 @@ class AdminController
 
             $this->setRedirect($this->getFlex()->adminRoute($object));
 
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             $this->admin->setMessage('Copy Failed: ' . $e->getMessage(), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
@@ -567,7 +577,7 @@ class AdminController
         $object = $this->getObject($this->id ?? '');
 
         if (!$object || !method_exists($object, 'getLevelListing')) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $request = $this->getRequest();
@@ -620,12 +630,12 @@ class AdminController
             $object = $this->getObject('');
 
             if (!$object || !method_exists($object, 'getLevelListing')) {
-                throw new \RuntimeException('Not Found', 404);
+                throw new RuntimeException('Not Found', 404);
             }
 
             $directory = $object->getFlexDirectory();
             if (!$directory->isAuthorized('list', 'admin', $this->user)) {
-                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
+                throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' getLevelListing.',
                     403);
             }
 
@@ -659,7 +669,7 @@ class AdminController
                 'initial' => (bool)$initial,
                 'data' => array_values($response)
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->createErrorResponse($e);
         }
 
@@ -675,7 +685,7 @@ class AdminController
 
         $object = $this->getObject($key);
         if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         /** @var FlexForm $form */
@@ -704,17 +714,17 @@ class AdminController
         try {
             $object = $this->getObject($key);
             if (!$object) {
-                throw new \RuntimeException('Not Found', 404);
+                throw new RuntimeException('Not Found', 404);
             }
 
             if ($object->exists()) {
                 if (!$object->isAuthorized('update', 'admin', $this->user)) {
-                    throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
+                    throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
                         403);
                 }
             } else {
                 if (!$object->isAuthorized('create', 'admin', $this->user)) {
-                    throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
+                    throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
                         403);
                 }
             }
@@ -738,10 +748,10 @@ class AdminController
                         $this->admin->setMessage($message, 'error');
                     }
                 }
-                throw new \RuntimeException('Form validation failed, please check your input');
+                throw new RuntimeException('Form validation failed, please check your input');
             }
             if ($error) {
-                throw new \RuntimeException($error);
+                throw new RuntimeException($error);
             }
 
             $object = $form->getObject();
@@ -779,7 +789,7 @@ class AdminController
             $grav = Grav::instance();
             $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
             $grav->fireEvent('gitsync');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
 
             if (isset($object, $form)) {
@@ -808,7 +818,7 @@ class AdminController
             $directory = $this->getDirectory();
             $config = $directory->getConfig('admin.views.configure.authorize') ?? $directory->getConfig('admin.configure.authorize') ?? 'admin.super';
             if (!$this->user->authorize($config)) {
-                throw new \RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' configure.', 403);
+                throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' configure.', 403);
             }
 
             $grav = Grav::instance();
@@ -831,10 +841,10 @@ class AdminController
                         $this->admin->setMessage($message, 'error');
                     }
                 }
-                throw new \RuntimeException('Form validation failed, please check your input');
+                throw new RuntimeException('Form validation failed, please check your input');
             }
             if ($error) {
-                throw new \RuntimeException($error);
+                throw new RuntimeException($error);
             }
 
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
@@ -844,7 +854,7 @@ class AdminController
 
                 $this->setRedirect($this->referrerRoute->toString(true));
             }
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
@@ -861,7 +871,7 @@ class AdminController
             $response = $this->forwardMediaTask('action', 'media.list');
 
             $this->admin->json_response = json_decode($response->getBody(), false);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
 
@@ -877,7 +887,7 @@ class AdminController
             $response = $this->forwardMediaTask('task', 'media.upload');
 
             $this->admin->json_response = json_decode($response->getBody(), false);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
 
@@ -893,7 +903,7 @@ class AdminController
             $response = $this->forwardMediaTask('task', 'media.delete');
 
             $this->admin->json_response = json_decode($response->getBody(), false);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
 
@@ -917,7 +927,7 @@ class AdminController
             $response = $this->forwardMediaTask('task', 'media.copy');
 
             $this->admin->json_response = json_decode($response->getBody(), false);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
 
@@ -933,7 +943,7 @@ class AdminController
             $response = $this->forwardMediaTask('task', 'media.remove');
 
             $this->admin->json_response = json_decode($response->getBody(), false);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             die($e->getMessage());
         }
 
@@ -946,7 +956,7 @@ class AdminController
      */
     public function taskFilesUpload(): bool
     {
-        throw new \RuntimeException('Task filesUpload should not be called!');
+        throw new RuntimeException('Task filesUpload should not be called!');
     }
 
     /**
@@ -956,7 +966,7 @@ class AdminController
      */
     public function taskRemoveMedia($filename = null): bool
     {
-        throw new \RuntimeException('Task removeMedia should not be called!');
+        throw new RuntimeException('Task removeMedia should not be called!');
     }
 
     /**
@@ -968,7 +978,7 @@ class AdminController
             $response = $this->forwardMediaTask('action', 'media.picker');
 
             $this->admin->json_response = json_decode($response->getBody(), false);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->admin->json_response = ['success' => false, 'error' => $e->getMessage()];
         }
 
@@ -1188,7 +1198,7 @@ class AdminController
             $response = $this->{$method}(...$params);
         } catch (RequestException $e) {
             $response = $this->createErrorResponse($e);
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $e) {
             // If task fails to run, redirect back to the previous page and display the error message.
             if ($this->task && !$this->redirect) {
                 $this->setRedirect($this->referrerRoute->toString(true));
@@ -1229,7 +1239,7 @@ class AdminController
     {
         $object = $object ?? $this->getObject();
         if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $formName = $this->post['__form-name__'] ?? '';
@@ -1265,7 +1275,7 @@ class AdminController
     {
         $directory = $directory ?? $this->getDirectory();
         if (!$directory) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $formName = $this->post['__form-name__'] ?? '';

@@ -1,12 +1,12 @@
 <?php
+
 namespace Grav\Plugin\Console;
 
-use Grav\Common\Grav;
+use Exception;
 use Grav\Common\Yaml;
 use Grav\Console\ConsoleCommand;
-use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use function count;
 
 /**
  * Class FlushQueueCommand
@@ -14,15 +14,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class FlexConvertDataCommand extends ConsoleCommand
 {
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $options = [];
 
     /**
      * @return void
      */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('convert-data')
@@ -44,35 +42,37 @@ class FlexConvertDataCommand extends ConsoleCommand
     }
 
     /**
-     * @return void
+     * @return int
      */
-    protected function serve()
+    protected function serve(): int
     {
+        $input = $this->getInput();
+        $io = $this->getIO();
+
         $out_raw = null;
-        $in = $this->input->getOption('in');
+        $in = $input->getOption('in');
         $in_parts = pathinfo($in);
         $in_extension = $in_parts['extension'];
-        $out_extension = $this->input->getOption('out');
-
-        $io = new SymfonyStyle($this->input, $this->output);
+        $out_extension = $input->getOption('out');
 
         $io->title('Flex Convert Data');
 
         if (!file_exists($in)) {
             $io->error('cannot find the file: ' . realpath($in));
-            exit;
+
+            return 1;
         }
-
-
 
         if (!$in_extension) {
             $io->error($in . ' has no file extension defined');
-            exit;
+
+            return 1;
         }
 
         if (!$out_extension) {
             $io->error($out_extension . ' is not a valid extension');
-            exit;
+
+            return 1;
         }
 
         $in_raw = file_get_contents($in);
@@ -84,11 +84,12 @@ class FlexConvertDataCommand extends ConsoleCommand
             $in_data = json_decode($in_raw, true);
         } else {
             $io->error('input files with extension ' . $in_extension . ', is not supported');
-            exit;
+
+            return 1;
         }
 
         // Simple progress bar
-        $progress = new ProgressBar($this->output, count($in_data));
+        $progress = $io->createProgressBar(count($in_data));
         $progress->setFormat('verbose');
         $progress->start();
 
@@ -115,7 +116,8 @@ class FlexConvertDataCommand extends ConsoleCommand
             $out_raw = json_encode($out_data, JSON_PRETTY_PRINT);
         } else {
             $io->error('input files with extension ' . $out_extension . ', is not supported');
-            exit;
+
+            return 1;
         }
 
         // Write the file:
@@ -123,11 +125,13 @@ class FlexConvertDataCommand extends ConsoleCommand
         file_put_contents($out_filename, $out_raw);
 
         $io->success('successfully converted the file and saved as: ' . $out_filename);
+
+        return 0;
     }
 
     /**
-     * @return false|string
-     * @throws \Exception
+     * @return string|false
+     * @throws Exception
      */
     protected function generateKey()
     {

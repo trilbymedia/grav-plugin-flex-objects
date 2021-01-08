@@ -28,6 +28,7 @@ use function is_callable;
  */
 class FlexObjectsPlugin extends Plugin
 {
+    /** @var string */
     protected const MIN_GRAV_VERSION = '1.7.0-rc.17';
 
     /** @var int[] */
@@ -126,10 +127,10 @@ class FlexObjectsPlugin extends Plugin
     public function onPluginsInitialized(): void
     {
         if ($this->isAdmin() && method_exists(Admin::class, 'getChangelog')) {
-            /** @var UserInterface $user */
+            /** @var UserInterface|null $user */
             $user = $this->grav['user'] ?? null;
 
-            if (!$user || !$user->authorize('login', 'admin')) {
+            if (null === $user || !$user->authorize('login', 'admin')) {
                 return;
             }
 

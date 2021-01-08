@@ -379,6 +379,9 @@ class Flex implements FlexInterface
         return $this->adminRoutes;
     }
 
+    /**
+     * @return array
+     */
     public function getAdminMenuItems(): array
     {
         if (null === $this->adminMenu) {
