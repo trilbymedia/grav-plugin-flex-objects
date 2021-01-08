@@ -3,7 +3,9 @@
 
 1. [](#improved)
    * Added support for relative paths in `getLevelListing` action
-
+1. [](#bugfix)
+   * Fixed `DataTable` class not working with objects that do not implement `FlexAuthorizeInterface`
+   
 # v1.0.0-rc.20
 ## 12/15/2020
 
