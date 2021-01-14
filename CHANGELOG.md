@@ -5,7 +5,7 @@
    * Added support for relative paths in `getLevelListing` action
 1. [](#bugfix)
    * Fixed admin not working with types that do not implement `FlexAuthorizeInterface`
-   * Exception when changing parent of new page [grav-plugin-admin#2018](https://github.com/getgrav/grav-plugin-admin/issues/2018)
+   * Bad redirect when changing parent of new page and saving [grav-plugin-admin#2014](https://github.com/getgrav/grav-plugin-admin/issues/2014)
    
 # v1.0.0-rc.20
 ## 12/15/2020
