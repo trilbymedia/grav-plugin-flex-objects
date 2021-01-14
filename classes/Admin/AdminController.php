@@ -57,43 +57,31 @@ class AdminController
 
     /** @var Grav */
     public $grav;
-
     /** @var string */
     public $view;
-
     /** @var string */
     public $task;
-
     /** @var Route|null */
     public $route;
-
     /** @var array */
     public $post;
-
     /** @var array|null */
     public $data;
 
     /** @var array */
     protected $adminRoutes;
-
     /** @var Uri */
     protected $uri;
-
     /** @var Admin */
     protected $admin;
-
     /** @var UserInterface */
     protected $user;
-
     /** @var string */
     protected $redirect;
-
     /** @var int */
     protected $redirectCode;
-
     /** @var Route */
     protected $currentRoute;
-
     /** @var Route */
     protected $referrerRoute;
 
@@ -755,19 +743,32 @@ class AdminController
             }
 
             $object = $form->getObject();
+            $objectKey = $object->getKey();
 
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
             if (!$this->redirect) {
+                $hasKeyChanged = $key !== $objectKey;
                 if ($key === '' || $this->referrerRoute->getGravParam('action') === 'add' || $this->referrerRoute->getGravParam('') === 'add') {
                     $this->referrerRoute = $this->currentRoute->withGravParam('action', null)->withGravParam('', null);
-                    if (!Utils::endsWith($this->referrerRoute->toString(false), '/' . $object->getKey())) {
-                        $this->referrerRoute = $this->referrerRoute->withAddedPath($object->getKey());
+
+                    if ($hasKeyChanged) {
+                        if ($key === '') {
+                            // Append new key.
+                            $route = $this->referrerRoute->getRoute() . '/' . $objectKey;
+                        } elseif ($objectKey === '') {
+                            // Remove old key.
+                            $route = preg_replace('|/' . preg_quote($key, '|') . '$|u', '/', $this->referrerRoute->getRoute());
+                        } else {
+                            // Replace old key with new key.
+                            $route = preg_replace('|/' . preg_quote($key, '|') . '$|u', '/' . $objectKey, $this->referrerRoute->getRoute());
+                        }
+                        $this->referrerRoute = $this->referrerRoute->withRoute($route);
                     }
-                } elseif ($key !== $object->getKey()) {
+                } elseif ($hasKeyChanged) {
                     // TODO: remove page specific code
                     if (!(method_exists($object, 'root') && $object->root())) {
-                        $route = preg_replace('|/' . preg_quote($key, '|') . '|u', '/' . $object->getKey(), $this->currentRoute->getRoute());
+                        $route = preg_replace('|/' . preg_quote($key, '|') . '$|u', '/' . $objectKey, $this->currentRoute->getRoute());
 
                         $this->referrerRoute = $this->currentRoute->withRoute($route);
                     }

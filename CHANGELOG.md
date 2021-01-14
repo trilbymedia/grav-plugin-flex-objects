@@ -5,6 +5,7 @@
    * Added support for relative paths in `getLevelListing` action
 1. [](#bugfix)
    * Fixed admin not working with types that do not implement `FlexAuthorizeInterface`
+   * Fixed redirect when saving a new page after changing parent
    
 # v1.0.0-rc.20
 ## 12/15/2020
