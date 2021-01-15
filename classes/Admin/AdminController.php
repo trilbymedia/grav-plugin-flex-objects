@@ -11,6 +11,7 @@ use Grav\Common\Flex\Types\Pages\PageCollection;
 use Grav\Common\Flex\Types\Pages\PageIndex;
 use Grav\Common\Flex\Types\Pages\PageObject;
 use Grav\Common\Grav;
+use Grav\Common\Language\Language;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserInterface;
@@ -1558,7 +1559,10 @@ class AdminController
      */
     protected function isMultilang(): bool
     {
-        return count($this->grav['config']->get('system.languages.supported', [])) > 1;
+        /** @var Language $language */
+        $language = $this->grav['language'];
+
+        return $language->enabled();
     }
 
     protected function validateNonce(): bool

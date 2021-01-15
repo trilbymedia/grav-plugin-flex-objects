@@ -6,6 +6,7 @@
 1. [](#bugfix)
    * Fixed admin not working with types that do not implement `FlexAuthorizeInterface`
    * Bad redirect when changing parent of new page and saving [grav-plugin-admin#2014](https://github.com/getgrav/grav-plugin-admin/issues/2014)
+   * Fixed page forms being empty if multi-language is enabled, but there's just one language [grav#3147](https://github.com/getgrav/grav/issues/3147)
    
 # v1.0.0-rc.20
 ## 12/15/2020
