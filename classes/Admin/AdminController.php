@@ -748,44 +748,61 @@ class AdminController
 
             $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
 
+            // Set route to point to the current page.
             if (!$this->redirect) {
-                $hasKeyChanged = $key !== $objectKey;
-                if ($key === '' || $this->referrerRoute->getGravParam('action') === 'add' || $this->referrerRoute->getGravParam('') === 'add') {
-                    $this->referrerRoute = $this->currentRoute->withGravParam('action', null)->withGravParam('', null);
+                $postAction = $request->getParsedBody()['_post_entries_save'] ?? 'edit';
+                if ($postAction === 'create-new') {
+                    // Create another.
+                    $route = $this->referrerRoute->withGravParam('action', null)->withGravParam('', 'add');
+                } elseif ($postAction === 'list') {
+                    // Back to listing.
+                    $route = $this->currentRoute;
+
+                    // Remove :add action.
+                    $actionAdd = $key === '' || $route->getGravParam('action') === 'add' || $route->getGravParam('') === 'add';
+                    if ($actionAdd) {
+                        $route = $route->withGravParam('action', null)->withGravParam('', null);
+                    }
+
+                    $len = ($key === '' ? 0 : -1) - \substr_count($key, '/');
+                    if ($len) {
+                        $route = $route->withRoute($route->getRoute(0, $len));
+                    }
+                } else {
+                    // Back to edit.
+                    $route = $this->currentRoute;
+                    $isRoot = $object instanceof PageInterface && $object->root();
+                    $hasKeyChanged = !$isRoot && $key !== $objectKey;
+
+                    // Remove :add action.
+                    $actionAdd = $key === '' || $route->getGravParam('action') === 'add' || $route->getGravParam('') === 'add';
+                    if ($actionAdd) {
+                        $route = $route->withGravParam('action', null)->withGravParam('', null);
+                    }
 
                     if ($hasKeyChanged) {
                         if ($key === '') {
                             // Append new key.
-                            $route = $this->referrerRoute->getRoute() . '/' . $objectKey;
+                            $path = $route->getRoute() . '/' . $objectKey;
                         } elseif ($objectKey === '') {
                             // Remove old key.
-                            $route = preg_replace('|/' . preg_quote($key, '|') . '$|u', '/', $this->referrerRoute->getRoute());
+                            $path = preg_replace('|/' . preg_quote($key, '|') . '$|u', '/', $route->getRoute());
                         } else {
                             // Replace old key with new key.
-                            $route = preg_replace('|/' . preg_quote($key, '|') . '$|u', '/' . $objectKey, $this->referrerRoute->getRoute());
+                            $path = preg_replace('|/' . preg_quote($key, '|') . '$|u', '/' . $objectKey, $route->getRoute());
                         }
-                        $this->referrerRoute = $this->referrerRoute->withRoute($route);
+                        $route = $route->withRoute($path);
                     }
-                } elseif ($hasKeyChanged) {
-                    // TODO: remove page specific code
-                    if (!(method_exists($object, 'root') && $object->root())) {
-                        $route = preg_replace('|/' . preg_quote($key, '|') . '$|u', '/' . $objectKey, $this->currentRoute->getRoute());
 
-                        $this->referrerRoute = $this->currentRoute->withRoute($route);
+                    // Make sure we're using the correct language.
+                    $lang = null;
+                    if ($object instanceof FlexTranslateInterface) {
+                        $lang = $object->getLanguage();
+                        $route = $route->withLanguage($lang);
                     }
                 }
-                $postAction = $request->getParsedBody()['_post_entries_save'] ?? 'edit';
-                if ($postAction === 'list') {
-                    $this->referrerRoute = $this->currentRoute->withRoute($this->currentRoute->getRoute(0, -1));
-                }
 
-                $lang = null;
-                if ($object instanceof FlexTranslateInterface) {
-                    $lang = $object->getLanguage();
-                    $this->referrerRoute = $this->referrerRoute->withLanguage($lang);
-                }
-
-                $this->setRedirect($this->referrerRoute->toString(true));
+                $this->setRedirect($route->toString(true));
             }
 
             $grav = Grav::instance();
