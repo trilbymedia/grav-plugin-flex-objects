@@ -531,7 +531,9 @@ class AdminController
                 throw new RuntimeException('Not Found', 404);
             }
 
-            if ($object instanceof FlexAuthorizeInterface && !$object->isAuthorized('create', 'admin', $this->user)) {
+            // Pages are a special case.
+            $parent = $object instanceof PageInterface ? $object->parent() : $object;
+            if (null === $parent || ($parent instanceof FlexAuthorizeInterface && !$parent->isAuthorized('create', 'admin', $this->user))) {
                 throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' copy.',
                     403);
             }

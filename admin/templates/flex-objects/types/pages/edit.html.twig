@@ -2,8 +2,11 @@
 
 {% set form = form ?? object.form(admin.session.expert != '0' ? 'raw') %}
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
-{% set can_read = can_read ?? (object.parent and object.isAuthorized('read', 'admin', user) ?: directory.isAuthorized('create', 'admin', user)) %}
-{% set can_save = can_save ?? (object.parent and object.isAuthorized('update', 'admin', user) ?: directory.isAuthorized('create', 'admin', user)) %}
+{% set parent = object.parent %}
+{% set can_read = can_read ?? (parent and object.isAuthorized('read', 'admin', user) ?: directory.isAuthorized('create', 'admin', user)) %}
+{% set can_copy = can_copy ?? (parent.exists and parent.isAuthorized('create', 'admin', user)) %}
+{% set can_create = can_create ?? (object.exists and object.isAuthorized('create', 'admin', user)) %}
+{% set can_save = can_save ?? (parent and object.isAuthorized('update', 'admin', user) ?: parent.isAuthorized('create', 'admin', user)) %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate') and not object.root()) %}
 
 {% macro spanToggle(input, length) %}
@@ -15,7 +18,6 @@
     {% set current_route = '/' ~ route.getRoute(1) %}
 
     {% if not object.root() %}
-    {% set parent = object.parent %}
     {% set child = object.children.first %}
     {% set prev = object.prevSibling %}
     {% set next = object.nextSibling %}
@@ -63,8 +65,10 @@
     {% if can_create %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/add.html.twig', 'flex-objects/types/pages/buttons/add.html.twig'] %}
     {% endif %}
-    {% if can_save %}
+    {% if can_copy %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/copy.html.twig', 'flex-objects/types/pages/buttons/copy.html.twig'] %}
+    {% endif %}
+    {% if can_save %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/move.html.twig', 'flex-objects/types/pages/buttons/move.html.twig'] %}
     {% endif %}
     {% endif %}
