@@ -7,6 +7,7 @@ namespace Grav\Plugin\FlexObjects;
 use Grav\Common\Config\Config;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
@@ -15,6 +16,7 @@ use Grav\Framework\Flex\Interfaces\FlexCommonInterface;
 use Grav\Framework\Flex\Interfaces\FlexDirectoryInterface;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
+use Grav\Plugin\FlexObjects\Admin\AdminController;
 use Grav\Plugin\FlexObjects\Table\DataTable;
 
 /**
@@ -198,7 +200,7 @@ class Flex implements FlexInterface
 
     public function isManaged(string $type): bool
     {
-        return in_array($type, $this->managed, true);
+        return \in_array($type, $this->managed, true);
     }
 
     /**
@@ -349,6 +351,24 @@ class Flex implements FlexInterface
         $extension = $extension ? '.' . $extension : '';
 
         return $route . $extension . ($p ? '/' . implode('/', $p) : '');
+    }
+
+    public function getAdminController(): ?AdminController
+    {
+        $grav = Grav::instance();
+        if (!isset($grav['admin'])) {
+            return null;
+        }
+
+        /** @var PageInterface $page */
+        $page = $grav['page'];
+        $header = $page->header();
+        $callable = $header->controller['controller']['instance'] ?? null;
+        if (null !== $callable && \is_callable($callable)) {
+            return $callable();
+        }
+
+        return null;
     }
 
     /**

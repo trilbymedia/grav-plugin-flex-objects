@@ -256,6 +256,7 @@ class FlexObjectsPlugin extends Plugin
             $page->slug($this->controller->getLocation());
             $header = $page->header();
             $header->access = ['admin.login'];
+            $header->controller = $this->controller->getInfo();
         }
     }
 

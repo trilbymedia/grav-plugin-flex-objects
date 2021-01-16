@@ -56,6 +56,9 @@ class AdminController
 {
     use ControllerResponseTrait;
 
+    /** @var AdminController|null */
+    private static $instance;
+
     /** @var Grav */
     public $grav;
     /** @var string */
@@ -1040,112 +1043,141 @@ class AdminController
         return Grav::instance()['flex_objects'];
     }
 
+    public static function getInstance(): ?AdminController
+    {
+        return self::$instance;
+    }
+
     /**
      * AdminController constructor.
      */
     public function __construct()
     {
+        self::$instance = $this;
+
         $this->grav = Grav::instance();
         $this->admin = Grav::instance()['admin'];
         $this->user = $this->admin->user;
 
         $this->active = false;
 
-        // Ensure the controller should be running
-        if (Utils::isAdminPlugin()) {
-            [, $location, $target] = $this->grav['admin']->getRouteDetails();
-            if (!$location) {
-                return;
-            }
+        // Controller can only be run in admin.
+        if (!Utils::isAdminPlugin()) {
+            return;
+        }
 
-            /** @var Uri $uri */
-            $uri = $this->grav['uri'];
-            $routeObject = $uri::getCurrentRoute();
-            $routeObject->withExtension('');
+        [, $location, $target] = $this->grav['admin']->getRouteDetails();
+        if (!$location) {
+            return;
+        }
 
-            $routes = $this->getAdminRoutes();
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        $routeObject = $uri::getCurrentRoute();
+        $routeObject->withExtension('');
 
-            // Match route to the flex directory.
-            $path = '/' . ($target ? $location . '/' . $target : $location) . '/';
-            $test = $routes[$path] ?? null;
+        $routes = $this->getAdminRoutes();
 
-            $directory = null;
-            if ($test)  {
-                $directory = $test['directory'];
-                $location = trim($path, '/');
-                $target = '';
-            } else {
-                krsort($routes);
-                foreach ($routes as $route => $test) {
-                    if (strpos($path, $route) === 0) {
-                        $directory = $test['directory'];
-                        $location = trim($route, '/');
-                        $target = trim(substr($path, strlen($route)), '/');
-                        break;
-                    }
-                    $test = null;
+        // Match route to the flex directory.
+        $path = '/' . ($target ? $location . '/' . $target : $location) . '/';
+        $test = $routes[$path] ?? null;
+
+        $directory = null;
+        if ($test)  {
+            $directory = $test['directory'];
+            $location = trim($path, '/');
+            $target = '';
+        } else {
+            krsort($routes);
+            foreach ($routes as $route => $test) {
+                if (strpos($path, $route) === 0) {
+                    $directory = $test['directory'];
+                    $location = trim($route, '/');
+                    $target = trim(substr($path, strlen($route)), '/');
+                    break;
                 }
+                $test = null;
             }
+        }
 
-            if ($directory) {
-                // Redirect aliases.
-                if (isset($test['redirect'])) {
-                    $route = $test['redirect'];
-                    // If directory route starts with alias and path continues, stop.
-                    if ($target && strpos($route, $location) === 0) {
-                        // We are not in a directory.
-                        return;
-                    }
-                    $redirect = '/' . $route . ($target ? '/' . $target : '');
-                    $this->setRedirect($redirect, 302);
-                    $this->redirect();
-                } elseif (isset($test['action'])) {
-                    $routeObject = $routeObject->withGravParam('', $test['action']);
-                }
-
-                $id = $target;
-                $target = $directory->getFlexType();
-            } else {
-                // We are not in a directory.
-                if ($location !== 'flex-objects') {
+        if ($directory) {
+            // Redirect aliases.
+            if (isset($test['redirect'])) {
+                $route = $test['redirect'];
+                // If directory route starts with alias and path continues, stop.
+                if ($target && strpos($route, $location) === 0) {
+                    // We are not in a directory.
                     return;
                 }
-                $array = explode('/', $target, 2);
-                $target = array_shift($array) ?: null;
-                $id = array_shift($array) ?: null;
+                $redirect = '/' . $route . ($target ? '/' . $target : '');
+                $this->setRedirect($redirect, 302);
+                $this->redirect();
+            } elseif (isset($test['action'])) {
+                $routeObject = $routeObject->withGravParam('', $test['action']);
             }
 
-            // Post
-            $post = $_POST ?? [];
-            if (isset($post['data'])) {
-                $this->data = $this->getPost($post['data']);
-                unset($post['data']);
+            $id = $target;
+            $target = $directory->getFlexType();
+        } else {
+            // We are not in a directory.
+            if ($location !== 'flex-objects') {
+                return;
             }
-
-            // Task
-            $task = $this->grav['task'];
-            if ($task) {
-                $this->task = $task;
-            }
-
-            $this->post = $this->getPost($post);
-            $this->location = 'flex-objects';
-            $this->target = $target;
-            $this->id = $this->post['id'] ?? $id;
-            $this->action = $this->post['action'] ?? $uri->param('action', null) ?? $uri->param('', null) ?? $routeObject->getGravParam('');
-            $this->active = true;
-            $this->currentRoute = $uri::getCurrentRoute();
-            $this->route = $routeObject;
-
-            $base = $this->grav['pages']->base();
-            if ($base) {
-                // Fix referrer for sub-folder multi-site setups.
-                $referrer = preg_replace('`^' . $base . '`', '', $uri->referrer());
-            } else {
-                $referrer = $uri->referrer();
-            }
-            $this->referrerRoute = $referrer ? RouteFactory::createFromString($referrer) : $this->currentRoute;
+            $array = explode('/', $target, 2);
+            $target = array_shift($array) ?: null;
+            $id = array_shift($array) ?: null;
         }
+
+        // Post
+        $post = $_POST ?? [];
+        if (isset($post['data'])) {
+            $this->data = $this->getPost($post['data']);
+            unset($post['data']);
+        }
+
+        // Task
+        $task = $this->grav['task'];
+        if ($task) {
+            $this->task = $task;
+        }
+
+        $this->post = $this->getPost($post);
+        $this->location = 'flex-objects';
+        $this->target = $target;
+        $this->id = $this->post['id'] ?? $id;
+        $this->action = $this->post['action'] ?? $uri->param('action', null) ?? $uri->param('', null) ?? $routeObject->getGravParam('');
+        $this->active = true;
+        $this->currentRoute = $uri::getCurrentRoute();
+        $this->route = $routeObject;
+
+        $base = $this->grav['pages']->base();
+        if ($base) {
+            // Fix referrer for sub-folder multi-site setups.
+            $referrer = preg_replace('`^' . $base . '`', '', $uri->referrer());
+        } else {
+            $referrer = $uri->referrer();
+        }
+        $this->referrerRoute = $referrer ? RouteFactory::createFromString($referrer) : $this->currentRoute;
+    }
+
+    public function getInfo(): array
+    {
+        if (!$this->isActive()) {
+            return [];
+        }
+
+        $class = AdminController::class;
+        return [
+            'controller' => [
+                'name' => $this->location,
+                'instance' => [$class, 'getInstance']
+            ],
+            'location' => $this->location,
+            'type' => $this->target,
+            'key' => $this->id,
+            'action' => $this->action,
+            'task' => $this->task
+        ];
     }
 
     /**

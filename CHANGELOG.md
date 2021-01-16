@@ -1,6 +1,8 @@
 # v1.0.0
 ## mm/dd/yyyy
 
+1. [](#new)
+   * Added `$grav['flex_objects']->getAdminController()` method
 1. [](#improved)
    * Added support for relative paths in `getLevelListing` action
 1. [](#bugfix)
