@@ -1,5 +1,5 @@
 # v1.0.0
-## mm/dd/yyyy
+## 01/19/2021
 
 1. [](#new)
    * Added `$grav['flex_objects']->getAdminController()` method

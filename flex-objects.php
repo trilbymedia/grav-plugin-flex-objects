@@ -29,7 +29,7 @@ use function is_callable;
 class FlexObjectsPlugin extends Plugin
 {
     /** @var string */
-    protected const MIN_GRAV_VERSION = '1.7.0-rc.17';
+    protected const MIN_GRAV_VERSION = '1.7.0';
 
     /** @var int[] */
     public $features = [
