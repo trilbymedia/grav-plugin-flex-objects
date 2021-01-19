@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Controllers;
 
+use Exception;
 use Grav\Common\Form\FormFlash;
 use Grav\Common\Grav;
-use Grav\Common\Media\Interfaces\MediaUploadInterface;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Media;
 use Grav\Common\Page\Medium\Medium;
@@ -18,10 +18,18 @@ use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Media\Interfaces\MediaInterface;
+use LogicException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use RocketTheme\Toolbox\Event\Event;
+use RuntimeException;
+use function is_array;
+use function is_string;
 
+/**
+ * Class MediaController
+ * @package Grav\Plugin\FlexObjects\Controllers
+ */
 class MediaController extends AbstractController
 {
     /**
@@ -31,14 +39,13 @@ class MediaController extends AbstractController
     {
         $this->checkAuthorization('media.create');
 
-        /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
-        if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+        if (null === $object) {
+            throw new RuntimeException('Not Found', 404);
         }
 
         if (!method_exists($object, 'checkUploadedMediaFile')) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         // Get field for the uploaded media.
@@ -54,7 +61,7 @@ class MediaController extends AbstractController
             $last = array_pop($parts);
             foreach ($parts as $name) {
                 if (!is_array($files[$name])) {
-                    throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
+                    throw new RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
                 }
                 $files = $files[$name];
             }
@@ -72,7 +79,7 @@ class MediaController extends AbstractController
         }
 
         if (!$file instanceof UploadedFileInterface) {
-            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
+            throw new RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
         }
 
         $filename = $file->getClientFilename();
@@ -82,14 +89,14 @@ class MediaController extends AbstractController
         try {
             $flash = $this->getFormFlash($object);
             $crop = $this->getPost('crop');
-            if (\is_string($crop)) {
+            if (is_string($crop)) {
                 $crop = json_decode($crop, true);
             }
 
             $flash->addUploadedFile($file, $field, $crop);
             $flash->save();
-        } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
+        } catch (Exception $e) {
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
         // Include exif metadata into the response if configured to do so
@@ -128,14 +135,14 @@ class MediaController extends AbstractController
         /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
         if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $filename = $this->getPost('filename');
 
         // Handle bad filenames.
         if (!Utils::checkFilename($filename)) {
-            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
+            throw new RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
         try {
@@ -143,8 +150,8 @@ class MediaController extends AbstractController
             $flash = $this->getFormFlash($object);
             $flash->removeFile($filename, $field);
             $flash->save();
-        } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
+        } catch (Exception $e) {
+            throw new RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
         $response = [
@@ -168,11 +175,11 @@ class MediaController extends AbstractController
         /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
         if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         if (!method_exists($object, 'uploadMediaFile')) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $request = $this->getRequest();
@@ -180,7 +187,7 @@ class MediaController extends AbstractController
 
         $file = $files['file'] ?? null;
         if (!$file instanceof UploadedFileInterface) {
-            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
+            throw new RuntimeException($this->translate('PLUGIN_ADMIN.INVALID_PARAMETERS'), 400);
         }
 
         $post = $request->getParsedBody();
@@ -229,18 +236,18 @@ class MediaController extends AbstractController
         /** @var FlexObjectInterface|null $object */
         $object = $this->getObject();
         if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         if (!method_exists($object, 'deleteMediaFile')) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $filename = $this->getPost('filename');
 
         // Handle bad filenames.
         if (!Utils::checkFilename($filename)) {
-            throw new \RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
+            throw new RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
         $object->deleteMediaFile($filename);
@@ -264,7 +271,7 @@ class MediaController extends AbstractController
         /** @var MediaInterface $object */
         $object = $this->getObject();
         if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $media = $object->getMedia();
@@ -304,13 +311,27 @@ class MediaController extends AbstractController
         /** @var FlexObject $object */
         $object = $this->getObject();
         if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
         }
 
         $name = $this->getPost('name');
         $settings = $object->getBlueprint()->schema()->getProperty($name);
         $fieldFolder = $settings['folder'] ?? null;
-        if ($fieldFolder) {
+        $folderIsString = \is_string($fieldFolder);
+
+        // Backwards compatibility.
+        if ($folderIsString && \in_array($fieldFolder, ['@self', 'self@'])) {
+            $fieldFolder = null;
+        } elseif ($object instanceof PageInterface) {
+            // TODO: Add support for @page, @root and @taxonomy
+            if ($folderIsString && strpos($fieldFolder, '@') !== false) {
+                if (\in_array($fieldFolder, ['@page.self', 'page@.self'])) {
+                    $fieldFolder = null;
+                }
+            }
+        }
+
+        if ($folderIsString && $fieldFolder) {
             // Custom media.
             $media = new Media($fieldFolder, []);
         } else {
@@ -425,6 +446,11 @@ class MediaController extends AbstractController
         return $flash;
     }
 
+    /**
+     * @param string $file
+     * @param array $settings
+     * @return false|int
+     */
     protected function filterAcceptedFiles(string $file, array $settings)
     {
         $valid = false;
@@ -439,16 +465,20 @@ class MediaController extends AbstractController
 
     /**
      * @param string $action
-     * @throws \LogicException
-     * @throws \RuntimeException
+     * @return void
+     * @throws LogicException
+     * @throws RuntimeException
      */
     protected function checkAuthorization(string $action): void
     {
-        /** @var FlexAuthorizeInterface $object */
         $object = $this->getObject();
-
         if (!$object) {
-            throw new \RuntimeException('Not Found', 404);
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        // If object does not have ACL support ignore ACL checks.
+        if (!$object instanceof FlexAuthorizeInterface) {
+            return;
         }
 
         switch ($action) {
@@ -462,11 +492,11 @@ class MediaController extends AbstractController
                 break;
 
             default:
-                throw new \LogicException(sprintf('Unsupported authorize action %s', $action), 500);
+                throw new LogicException(sprintf('Unsupported authorize action %s', $action), 500);
         }
 
         if (!$object->isAuthorized($action, null, $this->user)) {
-            throw new \RuntimeException('Forbidden', 403);
+            throw new RuntimeException('Forbidden', 403);
         }
     }
 }

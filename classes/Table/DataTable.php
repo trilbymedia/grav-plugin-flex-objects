@@ -7,8 +7,17 @@ namespace Grav\Plugin\FlexObjects\Table;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Framework\Collection\CollectionInterface;
+use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
+use JsonSerializable;
+use Throwable;
+use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
+use function is_array;
+use function is_string;
 
 /**
  * Class DataTable
@@ -17,7 +26,7 @@ use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
  * https://github.com/ratiw/vuetable-2/wiki/Data-Format-(JSON)
  * https://github.com/ratiw/vuetable-2/wiki/Sorting
  */
-class DataTable implements \JsonSerializable
+class DataTable implements JsonSerializable
 {
     /** @var string */
     private $url;
@@ -35,11 +44,15 @@ class DataTable implements \JsonSerializable
     private $filteredCollection;
     /** @var array */
     private $columns;
-    /** @var \Twig_Environment */
+    /** @var Environment */
     private $twig;
     /** @var array */
     private $twig_context;
 
+    /**
+     * DataTable constructor.
+     * @param array $params
+     */
     public function __construct(array $params)
     {
         $this->setUrl($params['url'] ?? '');
@@ -49,58 +62,94 @@ class DataTable implements \JsonSerializable
         $this->setSearch($params['search'] ?? '');
     }
 
+    /**
+     * @param string $url
+     * @return void
+     */
     public function setUrl(string $url): void
     {
         $this->url = $url;
     }
 
+    /**
+     * @param int $limit
+     * @return void
+     */
     public function setLimit(int $limit): void
     {
         $this->limit = max(1, $limit);
     }
 
+    /**
+     * @param int $page
+     * @return void
+     */
     public function setPage(int $page): void
     {
         $this->page = max(1, $page);
     }
 
-    public function setSort($sort)
+    /**
+     * @param string|string[] $sort
+     * @return void
+     */
+    public function setSort($sort): void
     {
         if (is_string($sort)) {
             $sort = $this->decodeSort($sort);
-        } elseif (!\is_array($sort)) {
+        } elseif (!is_array($sort)) {
             $sort = [];
         }
 
         $this->sort = $sort;
     }
 
+    /**
+     * @param string $search
+     * @return void
+     */
     public function setSearch(string $search): void
     {
         $this->search = $search;
     }
 
+    /**
+     * @param CollectionInterface $collection
+     * @return void
+     */
     public function setCollection(CollectionInterface $collection): void
     {
         $this->collection = $collection;
         $this->filteredCollection = null;
     }
 
+    /**
+     * @return int
+     */
     public function getLimit(): int
     {
         return $this->limit;
     }
 
+    /**
+     * @return int
+     */
     public function getPage(): int
     {
         return $this->page;
     }
 
+    /**
+     * @return int
+     */
     public function getLastPage(): int
     {
         return 1 + (int)floor(max(0, $this->getTotal()-1) / $this->getLimit());
     }
 
+    /**
+     * @return int
+     */
     public function getTotal(): int
     {
         $collection = $this->filteredCollection ?? $this->getCollection();
@@ -108,16 +157,26 @@ class DataTable implements \JsonSerializable
         return $collection ? $collection->count() : 0;
     }
 
+    /**
+     * @return array
+     */
     public function getSort(): array
     {
         return $this->sort;
     }
 
+    /**
+     * @return FlexCollectionInterface|null
+     */
     public function getCollection(): ?FlexCollectionInterface
     {
         return $this->collection;
     }
 
+    /**
+     * @param int $page
+     * @return string|null
+     */
     public function getUrl(int $page): ?string
     {
         if ($page < 1 || $page > $this->getLastPage()) {
@@ -127,7 +186,10 @@ class DataTable implements \JsonSerializable
         return "{$this->url}.json?page={$page}&per_page={$this->getLimit()}&sort={$this->encodeSort()}";
     }
 
-    public function getColumns()
+    /**
+     * @return array
+     */
+    public function getColumns(): array
     {
         if (null === $this->columns) {
             $collection = $this->getCollection();
@@ -137,9 +199,10 @@ class DataTable implements \JsonSerializable
 
             $blueprint = $collection->getFlexDirectory()->getBlueprint();
             $schema = $blueprint->schema();
+            $columns = $blueprint->get('config/admin/views/list/fields') ?? $blueprint->get('config/admin/list/fields', []);
 
             $list = [];
-            foreach ($blueprint->get('config/admin/list/fields') as $key => $options) {
+            foreach ($columns as $key => $options) {
                 if (!isset($options['field'])) {
                     $options['field'] = $schema->get($options['alias'] ?? $key);
                 }
@@ -155,7 +218,10 @@ class DataTable implements \JsonSerializable
         return $this->columns;
     }
 
-    public function getData()
+    /**
+     * @return array
+     */
+    public function getData(): array
     {
         $grav = Grav::instance();
 
@@ -215,7 +281,10 @@ class DataTable implements \JsonSerializable
         return $list;
     }
 
-    public function jsonSerialize()
+    /**
+     * @return array
+     */
+    public function jsonSerialize(): array
     {
         $data = $this->getData();
         $total = $this->getTotal();
@@ -243,6 +312,16 @@ class DataTable implements \JsonSerializable
         ];
     }
 
+    /**
+     * @param string $name
+     * @param array $column
+     * @param FlexObjectInterface $object
+     * @return false|string
+     * @throws Throwable
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
     protected function renderColumn(string $name, array $column, FlexObjectInterface $object)
     {
         $grav = Grav::instance();
@@ -252,7 +331,11 @@ class DataTable implements \JsonSerializable
         $type = $column['field']['type'] ?? 'text';
         $hasLink = $column['link'] ?? null;
         $link = null;
-        if ($hasLink && ($object->isAuthorized('read') || $object->isAuthorized('update'))) {
+
+        $authorized = $object instanceof FlexAuthorizeInterface
+            ? ($object->isAuthorized('read') || $object->isAuthorized('update')) : true;
+
+        if ($hasLink && $authorized) {
             $route = $grav['route']->withExtension('');
             $link = $route->withAddedPath($object->getKey())->withoutParams()->getUri();
         }
@@ -269,6 +352,14 @@ class DataTable implements \JsonSerializable
         ] + $this->twig_context);
     }
 
+    /**
+     * @param FlexObjectInterface $object
+     * @return false|string
+     * @throws Throwable
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
+     */
     protected function renderActions(FlexObjectInterface $object)
     {
         $grav = Grav::instance();
@@ -282,7 +373,13 @@ class DataTable implements \JsonSerializable
         ] + $this->twig_context);
     }
 
-    protected function decodeSort(string $sort, $fieldSeparator = ',', $orderSeparator = '|')
+    /**
+     * @param string $sort
+     * @param string $fieldSeparator
+     * @param string $orderSeparator
+     * @return array
+     */
+    protected function decodeSort(string $sort, string $fieldSeparator = ',', string $orderSeparator = '|'): array
     {
         $strings = explode($fieldSeparator, $sort);
         $list = [];
@@ -296,7 +393,12 @@ class DataTable implements \JsonSerializable
         return $list;
     }
 
-    protected function encodeSort($fieldSeparator = ',', $orderSeparator = '|')
+    /**
+     * @param string $fieldSeparator
+     * @param string $orderSeparator
+     * @return string
+     */
+    protected function encodeSort(string $fieldSeparator = ',', string $orderSeparator = '|'): string
     {
         $list = [];
         foreach ($this->getSort() as $key => $order) {

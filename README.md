@@ -2,7 +2,7 @@
 
 ## About
 
-The **Flex Objects** Plugin is for [Grav CMS](https://github.com/getgrav/grav).  Flex objects is a powerful new plugin that allows you to build custom collections of objects, which can modified by CRUD operations via the admin plugin to easily manage large sets of data that don't make sens as simple YAML configuration files, or Grav pages. These objects are defined by blueprints written in YAML and they are rendered by a set of twig files. Additionally both objects and collections can be customized by PHP classes, which allows you to define complex behaviors and relationships between the objects.
+The **Flex Objects** Plugin is for [Grav CMS](https://github.com/getgrav/grav).  Flex objects is a powerful new plugin that allows you to build custom collections of objects, which can modified by CRUD operations via the admin plugin to easily manage large sets of data that don't make sense as simple YAML configuration files, or Grav pages. These objects are defined by blueprints written in YAML and they are rendered by a set of twig files. Additionally both objects and collections can be customized by PHP classes, which allows you to define complex behaviors and relationships between the objects.
 
 ![](assets/flex-objects-list.png)
 
@@ -30,6 +30,7 @@ Alternatively it can be installed via the [Admin Plugin](http://learn.getgrav.or
 Once installed you can either create entries manually, or you can copy the sample data set:
 
 ```shell
+$ mkdir -p user/data/flex-objects
 $ cp user/plugins/flex-objects/data/flex-objects/contacts.json user/data/flex-objects/contacts.json
 ```
 
@@ -47,18 +48,6 @@ admin_list:
   order:
     by: updated_timestamp
     dir: desc
-
-object:
-  cache:
-    index:
-      enabled: true
-      timeout: 60
-    object:
-      enabled: true
-      timeout: 60
-    render:
-      enabled: true
-      timeout: 60
 
 directories:
   - 'blueprints://flex-objects/contacts.yaml'
@@ -244,7 +233,7 @@ Then you will need to make more widespread changes to the site Twig templates.  
 Here are the main benefits of using Flex objects:
 
 * CRUD is automatically handled for you by Flex Objects plugin
-* Objects can be stored using many diferent strategies, including single file, file per object or folder per object; using yaml, json etc.
+* Objects can be stored using many different strategies, including single file, file per object or folder per object; using yaml, json etc.
 * Flex types can be easily extended by custom PHP collection and object classes
 * Both Flex objects and collections know how to render themselves: `echo $object->render($layout, $context)` or `{% render object layout: layout with context %}`
 * You can easily create custom layouts for your objects and collections to be used in different pages

@@ -11,16 +11,20 @@
     </thead>
     <tbody>
     {% for type, directory in directories %}
-        {% if not directory.config('site.hidden', false) %}
+        {%- set title = options.directories[type]['title'] ?? options.directories[type]['collection']['title'] ?? directory.title -%}
+        {%- if title matches '/\{/' -%}
+            {%- set title = include(template_from_string(title, 'collection title template'))|trim -%}
+        {%- endif -%}
+        {%- set description = options.directories[type]['description'] ?? options.directories[type]['collection']['description'] ?? directory.description -%}
+
         <tr>
             <td>
-                <a href="{{ url(directory_url ~ '/directory:' ~ type) }}">{{ directory.title }}</a>
+                <a href="{{ url(directory_url ~ '/directory:' ~ type)|e }}">{{ title|e }}</a>
             </td>
             <td>
-                {{ directory.description }}
+                {{ description|e }}
             </td>
         </tr>
-        {% endif %}
     {% endfor %}
     </tbody>
 </table>

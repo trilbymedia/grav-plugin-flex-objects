@@ -1,3 +1,67 @@
+# v1.0.0
+## 01/19/2021
+
+1. [](#new)
+   * Added `$grav['flex_objects']->getAdminController()` method
+1. [](#improved)
+   * Added support for relative paths in `getLevelListing` action
+1. [](#bugfix)
+   * Fixed admin not working with types that do not implement `FlexAuthorizeInterface`
+   * Fixed bad redirect when creating new flex object and choosing to create another return to the list
+   * Fixed bad redirect when changing parent of new page and saving [grav-plugin-admin#2014](https://github.com/getgrav/grav-plugin-admin/issues/2014)
+   * Fixed page forms being empty if multi-language is enabled, but there's just one language [grav#3147](https://github.com/getgrav/grav/issues/3147)
+   * Fixed copying a page within a parent with no create permission [grav-plugin-admin#2002](https://github.com/getgrav/grav-plugin-admin/issues/2002)
+   
+# v1.0.0-rc.20
+## 12/15/2020
+
+1. [](#improved)
+    * Default cookies usage to SameSite Lax [grav-plugin-admin#1998](https://github.com/getgrav/grav-plugin-admin/issues/1998)
+    * Fixed typo [#89](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/89)
+
+# v1.0.0-rc.19
+## 12/02/2020
+
+1. [](#improved)
+    * Just keeping sync with Grav rc.19
+
+# v1.0.0-rc.18
+## 12/02/2020
+
+1. [](#new)
+    * Require **PHP 7.3.6**
+1. [](#improved)
+    * Improved frontend templates
+    * Improve blueprint structure
+    * Hooked up Duplicate and Move from within Pages list [#81](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/81)
+    * Respect CRUD ACL actions for items shortcuts in pages list [#82](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/82)
+    * Refresh object on controllers to make sure it is up to date
+1. [](#bugfix)
+    * Fixed fatal error in admin if list view hasn't been defined
+    * Fixed fatal error in admin if directory throws exception
+    * Fixed attempts to add an existing page
+    * Fixed form loosing its form state if saving fails when using `ObjectController`
+    * Fixed missing context when rendering collection in frontend
+    * Fixed Flex Admin activating on too old Admin plugin versions
+    
+# v1.0.0-rc.17
+## 10/07/2020
+
+1. [](#bugfix)
+    * Fixed media uploads for objects which do not implement `FlexAuthorizeInterface`
+    * Fixed file picker field not recognizing `folder: @self` variants
+
+# v1.0.0-rc.16
+## 09/01/2020
+
+1. [](#improved)
+    * Simplified `Flex Pages` admin not to differentiate between default language file extensions [#47](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/47)
+1. [](#bugfix)
+    * Fixed extra space in Flex admin pages
+    * Fixed folder creation with parent other than root [#66](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/66)
+    * Fixed task redirects in sub-folder multi-site environments
+    * Fixed typo in default permissions (should have been `admin.flex-objects`) [grav#2915](https://github.com/getgrav/grav/issues/2915)
+
 # v1.0.0-rc.15
 ## 07/22/2020
 

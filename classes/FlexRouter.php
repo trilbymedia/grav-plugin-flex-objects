@@ -10,8 +10,17 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
+/**
+ * Class FlexRouter
+ * @package Grav\Plugin\FlexObjects
+ */
 class FlexRouter implements MiddlewareInterface
 {
+    /**
+     * @param ServerRequestInterface $request
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $context = $request->getAttributes();
@@ -22,10 +31,18 @@ class FlexRouter implements MiddlewareInterface
 
         $task = $post['task'] ?? $route->getParam('task');
 
+        if (\in_array($task, ['cropupload', 'filesupload'])) {
+            $task = 'media.upload';
+        }
+
         switch ($task) {
-            case 'media.list':
-            case 'media.add':
+            case 'media.upload':
             case 'media.delete':
+            case 'media.copy':
+            case 'media.remove':
+            case 'media.list':
+
+            case 'media.add':
             case 'listmedia':
             case 'addmedia':
             case 'delmedia':
@@ -33,9 +50,11 @@ class FlexRouter implements MiddlewareInterface
             case 'save':
             case 'create':
             case 'update':
-            case 'move':
             case 'delete':
+            case 'reset':
             case 'preview':
+
+            case 'move':
                 return (new ObjectController())->handle($request);
         }
 

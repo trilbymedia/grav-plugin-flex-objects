@@ -2,8 +2,11 @@
 
 {% set form = form ?? object.form(admin.session.expert != '0' ? 'raw') %}
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
-{% set can_read = can_read ?? (object.parent and object.isAuthorized('read', 'admin', user) ?: directory.isAuthorized('create', 'admin', user)) %}
-{% set can_save = can_save ?? (object.parent and object.isAuthorized('update', 'admin', user) ?: directory.isAuthorized('create', 'admin', user)) %}
+{% set parent = object.parent %}
+{% set can_read = can_read ?? (parent and object.isAuthorized('read', 'admin', user) ?: directory.isAuthorized('create', 'admin', user)) %}
+{% set can_copy = can_copy ?? (parent.exists and parent.isAuthorized('create', 'admin', user)) %}
+{% set can_create = can_create ?? (object.exists and object.isAuthorized('create', 'admin', user)) %}
+{% set can_save = can_save ?? (parent and object.isAuthorized('update', 'admin', user) ?: parent.isAuthorized('create', 'admin', user)) %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate') and not object.root()) %}
 
 {% macro spanToggle(input, length) %}
@@ -15,7 +18,6 @@
     {% set current_route = '/' ~ route.getRoute(1) %}
 
     {% if not object.root() %}
-    {% set parent = object.parent %}
     {% set child = object.children.first %}
     {% set prev = object.prevSibling %}
     {% set next = object.nextSibling %}
@@ -63,8 +65,10 @@
     {% if can_create %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/add.html.twig', 'flex-objects/types/pages/buttons/add.html.twig'] %}
     {% endif %}
-    {% if can_save %}
+    {% if can_copy %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/copy.html.twig', 'flex-objects/types/pages/buttons/copy.html.twig'] %}
+    {% endif %}
+    {% if can_save %}
     {% include ['flex-objects/types/' ~ target ~ '/buttons/move.html.twig', 'flex-objects/types/pages/buttons/move.html.twig'] %}
     {% endif %}
     {% endif %}
@@ -90,7 +94,27 @@
         <div class="alert secondary-accent">
             <i class="fa fa-lightbulb-o"></i> This page will not exist until it is saved.
         </div>
-    {% elseif object.exists and can_translate and not has_translation %}
+    {% elseif can_translate %}
+        {% set is_default = language is same as(default_language) %}
+        {% if is_default and default_language in object_languages %}
+            {% if not translate_include_default and object.property('lang') %}
+            {# Handle default language extension #}
+            <div class="alert secondary-accent">
+                Using <strong>{{ all_languages[object_language] ?? object_language }}</strong> language override.
+                {{ object.hasTranslation('', false) ? 'Unused <strong>Default</strong> language file also exists.'|raw }}
+            </div>
+            {% elseif translate_include_default %}
+                {%  if not object.property('lang') %}
+                    <div class="alert secondary-accent">
+                        Using <strong>Default</strong> language file.
+                    </div>
+                {% elseif object.hasTranslation('', false) %}
+                    <div class="alert secondary-accent">
+                        Unused <strong>Default</strong> language file also exists.
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% elseif not has_translation %}
         <div class="alert warning">
             This page has not been translated to <i class="fa fa-flag-o"></i> <strong>{{ all_languages[language] ?? language }}</strong> language yet!
             {% if language == object_language %}
@@ -99,6 +123,7 @@
                 Falling back to <strong>{{ all_languages[object_language] ?? object_language }}</strong> language.
             {% endif %}
         </div>
+        {% endif %}
     {% endif %}
 {% endblock content_top %}
 
@@ -183,10 +208,6 @@
                 <a class="button" data-parents-select href="#"><i class="fa fa-fw fa-check"></i> {{ "PLUGIN_ADMIN.CONTINUE"|tu }}</a>
             </div>
         </form>
-    </div>
-
-    <div class="remodal parents-container" data-remodal-id="move" data-remodal-options="hashTracking: false">
-        {% include 'partials/page-move.html.twig' with { blueprints: admin.blueprints('admin/pages/move'), data: context } %}
     </div>
 
 {% endblock content %}

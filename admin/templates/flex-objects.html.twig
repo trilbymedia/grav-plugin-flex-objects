@@ -1,13 +1,13 @@
-{% set user = admin.user %}
-{% set route = controller.route %}
-{% set type = directory.config('admin.template') ?? target %}
+{%- set user = admin.user -%}
+{%- set route = controller.route -%}
+{%- set type = directory.config('admin.template') ?? target -%}
 
 {# Set action from ?preview=1 #}
-{% if key and uri.currentUri().queryParam('preview') %}
+{%- if key and uri.currentUri().queryParam('preview') %}
     {% set action = 'preview' %}
-{% endif %}
+{% endif -%}
 
-{% set template -%}
+{%- set template -%}
     {%- if action == 'add' -%}
         edit
     {%- elseif action == 'delete' -%}
@@ -15,15 +15,16 @@
     {%- else -%}
         {{- action ?: task ?: 'types' -}}
     {%- endif -%}
-{%- endset %}
+{%- endset -%}
 
-{% set separator = config.system.param_sep %}
+{%- set separator = config.system.param_sep -%}
+{%- set view_config = directory.config('admin.views.' ~ template) ?? directory.config('admin.' ~ template) ?? [] -%}
 
-{% include target ? [
+{%- include target ? [
         'flex-objects/types/' ~ type ~ '/' ~ template ~ '.html.twig',
         'flex-objects/types/default/' ~ template ~ '.html.twig',
         'flex-objects/layouts/404.html.twig'
     ] : [
         'flex-objects/types/default/' ~ template ~ '.html.twig',
         'flex-objects/layouts/404.html.twig'
-    ] %}
+    ] -%}

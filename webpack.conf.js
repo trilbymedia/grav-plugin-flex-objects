@@ -53,16 +53,23 @@ module.exports = {
         rules: [
             { enforce: 'pre', test: /\.json$/, loader: 'json-loader' },
             { enforce: 'pre', test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/ },
-            { test: /\.css$/, loader: 'vue-style-loader!style-loader!css-loader' },
+            {
+                test: /\.css$/,
+                use: [
+                    'vue-style-loader',
+                    'style-loader',
+                    'css-loader'
+                ]
+            },
             {
                 test: /\.js$/,
                 loader: 'babel-loader',
-                query: {
+                options: {
                     presets: ['@babel/preset-env'],
                     plugins: ['@babel/plugin-proposal-object-rest-spread']
                 }
             },
-            { test: /\.vue$/, loader: 'vue-loader', options: {} },
+            { test: /\.vue$/, use: ['vue-loader'] },
             { test: /\.(png|jpg|gif|svg)$/, loader: 'file', options: { name: '[name].[ext]?[hash]' } }
         ]
     }
