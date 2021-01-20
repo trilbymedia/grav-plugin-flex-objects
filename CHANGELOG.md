@@ -1,3 +1,9 @@
+# v1.0.1
+## 01/dd/2021
+
+1. [](#bugfix)
+   * Fixed 404 when trying to edit a page with accented characters [grav-plugin-admin#2026](https://github.com/getgrav/grav-plugin-admin/issues/2026)
+
 # v1.0.0
 ## 01/19/2021
 

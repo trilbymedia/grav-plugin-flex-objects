@@ -1070,6 +1070,8 @@ class AdminController
         if (!$location) {
             return;
         }
+        $target = \is_string($target) ? urldecode($target) : null;
+        $id = null;
 
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
