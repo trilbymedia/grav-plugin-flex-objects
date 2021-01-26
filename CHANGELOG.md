@@ -1,3 +1,9 @@
+# v1.0.2
+## mm/dd/2021
+
+1. [](#bugfix)
+   * Fixed saving page in expert mode [grav#3174](https://github.com/getgrav/grav/issues/3174)
+
 # v1.0.1
 ## 01/20/2021
 
