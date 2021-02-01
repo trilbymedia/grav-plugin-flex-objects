@@ -22,6 +22,7 @@ use Grav\Framework\File\Formatter\YamlFormatter;
 use Grav\Framework\File\Interfaces\FileFormatterInterface;
 use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\FlexFormFlash;
+use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexDirectoryInterface;
@@ -729,6 +730,20 @@ class AdminController
 
             /** @var FlexForm $form */
             $form = $this->getForm($object);
+
+            $callable = static function (array $data, array $files, FlexObject $object) use ($form) {
+                $object->update($data, $files);
+
+                // Support for expert mode.
+                if (str_ends_with($form->getId(), '-raw') && isset($data['frontmatter']) && is_callable([$object, 'frontmatter'])) {
+                    $object->frontmatter($data['frontmatter']);
+                    unset($data['frontmatter']);
+                }
+
+                $object->save();
+            };
+
+            $form->setSubmitMethod($callable);
             $form->handleRequest($request);
             $error = $form->getError();
             $errors = $form->getErrors();
