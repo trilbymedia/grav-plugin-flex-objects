@@ -1,3 +1,9 @@
+# v1.0.3
+## dd/mm/2021
+
+1. [](#bugfix)
+   * Fixed fatal error if configuration is missing directories [#107](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/107)
+
 # v1.0.2
 ## 02/01/2021
 

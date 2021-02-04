@@ -103,7 +103,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public function initializeFlex(): void
     {
-        $config = $this->config->get('plugins.flex-objects.directories');
+        $config = $this->config->get('plugins.flex-objects.directories') ?? [];
 
         // Add to DI container
         $this->grav['flex_objects'] = static function (Grav $grav) use ($config) {
