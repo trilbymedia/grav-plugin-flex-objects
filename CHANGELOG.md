@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
    * Fixed fatal error if configuration is missing directories [#107](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/107)
+   * Fixed case-sensitive `accept` in `filepicker` field
 
 # v1.0.2
 ## 02/01/2021
