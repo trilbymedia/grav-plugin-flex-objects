@@ -3,10 +3,10 @@
 {% set form = form ?? object.form(admin.session.expert != '0' ? 'raw') %}
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
 {% set parent = object.parent %}
-{% set can_read = can_read ?? (parent and object.isAuthorized('read', 'admin', user) ?: directory.isAuthorized('create', 'admin', user)) %}
+{% set can_read = can_read ?? (object.exists ? object.isAuthorized('read', 'admin', user) : parent.isAuthorized('create', 'admin', user))|bool %}
 {% set can_copy = can_copy ?? (parent.exists and parent.isAuthorized('create', 'admin', user)) %}
 {% set can_create = can_create ?? (object.exists and object.isAuthorized('create', 'admin', user)) %}
-{% set can_save = can_save ?? (parent and object.isAuthorized('update', 'admin', user) ?: parent.isAuthorized('create', 'admin', user)) %}
+{% set can_save = can_save ?? (object.exists ? object.isAuthorized('update', 'admin', user) : parent.isAuthorized('create', 'admin', user))|bool %}
 {% set can_translate = can_translate ?? (admin.multilang and object.hasFlexFeature('page-translate') and not object.root()) %}
 
 {% macro spanToggle(input, length) %}
