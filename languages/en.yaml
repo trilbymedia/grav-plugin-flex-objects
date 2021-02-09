@@ -9,3 +9,6 @@ PLUGIN_FLEX_OBJECTS:
   USE_BUILT_IN_CSS: "Use built in CSS"
   EXTRA_ADMIN_TWIG_PATH: "Extra Admin Twig Path"
   DIRECTORIES: "Directories"
+
+  LAYOUT_NOT_FOUND: "Object layout '%s' not found."
+  CSV: "CSV"
