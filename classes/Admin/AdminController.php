@@ -495,9 +495,15 @@ class AdminController
             $this->data['order'] = $max ? $max + 1 : false;
         }
 
-        $formatter = new YamlFormatter();
-        $this->data['frontmatter'] = $formatter->encode($this->data['header'] ?? []);
         $this->data['lang'] = $this->getLanguage();
+
+        $header = $this->data['header'] ?? [];
+        $this->grav->fireEvent('onAdminCreatePageFrontmatter', new Event(['header' => &$header,
+            'data' => $this->data]));
+
+        $formatter = new YamlFormatter();
+        $this->data['frontmatter'] = $formatter->encode($header);
+        $this->data['header'] = $header;
 
         $this->object = $directory->createObject($this->data, $key);
 

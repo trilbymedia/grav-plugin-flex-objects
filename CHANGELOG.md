@@ -7,6 +7,7 @@
    * Fixed fatal error if configuration is missing directories [#107](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/107)
    * Fixed case-sensitive `accept` in `filepicker` field
    * Fixed pages admin being accessible without read/write permissions [grav-plugin-admin#2053](https://github.com/getgrav/grav-plugin-admin/issues/2053)
+   * Fixed missing event `onAdminCreatePageFrontmatter` when creating a new page [grav-plugin-auto-date#8](https://github.com/getgrav/grav-plugin-auto-date/issues/8)
 
 # v1.0.2
 ## 02/01/2021
