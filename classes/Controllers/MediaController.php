@@ -209,7 +209,8 @@ class MediaController extends AbstractController
 
         if ($object instanceof PageInterface) {
             // Backwards compatibility to existing plugins.
-            $this->grav->fireEvent('onAdminAfterAddMedia', new Event(['page' => $object]));
+            // DEPRECATED: page
+            $this->grav->fireEvent('onAdminAfterAddMedia', new Event(['object' => $object, 'page' => $object]));
         }
 
         $response = [
@@ -252,8 +253,8 @@ class MediaController extends AbstractController
 
         $object->deleteMediaFile($filename);
 
-        // Admin compatibility for the pages.
         if ($object instanceof PageInterface) {
+            // Backwards compatibility to existing plugins.
             // DEPRECATED: page
             $this->grav->fireEvent('onAdminAfterDelMedia', new Event(['object' => $object, 'page' => $object, 'media' => $object->getMedia(), 'filename' => $filename]));
         }
