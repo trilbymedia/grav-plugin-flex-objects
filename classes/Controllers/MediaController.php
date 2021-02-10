@@ -252,6 +252,12 @@ class MediaController extends AbstractController
 
         $object->deleteMediaFile($filename);
 
+        // Admin compatibility for the pages.
+        if ($object instanceof PageInterface) {
+            // DEPRECATED: page
+            $this->grav->fireEvent('onAdminAfterDelMedia', new Event(['object' => $object, 'page' => $object, 'media' => $object->getMedia(), 'filename' => $filename]));
+        }
+
         $response = [
             'code'    => 200,
             'status'  => 'success',
