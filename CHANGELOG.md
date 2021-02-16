@@ -2,7 +2,7 @@
 ## dd/mm/2021
 
 1. [](#improved)
-   * List field: added new `placement` property to decide wether to add new items at the top, bottom or based on the *position* of the clicked button [#105](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/105)
+   * List field: added new `placement` property to decide whether to add new items at the top, bottom or based on the *position* of the clicked button [#105](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/105)
   * Added default styling for Flex-Objects Admin list view
 1. [](#bugfix)
    * Fixed fatal error if configuration is missing directories [#107](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/107)
@@ -10,6 +10,7 @@
    * Fixed pages admin being accessible without read/write permissions [grav-plugin-admin#2053](https://github.com/getgrav/grav-plugin-admin/issues/2053)
    * Fixed missing event `onAdminCreatePageFrontmatter` when creating a new page [grav-plugin-auto-date#8](https://github.com/getgrav/grav-plugin-auto-date/issues/8)
    * Fixed missing event `onAdminAfterDelMedia` when deleting a file from a page
+   * Fixed filepicker support for old `theme@:/` and `page@:/` notations [grav-plugin-admin#2071](https://github.com/getgrav/grav-plugin-admin/issues/2071)
 
 # v1.0.2
 ## 02/01/2021
