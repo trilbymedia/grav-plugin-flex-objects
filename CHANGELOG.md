@@ -10,7 +10,7 @@
    * Fixed pages admin being accessible without read/write permissions [grav-plugin-admin#2053](https://github.com/getgrav/grav-plugin-admin/issues/2053)
    * Fixed missing event `onAdminCreatePageFrontmatter` when creating a new page [grav-plugin-auto-date#8](https://github.com/getgrav/grav-plugin-auto-date/issues/8)
    * Fixed missing event `onAdminAfterDelMedia` when deleting a file from a page
-   * Fixed filepicker support for old `theme@:/` and `page@:/` notations [grav-plugin-admin#2071](https://github.com/getgrav/grav-plugin-admin/issues/2071)
+   * Fixed filepicker support for old `theme@:/` and `page@:/` notations [#109](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/109)
 
 # v1.0.2
 ## 02/01/2021
