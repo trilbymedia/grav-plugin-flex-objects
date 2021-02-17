@@ -507,11 +507,9 @@ class AdminController
 
         $this->object = $directory->createObject($this->data, $key);
 
-        /** @var FlexForm $form */
-        $form = $this->object->getForm();
-
         // Reset form, we are starting from scratch.
-        $form->reset();
+        /** @var FlexForm $form */
+        $form = $this->object->getForm('', ['reset' => true]);
 
         /** @var FlexFormFlash $flash */
         $flash = $form->getFlash();

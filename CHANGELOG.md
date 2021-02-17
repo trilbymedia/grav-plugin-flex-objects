@@ -11,6 +11,7 @@
    * Fixed missing event `onAdminCreatePageFrontmatter` when creating a new page [grav-plugin-auto-date#8](https://github.com/getgrav/grav-plugin-auto-date/issues/8)
    * Fixed missing event `onAdminAfterDelMedia` when deleting a file from a page
    * Fixed filepicker support for old `theme@:/` and `page@:/` notations [#109](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/109)
+   * Fixed adding the same new page twice remembering content from the last try
 
 # v1.0.2
 ## 02/01/2021
