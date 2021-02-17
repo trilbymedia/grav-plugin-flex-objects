@@ -495,17 +495,21 @@ class AdminController
             $this->data['order'] = $max ? $max + 1 : false;
         }
 
-        $formatter = new YamlFormatter();
-        $this->data['frontmatter'] = $formatter->encode($this->data['header'] ?? []);
         $this->data['lang'] = $this->getLanguage();
+
+        $header = $this->data['header'] ?? [];
+        $this->grav->fireEvent('onAdminCreatePageFrontmatter', new Event(['header' => &$header,
+            'data' => $this->data]));
+
+        $formatter = new YamlFormatter();
+        $this->data['frontmatter'] = $formatter->encode($header);
+        $this->data['header'] = $header;
 
         $this->object = $directory->createObject($this->data, $key);
 
-        /** @var FlexForm $form */
-        $form = $this->object->getForm();
-
         // Reset form, we are starting from scratch.
-        $form->reset();
+        /** @var FlexForm $form */
+        $form = $this->object->getForm('', ['reset' => true]);
 
         /** @var FlexFormFlash $flash */
         $flash = $form->getFlash();
@@ -685,8 +689,7 @@ class AdminController
 
         /** @var FlexForm $form */
         $form = $this->getForm($object);
-        $flash = $form->getFlash();
-        $flash->delete();
+        $form->getFlash()->delete();
 
         return $this->createRedirectResponse($this->referrerRoute->toString(true));
     }
@@ -1408,7 +1411,8 @@ class AdminController
                 $object->refresh();
             }
 
-            $this->object = $object;
+            // Get updated object via form.
+            $this->object = $object->getForm()->getObject();
         }
 
         return $this->object ?: null;

@@ -1,4 +1,4 @@
-/* Admin Styles */
+/* Flex-Objects Admin Styles */
 
 #types {
     padding: 3rem;
@@ -160,3 +160,56 @@
         }
     }
 }
+
+/** Defaults **/
+/* Admin Styles */
+#directory .search-wrapper input, #directory .search-wrapper select {
+  color: #646e7c;
+  border: 1px solid #e6e6e6;
+  background-color: #fcfcfc;
+}
+#directory .search-wrapper input::-webkit-input-placeholder, #directory .search-wrapper select::-webkit-input-placeholder {
+  color: #a7afb8;
+}
+#directory .search-wrapper input::-moz-placeholder, #directory .search-wrapper select::-moz-placeholder {
+  color: #a7afb8;
+}
+#directory .search-wrapper input:-moz-placeholder, #directory .search-wrapper select:-moz-placeholder {
+  color: #a7afb8;
+}
+#directory .search-wrapper input:-ms-input-placeholder, #directory .search-wrapper select:-ms-input-placeholder {
+  color: #a7afb8;
+}
+#directory .edit-action {
+  color: #0090D9 !important;
+}
+#directory .delete-action {
+  color: #F45857 !important;
+}
+#directory thead tr {
+  background: #fafafa;
+}
+#directory tbody tr:nth-child(even) {
+  background: white;
+}
+#directory i.published {
+  color: #27AE60;
+}
+#directory i.unpublished {
+  color: #E74C3C;
+}
+#directory .flex-list-pagination {
+  background: #fcfcfc;
+  border-top: 1px solid #f2f2f2;
+}
+#directory .flex-list-pagination .flex-objects-pagination .button {
+  color: #414147;
+}
+#directory .flex-list-pagination .flex-objects-pagination .button.active {
+  color: #ffffff;
+  background: #0090D9;
+}
+#directory .flex-list-pagination .flex-objects-pagination .button.disabled {
+  color: #99a2ad;
+}
+
