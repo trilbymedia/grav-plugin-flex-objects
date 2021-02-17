@@ -689,8 +689,7 @@ class AdminController
 
         /** @var FlexForm $form */
         $form = $this->getForm($object);
-        $flash = $form->getFlash();
-        $flash->delete();
+        $form->getFlash()->delete();
 
         return $this->createRedirectResponse($this->referrerRoute->toString(true));
     }
@@ -1412,7 +1411,8 @@ class AdminController
                 $object->refresh();
             }
 
-            $this->object = $object;
+            // Get updated object via form.
+            $this->object = $object->getForm()->getObject();
         }
 
         return $this->object ?: null;
