@@ -1,5 +1,5 @@
 # v1.0.3
-## dd/mm/2021
+## 02/17/2021
 
 1. [](#improved)
    * List field: added new `placement` property to decide whether to add new items at the top, bottom or based on the *position* of the clicked button [#105](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/105)
