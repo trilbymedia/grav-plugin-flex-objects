@@ -3,6 +3,8 @@
 
 1. [](#improved)
    * Added id attributes for buttons to help on acceptance testing
+1. [](#bugfix)
+   * Fixed fatal error in `/admin/flex-objects` [#114](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/114)
 
 # v1.0.3
 ## 02/17/2021
