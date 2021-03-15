@@ -21,6 +21,7 @@
    * Fixed filepicker support for old `theme@:/` and `page@:/` notations [#109](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/109)
    * Fixed adding the same new page twice remembering content from the last try
    * Fixed saving a new page with invalid data makes blueprint fields disappear [grav-plugin-admin#2068](https://github.com/getgrav/grav-plugin-admin/issues/2068)
+   * Fixed `onAdminSave` original page having empty header [grav#3259](https://github.com/getgrav/grav/issues/3259)
 
 # v1.0.2
 ## 02/01/2021

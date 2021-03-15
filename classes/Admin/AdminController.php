@@ -735,6 +735,9 @@ class AdminController
             $form = $this->getForm($object);
 
             $callable = static function (array $data, array $files, FlexObject $object) use ($form) {
+                if (method_exists($object, 'storeOriginal')) {
+                    $object->storeOriginal();
+                }
                 $object->update($data, $files);
 
                 // Support for expert mode.
