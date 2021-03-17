@@ -100,11 +100,11 @@ class AdminController
     protected $id;
     /** @var bool */
     protected $active;
-    /** @var FlexObjectInterface */
+    /** @var FlexObjectInterface|false|null */
     protected $object;
-    /** @var FlexCollectionInterface */
+    /** @var FlexCollectionInterface|null */
     protected $collection;
-    /** @var FlexDirectoryInterface */
+    /** @var FlexDirectoryInterface|null */
     protected $directory;
 
     /** @var string */
@@ -735,6 +735,9 @@ class AdminController
             $form = $this->getForm($object);
 
             $callable = static function (array $data, array $files, FlexObject $object) use ($form) {
+                if (method_exists($object, 'storeOriginal')) {
+                    $object->storeOriginal();
+                }
                 $object->update($data, $files);
 
                 // Support for expert mode.
@@ -1405,14 +1408,14 @@ class AdminController
                         $object->language($language);
                     }
                 }
-            }
 
-            if (is_callable([$object, 'refresh'])) {
-                $object->refresh();
-            }
+                if (is_callable([$object, 'refresh'])) {
+                    $object->refresh();
+                }
 
-            // Get updated object via form.
-            $this->object = $object->getForm()->getObject();
+                // Get updated object via form.
+                $this->object = $object ? $object->getForm()->getObject() : false;
+            }
         }
 
         return $this->object ?: null;

@@ -82,7 +82,7 @@ class FlexObjectsPlugin extends Plugin
             ],
             'onFormRegisterTypes' => [
                 ['onFormRegisterTypes', 0]
-            ],
+            ]
         ];
     }
 

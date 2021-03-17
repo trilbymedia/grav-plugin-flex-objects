@@ -1,9 +1,7 @@
 {% extends 'partials/base.html.twig' %}
 {% use 'flex-objects/types/default/titlebar/edit.html.twig' %}
 
-{# Get updated object from the form #}
 {% set form = form ?? object.form %}
-{% set object = form.object %}
 
 {# Allowed actions #}
 {% set can_list = can_list ?? directory.isAuthorized('list', 'admin', user) %}
