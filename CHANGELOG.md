@@ -6,6 +6,7 @@
 1. [](#bugfix)
    * Fixed fatal error in `/admin/flex-objects` [#114](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/114)
    * Fixed `onAdminSave` original page having empty header [grav#3259](https://github.com/getgrav/grav/issues/3259)
+   * Fixed flash issues on uploading files into a new page
 
 # v1.0.3
 ## 02/17/2021

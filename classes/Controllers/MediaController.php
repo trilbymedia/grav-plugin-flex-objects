@@ -14,6 +14,7 @@ use Grav\Common\Page\Medium\MediumFactory;
 use Grav\Common\Session;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
+use Grav\Framework\Flex\FlexFormFlash;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
@@ -435,17 +436,15 @@ class MediaController extends AbstractController
 
     /**
      * @param FlexObjectInterface $object
-     * @return FormFlash
+     * @return FlexFormFlash
      */
     protected function getFormFlash(FlexObjectInterface $object)
     {
-        $grav = Grav::instance();
-
         /** @var Session $session */
-        $session = $grav['session'];
+        $session = $this->grav['session'];
 
         /** @var Uri $uri */
-        $uri = $grav['uri'];
+        $uri = $this->grav['uri'];
         $url = $uri->url;
 
         $formName = $this->getPost('__form-name__');
@@ -463,8 +462,10 @@ class MediaController extends AbstractController
             'unique_id' => $uniqueId,
             'form_name' => $formName,
         ];
-        $flash = new FormFlash($config);
-        $flash->setUrl($url)->setUser($grav['user']);
+        $flash = new FlexFormFlash($config);
+        if (!$flash->exists()) {
+            $flash->setUrl($url)->setUser($this->grav['user']);
+        }
 
         return $flash;
     }
