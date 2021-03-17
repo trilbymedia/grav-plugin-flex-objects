@@ -9,11 +9,13 @@ use Grav\Common\Grav;
 use Grav\Common\Inflector;
 use Grav\Common\Language\Language;
 use Grav\Common\Session;
+use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Framework\Controller\Traits\ControllerResponseTrait;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexForm;
+use Grav\Framework\Flex\FlexFormFlash;
 use Grav\Framework\Flex\Interfaces\FlexFormInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Psr7\Response;
@@ -189,6 +191,42 @@ abstract class AbstractController implements RequestHandlerInterface
         }
 
         return $form;
+    }
+
+    /**
+     * @param FlexObjectInterface $object
+     * @param string $type
+     * @return FlexFormFlash
+     */
+    protected function getFormFlash(FlexObjectInterface $object, string $type = '')
+    {
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        $url = $uri->url;
+
+        $formName = $this->getPost('__form-name__');
+        if (!$formName) {
+            $form = $object->getForm($type);
+            $formName = $form->getName();
+            $uniqueId = $form->getUniqueId();
+        } else {
+            $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($url);
+        }
+
+        /** @var Session $session */
+        $session = $this->grav['session'];
+
+        $config = [
+            'session_id' => $session->getId(),
+            'unique_id' => $uniqueId,
+            'form_name' => $formName,
+        ];
+        $flash = new FlexFormFlash($config);
+        if (!$flash->exists()) {
+            $flash->setUrl($url)->setUser($this->grav['user']);
+        }
+
+        return $flash;
     }
 
     /**

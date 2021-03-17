@@ -14,8 +14,8 @@ docs: https://github.com/trilbymedia/grav-plugin-flex-objects/blob/develop/READM
 license: MIT
 
 dependencies:
-    - { name: grav, version: '>=1.7.4' }
-    - { name: form, version: '>=4.3.0' }
+    - { name: grav, version: '>=1.7.9' }
+    - { name: form, version: '>=5.0.1' }
 
 form:
   validation: loose

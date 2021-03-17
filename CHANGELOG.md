@@ -1,3 +1,13 @@
+# v1.0.5
+## mm/dd/2021
+
+1. [](#new)
+   * Require **Grav 1.7.9**
+   * Require **Form Plugin 5.0.1**
+1. [](#bugfix)
+   * Fixed broken media upload/picker fields with `@self/path` notations [grav#3275](https://github.com/getgrav/grav/issues/3275)
+   * Fixed `filepicker` field not including newly uploaded and excluding newly deleted files before saving the object
+
 # v1.0.4
 ## 03/17/2021
 
