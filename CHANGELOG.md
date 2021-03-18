@@ -10,6 +10,7 @@
    * Fixed broken media upload/picker fields with `@self/path` notations [grav#3275](https://github.com/getgrav/grav/issues/3275)
    * Fixed `filepicker` field not including newly uploaded and excluding newly deleted files before saving the object
    * Fixed `Flex Page` CRUD ACL when creating a new page [#115](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/115)
+   * Bumped dependencies versions [#116](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/116)
 
 # v1.0.4
 ## 03/17/2021
