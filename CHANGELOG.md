@@ -4,6 +4,8 @@
 1. [](#new)
    * Require **Grav 1.7.9**
    * Require **Form Plugin 5.0.1**
+1. [](#improved)
+   * Catch JSON decoding issues in controllers
 1. [](#bugfix)
    * Fixed broken media upload/picker fields with `@self/path` notations [grav#3275](https://github.com/getgrav/grav/issues/3275)
    * Fixed `filepicker` field not including newly uploaded and excluding newly deleted files before saving the object

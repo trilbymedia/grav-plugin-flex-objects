@@ -91,7 +91,7 @@ class MediaController extends AbstractController
         try {
             $crop = $this->getPost('crop');
             if (is_string($crop)) {
-                $crop = json_decode($crop, true);
+                $crop = json_decode($crop, true, 512, JSON_THROW_ON_ERROR);
             }
 
             $flash->addUploadedFile($file, $field, $crop);
