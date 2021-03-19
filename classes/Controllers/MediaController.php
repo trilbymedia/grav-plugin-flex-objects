@@ -5,16 +5,10 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Exception;
-use Grav\Common\Form\FormFlash;
-use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
-use Grav\Common\Page\Media;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Page\Medium\MediumFactory;
-use Grav\Common\Session;
-use Grav\Common\Uri;
 use Grav\Common\Utils;
-use Grav\Framework\Flex\FlexFormFlash;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
@@ -47,6 +41,13 @@ class MediaController extends AbstractController
 
         if (!method_exists($object, 'checkUploadedMediaFile')) {
             throw new RuntimeException('Not Found', 404);
+        }
+
+        // Get updated object from Form Flash.
+        $flash = $this->getFormFlash($object);
+        if ($flash->exists()) {
+            $object = $flash->getObject() ?? $object;
+            $object->update([], $flash->getFilesByFields());
         }
 
         // Get field for the uploaded media.
@@ -88,10 +89,9 @@ class MediaController extends AbstractController
         $object->checkUploadedMediaFile($file, $filename, $field);
 
         try {
-            $flash = $this->getFormFlash($object);
             $crop = $this->getPost('crop');
             if (is_string($crop)) {
-                $crop = json_decode($crop, true);
+                $crop = json_decode($crop, true, 512, JSON_THROW_ON_ERROR);
             }
 
             $flash->addUploadedFile($file, $field, $crop);
@@ -102,7 +102,7 @@ class MediaController extends AbstractController
 
         // Include exif metadata into the response if configured to do so
         $metadata = [];
-        $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
+        $include_metadata = $this->grav['config']->get('system.media.auto_metadata_exif', false);
         if ($include_metadata) {
             $medium = MediumFactory::fromUploadedFile($file);
 
@@ -199,7 +199,7 @@ class MediaController extends AbstractController
 
         // Include exif metadata into the response if configured to do so
         $metadata = [];
-        $include_metadata = $this->getGrav()['config']->get('system.media.auto_metadata_exif', false);
+        $include_metadata = $this->grav['config']->get('system.media.auto_metadata_exif', false);
         if ($include_metadata) {
             $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
             $media = $object->getMedia();
@@ -276,10 +276,17 @@ class MediaController extends AbstractController
     {
         $this->checkAuthorization('media.list');
 
-        /** @var MediaInterface $object */
+        /** @var MediaInterface|FlexObjectInterface $object */
         $object = $this->getObject();
         if (!$object) {
             throw new RuntimeException('Not Found', 404);
+        }
+
+        // Get updated object from Form Flash.
+        $flash = $this->getFormFlash($object);
+        if ($flash->exists()) {
+            $object = $flash->getObject() ?? $object;
+            $object->update([], $flash->getFilesByFields());
         }
 
         $media = $object->getMedia();
@@ -318,50 +325,24 @@ class MediaController extends AbstractController
 
         /** @var FlexObject $object */
         $object = $this->getObject();
-        if (!$object) {
+        if (!$object || !\is_callable([$object, 'getFieldSettings'])) {
             throw new RuntimeException('Not Found', 404);
         }
 
+        // Get updated object from Form Flash.
+        $flash = $this->getFormFlash($object);
+        if ($flash->exists()) {
+            $object = $flash->getObject() ?? $object;
+            $object->update([], $flash->getFilesByFields());
+        }
+
         $name = $this->getPost('name');
-        $settings = $object->getBlueprint()->schema()->getProperty($name);
-        $fieldFolder = $settings['folder'] ?? null;
-        $folderIsString = \is_string($fieldFolder);
-
-        // Backwards compatibility.
-        $hasToken = $folderIsString && strpos($fieldFolder, '@') !== false;
-        if ($hasToken) {
-            if (\in_array($fieldFolder, ['@self', 'self@'])) {
-                $fieldFolder = null;
-            } else {
-                $regex = '/^(?:(?:@page|page@):(.*))|(?:(?:@theme|theme@):\/?(.*))$/u';
-                preg_match($regex, $fieldFolder, $matches);
-                if ($matches) {
-                    if ($matches[1] !== '') {
-                        $route = trim($matches[1], '/');
-                        if ($route === '') {
-                            $grav = Grav::instance();
-                            $route = trim($grav['config']->get('system.home.alias'), '/');
-                        }
-
-                        $page = $this->getFlex()->getObject($route, 'pages');
-                        if (!$page instanceof PageInterface) {
-                            throw new RuntimeException('Page route not found: /' . $route);
-                        }
-                        $fieldFolder = $page->getMediaFolder();
-                    } elseif ($matches[2] !== '') {
-                        $fieldFolder = "theme://{$matches[2]}";
-                    }
-                }
-            }
+        $settings = $name ? $object->getFieldSettings($name) : null;
+        if (empty($settings['media_picker_field'])) {
+            throw new RuntimeException('Not Found', 404);
         }
 
-        if ($folderIsString && $fieldFolder) {
-            // Custom media.
-            $media = new Media($fieldFolder, []);
-        } else {
-            // Object media.
-            $media = $object->getMedia();
-        }
+        $media = $object->getMediaField($name);
 
         $available_files = [];
         $metadata = [];
@@ -385,7 +366,7 @@ class MediaController extends AbstractController
 
         // Peak in the flashObject for optimistic filepicker updates
         $pending_files = [];
-        $sessionField = base64_encode($this->getGrav()['uri']->url());
+        $sessionField = base64_encode($this->grav['uri']->url());
         $flash = $this->getSession()->getFlashObject('files-upload');
         $folder = $media->getPath() ?: null;
 
@@ -432,42 +413,6 @@ class MediaController extends AbstractController
         ];
 
         return $this->createJsonResponse($response);
-    }
-
-    /**
-     * @param FlexObjectInterface $object
-     * @return FlexFormFlash
-     */
-    protected function getFormFlash(FlexObjectInterface $object)
-    {
-        /** @var Session $session */
-        $session = $this->grav['session'];
-
-        /** @var Uri $uri */
-        $uri = $this->grav['uri'];
-        $url = $uri->url;
-
-        $formName = $this->getPost('__form-name__');
-        if (!$formName) {
-            // Legacy call without form name.
-            $form = $object->getForm();
-            $formName = $form->getName();
-            $uniqueId = $form->getUniqueId();
-        } else {
-            $uniqueId = $this->getPost('__unique_form_id__') ?: $formName ?: sha1($url);
-        }
-
-        $config = [
-            'session_id' => $session->getId(),
-            'unique_id' => $uniqueId,
-            'form_name' => $formName,
-        ];
-        $flash = new FlexFormFlash($config);
-        if (!$flash->exists()) {
-            $flash->setUrl($url)->setUser($this->grav['user']);
-        }
-
-        return $flash;
     }
 
     /**

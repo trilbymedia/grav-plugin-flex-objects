@@ -81,7 +81,7 @@ class FlexConvertDataCommand extends ConsoleCommand
         if ($in_extension === 'yaml' || $in_extension === 'yml') {
             $in_data = Yaml::parse($in_raw);
         } elseif ($in_extension === 'json' ) {
-            $in_data = json_decode($in_raw, true);
+            $in_data = json_decode($in_raw, true, 512, JSON_THROW_ON_ERROR);
         } else {
             $io->error('input files with extension ' . $in_extension . ', is not supported');
 

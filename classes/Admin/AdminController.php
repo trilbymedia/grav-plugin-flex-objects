@@ -588,7 +588,7 @@ class AdminController
 
         // Base64 decode the route
         $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
-        $data['filters'] = json_decode($options['filters'] ?? '{}', true) + ['type' => ['root', 'dir']];
+        $data['filters'] = json_decode($options['filters'] ?? '{}', true, 512, JSON_THROW_ON_ERROR) + ['type' => ['root', 'dir']];
 
         $initial = $data['initial'] ?? null;
         if ($initial) {
@@ -915,7 +915,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('action', 'media.list');
 
-            $this->admin->json_response = json_decode($response->getBody(), false);
+            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             die($e->getMessage());
         }
@@ -931,7 +931,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('task', 'media.upload');
 
-            $this->admin->json_response = json_decode($response->getBody(), false);
+            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             die($e->getMessage());
         }
@@ -947,7 +947,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('task', 'media.delete');
 
-            $this->admin->json_response = json_decode($response->getBody(), false);
+            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             die($e->getMessage());
         }
@@ -971,7 +971,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('task', 'media.copy');
 
-            $this->admin->json_response = json_decode($response->getBody(), false);
+            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             die($e->getMessage());
         }
@@ -987,7 +987,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('task', 'media.remove');
 
-            $this->admin->json_response = json_decode($response->getBody(), false);
+            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             die($e->getMessage());
         }
@@ -1022,7 +1022,7 @@ class AdminController
         try {
             $response = $this->forwardMediaTask('action', 'media.picker');
 
-            $this->admin->json_response = json_decode($response->getBody(), false);
+            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
             $this->admin->json_response = ['success' => false, 'error' => $e->getMessage()];
         }
@@ -1698,7 +1698,7 @@ class AdminController
             if (is_array($value)) {
                 $value = $this->jsonDecode($value);
             } else {
-                $value = json_decode($value, true);
+                $value = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
             }
         }
 
