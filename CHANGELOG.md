@@ -1,3 +1,9 @@
+# v1.0.6
+## mm/dd/2021
+
+1. [](#bugfix)
+    * Fixed automatic git-sync in admin save and delete [#120](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/120)
+
 # v1.0.5
 ## 03/19/2021
 

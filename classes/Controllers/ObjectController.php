@@ -79,7 +79,7 @@ class ObjectController extends AbstractController
             return $this->createDisplayResponse();
         }
 
-        // TODO: is there a better way to do this?
+        // FIXME: make it conditional
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
@@ -128,7 +128,7 @@ class ObjectController extends AbstractController
             return $this->createDisplayResponse();
         }
 
-        // TODO: is there a better way to do this?
+        // FIXME: make it conditional
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
@@ -158,6 +158,7 @@ class ObjectController extends AbstractController
 
         $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.DELETED_SUCCESSFULLY'), 'info');
 
+        // FIXME: make it conditional
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
