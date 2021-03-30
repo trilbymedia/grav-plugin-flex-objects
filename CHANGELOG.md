@@ -1,3 +1,10 @@
+# v1.0.6
+## 03/30/2021
+
+1. [](#bugfix)
+   * Fixed automatic git-sync in admin save and delete [#120](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/120)
+   * Prevent Add Page / Add Module modals from closing if clicking on the outside overlay [getgrav/grav-plugin-admin#2089](https://github.com/getgrav/grav-plugin-admin/issues/2089) 
+
 # v1.0.5
 ## 03/19/2021
 

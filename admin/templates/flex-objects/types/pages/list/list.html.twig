@@ -1,11 +1,11 @@
 {% extends 'flex-objects/types/default/list/list.html.twig' %}
 
 {% block modals %}
-  <div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking: false">
+  <div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
     {% include 'partials/blueprints-new.html.twig' with { blueprints: admin.blueprints('admin/pages/new'), data: obj_data, form_id: 'new-page' } %}
   </div>
 
-  <div class="remodal" data-remodal-id="modal-folder" data-remodal-options="hashTracking: false">
+  <div class="remodal" data-remodal-id="modal-folder" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
     {% include 'partials/blueprints-new-folder.html.twig' with { blueprints: admin.blueprints('admin/pages/new_folder'), data: obj_data, form_id: 'new-folder' } %}
   </div>
 
@@ -14,7 +14,7 @@
   </div>
 
   {% for key, add_modal in config.plugins.admin.add_modals %}
-  <div class="remodal {{ add_modal.modal_classes|defined('') }}" data-remodal-id="modal-add_modal-{{ key }}" data-remodal-options="hashTracking: false">
+  <div class="remodal {{ add_modal.modal_classes|defined('') }}" data-remodal-id="modal-add_modal-{{ key }}" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
     {% include add_modal.template|defined('partials/blueprints-new.html.twig') with {
       blueprints: admin.blueprints(add_modal.blueprint),
       data: obj_data,

@@ -344,7 +344,6 @@ class AdminController
 
                 $grav = Grav::instance();
                 $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
-                $grav->fireEvent('gitsync');
             }
         } catch (RuntimeException $e) {
             $this->admin->setMessage('Delete Failed: ' . $e->getMessage(), 'error');
@@ -833,7 +832,6 @@ class AdminController
 
             $grav = Grav::instance();
             $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
-            $grav->fireEvent('gitsync');
         } catch (RuntimeException $e) {
             $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
 
