@@ -185,7 +185,7 @@
             name: object.header.child_type ?? null
         }) %}
 
-        <div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking: false">
+        <div class="remodal" data-remodal-id="modal" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
             {% include 'partials/blueprints-new.html.twig' with { form: null, blueprints: admin.blueprints('admin/pages/new'), data: modal_data, form_id: 'new-page' } %}
         </div>
 
@@ -193,7 +193,7 @@
             {% include 'partials/blueprints-new-folder.html.twig' with { form: null, blueprints: admin.blueprints('admin/pages/new_folder'), data: modal_data, form_id: 'new-folder' } %}
         </div>
 
-        <div class="remodal" data-remodal-id="module" data-remodal-options="hashTracking: false">
+        <div class="remodal" data-remodal-id="module" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
             {% include 'partials/blueprints-new.html.twig' with { form: null, blueprints: admin.blueprints('admin/pages/modular_new'), data: modal_data, form_id: 'new-module' } %}
         </div>
     {% endif %}
