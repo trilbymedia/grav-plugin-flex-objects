@@ -1,6 +1,8 @@
 # v1.0.7
 ## mm/dd/2021
 
+1. [](#new)
+    * Added deny option support to `filepicker` field [#119](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/119)
 1. [](#bugfix)
     * Prevent expert editing mode from anyone else than super users [grav-plugin-admin#2094](https://github.com/getgrav/grav-plugin-admin/issues/2094)
     * Fixed not being able to add new folder [grav#3293](https://github.com/getgrav/grav/issues/3293)
