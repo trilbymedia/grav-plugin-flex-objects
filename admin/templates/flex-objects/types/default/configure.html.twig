@@ -39,6 +39,7 @@
 {% endblock %}
 
 {% block topbar %}
+    {% if user.authorize('admin.super') %}
     <form id="admin-mode-toggle">
         {% set normalText = 'PLUGIN_ADMIN.NORMAL'|tu %}
         {% set expertText = 'PLUGIN_ADMIN.EXPERT'|tu %}
@@ -54,6 +55,7 @@
             <a></a>
         </div>
     </form>
+    {% endif %}
 {% endblock topbar %}
 
 {% block content %}
