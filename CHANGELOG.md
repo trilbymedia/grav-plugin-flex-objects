@@ -6,6 +6,7 @@
 1. [](#bugfix)
     * Prevent expert editing mode from anyone else than super users [grav-plugin-admin#2094](https://github.com/getgrav/grav-plugin-admin/issues/2094)
     * Fixed not being able to add new folder [grav#3293](https://github.com/getgrav/grav/issues/3293)
+    * Fixed Flex directories defined only in theme not showing up [grav#3292](https://github.com/getgrav/grav/issues/3292)
 
 # v1.0.6
 ## 03/30/2021

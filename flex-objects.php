@@ -126,7 +126,7 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onPluginsInitialized(): void
     {
-        if ($this->isAdmin() && method_exists(Admin::class, 'getChangelog')) {
+        if ($this->isAdmin()) {
             /** @var UserInterface|null $user */
             $user = $this->grav['user'] ?? null;
 
@@ -153,6 +153,9 @@ class FlexObjectsPlugin extends Plugin
                 'onAdminControllerInit' => [
                     ['onAdminControllerInit', 0]
                 ],
+                'onThemeInitialized' => [
+                    ['onThemeInitialized', 0]
+                ],
                 'onPageInitialized' => [
                     ['onAdminPageInitialized', 0]
                 ],
@@ -163,8 +166,6 @@ class FlexObjectsPlugin extends Plugin
                     ['onGetPageTemplates', 0]
 
             ]);
-            /** @var AdminController controller */
-            $this->controller = new AdminController();
 
         } else {
             $this->enable([
@@ -181,25 +182,60 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onRegisterFlex(FlexRegisterEvent $event): void
     {
+        /** @var \Grav\Framework\Flex\Flex $flex */
         $flex = $event->flex;
-        $map = Flex::getLegacyBlueprintMap(false);
-
         $types = (array)$this->config->get('plugins.flex-objects.directories', []);
+        $this->registerDirectories($flex, $types);
+    }
+
+    /**
+     * @return void
+     */
+    public function onThemeInitialized(): void
+    {
+        // Register directories defined in the theme.
+        /** @var \Grav\Framework\Flex\Flex $flex */
+        $flex = $this->grav['flex'];
+        $types = (array)$this->config->get('plugins.flex-objects.directories', []);
+        $this->registerDirectories($flex, $types, true);
+
+        /** @var AdminController controller */
+        $this->controller = new AdminController();
+
+        /** @var Debugger $debugger */
+        $debugger = Grav::instance()['debugger'];
+        $names = implode(', ', array_keys($flex->getDirectories()));
+        $debugger->addMessage(sprintf('Registered flex types: %s', $names), 'debug');
+    }
+
+    /**
+     * @param \Grav\Framework\Flex\Flex $flex
+     * @param array $types
+     * @param bool $report
+     */
+    protected function registerDirectories(\Grav\Framework\Flex\Flex $flex, array $types, bool $report = false): void
+    {
+        $map = Flex::getLegacyBlueprintMap(false);
         foreach ($types as $blueprint) {
             // Backwards compatibility to v1.0.0-rc.3
             $blueprint = $map[$blueprint] ?? $blueprint;
             $type = basename((string)$blueprint, '.yaml');
+            if (!$type) {
+                continue;
+            }
 
             if (!file_exists($blueprint)) {
-                /** @var Debugger $debugger */
-                $debugger = Grav::instance()['debugger'];
-                $debugger->addMessage(sprintf('Flex: blueprint for flex type %s is missing', $type), 'error');
+                if ($report) {
+                    /** @var Debugger $debugger */
+                    $debugger = Grav::instance()['debugger'];
+                    $debugger->addMessage(sprintf('Flex: blueprint for flex type %s is missing', $type), 'error');
+                }
 
                 continue;
             }
 
             $directory = $flex->getDirectory($type);
-            if ($type && (!$directory || !$directory->isEnabled())) {
+            if (!$directory || !$directory->isEnabled()) {
                 $flex->addDirectoryType($type, $blueprint);
             }
         }
