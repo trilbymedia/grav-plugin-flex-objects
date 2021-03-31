@@ -408,8 +408,13 @@ class AdminController
 
         /** @var UniformResourceLocator $locator */
         $locator = $this->grav['locator'];
+        if ($locator->isStream($new_path)) {
+            $new_path = $locator->findResource($new_path, true, true);
+        } else {
+            $new_path = GRAV_ROOT . '/' . $new_path;
+        }
 
-        Folder::create($locator->findResource($new_path, true, true));
+        Folder::create($new_path);
         Cache::clearCache('invalidate');
 
         $this->grav->fireEvent('onAdminAfterSaveAs', new Event(['path' => $new_path]));
