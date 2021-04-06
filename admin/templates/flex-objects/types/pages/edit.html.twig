@@ -1,6 +1,6 @@
 {% extends 'flex-objects/types/default/edit.html.twig' %}
 
-{% set form = form ?? object.form(admin.session.expert != '0' ? 'raw') %}
+{% set form = form ?? object.form(user.authorize('admin.super') and admin.session.expert != '0' ? 'raw') %}
 
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
 {% set parent = object.parent %}
@@ -153,6 +153,7 @@
         </div>
     {% endif %}
 
+    {% if user.authorize('admin.super') %}
     <form id="admin-mode-toggle">
         {% set normalText = 'PLUGIN_ADMIN.NORMAL'|tu %}
         {% set expertText = 'PLUGIN_ADMIN.EXPERT'|tu %}
@@ -168,6 +169,7 @@
             <a></a>
         </div>
     </form>
+    {% endif %}
 {% endblock topbar %}
 
 {% block edit %}

@@ -1,9 +1,19 @@
+# v1.0.7
+## 04/06/2021
+
+1. [](#new)
+    * Added deny option support to `filepicker` field [#119](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/119)
+1. [](#bugfix)
+    * Prevent expert editing mode from anyone else than super users [grav-plugin-admin#2094](https://github.com/getgrav/grav-plugin-admin/issues/2094)
+    * Fixed not being able to add new folder [grav#3293](https://github.com/getgrav/grav/issues/3293)
+    * Fixed Flex directories defined only in theme not showing up [grav#3292](https://github.com/getgrav/grav/issues/3292)
+
 # v1.0.6
 ## 03/30/2021
 
 1. [](#bugfix)
    * Fixed automatic git-sync in admin save and delete [#120](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/120)
-   * Prevent Add Page / Add Module modals from closing if clicking on the outside overlay [getgrav/grav-plugin-admin#2089](https://github.com/getgrav/grav-plugin-admin/issues/2089) 
+   * Prevent Add Page / Add Module modals from closing if clicking on the outside overlay [grav-plugin-admin#2089](https://github.com/getgrav/grav-plugin-admin/issues/2089)
 
 # v1.0.5
 ## 03/19/2021

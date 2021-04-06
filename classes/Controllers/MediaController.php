@@ -395,6 +395,16 @@ class MediaController extends AbstractController
             });
         }
 
+        if (isset($settings['deny'])) {
+            $available_files = array_filter($available_files, function ($file) use ($settings) {
+                return $this->filterDeniedFiles($file, $settings);
+            });
+
+            $pending_files = array_filter($pending_files, function ($file) use ($settings) {
+                return $this->filterDeniedFiles($file, $settings);
+            });
+        }
+
         // Generate thumbs if needed
         if (isset($settings['preview_images']) && $settings['preview_images'] === true) {
             foreach ($available_files as $filename) {
@@ -427,6 +437,23 @@ class MediaController extends AbstractController
         foreach ((array)$settings['accept'] as $type) {
             $find = str_replace('*', '.*', $type);
             $valid |= preg_match('#' . $find . '$#i', $file);
+        }
+
+        return $valid;
+    }
+
+    /**
+     * @param string $file
+     * @param array $settings
+     * @return false|int
+     */
+    protected function filterDeniedFiles(string $file, array $settings)
+    {
+        $valid = true;
+
+        foreach ((array)$settings['deny'] as $type) {
+            $find = str_replace('*', '.*', $type);
+            $valid = !preg_match('#' . $find . '$#i', $file);
         }
 
         return $valid;
