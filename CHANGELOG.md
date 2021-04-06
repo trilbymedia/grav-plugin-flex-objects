@@ -1,5 +1,5 @@
 # v1.0.7
-## mm/dd/2021
+## 04/06/2021
 
 1. [](#new)
     * Added deny option support to `filepicker` field [#119](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/119)
