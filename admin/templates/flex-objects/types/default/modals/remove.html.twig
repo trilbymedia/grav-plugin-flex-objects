@@ -1,8 +1,9 @@
 <div class="remodal" data-remodal-id="delete" data-remodal-options="hashTracking: false">
     <form>
-        <h1>Delete {{ name|singularize|capitalize }}</h1>
+        {# FIXME -name|singularize- is not translatable #}
+        <h1>{{ 'PLUGIN_FLEX_OBJECTS.ACTION.DELETE_N'|tu }} {{ name|singularize|capitalize }}</h1>
         <p class="bigger">
-            Are you sure you want to permanently delete the {{ name|singularize }}?
+            {{ 'PLUGIN_FLEX_OBJECTS.ACTION.REALLY_DELETE'|tu( name|singularize, null ) }}
         </p>
         <div class="button-bar">
             <button data-remodal-action="cancel" class="button secondary remodal-cancel"><i class="fa fa-fw fa-close"></i> {{ "PLUGIN_ADMIN.CANCEL"|tu }}</button>

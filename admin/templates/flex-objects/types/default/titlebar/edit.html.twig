@@ -15,9 +15,9 @@
 
         {# DELETE #}
         {% if can_delete %}
-          {% block delete_button %}
+        {% block delete_button %}
             {% include ['flex-objects/types/' ~ target ~ '/buttons/delete.html.twig', 'flex-objects/types/default/buttons/delete.html.twig'] %}
-          {% endblock delete_button %}
+        {% endblock delete_button %}
         {% endif %}
 
         {% block extra_buttons %}{% endblock extra_buttons %}
@@ -38,8 +38,8 @@
             {{ not object.exists ? '[NEW]' }} {{ title }}
         {% else %}
             <i class="fa fa-fw fa-exclamation-triangle"></i>
-            Error
-        {% endif %}
+            {{ 'PLUGIN_ADMIN.ERROR'|tu }}
+        {% endif %}
     </h1>
     {% endblock titlebar_title %}
 

@@ -65,7 +65,7 @@
     {% endif %}
     {% if object.exists and form.flash.exists %}
         <div class="alert secondary-accent">
-            <i class="fa fa-lightbulb-o"></i> You are editing a saved draft. <button class="button button-link" type="submit" name="task" value="reset" form="blueprints">{{ "PLUGIN_ADMIN.RESET"|tu }}</button>
+            <i class="fa fa-lightbulb-o"></i> {{ 'PLUGIN_FLEX_OBJECTS.STATE.EDITING_DRAFT'|tu }} <button class="button button-link" type="submit" name="task" value="reset" form="blueprints">{{ "PLUGIN_ADMIN.RESET"|tu }}</button>
         </div>
     {% endif %}
 {% endblock %}
@@ -93,10 +93,10 @@
 
         {% do page.modifyHeader('http_response_code', 403) %}
         <div class="error-block">
-            <h1>Error 403</h1>
+            <h1>{{ 'PLUGIN_ADMIN.ERROR'|tu }} 403</h1>
             <div class="padding">
                 <p>
-                    Woops! Looks like you do not have permissions to access this page.
+                    {{ 'PLUGIN_FLEX_OBJECTS.ERROR.PAGE_FORBIDDEN'|tu }}
                 </p>
             </div>
         </div>
@@ -105,10 +105,10 @@
 
         {% do page.modifyHeader('http_response_code', 404) %}
         <div class="error-block">
-            <h1>Error 404</h1>
+            <h1>{{ 'PLUGIN_ADMIN.ERROR'|tu }} 404</h1>
             <div class="padding">
                 <p>
-                    Woops! Looks like this page doesn't exist.
+                    {{ 'PLUGIN_FLEX_OBJECTS.ERROR.PAGE_NOT_EXIST'|tu }}
                 </p>
             </div>
         </div>

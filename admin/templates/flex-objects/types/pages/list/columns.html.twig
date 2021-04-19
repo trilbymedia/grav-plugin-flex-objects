@@ -19,13 +19,20 @@
         <div id="pages-filters">
             <form>
                 <div class="filters-bar">
-                    <input type="text" placeholder="Search..." name="filters[search]" value="{{ filters['filters[search]'] }}" />
-                    <a href="#" class="adv-options button-border {{ hidePanel ? 'close' : 'open' }}">Advanced Options</a>
+                    <input type="text"
+                        placeholder="{{ 'PLUGIN_FLEX_OBJECTS.ACTION.SEARCH_PLACEHOLDER'|tu }}"
+                        name="filters[search]"
+                        value="{{ filters['filters[search]'] }}" />
+                    <a href="#" class="adv-options button-border {{ hidePanel ? 'close' : 'open' }}">
+                        {{ 'PLUGIN_FLEX_OBJECTS.ACTION.ADVANCED_OPTIONS'|tu }}
+                    </a>
                 </div>
 
                 <div class="filters-advanced {{ hidePanel ? 'hide' }}">
                     <fieldset>
-                        <legend>Page Attributes</legend>
+                        <legend>
+                            {{ 'PLUGIN_FLEX_OBJECTS.FILTER.PAGE_ATTRIBUTES'|tu }}
+                        </legend>
                         {{ macros.toggle('filters.routable', 'Routable', filters) }}
                         {{ macros.toggle('filters.module', 'Module', filters) }}
                         {{ macros.toggle('filters.visible', 'Visible', filters) }}
@@ -37,7 +44,9 @@
                     {% set selected = filters['filters[page_type]']|split(',') %}
                     {% set page_types = admin.types(null) %} {# directory.config('filters.ignore_page_types') #}
                     <fieldset>
-                        <legend>Page Types</legend>
+                        <legend>
+                            {{ 'PLUGIN_FLEX_OBJECTS.FILTER.PAGE_TYPES'|tu }}
+                        </legend>
                         {% for name,title in page_types %}
                             <span class="checkboxes toggleable">
                                 <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}" {% if name in selected %}checked{% endif %}>
@@ -49,7 +58,9 @@
                     {% set module_types = admin.modularTypes(null) %} {# directory.config('filters.ignore_module_types') #}
                     {% if module_types %}
                         <fieldset>
-                            <legend>Module Types</legend>
+                            <legend>
+                                {{ 'PLUGIN_FLEX_OBJECTS.FILTER.MODULAR_TYPES'|tu }}
+                            </legend>
                             {% for name,title in module_types %}
                                 <span class="checkboxes toggleable">
                                     <input type="checkbox" id="filters.type.{{ name }}" name="filters[page_type][]" value="{{ name }}" {% if name in selected %}checked{% endif %}>
@@ -59,14 +70,18 @@
                         </fieldset>
                     {% endif %}
 
-                    <a href="#" class="apply-filters button-border" data-filters="apply">Apply Filters</a>
-                    <a href="#" class="reset-defaults button-border" data-filters="reset">Reset to Defaults</a>
+                    <a href="#" class="apply-filters button-border" data-filters="apply">
+                        {{ 'PLUGIN_FLEX_OBJECTS.ACTION.APPLY_FILTERS'|tu }}
+                    </a>
+                    <a href="#" class="reset-defaults button-border" data-filters="reset">
+                        {{ 'PLUGIN_FLEX_OBJECTS.ACTION.RESET_FILTERS'|tu }}
+                    </a>
                 </div>
             </form>
         </div>
 
         <div class="grav-loading">
-            <div class="grav-loader">Loading...</div>
+            <div class="grav-loader">{{ 'PLUGIN_FLEX_OBJECTS.STATE.LOADING'|tu }}</div>
         </div>
         <div id="pages-columns" style="margin-top: -1rem;"
              data-lang-url="{{ grav.uri.getCurrentRoute.withoutParams.withExtension('').withLanguage('%LANG%').toString(true) }}"></div>
@@ -101,7 +116,7 @@
         <form>
             <h1>Parents</h1>
             <div class="grav-loading">
-                <div class="grav-loader">Loading...</div>
+                <div class="grav-loader">{{ 'PLUGIN_FLEX_OBJECTS.STATE.LOADING'|tu }}</div>
             </div>
             <div class="parents-content"></div>
             <div class="button-bar">
