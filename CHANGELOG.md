@@ -2,7 +2,7 @@
 ## mm/dd/2021
 
 1. [](#improved)
-    * Utilize new Admin detector to prevent Save actions to trigger unsaved notice on unload [getgrav/grav-plugin-admin#2125](https://github.com/getgrav/grav-plugin-admin/issues/2125)
+    * Utilize new Admin detector to prevent Save actions that triggers unsaved notice on unload [getgrav/grav-plugin-admin#2125](https://github.com/getgrav/grav-plugin-admin/issues/2125)
 
 # v1.0.7
 ## 04/06/2021
