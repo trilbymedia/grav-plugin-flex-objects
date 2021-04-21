@@ -24,6 +24,7 @@ PLUGIN_FLEX_OBJECTS:
     ADVANCED_OPTIONS: "Advanced Options"
     APPLY_FILTERS: "Apply Filters"
     RESET_FILTERS: "Reset to Defaults"
+    LIST_ITEMS: "List Items"
 
   FILTER:
     PAGE_ATTRIBUTES: "Page Attributes"
