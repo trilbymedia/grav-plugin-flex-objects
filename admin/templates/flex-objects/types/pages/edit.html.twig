@@ -203,6 +203,10 @@
         </div>
     {% endif %}
 
+        <div class="remodal" data-remodal-id="modal-page-copy" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
+            {% include 'partials/blueprints-copy.html.twig' with { blueprints: admin.blueprints('admin/pages/copy'), data: modal_data, form_id: 'copy' } %}
+        </div>
+
     {# TODO: regular pages support extra modals from admin config #}
 
     <div class="remodal parents-container" data-remodal-id="parents" data-remodal-options="hashTracking: false, stack: true">
