@@ -201,11 +201,11 @@
         <div class="remodal" data-remodal-id="module" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
             {% include 'partials/blueprints-new.html.twig' with { form: null, blueprints: admin.blueprints('admin/pages/modular_new'), data: modal_data, form_id: 'new-module' } %}
         </div>
-    {% endif %}
 
         <div class="remodal" data-remodal-id="modal-page-copy" data-remodal-options="hashTracking: false, closeOnOutsideClick: false">
-            {% include 'partials/blueprints-copy.html.twig' with { blueprints: admin.blueprints('admin/pages/copy'), data: modal_data, form_id: 'copy' } %}
+            {% include 'partials/blueprints-copy.html.twig' with { blueprints: admin.blueprints('admin/pages/copy'), data: data({ title: object.title ~ ' (Copy)', folder: object.slug ~ '-copy' }), form_id: 'copy' } %}
         </div>
+    {% endif %}
 
     {# TODO: regular pages support extra modals from admin config #}
 
