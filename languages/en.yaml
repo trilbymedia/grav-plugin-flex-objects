@@ -68,5 +68,5 @@ PLUGIN_FLEX_OBJECTS:
     BLUEPRINT_NO_LIST_ADVISE: "Please add list of fields to blueprints file."
     BLUEPRINT_NO_LIST_TEMPLATE: "Please create template file for the type in <b>flex-objects/types/%s/list.html.twig</b>"
     LIST_EMPTY: "There are currently no entries."
-    LIST_EMPTY_ADD: "There are currently no entries, click the <a href=\"&s\">Add</a> button to create a new one…"
+    LIST_EMPTY_ADD: "There are currently no entries, click the <a href=\"%s\">Add</a> button to create a new one…"
     NO_FLEX_DIRECTORIES: "No Flex Directories detected"

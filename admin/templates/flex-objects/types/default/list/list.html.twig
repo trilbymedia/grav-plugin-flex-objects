@@ -1,6 +1,7 @@
 {% block directory %}
 <div id="directory">
     {% if not fields %}
+        {% block no_list %}
         <div class="no-entries">
             <p>{{ 'PLUGIN_FLEX_OBJECTS.ERROR.BLUEPRINT_NO_LIST'|tu( target, null )|raw }}</p>
             <ul>
@@ -12,16 +13,20 @@
                 </li>
             </ul>
         </div>
-        {% elseif not collection.count %}
+        {% endblock %}
+    {% elseif not collection.count %}
+        {% block no_entries %}
         <div class="no-entries">
             {% if directory.isAuthorized('create', 'admin', user) %}
                 {% set createLink = admin_route(flex.adminRoute(collection, {action: 'add'})) %}
-                {{ 'PLUGIN_FLEX_OBJECTS.ERROR.LIST_EMPTY_ADD'|tu( createLink, null )|raw }}
+                {{ 'PLUGIN_FLEX_OBJECTS.ERROR.LIST_EMPTY_ADD'|tu(createLink, null)|raw }}
             {% else %}
                 {{ 'PLUGIN_FLEX_OBJECTS.ERROR.LIST_EMPTY'|tu }}
             {% endif %}
         </div>
+        {% endblock %}
     {% else %}
+        {% block entries %}
         {% set per_page = per_page ?? directory_config.per_page %}
 
         {% set tableFields = [] %}
@@ -95,9 +100,13 @@
                     </linearGradient>
                 </defs>
             {% endfor %}
-            </svg></div>
+            </svg>
+        </div>
+        {% endblock %}
     {% endif %}
 
+    {% block modals %}
     {% include 'flex-objects/types/default/modals/remove.html.twig' with { name: target } %}
+    {% endblock %}
 </div>
 {% endblock %}
