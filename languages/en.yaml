@@ -14,6 +14,17 @@ PLUGIN_FLEX_OBJECTS:
   CSV: "CSV"
   PARENTS: "Parents"
 
+  CONTROLLER:
+    TASK_DELETE_SUCCESS: 'Entry deleted successfully'
+    TASK_DELETE_FAILURE: 'Failed to delete entry: %s'
+    TASK_NEW_FOLDER_SUCCESS: 'Folder created successfully'
+    TASK_COPY_SUCCESS: 'Copy created successfully'
+    TASK_COPY_FAILURE: 'Failed to create copy: %s'
+    TASK_SAVE_SUCCESS: 'Entry saved successfully'
+    TASK_SAVE_FAILURE: 'Failed to save entry: %s'
+    TASK_CONFIGURE_SUCCESS: 'Configuration saved successfully'
+    TASK_CONFIGURE_FAILURE: 'Failed to save configuration: %s'
+
   ACTION:
     CREATE_NEW: Create New Item
     EDIT_ITEM: Edit Item
