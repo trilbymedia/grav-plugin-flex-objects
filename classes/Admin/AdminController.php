@@ -553,15 +553,18 @@ class AdminController
             if ($object instanceof PageInterface) {
                 $blueprints = $this->admin->blueprints('admin/pages/move');
                 $data = $this->data;
-                unset($data['blueprint']);
                 $blueprints->validate($data);
                 $data = $blueprints->filter($data, true, true);
-                // Hack as pages are so messed up...
+                // Hack for pages
                 $data['name'] = $data['name'] ?? $object->template();
+                $data['ordering'] = (int)$object->order() > 0;
+                $data['order'] = null;
                 if (isset($data['title'])) {
                     $data['header']['title'] = $data['title'];
                     unset($data['title']);
                 }
+
+                $object->order(false);
                 $object->update($data);
             }
 
