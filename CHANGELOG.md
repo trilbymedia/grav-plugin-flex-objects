@@ -4,6 +4,7 @@
 1. [](#new)
    * Require **Admin 1.10.13**
 1. [](#improved)
+    * Added a few missing translations
     * Utilize new Admin detector to prevent Save actions that triggers unsaved notice on unload [getgrav/grav-plugin-admin#2125](https://github.com/getgrav/grav-plugin-admin/issues/2125)
     * Improved copying page by adding a modal for new page title and folder name
 
