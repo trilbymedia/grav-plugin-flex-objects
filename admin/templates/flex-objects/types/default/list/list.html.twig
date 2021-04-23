@@ -1,26 +1,32 @@
 {% block directory %}
 <div id="directory">
     {% if not fields %}
+        {% block no_list %}
         <div class="no-entries">
-            <p>Blueprint for '{{ target }}' does not define displayed fields or list page override.</p>
+            <p>{{ 'PLUGIN_FLEX_OBJECTS.ERROR.BLUEPRINT_NO_LIST'|tu( target, null )|raw }}</p>
             <ul>
                 <li>
-                    Please add list of fields to blueprints file.
+                    {{ 'PLUGIN_FLEX_OBJECTS.ERROR.BLUEPRINT_NO_LIST_ADVISE'|tu }}
                 </li>
                 <li>
-                    Please create template file for the type in <strong>flex-objects/types/{{ target }}/list.html.twig</strong>
+                    {{ 'PLUGIN_FLEX_OBJECTS.ERROR.BLUEPRINT_NO_LIST_TEMPLATE'|tu( target, null )|raw }}
                 </li>
             </ul>
         </div>
-        {% elseif not collection.count %}
+        {% endblock %}
+    {% elseif not collection.count %}
+        {% block no_entries %}
         <div class="no-entries">
             {% if directory.isAuthorized('create', 'admin', user) %}
-                There are currently no entries, click the <a href="{{ admin_route(flex.adminRoute(collection, {action: 'add'})) }}">Add</a> button to create a new one...
+                {% set createLink = admin_route(flex.adminRoute(collection, {action: 'add'})) %}
+                {{ 'PLUGIN_FLEX_OBJECTS.ERROR.LIST_EMPTY_ADD'|tu(createLink, null)|raw }}
             {% else %}
-                There are currently no entries.
+                {{ 'PLUGIN_FLEX_OBJECTS.ERROR.LIST_EMPTY'|tu }}
             {% endif %}
         </div>
+        {% endblock %}
     {% else %}
+        {% block entries %}
         {% set per_page = per_page ?? directory_config.per_page %}
 
         {% set tableFields = [] %}
@@ -94,9 +100,13 @@
                     </linearGradient>
                 </defs>
             {% endfor %}
-            </svg></div>
+            </svg>
+        </div>
+        {% endblock %}
     {% endif %}
 
+    {% block modals %}
     {% include 'flex-objects/types/default/modals/remove.html.twig' with { name: target } %}
+    {% endblock %}
 </div>
 {% endblock %}

@@ -23,10 +23,14 @@
   </div>
   {% endfor %}
 
+  <div class="remodal" data-remodal-id="modal-page-copy" data-remodal-options="hashTracking: false">
+    {% include 'partials/blueprints-copy.html.twig' with { blueprints: admin.blueprints('admin/pages/copy'), data: obj_data, form_id: 'copy' } %}
+  </div>
+
   <div class="remodal parents-container" data-remodal-id="parents" data-remodal-options="hashTracking: false, stack: true">
     <form>
       <h1>Parents</h1>
-      <div class="grav-loading"><div class="grav-loader">Loading...</div></div>
+      <div class="grav-loading"><div class="grav-loader">{{ 'PLUGIN_FLEX_OBJECTS.STATE.LOADING'|tu }}</div></div>
       <div class="parents-content"></div>
       <div class="button-bar">
         <a class="button secondary remodal-cancel" data-remodal-action="cancel" href="#"><i class="fa fa-fw fa-close"></i> {{ "PLUGIN_ADMIN.CANCEL"|tu }}</a>

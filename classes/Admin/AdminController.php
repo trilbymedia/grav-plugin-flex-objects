@@ -333,7 +333,7 @@ class AdminController
 
                 $object->delete();
 
-                $this->admin->setMessage($this->admin::translate(['PLUGIN_ADMIN.REMOVED_SUCCESSFULLY', 'Directory Entry']), 'info');
+                $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_DELETE_SUCCESS'));
                 if ($this->currentRoute->withoutGravParams()->getRoute() === $this->referrerRoute->getRoute()) {
                     $redirect = dirname($this->currentRoute->withoutGravParams()->toString(true));
                 } else {
@@ -346,12 +346,12 @@ class AdminController
                 $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
             }
         } catch (RuntimeException $e) {
-            $this->admin->setMessage('Delete Failed: ' . $e->getMessage(), 'error');
+            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_DELETE_FAILURE', $e->getMessage()), 'error');
 
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 
-        return $object ? true : false;
+        return $object !== null;
     }
 
     /**
@@ -419,7 +419,7 @@ class AdminController
 
         $this->grav->fireEvent('onAdminAfterSaveAs', new Event(['path' => $new_path]));
 
-        $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+        $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_NEW_FOLDER_SUCCESS'));
 
         $this->setRedirect($this->referrerRoute->toString(true));
     }
@@ -550,12 +550,32 @@ class AdminController
                     403);
             }
 
+            if ($object instanceof PageInterface) {
+                $blueprints = $this->admin->blueprints('admin/pages/move');
+                $data = $this->data;
+                $blueprints->validate($data);
+                $data = $blueprints->filter($data, true, true);
+                // Hack for pages
+                $data['name'] = $data['name'] ?? $object->template();
+                $data['ordering'] = (int)$object->order() > 0;
+                $data['order'] = null;
+                if (isset($data['title'])) {
+                    $data['header']['title'] = $data['title'];
+                    unset($data['title']);
+                }
+
+                $object->order(false);
+                $object->update($data);
+            }
+
             $object = $object->createCopy();
+
+            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_COPY_SUCCESS'));
 
             $this->setRedirect($this->getFlex()->adminRoute($object));
 
         } catch (RuntimeException $e) {
-            $this->admin->setMessage('Copy Failed: ' . $e->getMessage(), 'error');
+            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_COPY_FAILURE', $e->getMessage()), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 
@@ -780,7 +800,7 @@ class AdminController
             $object = $form->getObject();
             $objectKey = $object->getKey();
 
-            $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_SAVE_SUCCESS'));
 
             // Set route to point to the current page.
             if (!$this->redirect) {
@@ -842,7 +862,7 @@ class AdminController
             $grav = Grav::instance();
             $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
         } catch (RuntimeException $e) {
-            $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
+            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_SAVE_FAILURE', $e->getMessage()), 'error');
 
             if (isset($object, $form)) {
                 $data = $form->getData();
@@ -899,7 +919,7 @@ class AdminController
                 throw new RuntimeException($error);
             }
 
-            $this->admin->setMessage($this->admin::translate('PLUGIN_ADMIN.SUCCESSFULLY_SAVED'), 'info');
+            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_CONFIGURE_SUCCESS'));
 
             if (!$this->redirect) {
                 $this->referrerRoute = $this->currentRoute;
@@ -907,7 +927,7 @@ class AdminController
                 $this->setRedirect($this->referrerRoute->toString(true));
             }
         } catch (RuntimeException $e) {
-            $this->admin->setMessage('Save Failed: ' . $e->getMessage(), 'error');
+            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_CONFIGURE_FAILURE', $e->getMessage()), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 
@@ -1668,10 +1688,6 @@ class AdminController
      */
     protected function getPost(array $post): array
     {
-        if (!is_array($post)) {
-            return [];
-        }
-
         unset($post['task']);
 
         // Decode JSON encoded fields and merge them to data.
@@ -1687,6 +1703,7 @@ class AdminController
 
     /**
      * @param ResponseInterface $response
+     * @return never-return
      */
     protected function close(ResponseInterface $response): void
     {

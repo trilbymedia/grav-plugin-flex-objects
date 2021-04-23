@@ -1,7 +1,19 @@
+# v1.0.8
+## 04/23/2021
+
+1. [](#new)
+   * Require **Admin 1.10.13**
+   * Require **Form Plugin 5.0.2**
+1. [](#improved)
+    * Added a few missing translations
+    * Utilize new Admin detector to prevent Save actions that triggers unsaved notice on unload [getgrav/grav-plugin-admin#2125](https://github.com/getgrav/grav-plugin-admin/issues/2125)
+    * Improved copying page by adding a modal for new page title and folder name
+
 # v1.0.7
 ## 04/06/2021
 
 1. [](#new)
+    * Require **Grav 1.7.10**
     * Added deny option support to `filepicker` field [#119](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/119)
 1. [](#bugfix)
     * Prevent expert editing mode from anyone else than super users [grav-plugin-admin#2094](https://github.com/getgrav/grav-plugin-admin/issues/2094)

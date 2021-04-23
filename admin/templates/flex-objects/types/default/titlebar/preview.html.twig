@@ -22,8 +22,8 @@
             {{ "PLUGIN_ADMIN.PREVIEW"|tu }}: {{ not object.exists ? '[NEW]' }} <strong>{{ title }}</strong>
         {% else %}
             <i class="fa fa-fw fa-exclamation-triangle"></i>
-            Error
-        {% endif %}
+            {{ 'PLUGIN_ADMIN.ERROR'|tu }}
+        {% endif %}
     </h1>
     {% endblock titlebar_title %}
 
