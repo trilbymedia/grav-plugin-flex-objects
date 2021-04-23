@@ -166,9 +166,9 @@
 
         <div class="switch-toggle switch-grav">
             <input type="radio" value="normal" data-leave-url="{{ route.withGravParam('mode', 'normal').toString(true) }}" id="normal" name="mode-switch" class="highlight" {% if admin.session.expert == '0' %} checked="checked"{% endif %}>
-            <label for="normal">{{ normalText|raw }}</label>
+            <label for="normal">{{ normalText }}</label>
             <input type="radio" value="expert" data-leave-url="{{ route.withGravParam('mode', 'expert').toString(true) }}" id="expert" name="mode-switch" class="highlight" {% if admin.session.expert == '1' %} checked="checked"{% endif %}>
-            <label for="expert">{{ expertText|raw }}</label>
+            <label for="expert">{{ expertText }}</label>
             <a></a>
         </div>
     </form>

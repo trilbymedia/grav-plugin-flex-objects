@@ -558,6 +558,10 @@ class AdminController
                 $data = $blueprints->filter($data, true, true);
                 // Hack as pages are so messed up...
                 $data['name'] = $data['name'] ?? $object->template();
+                if (isset($data['title'])) {
+                    $data['header']['title'] = $data['title'];
+                    unset($data['title']);
+                }
                 $object->update($data);
             }
 
