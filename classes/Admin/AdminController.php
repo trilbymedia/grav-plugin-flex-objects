@@ -550,9 +550,9 @@ class AdminController
                     403);
             }
 
-            if ($object instanceof PageInterface) {
-                $blueprints = $this->admin->blueprints('admin/pages/move');
+            if ($object instanceof PageInterface && is_array($this->data)) {
                 $data = $this->data;
+                $blueprints = $this->admin->blueprints('admin/pages/move');
                 $blueprints->validate($data);
                 $data = $blueprints->filter($data, true, true);
                 // Hack for pages
