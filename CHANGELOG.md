@@ -1,5 +1,5 @@
 # v1.0.9
-## mm/dd/2021
+## 04/29/2021
 
 1. [](#bugfix)
    * Fixed fatal error when copying a page in admin if no modal is being shown [getgrav/grav#3335](https://github.com/getgrav/grav/issues/3335)
