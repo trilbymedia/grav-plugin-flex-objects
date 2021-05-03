@@ -416,6 +416,7 @@ class AdminController
 
         Folder::create($new_path);
         Cache::clearCache('invalidate');
+        $directory->getCache('index')->clear();
 
         $this->grav->fireEvent('onAdminAfterSaveAs', new Event(['path' => $new_path]));
 
