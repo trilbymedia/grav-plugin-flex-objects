@@ -1,3 +1,10 @@
+# v1.0.10
+## 05/19/2021
+
+1. [](#bugfix)
+   * Fixed `Add Folder` not updating the page list until cache is cleared
+   * Fixed broken error message translations
+
 # v1.0.9
 ## 04/29/2021
 

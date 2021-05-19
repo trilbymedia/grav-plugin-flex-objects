@@ -346,7 +346,7 @@ class AdminController
                 $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
             }
         } catch (RuntimeException $e) {
-            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_DELETE_FAILURE', $e->getMessage()), 'error');
+            $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_DELETE_FAILURE', $e->getMessage()]), 'error');
 
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
@@ -416,6 +416,7 @@ class AdminController
 
         Folder::create($new_path);
         Cache::clearCache('invalidate');
+        $directory->getCache('index')->clear();
 
         $this->grav->fireEvent('onAdminAfterSaveAs', new Event(['path' => $new_path]));
 
@@ -575,7 +576,7 @@ class AdminController
             $this->setRedirect($this->getFlex()->adminRoute($object));
 
         } catch (RuntimeException $e) {
-            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_COPY_FAILURE', $e->getMessage()), 'error');
+            $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_COPY_FAILURE', $e->getMessage()]), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 
@@ -862,7 +863,7 @@ class AdminController
             $grav = Grav::instance();
             $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
         } catch (RuntimeException $e) {
-            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_SAVE_FAILURE', $e->getMessage()), 'error');
+            $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_SAVE_FAILURE', $e->getMessage()]), 'error');
 
             if (isset($object, $form)) {
                 $data = $form->getData();
@@ -927,7 +928,7 @@ class AdminController
                 $this->setRedirect($this->referrerRoute->toString(true));
             }
         } catch (RuntimeException $e) {
-            $this->admin->setMessage($this->admin::translate('PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_CONFIGURE_FAILURE', $e->getMessage()), 'error');
+            $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_CONFIGURE_FAILURE', $e->getMessage()]), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
 
