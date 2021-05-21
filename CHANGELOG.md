@@ -1,3 +1,9 @@
+# v1.0.11
+## mm/dd/2021
+
+1. [](#improved)
+   * Allow file uploads to send data such as `data[media_order]`
+
 # v1.0.10
 ## 05/19/2021
 
