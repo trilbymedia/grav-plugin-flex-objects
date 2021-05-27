@@ -1,3 +1,9 @@
+# v1.0.12
+## mm/dd/2021
+
+1. [](#bugfix)
+   * Fixed logic to get form blueprints and object, prevents events from being fired twice
+
 # v1.0.11
 ## 05/24/2021
 
