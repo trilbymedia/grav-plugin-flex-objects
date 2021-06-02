@@ -1,6 +1,11 @@
 {% extends 'flex-objects/types/default/edit.html.twig' %}
 
-{% set form = form ?? object.form(user.authorize('admin.super') and admin.session.expert != '0' ? 'raw') %}
+{# Avoid defining form and object twice: object should always come from the form! #}
+{% if form is not defined %}
+    {% set form = object.form(user.authorize('admin.super') and admin.session.expert != '0' ? 'raw') %}
+    {% set form = object.form %}
+    {% set object = form.object %}
+{% endif %}
 
 {% set title = title ?? form.getValue('header.title') ?? object.title ?? key %}
 {% set parent = object.parent %}
