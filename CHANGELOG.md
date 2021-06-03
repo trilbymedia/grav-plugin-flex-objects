@@ -1,3 +1,9 @@
+# v1.0.13
+## mm/dd/2021
+
+1. [](#bugfix)
+   * Fixed expert mode for Flex Pages
+
 # v1.0.12
 ## 06/02/2021
 

@@ -1,9 +1,9 @@
 {% extends 'flex-objects/types/default/edit.html.twig' %}
 
 {# Avoid defining form and object twice: object should always come from the form! #}
-{% if form is not defined %}
-    {% set form = object.form(user.authorize('admin.super') and admin.session.expert != '0' ? 'raw') %}
-    {% set form = object.form %}
+{% set expert = user.authorize('admin.super') and admin.session.expert != '0' %}
+{% if expert or form is not defined %}
+    {% set form = object.form(expert ? 'raw' : '') %}
     {% set object = form.object %}
 {% endif %}
 
@@ -170,9 +170,9 @@
         {% set expertText = macro.spanToggle(expertText, maxLen) %}
 
         <div class="switch-toggle switch-grav">
-            <input type="radio" value="normal" data-leave-url="{{ route.withGravParam('mode', 'normal').toString(true) }}" id="normal" name="mode-switch" class="highlight" {% if admin.session.expert == '0' %} checked="checked"{% endif %}>
+            <input type="radio" value="normal" data-leave-url="{{ route.withGravParam('mode', 'normal').toString(true) }}" id="normal" name="mode-switch" class="highlight" {% if expert == '0' %} checked="checked"{% endif %}>
             <label for="normal">{{ normalText }}</label>
-            <input type="radio" value="expert" data-leave-url="{{ route.withGravParam('mode', 'expert').toString(true) }}" id="expert" name="mode-switch" class="highlight" {% if admin.session.expert == '1' %} checked="checked"{% endif %}>
+            <input type="radio" value="expert" data-leave-url="{{ route.withGravParam('mode', 'expert').toString(true) }}" id="expert" name="mode-switch" class="highlight" {% if expert == '1' %} checked="checked"{% endif %}>
             <label for="expert">{{ expertText }}</label>
             <a></a>
         </div>
