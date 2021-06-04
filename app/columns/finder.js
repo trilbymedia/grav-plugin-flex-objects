@@ -162,8 +162,8 @@ export class FlexPages {
                     const ul = $(`<div class="dropdown-menu">
     <div class="action-bar">
         ${canPreview ? `<a href="${route}/:preview" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a>` : ''}
-        ${canCopy ? `<a href="${route}/task:copy/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Duplicate" href="#modal-page-copy" data-remodal-target="modal-page-copy" data-copy-flex-page data-title="${item.title}" data-folder="${item['item-key']}"><i class="fa fa-fw fa-copy"></i></a>` : ''}
         ${canEdit ? `<a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a>` : ''}
+        ${canCopy ? `<a href="${route}/task:copy/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Duplicate" href="#modal-page-copy" data-remodal-target="modal-page-copy" data-copy-flex-page data-title="${item.title}" data-folder="${item['item-key']}"><i class="fa fa-fw fa-copy"></i></a>` : ''}
         ${canMove ? '<a href="#" class="dropdown-item" title="Move (coming soon)"><i class="fa fa-fw fa-arrows"></i></a>' : ''}
         ${canDelete ? `<a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item danger" title="Delete"><i class="fa fa-fw fa-trash-o"></i></a>` : ''}
     </div>
