@@ -163,7 +163,7 @@ export class FlexPages {
     <div class="action-bar">
         ${canPreview ? `<a href="${route}/:preview" class="dropdown-item" title="Preview"><i class="fa fa-fw fa-eye"></i></a>` : ''}
         ${canEdit ? `<a href="${route}" class="dropdown-item" title="Edit"><i class="fa fa-fw fa-pencil"></i></a>` : ''}
-        ${canCopy ? `<a href="${route}/task:copy/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Duplicate"><i class="fa fa-fw fa-copy"></i></a>` : ''}
+        ${canCopy ? `<a href="${route}/task:copy/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item" title="Duplicate" href="#modal-page-copy" data-remodal-target="modal-page-copy" data-copy-flex-page data-title="${item.title}" data-folder="${item['item-key']}"><i class="fa fa-fw fa-copy"></i></a>` : ''}
         ${canMove ? '<a href="#" class="dropdown-item" title="Move (coming soon)"><i class="fa fa-fw fa-arrows"></i></a>' : ''}
         ${canDelete ? `<a href="#delete" data-remodal-target="delete" data-delete-url="${route}/task:delete/admin-nonce:${GRAV_CONFIG.admin_nonce}" class="dropdown-item danger" title="Delete"><i class="fa fa-fw fa-trash-o"></i></a>` : ''}
     </div>
@@ -204,6 +204,8 @@ export class FlexPages {
 </div>`);
                     ul.appendTo(dotdotdot);
                 }
+
+                return true;
             });
         }
 
@@ -402,6 +404,18 @@ document.addEventListener('click', (event) => {
             event.preventDefault();
             event.stopPropagation();
         }
+    }
+
+    if (event.target.dataset.copyFlexPage || event.target.closest('[data-copy-flex-page]')) {
+        const target = event.target.dataset.copyFlexPage ? event.target : event.target.closest('[data-copy-flex-page]');
+        const modal = document.querySelector('[data-remodal-id="modal-page-copy"]');
+        const form = modal.querySelector('form');
+        const titleField = modal.querySelector('[name="data[title]"]');
+        const folderField = modal.querySelector('[name="data[folder]"]');
+
+        titleField.value = `${target.dataset.title} (Copy)`;
+        folderField.value = `${target.dataset.folder}-copy`;
+        form.action = target.href;
     }
 });
 
