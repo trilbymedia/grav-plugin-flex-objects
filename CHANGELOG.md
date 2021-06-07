@@ -1,5 +1,5 @@
 # v1.0.14
-## mm/dd/2021
+## 06/07/2021
 
 1. [](#improved)
    * Added enhanced copy modal from Pages list [getgrav/grav-plugin-admin#2139](https://github.com/getgrav/grav-plugin-admin/issues/2139)
