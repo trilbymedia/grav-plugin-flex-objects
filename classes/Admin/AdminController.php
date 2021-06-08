@@ -443,7 +443,7 @@ class AdminController
         $route = trim($this->data['route'], '/');
 
         $object = $this->getObject($route);
-        $authorized = $object && $object->isAuthorized('create', 'admin', $this->user);
+        $authorized = $object instanceof PageObject && $object->isAuthorized('create', 'admin', $this->user);
 
         if (!$authorized && !$directory->isAuthorized('create', 'admin', $this->user)) {
             $this->setRedirect($this->referrerRoute->toString(true));
@@ -468,7 +468,11 @@ class AdminController
             throw new RuntimeException('Creating page failed: bad folder name', 400);
         }
 
-        if (isset($this->data['name']) && strpos($this->data['name'], 'modular/') === 0) {
+        if (!isset($this->data['name'])) {
+            // Get default child type.
+            $this->data['name'] = $object->header()->child_type ?? $object->getBlueprint()->child_type ?? 'default';
+        }
+        if (strpos($this->data['name'], 'modular/') === 0) {
             $this->data['header']['body_classes'] = 'modular';
             $folder = '_' . $folder;
         }

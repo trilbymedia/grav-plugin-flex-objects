@@ -1,3 +1,9 @@
+# v1.0.15
+## mm/dd/2021
+
+1. [](#bugfix)
+   * Fixed missing handling of child_type in Flex Pages [getgrav/grav-plugin-admin#2087](https://github.com/getgrav/grav-plugin-admin/issues/2087)
+
 # v1.0.14
 ## 06/07/2021
 
