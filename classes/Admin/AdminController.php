@@ -271,6 +271,15 @@ class AdminController
             throw new RuntimeException($this->admin::translate('Not Found'), 404);
         }
 
+        $queryParams = $this->getRequest()->getQueryParams();
+        $type = $queryParams['type'] ?? null;
+        if ($type) {
+            $config = $config['options'][$type] ?? null;
+            if (!$config) {
+                throw new RuntimeException($this->admin::translate('Not Found'), 404);
+            }
+        }
+
         $defaultFormatter = CsvFormatter::class;
         $class = trim($config['formatter']['class'] ?? $defaultFormatter, '\\');
         $method = $config['method'] ?? ($class === $defaultFormatter ? 'csvSerialize' : 'jsonSerialize');
@@ -282,7 +291,7 @@ class AdminController
         $filename = ($config['filename'] ?? 'export') . $formatter->getDefaultFileExtension();
 
         if (method_exists($collection, $method)) {
-            $list = $collection->{$method}();
+            $list = $type ? $collection->{$method}($type) : $collection->{$method}();
         } else {
             $list = [];
 
