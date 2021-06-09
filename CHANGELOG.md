@@ -4,6 +4,7 @@
 1. [](#bugfix)
    * Fixed missing handling of child_type in Flex Pages [getgrav/grav-plugin-admin#2087](https://github.com/getgrav/grav-plugin-admin/issues/2087)
    * Added support for multiple `Exports` in a dropdown
+   * Admin is no longer a dependency of Flex Objects [trilbymedia/grav-plugin-flex-objects#130](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/130)
 
 # v1.0.14
 ## 06/07/2021

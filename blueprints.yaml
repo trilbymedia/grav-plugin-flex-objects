@@ -15,7 +15,6 @@ license: MIT
 
 dependencies:
     - { name: grav, version: '>=1.7.10' }
-    - { name: admin, version: '>=1.7.13' }
     - { name: form, version: '>=5.0.2' }
 
 form:
