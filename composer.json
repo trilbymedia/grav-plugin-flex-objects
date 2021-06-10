@@ -1,5 +1,5 @@
 {
-  "name": "grav-plugin-flex-objects",
+  "name": "getgrav/grav-plugin-flex-objects",
   "type": "grav-plugin",
   "description": "Flex Objects plugin for Grav CMS",
   "keywords": ["flex-objects"],
