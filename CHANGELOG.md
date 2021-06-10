@@ -1,6 +1,9 @@
 # v1.0.15
 ## mm/dd/2021
 
+1. [](#improved)
+   * Better checks against missing Flex Type inside tasks
+   * Better authorization checks, falls back to directory level authorization checks if objects do not support authorization
 1. [](#bugfix)
    * Fixed missing handling of child_type in Flex Pages [getgrav/grav-plugin-admin#2087](https://github.com/getgrav/grav-plugin-admin/issues/2087)
    * Added support for multiple `Exports` in a dropdown
