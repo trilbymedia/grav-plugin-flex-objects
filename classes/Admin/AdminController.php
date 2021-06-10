@@ -834,6 +834,10 @@ class AdminController
                     unset($data['frontmatter']);
                 }
 
+                if (is_callable([$object, 'check'])) {
+                    $object->check($this->user);
+                }
+
                 $object->save();
             };
 
