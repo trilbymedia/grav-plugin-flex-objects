@@ -406,11 +406,7 @@ class AdminController
             throw new RuntimeException('Not Found', 404);
         }
 
-        if ($directory instanceof FlexAuthorizeInterface && !$directory->isAuthorized('create', 'admin', $this->user)) {
-            throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.', 403);
-        }
-
-        $collection = $directory->getCollection();
+        $collection = $directory->getIndex();
         if (!($collection instanceof PageCollection || $collection instanceof PageIndex)) {
             throw new RuntimeException('Task saveNewFolder works only for pages', 400);
         }
@@ -427,6 +423,10 @@ class AdminController
         $parent = $route ? $directory->getObject($route) : $collection->getRoot();
         if (!$parent instanceof PageObject) {
             throw new RuntimeException('Creating folder failed, bad parent route', 400);
+        }
+
+        if (!$parent->isAuthorized('create', 'admin', $this->user)) {
+            throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' create.', 403);
         }
 
         $path = $parent->getFlexDirectory()->getStorageFolder($parent->getStorageKey());
@@ -485,10 +485,12 @@ class AdminController
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
 
-        $object = $this->getObject($route);
-        $authorized = $object instanceof PageObject && $object->isAuthorized('create', 'admin', $this->user);
+        $parent = $route ? $directory->getObject($route) : $collection->getRoot();
+        $authorized = $parent instanceof FlexAuthorizeInterface
+            ? $parent->isAuthorized('create', 'admin', $this->user)
+            : $directory->isAuthorized('create', 'admin', $this->user);
 
-        if (!$authorized && !$directory->isAuthorized('create', 'admin', $this->user)) {
+        if (!$authorized) {
             $this->setRedirect($this->referrerRoute->toString(true));
 
             throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' add.', 403);
@@ -513,7 +515,7 @@ class AdminController
 
         if (!isset($this->data['name'])) {
             // Get default child type.
-            $this->data['name'] = $object->header()->child_type ?? $object->getBlueprint()->child_type ?? 'default';
+            $this->data['name'] = $parent->header()->child_type ?? $parent->getBlueprint()->child_type ?? 'default';
         }
         if (strpos($this->data['name'], 'modular/') === 0) {
             $this->data['header']['body_classes'] = 'modular';
@@ -535,8 +537,6 @@ class AdminController
 
             // Empty string on visible means auto.
             if ($auto || $visible) {
-                /** @var PageObject $parent */
-                $parent = $route ? $directory->getObject($route) : $directory->getIndex()->getRoot();
                 $children = $parent ? $parent->children()->visible() : [];
                 $max = $auto ? 0 : 1;
                 foreach ($children as $child) {
@@ -592,7 +592,7 @@ class AdminController
             }
 
             $object = $this->getObject();
-            if (!$object || !$object->exists()) {
+            if (!$object || !$object->exists() || !is_callable([$object, 'createCopy'])) {
                 throw new RuntimeException('Not Found', 404);
             }
 
