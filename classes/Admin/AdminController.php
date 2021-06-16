@@ -147,8 +147,7 @@ class AdminController
             );
 
             try {
-                $grav = Grav::instance();
-                $grav->fireEvent('onFlexTask' . ucfirst($this->task), $event);
+                $this->grav->fireEvent('onFlexTask' . ucfirst($this->task), $event);
             } catch (Exception $e) {
                 /** @var Debugger $debugger */
                 $debugger = $this->grav['debugger'];
@@ -197,8 +196,7 @@ class AdminController
             );
 
             try {
-                $grav = Grav::instance();
-                $grav->fireEvent('onFlexAction' . ucfirst($this->action), $event);
+                $this->grav->fireEvent('onFlexAction' . ucfirst($this->action), $event);
             } catch (Exception $e) {
                 /** @var Debugger $debugger */
                 $debugger = $this->grav['debugger'];
@@ -380,8 +378,7 @@ class AdminController
 
                 $this->setRedirect($redirect);
 
-                $grav = Grav::instance();
-                $grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
+                $this->grav->fireEvent('onFlexAfterDelete', new Event(['type' => 'flex', 'object' => $object]));
             }
         } catch (RuntimeException $e) {
             $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_DELETE_FAILURE', $e->getMessage()]), 'error');
@@ -810,10 +807,8 @@ class AdminController
                         403);
             }
 
-            $grav = Grav::instance();
-
             /** @var ServerRequestInterface $request */
-            $request = $grav['request'];
+            $request = $this->grav['request'];
 
             /** @var FlexForm $form */
             $form = $this->getForm($object);
@@ -923,8 +918,7 @@ class AdminController
                 $this->setRedirect($route->toString(true));
             }
 
-            $grav = Grav::instance();
-            $grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
+            $this->grav->fireEvent('onFlexAfterSave', new Event(['type' => 'flex', 'object' => $object]));
         } catch (RuntimeException $e) {
             $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_SAVE_FAILURE', $e->getMessage()]), 'error');
 
@@ -961,10 +955,8 @@ class AdminController
                 throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' configure.', 403);
             }
 
-            $grav = Grav::instance();
-
             /** @var ServerRequestInterface $request */
-            $request = $grav['request'];
+            $request = $this->grav['request'];
 
             /** @var FlexForm $form */
             $form = $this->getDirectoryForm();
@@ -1202,7 +1194,7 @@ class AdminController
         self::$instance = $this;
 
         $this->grav = Grav::instance();
-        $this->admin = Grav::instance()['admin'];
+        $this->admin = $this->grav['admin'];
         $this->user = $this->admin->user;
 
         $this->active = false;
@@ -1217,7 +1209,6 @@ class AdminController
             return;
         }
         $target = \is_string($target) ? urldecode($target) : null;
-        $id = null;
 
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
