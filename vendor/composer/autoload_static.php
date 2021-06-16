@@ -21,6 +21,7 @@ class ComposerStaticInit69fc28174abe912f71ebf710ee161e8f
     );
 
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Grav\\Plugin\\FlexObjectsPlugin' => __DIR__ . '/../..' . '/flex-objects.php',
     );
 
