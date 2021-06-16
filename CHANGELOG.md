@@ -1,3 +1,9 @@
+# v1.0.16
+## mm/dd/2021
+
+1. [](#bugfix)
+   * Fixed authorization check for user configuration
+
 # v1.0.15
 ## 06/16/2021
 
