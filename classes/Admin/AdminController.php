@@ -474,10 +474,52 @@ class AdminController
             throw new RuntimeException('Not Found', 404);
         }
 
-        $collection = $directory->getIndex();
-        if (!($collection instanceof PageCollection || $collection instanceof PageIndex)) {
-            throw new RuntimeException('Task continue works only for pages', 400);
+        if ($directory->getFlexType() === 'pages') {
+            $this->continuePages($directory);
+        } else {
+            $this->continue($directory);
         }
+    }
+
+    protected function continue(FlexDirectoryInterface $directory): void
+    {
+        $config = $directory->getConfig('admin');
+        $supported = !empty($config['modals']['add']);
+        if (!$supported) {
+            throw new RuntimeException('Task continue is not supported by the type', 400);
+        }
+
+        $authorized = $directory->isAuthorized('create', 'admin', $this->user);
+        if (!$authorized) {
+            $this->setRedirect($this->referrerRoute->toString(true));
+
+            throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' add.', 403);
+        }
+
+        $this->object = $directory->createObject($this->data, '');
+
+        // Reset form, we are starting from scratch.
+        /** @var FlexForm $form */
+        $form = $this->object->getForm('', ['reset' => true]);
+
+        /** @var FlexFormFlash $flash */
+        $flash = $form->getFlash();
+        $flash->setUrl($this->getFlex()->adminRoute($this->object));
+        $flash->save(true);
+
+        $this->setRedirect($flash->getUrl());
+    }
+
+    /**
+     * Create a new page (from modal).
+     *
+     * TODO: Move pages specific logic
+     *
+     * @return void
+     */
+    protected function continuePages(FlexDirectoryInterface $directory): void
+    {
+        $collection = $directory->getIndex();
 
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
