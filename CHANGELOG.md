@@ -1,5 +1,5 @@
 # v1.0.16
-## mm/dd/2021
+## 07/19/2021
 
 1. [](#new)
    * Added basic new modal support for all flex types
