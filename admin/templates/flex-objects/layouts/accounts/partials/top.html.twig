@@ -15,7 +15,7 @@
         {% endif %}
         {% endfor %}
 
-        {% if user.authorize(authorize) %}
+        {% if user.authorize(authorize) or user.authorize('admin.super') %}
         <a {{is_configure ? active_html|raw }} href="{{ admin_route('/accounts/configure') }}">
             <span>{{ 'PLUGIN_ADMIN.CONFIGURATION'|tu }}</span>
         </a>

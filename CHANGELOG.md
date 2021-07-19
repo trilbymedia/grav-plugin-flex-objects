@@ -1,3 +1,11 @@
+# v1.0.16
+## 07/19/2021
+
+1. [](#new)
+   * Added basic new modal support for all flex types
+1. [](#bugfix)
+   * Fixed authorization check for user configuration
+
 # v1.0.15
 ## 06/16/2021
 
