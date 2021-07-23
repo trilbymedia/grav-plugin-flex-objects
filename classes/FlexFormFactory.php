@@ -9,6 +9,7 @@ use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Page;
 use Grav\Framework\Form\Interfaces\FormFactoryInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
+use function is_string;
 
 /**
  * Class FlexFormFactory
@@ -37,13 +38,31 @@ class FlexFormFactory implements FormFactoryInterface
     {
         $formFlex = $form['flex'] ?? [];
 
-        $type = $formFlex['type'] ?? '';
-        $key = $formFlex['key'] ?? '';
+        $type = $formFlex['type'] ?? null;
+        $key = $formFlex['key'] ?? null;
+        if (null !== $key && !is_string($key)) {
+            $key = (string)$key;
+        }
         $layout = $formFlex['layout'] ?? $name;
 
         /** @var Flex $flex */
         $flex = Grav::instance()['flex_objects'];
-        $object = $flex->getObject($key, $type);
+        if (is_string($type)) {
+            $directory = $flex->getDirectory($type);
+            if (!$directory) {
+                return null;
+            }
+
+            $create = $form['actions']['create'] ?? true;
+            $edit = $form['actions']['edit'] ?? true;
+
+            $object = $edit && null !== $key ? $directory->getObject($key) : null;
+            if (!$object && $create) {
+                $object = $directory->createObject([], $key ?? '');
+            }
+        } else {
+            $object = $flex->getObject($key);
+        }
 
         return $object ? $object->getForm($layout, ['form' => $form]) : null;
     }

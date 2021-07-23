@@ -1,3 +1,9 @@
+# v1.1.0
+## mm/dd/2021
+
+1. [](#new)
+   * Added basic frontend editing support
+
 # v1.0.16
 ## 07/19/2021
 
