@@ -14,6 +14,7 @@ use Grav\Events\PluginsLoadedEvent;
 use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
+use Grav\Framework\Route\Route;
 use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
@@ -172,6 +173,9 @@ class FlexObjectsPlugin extends Plugin
                 'onTwigTemplatePaths' => [
                     ['onTwigTemplatePaths', 0]
                 ],
+                'onBeforeFlexFormInitialize' => [
+                    ['onBeforeFlexFormInitialize', -10]
+                ],
             ]);
         }
     }
@@ -206,6 +210,24 @@ class FlexObjectsPlugin extends Plugin
         $debugger = Grav::instance()['debugger'];
         $names = implode(', ', array_keys($flex->getDirectories()));
         $debugger->addMessage(sprintf('Registered flex types: %s', $names), 'debug');
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function onBeforeFlexFormInitialize(Event $event): void
+    {
+        /** @var array $form */
+        $form = $event['form'];
+        if (!isset($form['flex']['key']) && $form['actions']['edit'] === true) {
+            /** @var Route $route */
+            $route = $this->grav['route'];
+            $id = $route->getGravParam('id');
+            if (null !== $id) {
+                $form['flex']['key'] = $id;
+                $event['form'] = $form;
+            }
+        }
     }
 
     /**
