@@ -9,6 +9,7 @@ use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Page;
 use Grav\Framework\Form\Interfaces\FormFactoryInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
+use RocketTheme\Toolbox\Event\Event;
 use function is_string;
 
 /**
@@ -36,6 +37,10 @@ class FlexFormFactory implements FormFactoryInterface
      */
     public function createFormForPage(PageInterface $page, string $name, array $form): ?FormInterface
     {
+        // Fire event
+        $grav = Grav::instance();
+        $grav->fireEvent('onBeforeFlexFormInitialize', new Event(['page' => $page, 'name' => $name, 'form' => &$form]));
+
         $formFlex = $form['flex'] ?? [];
 
         $type = $formFlex['type'] ?? null;

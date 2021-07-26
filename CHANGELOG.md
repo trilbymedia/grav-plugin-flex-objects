@@ -3,6 +3,7 @@
 
 1. [](#new)
    * Added basic frontend editing support
+   * Added `onBeforeFlexFormInitialize` event to help to initialize the frontend form
 
 # v1.0.16
 ## 07/19/2021
