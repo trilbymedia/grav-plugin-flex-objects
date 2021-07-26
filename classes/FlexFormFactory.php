@@ -10,6 +10,7 @@ use Grav\Common\Page\Page;
 use Grav\Framework\Form\Interfaces\FormFactoryInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
 use RocketTheme\Toolbox\Event\Event;
+use function is_callable;
 use function is_string;
 
 /**
@@ -62,7 +63,11 @@ class FlexFormFactory implements FormFactoryInterface
             $edit = $form['actions']['edit'] ?? true;
 
             $object = $edit && null !== $key ? $directory->getObject($key) : null;
-            if (!$object && $create) {
+            if ($object) {
+                if (is_callable([$object, 'refresh'])) {
+                    $object->refresh();
+                }
+            } elseif ($create) {
                 $object = $directory->createObject([], $key ?? '');
             }
         } else {

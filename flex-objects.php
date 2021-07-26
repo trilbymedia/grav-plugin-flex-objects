@@ -13,14 +13,20 @@ use Grav\Events\PermissionsRegisterEvent;
 use Grav\Events\PluginsLoadedEvent;
 use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
+use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Route\Route;
+use Grav\Framework\Session\Messages;
 use Grav\Plugin\Admin\Admin;
+use Grav\Plugin\FlexObjects\Controllers\ObjectController;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
 use Grav\Plugin\FlexObjects\Admin\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
+use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
+use RuntimeException;
 use function is_callable;
 
 /**
@@ -176,6 +182,9 @@ class FlexObjectsPlugin extends Plugin
                 'onBeforeFlexFormInitialize' => [
                     ['onBeforeFlexFormInitialize', -10]
                 ],
+                'onPageTask' => [
+                    ['onPageTask', -10]
+                ],
             ]);
         }
     }
@@ -227,6 +236,35 @@ class FlexObjectsPlugin extends Plugin
                 $form['flex']['key'] = $id;
                 $event['form'] = $form;
             }
+        }
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function onPageTask(Event $event): void
+    {
+        /** @var FormInterface|null $form */
+        $form = $event['form'] ?? null;
+        if (!$form instanceof FlexForm) {
+            return;
+        }
+
+        $object = $form->getObject();
+
+        /** @var ServerRequestInterface $request */
+        $request = $event['request'];
+        $request = $request
+            ->withAttribute('type', $object->getFlexType())
+            ->withAttribute('key', $object->getKey())
+            ->withAttribute('object', $object)
+            ->withAttribute('form', $form);
+
+        $controller = new ObjectController();
+
+        $response = $controller->handle($request);
+        if ($response->getStatusCode() !== 418) {
+            $this->grav->close($response);
         }
     }
 
