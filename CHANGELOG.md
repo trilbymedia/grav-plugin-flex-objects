@@ -2,6 +2,7 @@
 ## mm/dd/2021
 
 1. [](#new)
+   * Require **Grav 1.7.19**
    * Added basic frontend editing support
    * Added `onBeforeFlexFormInitialize` event to help to initialize the frontend form
 
