@@ -254,7 +254,8 @@ class FlexObjectsPlugin extends Plugin
         }
 
         $header = $page->header();
-        $form = array_key_first($page->forms());
+        $forms = $page->forms();
+        $form = reset($forms);
         if (($form['type'] ?? null) !== 'flex') {
             $form = null;
         }
@@ -269,7 +270,7 @@ class FlexObjectsPlugin extends Plugin
         $route = $this->grav['route'];
 
         $type = $form['flex']['type'] ?? $config['directory'] ?? $route->getGravParam('directory') ?? null;
-        $key = $form['flex']['key'] ?? $config['id'] ?? $route->getGravParam('id') ?? null;
+        $key = $form['flex']['key'] ?? $config['id'] ?? $route->getGravParam('id') ?? '';
         if (\is_string($type)) {
             /** @var Flex $flex */
             $flex = $this->grav['flex_objects'];
@@ -287,12 +288,12 @@ class FlexObjectsPlugin extends Plugin
 
         $scope = $config['access']['scope'] ?? null;
 
-        $object = $key ? $directory->getObject($key) : null;
+        $object = $key !== '' ? $directory->getObject($key) : null;
         $hasAccess = null;
 
         $action = null;
         if (!$form) {
-            $action = $key ? 'read' : 'list';
+            $action = $key !== '' ? 'read' : 'list';
             if (null === $scope) {
                 $hasAccess = true;
             }
