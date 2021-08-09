@@ -243,7 +243,7 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
-     * [onPageInitialized] Authorize Flex Objects Page
+     * [onPageInitialized:10000] Authorize Flex Objects Page
      */
     public function authorizePage(Event $event): void
     {

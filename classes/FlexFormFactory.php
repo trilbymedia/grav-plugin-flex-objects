@@ -41,6 +41,7 @@ class FlexFormFactory implements FormFactoryInterface
         // Fire event
         $grav = Grav::instance();
         $grav->fireEvent('onBeforeFlexFormInitialize', new Event(['page' => $page, 'name' => $name, 'form' => &$form]));
+        $page->addForms([$form], true);
 
         $formFlex = $form['flex'] ?? [];
 
