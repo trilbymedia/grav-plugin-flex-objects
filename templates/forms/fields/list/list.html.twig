@@ -89,24 +89,16 @@
                             {% set child = child|merge({ name: childName }) %}
 
                             {% if child.type == 'key' %}
-                                {%
-                                    include 'forms/fields/key/key.html.twig'
-                                    with { field: child, value: key }
-                                %}
+                                {% set field_templates = include_form_field(child.type, field_layout) %}
+                                {% include field_templates with { field: child, value: key } %}
                             {% elseif child.key == true %}
-                                {% include [
-                                        "forms/fields/#{child.type}/#{child.type}.html.twig",
-                                        'forms/fields/key/key.html.twig'
-                                    ] with { field: child, value: key }
+                                {% set field_templates = include_form_field(child.type, field_layout, 'key') %}
+                                {% include field_templates with { field: child, value: key }
                                 %}
                             {% elseif child.type %}
+                                {% set field_templates = include_form_field(child.type, field_layout, 'text') %}
                                 {% set originalValue = childValue %}
-                                {%
-                                    include [
-                                        "forms/fields/#{child.type}/#{child.type}.html.twig",
-                                        'forms/fields/text/text.html.twig'
-                                    ] with { field: child, value: childValue }
-                                %}
+                                {% include field_templates with { field: child, value: childValue } %}
                             {% endif %}
                         {% endfor %}
                         <div class="item-actions">
@@ -160,24 +152,14 @@
                         {%- set child = child|merge({ name: childName }) -%}
 
                         {%- if child.type == 'key' -%}
-                            {%-
-                                include 'forms/fields/key/key.html.twig'
-                                with { field: child, value: null }
-                            -%}
+                            {%- set field_templates = include_form_field(child.type, field_layout) -%}
+                            {%- include field_templates with { field: child, value: null } -%}
                         {%- elseif child.key == true -%}
-                            {%-
-                            include [
-                                "forms/fields/#{child.type}/#{child.type}.html.twig",
-                                'forms/fields/key/key.html.twig'
-                                ] with { field: child, value: null }
-                            -%}
+                            {%- set field_templates = include_form_field(child.type, field_layout, 'key') -%}
+                            {%- include field_templates with { field: child, value: null } -%}
                         {%- elseif child.type -%}
-                            {%-
-                                include [
-                                    "forms/fields/#{child.type}/#{child.type}.html.twig",
-                                    'forms/fields/text/text.html.twig'
-                                ] with { field: child, value: null }
-                            -%}
+                            {%- set field_templates = include_form_field(child.type, field_layout, 'text') -%}
+                            {%- include field_templates with { field: child, value: null } -%}
                         {%- endif -%}
                     {%- endfor %}
                     <div class="item-actions">
