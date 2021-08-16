@@ -291,25 +291,27 @@ class FlexObjectsPlugin extends Plugin
         $object = $key !== '' ? $directory->getObject($key) : null;
         $hasAccess = null;
 
-        $action = null;
-        if (!$form) {
-            $action = $key !== '' ? 'read' : 'list';
-            if (null === $scope) {
-                $hasAccess = true;
-            }
-        } elseif ($object) {
-            if ($edit) {
+        $action = $config['access']['action'] ?? null;
+        if (null === $action) {
+            if (!$form) {
+                $action = $key !== '' ? 'read' : 'list';
+                if (null === $scope) {
+                    $hasAccess = true;
+                }
+            } elseif ($object) {
+                if ($edit) {
+                    $scope = $scope ?? 'admin';
+                    $action = 'update';
+                } else {
+                    $hasAccess = false;
+                }
+            } elseif ($create) {
+                $object = $directory->createObject([], $key);
                 $scope = $scope ?? 'admin';
-                $action = 'update';
+                $action = 'create';
             } else {
                 $hasAccess = false;
             }
-        } elseif ($create) {
-            $object = $directory->createObject([], $key);
-            $scope = $scope ?? 'admin';
-            $action = 'create';
-        } else {
-            $hasAccess = false;
         }
 
         if ($action && $hasAccess === null) {
