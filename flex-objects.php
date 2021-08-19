@@ -93,6 +93,30 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
+     * Get list of form field types specified in this plugin. Only special types needs to be listed.
+     *
+     * @return array
+     */
+    public function getFormFieldTypes()
+    {
+        return [
+            'list' => [
+                'array' => true
+            ],
+            'pagemedia' => [
+                'array' => true,
+                'media_field' => true,
+                'validate' => [
+                    'type' => 'ignore'
+                ]
+            ],
+            'filepicker' => [
+                'media_picker_field' => true
+            ],
+        ];
+    }
+
+    /**
      * [PluginsLoadedEvent:100000] Composer autoload.
      *
      * @return ClassLoader
