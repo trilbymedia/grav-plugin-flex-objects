@@ -5,6 +5,7 @@ namespace Grav\Plugin\FlexObjects\Admin;
 use Exception;
 use Grav\Common\Cache;
 use Grav\Common\Config\Config;
+use Grav\Common\Data\Data;
 use Grav\Common\Debugger;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Flex\Types\Pages\PageCollection;
@@ -969,7 +970,9 @@ class AdminController
                 if (null !== $data) {
                     $flash = $form->getFlash();
                     $flash->setObject($object);
-                    $flash->setData($data->toArray());
+                    if ($data instanceof Data) {
+                        $flash->setData($data->toArray());
+                    }
                     $flash->save();
                 }
             }
