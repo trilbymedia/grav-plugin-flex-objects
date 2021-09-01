@@ -1,5 +1,12 @@
+# v1.1.1
+## 09/01/2021
+
+1. [](#bugfix)
+    * Fixed XSS in page admin
+    * Fixed check for bad folder name, prevent bad characters
+
 # v1.1.0
-## 03/31/2021
+## 08/31/2021
 
 1. [](#new)
    * Require **Grav 1.7.19** and **Form 5.1.0**

@@ -412,9 +412,9 @@ class AdminController
         $data = $this->data;
         $route = trim($data['route'] ?? '', '/');
 
-        // TODO: Folder name needs to be validated!
+        // TODO: Folder name needs to be validated! However we test against /="' as they are dangerous characters.
         $folder = mb_strtolower($data['folder'] ?? '');
-        if ($folder === '' || mb_strpos($folder, '/') !== false) {
+        if ($folder === '' || preg_match('![="\']!u', $folder) !== 0) {
             throw new RuntimeException('Creating folder failed, bad folder name', 400);
         }
 
