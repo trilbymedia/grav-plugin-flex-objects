@@ -1,5 +1,5 @@
 # v1.1.1
-## mm/dd/2021
+## 09/01/2021
 
 1. [](#bugfix)
     * Fixed XSS in page admin
