@@ -1,3 +1,9 @@
+# v1.1.2
+## mm/dd/2021
+
+1. [](#new)
+    * Added page header `flex.router: [ROUTER]` which triggers `flex.router.[ROUTER]` event for child routes of the page
+
 # v1.1.1
 ## 09/01/2021
 
