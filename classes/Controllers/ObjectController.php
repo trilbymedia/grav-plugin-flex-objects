@@ -7,6 +7,8 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 use Grav\Common\Grav;
 use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
+use Grav\Framework\Route\Route;
+use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use RuntimeException;
@@ -221,11 +223,99 @@ class ObjectController extends AbstractController
     }
 
     /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskMediaList(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('action', 'media.list');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskMediaUpload(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('task', 'media.upload');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskMediaDelete(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('task', 'media.delete');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskGetFilesInFolder(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('action', 'media.picker');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @deprecated Do not use
+     */
+    public function taskFilesUpload(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var Route $route */
+        $route = $this->grav['route'];
+        if ($route->getParam('task') === 'media.upload') {
+            return $this->taskMediaUpload($request);
+        }
+
+        throw new RuntimeException('Task filesUpload should not be called, please update form plugin!', 400);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @deprecated Do not use
+     */
+    public function taskRemoveMedia(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var Route $route */
+        $route = $this->grav['route'];
+        if ($route->getParam('task') === 'media.delete') {
+            return $this->taskMediaDelete($request);
+        }
+
+        throw new RuntimeException('Task removeMedia should not be called, please update form plugin!', 400);
+    }
+
+    /**
      * Display object preview.
      *
      * @return ResponseInterface
      */
-    protected function actionDisplayPreview(): ResponseInterface
+    public function actionDisplayPreview(): ResponseInterface
     {
         $this->checkAuthorization('save');
         $this->checkAuthorization('read');
@@ -275,5 +365,35 @@ class ObjectController extends AbstractController
                 throw new RuntimeException('Forbidden', 403);
             }
         }
+    }
+
+    /**
+     * @param string $type
+     * @param string $name
+     * @return ResponseInterface
+     */
+    protected function forwardMediaTask(string $type, string $name): ResponseInterface
+    {
+        /** @var Route $route */
+        $route = $this->grav['route']->withGravParam('task', null)->withGravParam($type, $name);
+        $object = $this->getObject();
+
+        /** @var ServerRequest $request */
+        $request = $this->grav['request'];
+        $request = $request
+            ->withAttribute($type, $name)
+            ->withAttribute('type', $this->type)
+            ->withAttribute('key', $this->key)
+            ->withAttribute('storage_key', $object && $object->exists() ? $object->getStorageKey() : null)
+            ->withAttribute('route', $route)
+            ->withAttribute('forwarded', true)
+            ->withAttribute('object', $object);
+
+        $controller = new MediaController();
+        if ($this->user) {
+            $controller->setUser($this->user);
+        }
+
+        return $controller->handle($request);
     }
 }
