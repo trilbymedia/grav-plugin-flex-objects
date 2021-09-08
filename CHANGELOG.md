@@ -6,6 +6,7 @@
     * Added file upload/delete support to frontend forms
     * Support proper error, login and unauthorized pages if all requirements are met
     * Added page header `flex.router: [ROUTER]` which triggers `flex.router.[ROUTER]` event for child routes of the page
+    * Added `flex.[type].task.create.after` and `flex.[type].task.update.after` events for frontend
 
 # v1.1.1
 ## 09/01/2021

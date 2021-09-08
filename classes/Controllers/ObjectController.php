@@ -12,6 +12,7 @@ use Grav\Framework\Route\Route;
 use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use RocketTheme\Toolbox\Event\Event;
 use RuntimeException;
 
 /**
@@ -99,7 +100,24 @@ class ObjectController extends AbstractController
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
-        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.STATE.CREATED_SUCCESSFULLY'), 'info');
+        $this->object = $form->getObject();
+        $event = new Event(
+            [
+                'controller' => $this,
+                'object' => $this->object,
+                'response' => null,
+                'message' => null,
+            ]
+        );
+
+        $this->grav->fireEvent("flex.{$this->type}.task.create.after", $event);
+
+        $this->setMessage($event['message'] ?? $this->translate('PLUGIN_FLEX_OBJECTS.STATE.CREATED_SUCCESSFULLY'), 'info');
+
+        if ($event['response']) {
+            return $event['response'];
+        }
+
 
         $redirect = $request->getAttribute('redirect', (string)$request->getUri());
 
@@ -161,7 +179,23 @@ class ObjectController extends AbstractController
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
-        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.STATE.UPDATED_SUCCESSFULLY'), 'info');
+        $this->object = $form->getObject();
+        $event = new Event(
+            [
+                'controller' => $this,
+                'object' => $this->object,
+                'response' => null,
+                'message' => null,
+            ]
+        );
+
+        $this->grav->fireEvent("flex.{$this->type}.task.update.after", $event);
+
+        $this->setMessage($event['message'] ?? $this->translate('PLUGIN_FLEX_OBJECTS.STATE.UPDATED_SUCCESSFULLY'), 'info');
+
+        if ($event['response']) {
+            return $event['response'];
+        }
 
         $redirect = $request->getAttribute('redirect', (string)$request->getUri()->getPath());
 
