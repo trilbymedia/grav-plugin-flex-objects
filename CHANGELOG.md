@@ -2,7 +2,7 @@
 ## mm/dd/2021
 
 1. [](#new)
-    * Require **Grav 1.7.21**, optionally **Error 1.8.0** and **Login 3.5.2**
+    * Require **Grav 1.7.21**, optionally **Error 1.8.0**, **Login 3.5.2** and **Form 5.1.1**
     * Added file upload/delete support to frontend forms
     * Support proper error, login and unauthorized pages if all requirements are met
     * Added page header `flex.router: [ROUTER]` which triggers `flex.router.[ROUTER]` event for child routes of the page

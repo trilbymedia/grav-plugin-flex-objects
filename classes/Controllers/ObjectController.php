@@ -6,6 +6,7 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
 use Grav\Framework\Flex\FlexForm;
+use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Route\Route;
 use Nyholm\Psr7\ServerRequest;
@@ -56,6 +57,19 @@ class ObjectController extends AbstractController
         $this->checkAuthorization('create');
 
         $form = $this->getForm();
+        $callable = function (array $data, array $files, FlexObject $object) {
+            if (method_exists($object, 'storeOriginal')) {
+                $object->storeOriginal();
+            }
+            $object->update($data, $files);
+            if (\is_callable([$object, 'check'])) {
+                $object->check($this->user);
+            }
+
+            $object->save();
+        };
+
+        $form->setSubmitMethod($callable);
         $form->handleRequest($request);
         if (!$form->isValid()) {
             $error = $form->getError();
@@ -105,6 +119,19 @@ class ObjectController extends AbstractController
         $this->checkAuthorization('update');
 
         $form = $this->getForm();
+        $callable = function (array $data, array $files, FlexObject $object) {
+            if (method_exists($object, 'storeOriginal')) {
+                $object->storeOriginal();
+            }
+            $object->update($data, $files);
+            if (\is_callable([$object, 'check'])) {
+                $object->check($this->user);
+            }
+
+            $object->save();
+        };
+
+        $form->setSubmitMethod($callable);
         $form->handleRequest($request);
         if (!$form->isValid()) {
             $error = $form->getError();
