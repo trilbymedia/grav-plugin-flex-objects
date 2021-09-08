@@ -219,13 +219,28 @@ class ObjectController extends AbstractController
 
         $object->delete();
 
-        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.STATE.DELETED_SUCCESSFULLY'), 'info');
-
         // FIXME: make it conditional
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
-        $redirect = $request->getAttribute('redirect', $this->getFlex()->adminRoute($this->getDirectory()));
+        $event = new Event(
+            [
+                'controller' => $this,
+                'object' => $object,
+                'response' => null,
+                'message' => null,
+            ]
+        );
+
+        $this->grav->fireEvent("flex.{$this->type}.task.delete.after", $event);
+
+        $this->setMessage($this->translate($event['message'] ?? 'PLUGIN_FLEX_OBJECTS.STATE.DELETED_SUCCESSFULLY'), 'info');
+
+        if ($event['response']) {
+            return $event['response'];
+        }
+
+        $redirect = $request->getAttribute('redirect', (string)$request->getUri()->getPath());
 
         return $this->createRedirectResponse($redirect, 303);
     }
