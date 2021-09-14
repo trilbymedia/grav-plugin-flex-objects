@@ -1,5 +1,1 @@
-{# flex-objects/views/404.html.twig #}
-
-{% do page.modifyHeader('http_response_code', 404) %}
-
-<h2>{{ 'PLUGIN_FLEX_OBJECTS.ERROR.PAGE_NOT_FOUND'|t|e }}</h2>
+{% throw 404 'Not Found' %}

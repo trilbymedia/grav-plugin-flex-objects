@@ -6,9 +6,13 @@ namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Grav\Common\Grav;
 use Grav\Framework\Flex\FlexForm;
+use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
+use Grav\Framework\Route\Route;
+use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use RocketTheme\Toolbox\Event\Event;
 use RuntimeException;
 
 /**
@@ -54,6 +58,19 @@ class ObjectController extends AbstractController
         $this->checkAuthorization('create');
 
         $form = $this->getForm();
+        $callable = function (array $data, array $files, FlexObject $object) {
+            if (method_exists($object, 'storeOriginal')) {
+                $object->storeOriginal();
+            }
+            $object->update($data, $files);
+            if (\is_callable([$object, 'check'])) {
+                $object->check($this->user);
+            }
+
+            $object->save();
+        };
+
+        $form->setSubmitMethod($callable);
         $form->handleRequest($request);
         if (!$form->isValid()) {
             $error = $form->getError();
@@ -83,7 +100,24 @@ class ObjectController extends AbstractController
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
-        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.STATE.CREATED_SUCCESSFULLY'), 'info');
+        $this->object = $form->getObject();
+        $event = new Event(
+            [
+                'controller' => $this,
+                'object' => $this->object,
+                'response' => null,
+                'message' => null,
+            ]
+        );
+
+        $this->grav->fireEvent("flex.{$this->type}.task.create.after", $event);
+
+        $this->setMessage($event['message'] ?? $this->translate('PLUGIN_FLEX_OBJECTS.STATE.CREATED_SUCCESSFULLY'), 'info');
+
+        if ($event['response']) {
+            return $event['response'];
+        }
+
 
         $redirect = $request->getAttribute('redirect', (string)$request->getUri());
 
@@ -103,6 +137,19 @@ class ObjectController extends AbstractController
         $this->checkAuthorization('update');
 
         $form = $this->getForm();
+        $callable = function (array $data, array $files, FlexObject $object) {
+            if (method_exists($object, 'storeOriginal')) {
+                $object->storeOriginal();
+            }
+            $object->update($data, $files);
+            if (\is_callable([$object, 'check'])) {
+                $object->check($this->user);
+            }
+
+            $object->save();
+        };
+
+        $form->setSubmitMethod($callable);
         $form->handleRequest($request);
         if (!$form->isValid()) {
             $error = $form->getError();
@@ -132,7 +179,23 @@ class ObjectController extends AbstractController
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
-        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.STATE.UPDATED_SUCCESSFULLY'), 'info');
+        $this->object = $form->getObject();
+        $event = new Event(
+            [
+                'controller' => $this,
+                'object' => $this->object,
+                'response' => null,
+                'message' => null,
+            ]
+        );
+
+        $this->grav->fireEvent("flex.{$this->type}.task.update.after", $event);
+
+        $this->setMessage($event['message'] ?? $this->translate('PLUGIN_FLEX_OBJECTS.STATE.UPDATED_SUCCESSFULLY'), 'info');
+
+        if ($event['response']) {
+            return $event['response'];
+        }
 
         $redirect = $request->getAttribute('redirect', (string)$request->getUri()->getPath());
 
@@ -156,13 +219,28 @@ class ObjectController extends AbstractController
 
         $object->delete();
 
-        $this->setMessage($this->translate('PLUGIN_FLEX_OBJECTS.STATE.DELETED_SUCCESSFULLY'), 'info');
-
         // FIXME: make it conditional
         $grav = $this->grav;
         $grav->fireEvent('gitsync');
 
-        $redirect = $request->getAttribute('redirect', $this->getFlex()->adminRoute($this->getDirectory()));
+        $event = new Event(
+            [
+                'controller' => $this,
+                'object' => $object,
+                'response' => null,
+                'message' => null,
+            ]
+        );
+
+        $this->grav->fireEvent("flex.{$this->type}.task.delete.after", $event);
+
+        $this->setMessage($this->translate($event['message'] ?? 'PLUGIN_FLEX_OBJECTS.STATE.DELETED_SUCCESSFULLY'), 'info');
+
+        if ($event['response']) {
+            return $event['response'];
+        }
+
+        $redirect = $request->getAttribute('redirect', (string)$request->getUri()->getPath());
 
         return $this->createRedirectResponse($redirect, 303);
     }
@@ -221,11 +299,99 @@ class ObjectController extends AbstractController
     }
 
     /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskMediaList(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('action', 'media.list');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskMediaUpload(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('task', 'media.upload');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskMediaDelete(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('task', 'media.delete');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskGetFilesInFolder(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('action', 'media.picker');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @deprecated Do not use
+     */
+    public function taskFilesUpload(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var Route $route */
+        $route = $this->grav['route'];
+        if ($route->getParam('task') === 'media.upload') {
+            return $this->taskMediaUpload($request);
+        }
+
+        throw new RuntimeException('Task filesUpload should not be called, please update form plugin!', 400);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @deprecated Do not use
+     */
+    public function taskRemoveMedia(ServerRequestInterface $request): ResponseInterface
+    {
+        /** @var Route $route */
+        $route = $this->grav['route'];
+        if ($route->getParam('task') === 'media.delete') {
+            return $this->taskMediaDelete($request);
+        }
+
+        throw new RuntimeException('Task removeMedia should not be called, please update form plugin!', 400);
+    }
+
+    /**
      * Display object preview.
      *
      * @return ResponseInterface
      */
-    protected function actionDisplayPreview(): ResponseInterface
+    public function actionDisplayPreview(): ResponseInterface
     {
         $this->checkAuthorization('save');
         $this->checkAuthorization('read');
@@ -275,5 +441,35 @@ class ObjectController extends AbstractController
                 throw new RuntimeException('Forbidden', 403);
             }
         }
+    }
+
+    /**
+     * @param string $type
+     * @param string $name
+     * @return ResponseInterface
+     */
+    protected function forwardMediaTask(string $type, string $name): ResponseInterface
+    {
+        /** @var Route $route */
+        $route = $this->grav['route']->withGravParam('task', null)->withGravParam($type, $name);
+        $object = $this->getObject();
+
+        /** @var ServerRequest $request */
+        $request = $this->grav['request'];
+        $request = $request
+            ->withAttribute($type, $name)
+            ->withAttribute('type', $this->type)
+            ->withAttribute('key', $this->key)
+            ->withAttribute('storage_key', $object && $object->exists() ? $object->getStorageKey() : null)
+            ->withAttribute('route', $route)
+            ->withAttribute('forwarded', true)
+            ->withAttribute('object', $object);
+
+        $controller = new MediaController();
+        if ($this->user) {
+            $controller->setUser($this->user);
+        }
+
+        return $controller->handle($request);
     }
 }

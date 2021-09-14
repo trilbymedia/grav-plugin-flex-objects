@@ -5,6 +5,7 @@ use Composer\Autoload\ClassLoader;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Page\Interfaces\PageInterface;
+use Grav\Common\Page\Pages;
 use Grav\Common\Page\Types;
 use Grav\Common\Plugin;
 use Grav\Common\User\Interfaces\UserInterface;
@@ -211,6 +212,9 @@ class FlexObjectsPlugin extends Plugin
                 'onPageTask' => [
                     ['onPageTask', -10]
                 ],
+                'onPageNotFound' => [
+                    ['onPageNotFound', 10]
+                ],
             ]);
         }
     }
@@ -267,7 +271,62 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
+     * [onPageNotFound:10] Router for 404 pages.
+     *
+     * @param Event $event
+     */
+    public function onPageNotFound(Event $event): void
+    {
+        /** @var Route $route */
+        $route = $event['route'];
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+
+        // Find first existing and routable parent page.
+        $parts = explode('/', $route->getRoute());
+        array_shift($parts);
+        $page = null;
+        $base = '';
+        $path = [];
+        while (!$page && $parts) {
+            $path[] = array_pop($parts);
+            $base = '/' . implode('/', $parts);
+            $page = $pages->find($base);
+            if ($page && !$page->routable()) {
+                $page = null;
+            }
+        }
+
+        // If page is found, check if it contains flex directory router.
+        if ($page) {
+            $options = $page->header()->flex ?? null;
+            $router = $options['router'] ?? null;
+            if (\is_string($router)) {
+                $path = implode('/', array_reverse($path));
+                $flexEvent = new Event([
+                    'parent' => $page,
+                    'page' => null,
+                    'base' => $base,
+                    'path' => $path,
+                    'route' => $route,
+                    'options' => $options,
+                    'request' => $event['request']
+                ]);
+                $flexEvent = $this->grav->fireEvent("flex.router.{$router}", $flexEvent);
+                $routedPage = $flexEvent['page'];
+                if ($routedPage) {
+                    $event->page = $routedPage;
+                    $event->stopPropagation();
+                }
+            }
+        }
+    }
+
+    /**
      * [onPageInitialized:10000] Authorize Flex Objects Page
+     *
+     * @param Event $event
      */
     public function authorizePage(Event $event): void
     {

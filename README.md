@@ -13,7 +13,7 @@ The **Flex Objects** Plugin is for [Grav CMS](https://github.com/getgrav/grav). 
 
 ## System Requirements
 
-Plugin requires **Grav** v1.7.0 or later version in order to run. Additionally you need **Form Plugin** v4.0.0 and optionally **Admin Plugin** v1.10.0 or later version.
+Plugin requires **Grav** v1.7.19 or later version in order to run. Additionally you need **Form Plugin** v5.1.0 and optionally **Admin Plugin** v1.10.19 or later version.
 
 ## Installation
 
@@ -98,7 +98,9 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
 1. Copy the `blueprints/flex-objects/contacts.yaml` Blueprint file to another location, let's say `user/blueprints/flex-objects/`. The file can really be stored anywhere, but if you are using admin, it is best to keep the blueprint file where admin can automatically find it.
 
-1. Edit the `user/blueprints/flex-objects/contacts.yaml` like so:
+!!! **NOTE:** If you want to put the blueprints to `user/themes/yourtheme/blueprints`, you need to use the new blueprint folder structure from Grav 1.7. See [Plugin/Theme Blueprints](https://learn.getgrav.org/17/advanced/grav-development/grav-17-upgrade-guide#plugin-theme-blueprints-blueprints-yaml).
+
+2. Edit the `user/blueprints/flex-objects/contacts.yaml` like so:
 
     ```yaml
     title: Contacts
@@ -172,9 +174,9 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
 
    See how we replaced `tags:` with `phone:` in the `config.admin.list.fields` section at the top.  Also, notice how we removed the `tags:` Blueprint field definition, and added a simple text field for `phone:`.  If you have questions about available form fields, [check out the extensive documentation](https://learn.getgrav.org/forms/blueprints/fields-available) on the subject. 
 
-1. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has its `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-objects/templates/flex-objects/layouts/contacts/object/default.html.twig` file to `user/themes/quark/templates/flex-objects/layouts/contacts/object/default.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one. We are also assuming you are using `Quark` theme, so you may have to change this to reference the theme you are using.
+3. We need to copy the frontend Twig file and modify it to add the new "Phone" field.  By default your theme already has its `templates`, so we can take advantage of it <sup>2</sup>. We'll simply copy the `user/plugins/flex-objects/templates/flex-objects/layouts/contacts/object/default.html.twig` file to `user/themes/quark/templates/flex-objects/layouts/contacts/object/default.html.twig`. Notice, there is no reference to `admin/` here, this is site template, not an admin one. We are also assuming you are using `Quark` theme, so you may have to change this to reference the theme you are using.
 
-1. Edit the `default.html.twig` file you just copied so it has these modifications:
+4. Edit the `default.html.twig` file you just copied so it has these modifications:
 
     ```twig
     <div class="entry-details">
@@ -194,7 +196,7 @@ Let's assume you simply want to add a new "Phone Number" field to the existing D
     
     Notice, we removed the `entry-extra` DIV, and added a new `if` block with the Twig code to display the phone number if set.
     
-1. We also need to tweak the JavaScript initialization which provides which hooks up certain classes to the search.  To do this we need to copy the `user/plugins/flex-objects/templates/flex-objects/layouts/contacts/collection/default.html.twig` file to `user/themes/quark/templates/flex-objects/layouts/contacts/collection/default.html.twig`. Notice this is the `collection` template this time, not the `object` template as we copied before.
+5. We also need to tweak the JavaScript initialization which provides which hooks up certain classes to the search.  To do this we need to copy the `user/plugins/flex-objects/templates/flex-objects/layouts/contacts/collection/default.html.twig` file to `user/themes/quark/templates/flex-objects/layouts/contacts/collection/default.html.twig`. Notice this is the `collection` template this time, not the `object` template as we copied before.
 
     Edit this file and replace the `<script></script>` tag at the bottom with this code:
     
