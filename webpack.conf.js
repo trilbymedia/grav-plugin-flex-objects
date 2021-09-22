@@ -1,6 +1,6 @@
 var webpack = require('webpack');
 var path = require('path');
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+var TerserPlugin = require('terser-webpack-plugin');
 var isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production-wip';
 var VueLoaderPlugin = require('vue-loader/lib/plugin');
 
@@ -18,8 +18,8 @@ module.exports = {
     optimization: {
         minimize: isProd,
         minimizer: [
-            new UglifyJsPlugin({
-                uglifyOptions: {
+            new TerserPlugin({
+                terserOptions: {
                     compress: {
                         drop_console: true
                     },

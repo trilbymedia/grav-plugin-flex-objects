@@ -4,6 +4,7 @@
 1. [](#improved)
     * Updated dependencies to latest
     * Optimized import of certain dependencies
+    * Dev: Moved away from deprecated UglifyJsPlugin in favor of TerserPlugin
 
 # v1.1.2
 ## 09/14/2021
