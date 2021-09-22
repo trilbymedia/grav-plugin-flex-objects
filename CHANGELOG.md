@@ -1,3 +1,10 @@
+# v1.1.3
+## mm/dd/2021
+
+1. [](#improved)
+    * Updated dependencies to latest
+    * Optimized import of certain dependencies
+
 # v1.1.2
 ## 09/14/2021
 
