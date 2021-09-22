@@ -11,9 +11,7 @@
     "dependencies": {
         "axios": "^0.21.4",
         "eventemitter3": "^4.0.7",
-        "gulp-sourcemaps": "^3.0.0",
         "lodash": "^4.17.21",
-        "npm-check-updates": "^11.8.5",
         "tiny-cookie": "^2.3.2",
         "vue": "^2.6.14",
         "vue-content-loader": "0.2.3",
@@ -36,6 +34,7 @@
         "eslint": "^7.32.0",
         "eslint-loader": "^4.0.2",
         "exports-loader": "^3.0.0",
+        "gulp-sourcemaps": "^3.0.0",
         "imports-loader": "^3.0.0",
         "json-loader": "^0.5.7",
         "style-loader": "^3.3.0",
