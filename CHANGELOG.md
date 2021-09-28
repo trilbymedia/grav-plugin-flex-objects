@@ -5,6 +5,7 @@
     * Updated dependencies to latest
     * Optimized import of certain dependencies
     * Dev: Moved away from deprecated UglifyJsPlugin in favor of TerserPlugin
+    * Use active form from the Form plugin to get page metadata
 
 # v1.1.2
 ## 09/14/2021
