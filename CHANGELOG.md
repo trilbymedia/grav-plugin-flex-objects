@@ -1,5 +1,5 @@
 # v1.1.3
-## mm/dd/2021
+## 10/26/2021
 
 1. [](#improved)
     * Updated JS dependencies to latest
