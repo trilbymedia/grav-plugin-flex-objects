@@ -406,8 +406,11 @@ class FlexObjectsPlugin extends Plugin
         }
 
         if (!$hasAccess) {
-            $page->modifyHeader('access', ['flex_no_access' => true]);
+            // Hide the page.
+            $page->routable(false);
+            $page->visible(false);
         } elseif ($config['access']['override'] ?? false) {
+            // Override page access settings (allow).
             $page->modifyHeader('access', []);
         }
     }

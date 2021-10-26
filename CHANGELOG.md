@@ -7,6 +7,8 @@
     * Dev: Moved away from deprecated UglifyJsPlugin in favor of TerserPlugin
     * Use active form from the Form plugin to get page metadata
     * Added page header `flex.access.override: true`, which allows flex to replace page `access` when user is allowed to perform action in flex
+1. [](#bugfix)
+    * Fixed flex object page access for super users when permission was denied
 
 # v1.1.2
 ## 09/14/2021
