@@ -2,10 +2,11 @@
 ## mm/dd/2021
 
 1. [](#improved)
-    * Updated dependencies to latest
-    * Optimized import of certain dependencies
+    * Updated JS dependencies to latest
+    * Optimized import of certain JS dependencies
     * Dev: Moved away from deprecated UglifyJsPlugin in favor of TerserPlugin
     * Use active form from the Form plugin to get page metadata
+    * Added page header `flex.access.override: true`, which allows flex to replace page `access` when user is allowed to perform action in flex
 
 # v1.1.2
 ## 09/14/2021

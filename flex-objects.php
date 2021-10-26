@@ -405,10 +405,10 @@ class FlexObjectsPlugin extends Plugin
             }
         }
 
-        if ($hasAccess) {
+        if (!$hasAccess) {
+            $page->modifyHeader('access', ['flex_no_access' => true]);
+        } elseif ($config['access']['override'] ?? false) {
             $page->modifyHeader('access', []);
-        } else {
-            $page->modifyHeader('access', ['admin.flex.no_access' => true]);
         }
     }
 
