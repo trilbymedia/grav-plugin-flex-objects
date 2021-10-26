@@ -1,8 +1,9 @@
 var webpack = require('webpack');
 var path = require('path');
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+var TerserPlugin = require('terser-webpack-plugin');
 var isProd = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production-wip';
 var VueLoaderPlugin = require('vue-loader/lib/plugin');
+const ESLintWebpackPlugin = require('eslint-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -18,8 +19,8 @@ module.exports = {
     optimization: {
         minimize: isProd,
         minimizer: [
-            new UglifyJsPlugin({
-                uglifyOptions: {
+            new TerserPlugin({
+                terserOptions: {
                     compress: {
                         drop_console: true
                     },
@@ -43,7 +44,8 @@ module.exports = {
         new webpack.ProvidePlugin({
             'fetch': 'imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch'
         }),
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
+        new ESLintWebpackPlugin()
     ],
     externals: {
         jquery: 'jQuery',
@@ -51,13 +53,10 @@ module.exports = {
     },
     module: {
         rules: [
-            { enforce: 'pre', test: /\.json$/, loader: 'json-loader' },
-            { enforce: 'pre', test: /\.js$/, loader: 'eslint-loader', exclude: /node_modules/ },
             {
                 test: /\.css$/,
                 use: [
                     'vue-style-loader',
-                    'style-loader',
                     'css-loader'
                 ]
             },

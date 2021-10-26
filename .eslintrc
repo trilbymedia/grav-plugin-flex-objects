@@ -6,11 +6,12 @@
         "es6": true
     },
 
-    "parser": "babel-eslint",
+    "parser": "@babel/eslint-parser",
 
     "parserOptions": {
         "ecmaVersion": 7,
-        "sourceType": "module"
+        "sourceType": "module",
+        "requireConfigFile": false
     },
 
     "rules": {

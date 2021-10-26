@@ -39,7 +39,8 @@
     import VuetablePaginationInfo from 'vuetable-2/src/components/VuetablePaginationInfo.vue';
     import VuetableCssConfig from "../VuetableCssConfig.js";
 
-    import _ from 'lodash';
+    import set from 'lodash/set';
+    import unset from 'lodash/unset';
 
     export default {
         props: ['store', 'value'],
@@ -66,15 +67,15 @@
                 this.$refs.paginationInfo.setPaginationData(paginationData);
             },
             onFilterSet (filterText) {
-                _.set(this.extraParams, 'filter', filterText);
+                set(this.extraParams, 'filter', filterText);
                 Vue.nextTick(() => this.$refs.vuetable.refresh());
             },
             onFilterReset () {
-                _.unset(this.extraParams, 'filter');
+                unset(this.extraParams, 'filter');
                 Vue.nextTick(() => this.$refs.vuetable.refresh());
             },
             onFilterPerPage (limit) {
-                console.log('onFilterPerPage', limit, this.store.data);
+                // console.log('onFilterPerPage', limit, this.store.data);
                 this.perPage = limit || this.$refs.paginationInfo.tablePagination.total;
                 // this.$refs.vuetable.perPage = limit;
                 Vue.nextTick(() => this.$refs.vuetable.refresh());
