@@ -1,3 +1,9 @@
+# v1.1.4
+## mm/dd/2021
+
+1. [](#improved)
+    * Changed flex router not to trigger `onPageNotFound` event
+
 # v1.1.3
 ## 10/26/2021
 

@@ -203,6 +203,9 @@ class FlexObjectsPlugin extends Plugin
                 'onTwigTemplatePaths' => [
                     ['onTwigTemplatePaths', 0]
                 ],
+                'onPagesInitialized' => [
+                    ['onPagesInitialized', -10000]
+                ],
                 'onPageInitialized' => [
                     ['authorizePage', 10000]
                 ],
@@ -211,9 +214,6 @@ class FlexObjectsPlugin extends Plugin
                 ],
                 'onPageTask' => [
                     ['onPageTask', -10]
-                ],
-                'onPageNotFound' => [
-                    ['onPageNotFound', 10]
                 ],
             ]);
         }
@@ -271,12 +271,18 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
-     * [onPageNotFound:10] Router for 404 pages.
+     * [onPagesInitialized:-10000] Default router for flex pages.
      *
      * @param Event $event
      */
-    public function onPageNotFound(Event $event): void
+    public function onPagesInitialized(Event $event): void
     {
+        /** @var PageInterface|null $page */
+        $page = $this->grav['page'] ?? null;
+        if ($page->routable()) {
+            return;
+        }
+
         /** @var Route $route */
         $route = $event['route'];
 
@@ -314,9 +320,15 @@ class FlexObjectsPlugin extends Plugin
                     'request' => $event['request']
                 ]);
                 $flexEvent = $this->grav->fireEvent("flex.router.{$router}", $flexEvent);
+                /** @var PageInterface|null $routedPage */
                 $routedPage = $flexEvent['page'];
                 if ($routedPage) {
-                    $event->page = $routedPage;
+                    /** @var Debugger $debugger */
+                    $debugger = Grav::instance()['debugger'];
+                    $debugger->addMessage(sprintf('Flex uses page %s', $routedPage->route()));
+
+                    unset($this->grav['page']);
+                    $this->grav['page'] = $routedPage;
                     $event->stopPropagation();
                 }
             }
