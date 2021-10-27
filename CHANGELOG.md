@@ -1,6 +1,8 @@
 # v1.1.4
 ## mm/dd/2021
 
+1. [](#new)
+    * Require **Grav 1.7.25**
 1. [](#improved)
     * Changed flex router not to trigger `onPageNotFound` event
 
