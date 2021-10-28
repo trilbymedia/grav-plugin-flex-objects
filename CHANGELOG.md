@@ -5,6 +5,7 @@
     * Require **Grav 1.7.25**
 1. [](#improved)
     * Changed flex router not to trigger `onPageNotFound` event
+    * If ACL check for the object fails, display unauthorized page instead of 404
 
 # v1.1.3
 ## 10/26/2021

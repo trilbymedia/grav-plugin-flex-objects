@@ -418,9 +418,17 @@ class FlexObjectsPlugin extends Plugin
         }
 
         if (!$hasAccess) {
-            // Hide the page.
+            // Hide the page (404).
             $page->routable(false);
             $page->visible(false);
+
+            $login = $this->grav['login'] ?? null;
+            $unauthorized = $login ? $login->addPage('unauthorized') : null;
+            if ($unauthorized) {
+                // Replace page with unauthorized page.
+                unset($this->grav['page']);
+                $this->grav['page'] = $unauthorized;
+            }
         } elseif ($config['access']['override'] ?? false) {
             // Override page access settings (allow).
             $page->modifyHeader('access', []);
