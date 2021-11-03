@@ -6,6 +6,8 @@
 1. [](#improved)
     * Changed flex router not to trigger `onPageNotFound` event
     * If ACL check for the object fails, display unauthorized page instead of 404
+1. [](#bugfix)
+    * Fixed unescaped messages in JSON responses
 
 # v1.1.3
 ## 10/26/2021
