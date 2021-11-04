@@ -8,6 +8,7 @@
     * If ACL check for the object fails, display unauthorized page instead of 404
 1. [](#bugfix)
     * Fixed unescaped messages in JSON responses
+    * Fixed `Call to a member function getName() on null` when using file field [#149](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/149)
 
 # v1.1.3
 ## 10/26/2021

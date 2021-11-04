@@ -188,7 +188,7 @@ abstract class AbstractController implements RequestHandlerInterface
             /** @var Forms $forms */
             $forms = $this->getGrav()['forms'];
             $form = $forms->getActiveForm();
-            if ($form->getName() == $formName && $form instanceof FlexForm && $form->getObject()->getFlexKey() === $object->getFlexKey()) {
+            if ($form instanceof FlexForm && $form->getName() === $formName && $form->getObject()->getFlexKey() === $object->getFlexKey()) {
                 return $form;
             }
         }
