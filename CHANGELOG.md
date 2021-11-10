@@ -5,6 +5,7 @@
     * Require **Grav 1.7.25**
 1. [](#improved)
     * Changed flex router not to trigger `onPageNotFound` event
+    * Changed flex router to be called also with empty path
     * If ACL check for the object fails, display unauthorized page instead of 404
 1. [](#bugfix)
     * Fixed unescaped messages in JSON responses

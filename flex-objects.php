@@ -279,28 +279,27 @@ class FlexObjectsPlugin extends Plugin
     {
         /** @var PageInterface|null $page */
         $page = $this->grav['page'] ?? null;
-        if ($page->routable()) {
-            return;
-        }
 
         /** @var Route $route */
         $route = $event['route'];
 
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-
-        // Find first existing and routable parent page.
-        $parts = explode('/', $route->getRoute());
-        array_shift($parts);
-        $page = null;
         $base = '';
         $path = [];
-        while (!$page && $parts) {
-            $path[] = array_pop($parts);
-            $base = '/' . implode('/', $parts);
-            $page = $pages->find($base);
-            if ($page && !$page->routable()) {
-                $page = null;
+        if (!$page->routable()) {
+            /** @var Pages $pages */
+            $pages = $this->grav['pages'];
+
+            // Find first existing and routable parent page.
+            $parts = explode('/', $route->getRoute());
+            array_shift($parts);
+            $page = null;
+            while (!$page && $parts) {
+                $path[] = array_pop($parts);
+                $base = '/' . implode('/', $parts);
+                $page = $pages->find($base);
+                if ($page && !$page->routable()) {
+                    $page = null;
+                }
             }
         }
 
@@ -312,7 +311,7 @@ class FlexObjectsPlugin extends Plugin
                 $path = implode('/', array_reverse($path));
                 $flexEvent = new Event([
                     'parent' => $page,
-                    'page' => null,
+                    'page' => $page,
                     'base' => $base,
                     'path' => $path,
                     'route' => $route,
