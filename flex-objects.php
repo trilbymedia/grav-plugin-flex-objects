@@ -285,7 +285,7 @@ class FlexObjectsPlugin extends Plugin
 
         $base = '';
         $path = [];
-        if (!$page->routable()) {
+        if (!$page->routable() && $page->template() !== 'notfound') {
             /** @var Pages $pages */
             $pages = $this->grav['pages'];
 
@@ -310,6 +310,7 @@ class FlexObjectsPlugin extends Plugin
             if (\is_string($router)) {
                 $path = implode('/', array_reverse($path));
                 $flexEvent = new Event([
+                    'flex' => $this->grav['flex'],
                     'parent' => $page,
                     'page' => $page,
                     'base' => $base,
