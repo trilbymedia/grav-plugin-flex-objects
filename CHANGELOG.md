@@ -1,3 +1,9 @@
+# v1.1.5
+## mm/dd/2021
+
+1. [](#bugfix)
+    * Fixed regression when calling flex router with a path
+
 # v1.1.4
 ## 11/16/2021
 
