@@ -1,7 +1,9 @@
 # v1.1.5
 ## mm/dd/2021
 
-1. [](#bugfix)
+1. [](#new)
+    * Added method `ObjectController::checkAuthorizations()` to check if one of the actions is true
+2. [](#bugfix)
     * Fixed regression when calling flex router with a path
 
 # v1.1.4
