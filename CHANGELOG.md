@@ -1,5 +1,5 @@
 # v1.1.5
-## mm/dd/2021
+## 11/24/2021
 
 1. [](#new)
     * Added method `ObjectController::checkAuthorizations()` to check if one of the actions is true
