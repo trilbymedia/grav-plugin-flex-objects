@@ -285,7 +285,7 @@ class FlexObjectsPlugin extends Plugin
 
         $base = '';
         $path = [];
-        if (!$page->routable() && $page->template() !== 'notfound') {
+        if (!$page->routable() || $page->template() === 'notfound') {
             /** @var Pages $pages */
             $pages = $this->grav['pages'];
 

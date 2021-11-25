@@ -443,6 +443,32 @@ class ObjectController extends AbstractController
         }
     }
 
+
+    /**
+     * @param string[] $actions
+     * @return void
+     * @throws RuntimeException
+     */
+    public function checkAuthorizations(array $actions): void
+    {
+        $object = $this->getObject();
+
+        if (!$object) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        if ($object instanceof FlexAuthorizeInterface) {
+            $test = false;
+            foreach ($actions as $action) {
+                $test |= $object->isAuthorized($action, null, $this->user);
+            }
+
+            if (!$test) {
+                throw new RuntimeException('Forbidden', 403);
+            }
+        }
+    }
+
     /**
      * @param string $type
      * @param string $name
