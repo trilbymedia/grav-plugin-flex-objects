@@ -1,3 +1,9 @@
+# v1.1.6
+## 11/29/2021
+
+2. [](#bugfix)
+    * Fixed regression `Call to a member function getRoute() on null` when using CLI [#151](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/151)
+
 # v1.1.5
 ## 11/24/2021
 
