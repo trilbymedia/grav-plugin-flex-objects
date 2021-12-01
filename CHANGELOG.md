@@ -1,7 +1,13 @@
+# v1.1.7
+## mm/dd/2021
+
+1. [](#improved)
+    * Added optional `$scope` parameter to `ObjectController::checkAuthorization()`
+    
 # v1.1.6
 ## 11/29/2021
 
-2. [](#bugfix)
+1. [](#bugfix)
     * Fixed regression `Call to a member function getRoute() on null` when using CLI [#151](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/151)
 
 # v1.1.5

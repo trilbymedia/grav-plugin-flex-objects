@@ -425,10 +425,11 @@ class ObjectController extends AbstractController
 
     /**
      * @param string $action
+     * @param string|null $scope
      * @return void
      * @throws RuntimeException
      */
-    public function checkAuthorization(string $action): void
+    public function checkAuthorization(string $action, string $scope = null): void
     {
         $object = $this->getObject();
 
@@ -437,7 +438,7 @@ class ObjectController extends AbstractController
         }
 
         if ($object instanceof FlexAuthorizeInterface) {
-            if (!$object->isAuthorized($action, null, $this->user)) {
+            if (!$object->isAuthorized($action, $scope, $this->user)) {
                 throw new RuntimeException('Forbidden', 403);
             }
         }
