@@ -709,7 +709,7 @@ class AdminController
 
         // Base64 decode the route
         $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
-        $data['filters'] = json_decode($options['filters'] ?? '{}', true, 512, JSON_THROW_ON_ERROR) + ['type' => ['root', 'dir']];
+        $data['filters'] = json_decode($data['filters'] ?? '{}', true, 512, JSON_THROW_ON_ERROR) + ['type' => ['root', 'dir']];
 
         $initial = $data['initial'] ?? null;
         if ($initial) {
@@ -1313,7 +1313,7 @@ class AdminController
         }
 
         // Post
-        $post = $_POST ?? [];
+        $post = $_POST;
         if (isset($post['data'])) {
             $this->data = $this->getPost($post['data']);
             unset($post['data']);

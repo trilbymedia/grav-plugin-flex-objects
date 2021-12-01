@@ -360,6 +360,7 @@ class FlexObjectsPlugin extends Plugin
         }
 
         // Make sure the page contains flex.
+        /** @var array $config <- phpstan 1 workaround */
         $config = $header->flex ?? [];
         if (!$config && !$form) {
             return;
