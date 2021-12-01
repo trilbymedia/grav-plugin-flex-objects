@@ -242,7 +242,6 @@ class FlexObjectsPlugin extends Plugin
         $types = (array)$this->config->get('plugins.flex-objects.directories', []);
         $this->registerDirectories($flex, $types, true);
 
-        /** @var AdminController controller */
         $this->controller = new AdminController();
 
         /** @var Debugger $debugger */
