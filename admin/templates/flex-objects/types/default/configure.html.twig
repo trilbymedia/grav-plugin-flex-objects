@@ -16,7 +16,7 @@
     {%- if title_config.template -%}
         {{- include(template_from_string(title_config.template, 'configure title template')) -}}
     {%- else -%}
-        {{- directory.title }} {{ 'PLUGIN_ADMIN.CONFIGURATION'|tu -}}
+        {{- directory.title|tu }} - {{ 'PLUGIN_ADMIN.CONFIGURATION'|tu -}}
     {% endif %}
 {%- endset %}
 
