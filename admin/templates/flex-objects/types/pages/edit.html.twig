@@ -89,7 +89,7 @@
     {% if allowed and user.authorize('admin.super') %}
     <div class="alert notice">
         {% set save_location = object.getStorageFolder() ?: directory.getStorageFolder() %}
-        {{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }} {{ not object.exists ? '[NEW]' }}</b> (type: <b>{{ (form.getValue('name') ?: 'default') }}</b>)
+        {{ "PLUGIN_ADMIN.SAVE_LOCATION"|tu }}: <b>{{ url(save_location, false, true)|trim('/') }} {{ not object.exists ? '[' ~ 'PLUGIN_FLEX_OBJECTS.NEW'|tu|upper ~ ']' }}</b> (type: <b>{{ (form.getValue('name') ?: 'default') }}</b>)
     </div>
     {% endif %}
     {% if object.exists and form.flash.exists %}
