@@ -5,7 +5,7 @@ PLUGIN_FLEX_OBJECTS:
   TITLE: Flex Objects
   TYPES_TITLE: Directories
   AFTER_SAVE: After Save…
-  LIST_INFO: 'Displaying {from} to {to} out of {total} records'
+  LIST_INFO: "Displaying {from} to {to} out of {total} records"
   EMPTY_RESULT: The requested query returns no result
 
   USE_BUILT_IN_CSS: "Use built in CSS"
@@ -13,17 +13,18 @@ PLUGIN_FLEX_OBJECTS:
   DIRECTORIES: "Directories"
   CSV: "CSV"
   PARENTS: "Parents"
+  NEW: "New"
 
   CONTROLLER:
-    TASK_DELETE_SUCCESS: 'Entry deleted successfully'
-    TASK_DELETE_FAILURE: 'Failed to delete entry: %s'
-    TASK_NEW_FOLDER_SUCCESS: 'Folder created successfully'
-    TASK_COPY_SUCCESS: 'Copy created successfully'
-    TASK_COPY_FAILURE: 'Failed to create copy: %s'
-    TASK_SAVE_SUCCESS: 'Entry saved successfully'
-    TASK_SAVE_FAILURE: 'Failed to save entry: %s'
-    TASK_CONFIGURE_SUCCESS: 'Configuration saved successfully'
-    TASK_CONFIGURE_FAILURE: 'Failed to save configuration: %s'
+    TASK_DELETE_SUCCESS: "Entry deleted successfully"
+    TASK_DELETE_FAILURE: "Failed to delete entry: %s"
+    TASK_NEW_FOLDER_SUCCESS: "Folder created successfully"
+    TASK_COPY_SUCCESS: "Copy created successfully"
+    TASK_COPY_FAILURE: "Failed to create copy: %s"
+    TASK_SAVE_SUCCESS: "Entry saved successfully"
+    TASK_SAVE_FAILURE: "Failed to save entry: %s"
+    TASK_CONFIGURE_SUCCESS: "Configuration saved successfully"
+    TASK_CONFIGURE_FAILURE: "Failed to save configuration: %s"
 
   ACTION:
     CREATE_NEW: Create New Item
