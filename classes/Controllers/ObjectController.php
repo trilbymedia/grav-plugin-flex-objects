@@ -9,6 +9,7 @@ use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Route\Route;
+use Grav\Plugin\FlexObjects\Events\FlexTaskEvent;
 use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -66,6 +67,9 @@ class ObjectController extends AbstractController
             if (\is_callable([$object, 'check'])) {
                 $object->check($this->user);
             }
+
+            $event = new FlexTaskEvent($this, $object, 'create');
+            $this->grav->dispatchEvent($event);
 
             $object->save();
         };
@@ -146,6 +150,9 @@ class ObjectController extends AbstractController
                 $object->check($this->user);
             }
 
+            $event = new FlexTaskEvent($this, $object, 'update');
+            $this->grav->dispatchEvent($event);
+
             $object->save();
         };
 
@@ -216,6 +223,9 @@ class ObjectController extends AbstractController
         if (!$object) {
             throw new RuntimeException('Not Found', 404);
         }
+
+        $event = new FlexTaskEvent($this, $object, 'delete');
+        $this->grav->dispatchEvent($event);
 
         $object->delete();
 
