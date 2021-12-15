@@ -21,7 +21,7 @@ PLUGIN_FLEX_OBJECTS:
     TASK_NEW_FOLDER_SUCCESS: "Carpeta creada exitosamente"
     TASK_COPY_SUCCESS: "Copia creada exitosamente"
     TASK_COPY_FAILURE: "Falla al crear la copia: %s"
-    TASK_SAVE_SUCCESS: "Entrada guardad exitosamente"
+    TASK_SAVE_SUCCESS: "Entrada guardada exitosamente"
     TASK_SAVE_FAILURE: "Falla al guardar la entrada: %s"
     TASK_CONFIGURE_SUCCESS: "Configuración gardada exitosamente"
     TASK_CONFIGURE_FAILURE: "Falla al guardar la configuración: %s"
