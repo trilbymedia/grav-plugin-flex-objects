@@ -107,6 +107,7 @@ class ObjectController extends AbstractController
         $this->object = $form->getObject();
         $event = new Event(
             [
+                'task' => 'create',
                 'controller' => $this,
                 'object' => $this->object,
                 'response' => null,
@@ -189,6 +190,7 @@ class ObjectController extends AbstractController
         $this->object = $form->getObject();
         $event = new Event(
             [
+                'task' => 'update',
                 'controller' => $this,
                 'object' => $this->object,
                 'response' => null,
@@ -235,6 +237,7 @@ class ObjectController extends AbstractController
 
         $event = new Event(
             [
+                'task' => 'delete',
                 'controller' => $this,
                 'object' => $object,
                 'response' => null,
