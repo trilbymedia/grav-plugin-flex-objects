@@ -14,6 +14,17 @@ PLUGIN_FLEX_OBJECTS:
   CSV: "CSV"
   PARENTS: "Eltern"
 
+  CONTROLLER:
+    TASK_DELETE_SUCCESS: 'Eintrag erfolgreich gelöscht'
+    TASK_DELETE_FAILURE: 'Löschen des Eintrags fehlgeschlagen: %s'
+    TASK_NEW_FOLDER_SUCCESS: 'Ordner erfolgreich angelegt'
+    TASK_COPY_SUCCESS: 'Kopie erfolgreich angelegt'
+    TASK_COPY_FAILURE: 'Kopieren des Eintrags fehlgeschlagen: %s'
+    TASK_SAVE_SUCCESS: 'Eintrag erfolgreich gespeichert'
+    TASK_SAVE_FAILURE: 'Speichern des Eintrags fehlgeschlagen: %s'
+    TASK_CONFIGURE_SUCCESS: 'Konfiguration erfolgreich gespeichert'
+    TASK_CONFIGURE_FAILURE: 'Speichern der Konfiguration fehlgeschlagen: %s'
+
   ACTION:
     CREATE_NEW: Neuen Eintrag anlegen
     EDIT_ITEM: Eintrag bearbeiten
