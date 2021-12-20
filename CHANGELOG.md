@@ -3,8 +3,10 @@
 
 1. [](#new)
     * Allow intercepting object `create`, `update` and `delete` tasks by using `FlexTaskEvent` event
-1. [](#improved)
+2. [](#improved)
     * Added optional `$scope` parameter to `ObjectController::checkAuthorization()`
+3. [](#bugfix)
+    * Fixed continue with `PageInterface` types
     
 # v1.1.6
 ## 11/29/2021

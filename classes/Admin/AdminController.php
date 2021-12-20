@@ -475,7 +475,7 @@ class AdminController
             throw new RuntimeException('Not Found', 404);
         }
 
-        if ($directory->getFlexType() === 'pages') {
+        if ($directory->getObject() instanceof PageInterface) {
             $this->continuePages($directory);
         } else {
             $this->continue($directory);
@@ -520,12 +520,17 @@ class AdminController
      */
     protected function continuePages(FlexDirectoryInterface $directory): void
     {
-        $collection = $directory->getIndex();
 
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
 
-        $parent = $route ? $directory->getObject($route) : $collection->getRoot();
+        if ($route) {
+            $parent = $directory->getObject($route);
+        } else {
+            // Use root page or fail back to directory auth.
+            $index = $directory->getIndex();
+            $parent = $index->getRoot() ?? $directory;
+        }
         $authorized = $parent instanceof FlexAuthorizeInterface
             ? $parent->isAuthorized('create', 'admin', $this->user)
             : $directory->isAuthorized('create', 'admin', $this->user);
