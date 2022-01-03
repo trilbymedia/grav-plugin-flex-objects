@@ -9,6 +9,7 @@ use Grav\Framework\Flex\FlexForm;
 use Grav\Framework\Flex\FlexObject;
 use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Route\Route;
+use Grav\Plugin\FlexObjects\Events\FlexTaskEvent;
 use Nyholm\Psr7\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -67,6 +68,9 @@ class ObjectController extends AbstractController
                 $object->check($this->user);
             }
 
+            $event = new FlexTaskEvent($this, $object, 'create');
+            $this->grav->dispatchEvent($event);
+
             $object->save();
         };
 
@@ -103,6 +107,7 @@ class ObjectController extends AbstractController
         $this->object = $form->getObject();
         $event = new Event(
             [
+                'task' => 'create',
                 'controller' => $this,
                 'object' => $this->object,
                 'response' => null,
@@ -146,6 +151,9 @@ class ObjectController extends AbstractController
                 $object->check($this->user);
             }
 
+            $event = new FlexTaskEvent($this, $object, 'update');
+            $this->grav->dispatchEvent($event);
+
             $object->save();
         };
 
@@ -182,6 +190,7 @@ class ObjectController extends AbstractController
         $this->object = $form->getObject();
         $event = new Event(
             [
+                'task' => 'update',
                 'controller' => $this,
                 'object' => $this->object,
                 'response' => null,
@@ -217,6 +226,9 @@ class ObjectController extends AbstractController
             throw new RuntimeException('Not Found', 404);
         }
 
+        $event = new FlexTaskEvent($this, $object, 'delete');
+        $this->grav->dispatchEvent($event);
+
         $object->delete();
 
         // FIXME: make it conditional
@@ -225,6 +237,7 @@ class ObjectController extends AbstractController
 
         $event = new Event(
             [
+                'task' => 'delete',
                 'controller' => $this,
                 'object' => $object,
                 'response' => null,
@@ -425,10 +438,11 @@ class ObjectController extends AbstractController
 
     /**
      * @param string $action
+     * @param string|null $scope
      * @return void
      * @throws RuntimeException
      */
-    public function checkAuthorization(string $action): void
+    public function checkAuthorization(string $action, string $scope = null): void
     {
         $object = $this->getObject();
 
@@ -437,7 +451,7 @@ class ObjectController extends AbstractController
         }
 
         if ($object instanceof FlexAuthorizeInterface) {
-            if (!$object->isAuthorized($action, null, $this->user)) {
+            if (!$object->isAuthorized($action, $scope, $this->user)) {
                 throw new RuntimeException('Forbidden', 403);
             }
         }

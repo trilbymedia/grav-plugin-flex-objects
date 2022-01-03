@@ -475,7 +475,7 @@ class AdminController
             throw new RuntimeException('Not Found', 404);
         }
 
-        if ($directory->getFlexType() === 'pages') {
+        if ($directory->getObject() instanceof PageInterface) {
             $this->continuePages($directory);
         } else {
             $this->continue($directory);
@@ -520,12 +520,17 @@ class AdminController
      */
     protected function continuePages(FlexDirectoryInterface $directory): void
     {
-        $collection = $directory->getIndex();
 
         $this->data['route'] = '/' . trim($this->data['route'] ?? '', '/');
         $route = trim($this->data['route'], '/');
 
-        $parent = $route ? $directory->getObject($route) : $collection->getRoot();
+        if ($route) {
+            $parent = $directory->getObject($route);
+        } else {
+            // Use root page or fail back to directory auth.
+            $index = $directory->getIndex();
+            $parent = $index->getRoot() ?? $directory;
+        }
         $authorized = $parent instanceof FlexAuthorizeInterface
             ? $parent->isAuthorized('create', 'admin', $this->user)
             : $directory->isAuthorized('create', 'admin', $this->user);
@@ -709,7 +714,7 @@ class AdminController
 
         // Base64 decode the route
         $data['route'] = isset($data['route']) ? base64_decode($data['route']) : null;
-        $data['filters'] = json_decode($options['filters'] ?? '{}', true, 512, JSON_THROW_ON_ERROR) + ['type' => ['root', 'dir']];
+        $data['filters'] = json_decode($data['filters'] ?? '{}', true, 512, JSON_THROW_ON_ERROR) + ['type' => ['root', 'dir']];
 
         $initial = $data['initial'] ?? null;
         if ($initial) {
@@ -1313,7 +1318,7 @@ class AdminController
         }
 
         // Post
-        $post = $_POST ?? [];
+        $post = $_POST;
         if (isset($post['data'])) {
             $this->data = $this->getPost($post['data']);
             unset($post['data']);

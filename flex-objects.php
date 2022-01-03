@@ -242,7 +242,6 @@ class FlexObjectsPlugin extends Plugin
         $types = (array)$this->config->get('plugins.flex-objects.directories', []);
         $this->registerDirectories($flex, $types, true);
 
-        /** @var AdminController controller */
         $this->controller = new AdminController();
 
         /** @var Debugger $debugger */
@@ -360,6 +359,7 @@ class FlexObjectsPlugin extends Plugin
         }
 
         // Make sure the page contains flex.
+        /** @var array $config <- phpstan 1 workaround */
         $config = $header->flex ?? [];
         if (!$config && !$form) {
             return;
