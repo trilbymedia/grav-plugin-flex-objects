@@ -1089,6 +1089,27 @@ class AdminController
     /**
      * @return bool
      */
+    public function taskMediaUploadMeta(): bool
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        try {
+            $response = $this->forwardMediaTask('task', 'media.upload.meta');
+
+            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
     public function taskMediaDelete(): bool
     {
         $directory = $this->getDirectory();

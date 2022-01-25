@@ -132,6 +132,41 @@ class MediaController extends AbstractController
         return $this->createJsonResponse($response);
     }
 
+    public function taskMediaUploadMeta(): ResponseInterface
+    {
+        $this->checkAuthorization('media.create');
+
+        $object = $this->getObject();
+        if (null === $object) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        if (!method_exists($object, 'checkUploadedMediaFile')) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        // Get updated object from Form Flash.
+        $flash = $this->getFormFlash($object);
+        if ($flash->exists()) {
+            $object = $flash->getObject() ?? $object;
+            $object->update([], $flash->getFilesByFields());
+        }
+
+        // Get field and data for the uploaded media.
+        $field = $this->getPost('field');
+        $data = $this->getPost('data');
+
+        $response = [
+            'code'    => 200,
+            'status'  => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
+            'filename' => htmlspecialchars($filename, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
+            'metadata' => $metadata
+        ];
+
+        return $this->createJsonResponse($response);
+    }
+
     /**
      * @return ResponseInterface
      */
