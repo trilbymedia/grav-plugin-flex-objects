@@ -155,13 +155,15 @@ class MediaController extends AbstractController
         // Get field and data for the uploaded media.
         $field = $this->getPost('field');
         $data = $this->getPost('data');
+        $filename = basename($data['name']);
 
         $response = [
             'code'    => 200,
             'status'  => 'success',
             'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
-            'filename' => htmlspecialchars($filename, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
-            'metadata' => $metadata
+            'field' => $field,
+            'filename' => $filename,
+            'metadata' => $data
         ];
 
         return $this->createJsonResponse($response);
