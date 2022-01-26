@@ -19,7 +19,7 @@
     <h1>
         {% if allowed %}
             <i class="fa fa-fw {{ title_icon }}"></i>
-            {{ "PLUGIN_ADMIN.PREVIEW"|tu }}: {{ not object.exists ? '[NEW]' }} <strong>{{ title }}</strong>
+            {{ "PLUGIN_ADMIN.PREVIEW"|tu }}: {{ not object.exists ? '[' ~ 'PLUGIN_FLEX_OBJECTS.NEW'|tu|upper ~ ']' }} <strong>{{ title }}</strong>
         {% else %}
             <i class="fa fa-fw fa-exclamation-triangle"></i>
             {{ 'PLUGIN_ADMIN.ERROR'|tu }}
