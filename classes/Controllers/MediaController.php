@@ -115,7 +115,7 @@ class MediaController extends AbstractController
             $media = $object->getMedia();
             $media->add($filename, $medium);
 
-            $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
+            $basename = str_replace(['@3x', '@2x'], '', Utils::pathinfo($filename, PATHINFO_BASENAME));
             if (isset($media[$basename])) {
                 $metadata = $media[$basename]->metadata() ?: [];
             }
@@ -127,6 +127,43 @@ class MediaController extends AbstractController
             'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
             'filename' => htmlspecialchars($filename, ENT_QUOTES | ENT_HTML5, 'UTF-8'),
             'metadata' => $metadata
+        ];
+
+        return $this->createJsonResponse($response);
+    }
+
+    public function taskMediaUploadMeta(): ResponseInterface
+    {
+        $this->checkAuthorization('media.create');
+
+        $object = $this->getObject();
+        if (null === $object) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        if (!method_exists($object, 'checkUploadedMediaFile')) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        // Get updated object from Form Flash.
+        $flash = $this->getFormFlash($object);
+        if ($flash->exists()) {
+            $object = $flash->getObject() ?? $object;
+            $object->update([], $flash->getFilesByFields());
+        }
+
+        // Get field and data for the uploaded media.
+        $field = $this->getPost('field');
+        $data = $this->getPost('data');
+        $filename = Utils::basename($data['name']);
+
+        $response = [
+            'code'    => 200,
+            'status'  => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
+            'field' => $field,
+            'filename' => $filename,
+            'metadata' => $data
         ];
 
         return $this->createJsonResponse($response);
@@ -207,7 +244,7 @@ class MediaController extends AbstractController
         $metadata = [];
         $include_metadata = $this->grav['config']->get('system.media.auto_metadata_exif', false);
         if ($include_metadata) {
-            $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
+            $basename = str_replace(['@3x', '@2x'], '', Utils::pathinfo($filename, PATHINFO_BASENAME));
             $media = $object->getMedia();
             if (isset($media[$basename])) {
                 $metadata = $media[$basename]->metadata() ?: [];
