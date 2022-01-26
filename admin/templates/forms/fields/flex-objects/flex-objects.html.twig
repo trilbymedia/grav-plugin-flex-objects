@@ -60,7 +60,7 @@
             {% set translation = (grav.twig.twig.filters['tu'] is defined ? text|tu : text|t)|trim %}
             <label for="{{ id ~ '_no' }}">{{ (macro.spanToggle(translation, maxLen)|trim)|raw }}</label>
         </div>
-        <span title="{{ directory.description }}">{{ directory.title }}</span>
+        <span title="{{ directory.description|tu }}">{{ directory.title|tu }}</span>
         </div>
     {% endfor %}
     {% else %}
