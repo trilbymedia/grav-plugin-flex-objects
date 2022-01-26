@@ -1,6 +1,8 @@
 # v1.1.8
 ## mm/dd/2022
 
+1. [](#new)
+    * Require **Grav 1.7.29**
 3. [](#improved)
     * Made path handling unicode-safe, use new `Utils::basename()` and `Utils::pathinfo()` everywhere
 
