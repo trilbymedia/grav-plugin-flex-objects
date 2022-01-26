@@ -115,7 +115,7 @@ class MediaController extends AbstractController
             $media = $object->getMedia();
             $media->add($filename, $medium);
 
-            $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
+            $basename = str_replace(['@3x', '@2x'], '', Utils::pathinfo($filename, PATHINFO_BASENAME));
             if (isset($media[$basename])) {
                 $metadata = $media[$basename]->metadata() ?: [];
             }
@@ -155,7 +155,7 @@ class MediaController extends AbstractController
         // Get field and data for the uploaded media.
         $field = $this->getPost('field');
         $data = $this->getPost('data');
-        $filename = basename($data['name']);
+        $filename = Utils::basename($data['name']);
 
         $response = [
             'code'    => 200,
@@ -244,7 +244,7 @@ class MediaController extends AbstractController
         $metadata = [];
         $include_metadata = $this->grav['config']->get('system.media.auto_metadata_exif', false);
         if ($include_metadata) {
-            $basename = str_replace(['@3x', '@2x'], '', pathinfo($filename, PATHINFO_BASENAME));
+            $basename = str_replace(['@3x', '@2x'], '', Utils::pathinfo($filename, PATHINFO_BASENAME));
             $media = $object->getMedia();
             if (isset($media[$basename])) {
                 $metadata = $media[$basename]->metadata() ?: [];
