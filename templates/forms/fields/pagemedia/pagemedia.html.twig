@@ -21,9 +21,15 @@
 
 
 {% set route = admin ? admin.route : grav.uri.route() %}
-<div class="form-field grid vertical {% if field.classes is defined %}{{ field.classes }}{% endif %}">
+<div class="pagemedia-field form-field grid vertical {% if field.classes is defined %}{{ field.classes }}{% endif %}">
     <div class="form-label">
-        <label>{{ field.label|tu }}</label>
+        <label class="media-collapser">
+            <i class="fa fa-fw small fa-chevron-{{ pageMediaStore.collapsed ? 'right' : 'down' }}"></i>
+            {{ field.label|t }} <span data-pagemedia-count>({{ admin.page.media|length }})</span>
+        </label>
+        <div class="{{ pageMediaStore.collapsed ? 'hidden' : '' }}">
+            <input type="range" min="70" step="10" max="200" value="{{ pageMediaStore.width }}" class="media-resizer">
+        </div>
     </div>
     <div class="form-data form-uploads-wrapper">
         {% set uploadLimit = grav.config.system.media.upload_limit / 1024 / 1024 %}
