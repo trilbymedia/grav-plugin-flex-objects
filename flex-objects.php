@@ -313,6 +313,7 @@ class FlexObjectsPlugin extends Plugin
             $router = $options['router'] ?? null;
             if (\is_string($router)) {
                 $path = implode('/', array_reverse($path));
+                $response = null;
                 $flexEvent = new Event([
                     'flex' => $this->grav['flex'],
                     'parent' => $page,
@@ -321,9 +322,14 @@ class FlexObjectsPlugin extends Plugin
                     'path' => $path,
                     'route' => $route,
                     'options' => $options,
-                    'request' => $event['request']
+                    'request' => $event['request'],
+                    'response' => &$response,
                 ]);
                 $flexEvent = $this->grav->fireEvent("flex.router.{$router}", $flexEvent);
+                if ($response) {
+                    $this->grav->close($response);
+                }
+
                 /** @var PageInterface|null $routedPage */
                 $routedPage = $flexEvent['page'];
                 if ($routedPage) {
