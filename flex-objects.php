@@ -309,13 +309,17 @@ class FlexObjectsPlugin extends Plugin
 
         // If page is found, check if it contains flex directory router.
         if ($page) {
+            $flex = $this->grav['flex'];
             $options = $page->header()->flex ?? null;
             $router = $options['router'] ?? null;
+            $type = $options['directory'] ?? null;
+            $directory = $type ? $flex->getDirectory($type) : null;
             if (\is_string($router)) {
                 $path = implode('/', array_reverse($path));
                 $response = null;
                 $flexEvent = new Event([
-                    'flex' => $this->grav['flex'],
+                    'flex' => $flex,
+                    'directory' => $directory,
                     'parent' => $page,
                     'page' => $page,
                     'base' => $base,
