@@ -1,3 +1,9 @@
+# v1.1.9
+## 03/14/2022
+
+1. [](#new)
+    * Added support for flex router to return a response instead of a page
+
 # v1.1.8
 ## 01/28/2022
 
