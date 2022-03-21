@@ -1,3 +1,9 @@
+# v1.1.10
+## mm/dd/2022
+
+1. [](#improved)
+    * Improved flex router event to include directory
+
 # v1.1.9
 ## 03/14/2022
 
