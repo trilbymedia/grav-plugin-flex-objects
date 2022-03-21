@@ -364,9 +364,17 @@ class FlexObjectsPlugin extends Plugin
 
         $header = $page->header();
         $forms = $page->forms();
-        $form = reset($forms);
-        if (($form['type'] ?? null) !== 'flex') {
-            $form = null;
+
+        // Update dynamic flex forms.
+        $form = null;
+        foreach ($forms as $name => $test) {
+            $type = $form['type'] ?? null;
+            if ($type === 'flex') {
+                $form = $test;
+
+                $this->grav->fireEvent('onBeforeFlexFormInitialize', new Event(['page' => $page, 'name' => $name, 'form' => &$form]));
+                $page->addForms([$form], true);
+            }
         }
 
         // Make sure the page contains flex.
