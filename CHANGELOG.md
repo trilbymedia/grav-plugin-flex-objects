@@ -3,6 +3,8 @@
 
 1. [](#improved)
     * Improved flex router event to include directory
+3. [](#bugfix)
+    * Fixed flex content in unauthorized module causing the whole page to become unauthorized
 
 # v1.1.9
 ## 03/14/2022

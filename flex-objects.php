@@ -358,7 +358,7 @@ class FlexObjectsPlugin extends Plugin
     {
         /** @var PageInterface|null $page */
         $page = $event['page'];
-        if (null === $page) {
+        if (!$page instanceof PageInterface) {
             return;
         }
 
@@ -437,12 +437,14 @@ class FlexObjectsPlugin extends Plugin
             $page->routable(false);
             $page->visible(false);
 
-            $login = $this->grav['login'] ?? null;
-            $unauthorized = $login ? $login->addPage('unauthorized') : null;
-            if ($unauthorized) {
-                // Replace page with unauthorized page.
-                unset($this->grav['page']);
-                $this->grav['page'] = $unauthorized;
+            // If page is not a module, replace the current page with unauthorized page.
+            if (!$page->isModule()) {
+                $login = $this->grav['login'] ?? null;
+                $unauthorized = $login ? $login->addPage('unauthorized') : null;
+                if ($unauthorized) {
+                    unset($this->grav['page']);
+                    $this->grav['page'] = $unauthorized;
+                }
             }
         } elseif ($config['access']['override'] ?? false) {
             // Override page access settings (allow).
