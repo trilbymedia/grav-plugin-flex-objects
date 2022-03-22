@@ -28,6 +28,7 @@ use Grav\Plugin\FlexObjects\Admin\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
+use function is_array;
 use function is_callable;
 
 /**
@@ -363,24 +364,24 @@ class FlexObjectsPlugin extends Plugin
         }
 
         $header = $page->header();
-        $forms = $page->forms();
+        $forms = $page->getForms();
 
-        // Update dynamic flex forms.
+        // Update dynamic flex forms from the page.
         $form = null;
         foreach ($forms as $name => $test) {
             $type = $form['type'] ?? null;
             if ($type === 'flex') {
                 $form = $test;
 
+                // Update the form and add it back to the page.
                 $this->grav->fireEvent('onBeforeFlexFormInitialize', new Event(['page' => $page, 'name' => $name, 'form' => &$form]));
                 $page->addForms([$form], true);
             }
         }
 
         // Make sure the page contains flex.
-        /** @var array $config <- phpstan 1 workaround */
-        $config = $header->flex ?? [];
-        if (!$config && !$form) {
+        $config = $header->flex ?? null;
+        if (!is_array($config) && !$form) {
             return;
         }
 
