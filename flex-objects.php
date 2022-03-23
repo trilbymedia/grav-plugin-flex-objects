@@ -28,6 +28,7 @@ use Grav\Plugin\FlexObjects\Admin\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
+use function is_array;
 use function is_callable;
 
 /**
@@ -119,8 +120,6 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
-     * [PluginsLoadedEvent:100000] Composer autoload.
-     *
      * @return ClassLoader
      */
     public function autoload(): ClassLoader
@@ -358,21 +357,29 @@ class FlexObjectsPlugin extends Plugin
     {
         /** @var PageInterface|null $page */
         $page = $event['page'];
-        if (null === $page) {
+        if (!$page instanceof PageInterface) {
             return;
         }
 
         $header = $page->header();
-        $forms = $page->forms();
-        $form = reset($forms);
-        if (($form['type'] ?? null) !== 'flex') {
-            $form = null;
+        $forms = $page->getForms();
+
+        // Update dynamic flex forms from the page.
+        $form = null;
+        foreach ($forms as $name => $test) {
+            $type = $form['type'] ?? null;
+            if ($type === 'flex') {
+                $form = $test;
+
+                // Update the form and add it back to the page.
+                $this->grav->fireEvent('onBeforeFlexFormInitialize', new Event(['page' => $page, 'name' => $name, 'form' => &$form]));
+                $page->addForms([$form], true);
+            }
         }
 
         // Make sure the page contains flex.
-        /** @var array $config <- phpstan 1 workaround */
-        $config = $header->flex ?? [];
-        if (!$config && !$form) {
+        $config = $header->flex ?? null;
+        if (!is_array($config) && !$form) {
             return;
         }
 
@@ -437,12 +444,14 @@ class FlexObjectsPlugin extends Plugin
             $page->routable(false);
             $page->visible(false);
 
-            $login = $this->grav['login'] ?? null;
-            $unauthorized = $login ? $login->addPage('unauthorized') : null;
-            if ($unauthorized) {
-                // Replace page with unauthorized page.
-                unset($this->grav['page']);
-                $this->grav['page'] = $unauthorized;
+            // If page is not a module, replace the current page with unauthorized page.
+            if (!$page->isModule()) {
+                $login = $this->grav['login'] ?? null;
+                $unauthorized = $login ? $login->addPage('unauthorized') : null;
+                if ($unauthorized) {
+                    unset($this->grav['page']);
+                    $this->grav['page'] = $unauthorized;
+                }
             }
         } elseif ($config['access']['override'] ?? false) {
             // Override page access settings (allow).
