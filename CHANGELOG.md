@@ -1,7 +1,9 @@
-# v1.1.10
+# v1.2.0
 ## mm/dd/2022
 
-1. [](#improved)
+1. [](#new)
+    * Require **Grav 1.7.32** and **Form 6.0.0**
+2. [](#improved)
     * Improved flex router event to include directory
 3. [](#bugfix)
     * Fixed caching issues in dynamic flex forms

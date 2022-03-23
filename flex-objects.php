@@ -120,8 +120,6 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
-     * [PluginsLoadedEvent:100000] Composer autoload.
-     *
      * @return ClassLoader
      */
     public function autoload(): ClassLoader
