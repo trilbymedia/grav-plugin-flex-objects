@@ -1341,7 +1341,11 @@ class AdminController
         // Post
         $post = $_POST;
         if (isset($post['data'])) {
-            $this->data = $this->getPost($post['data']);
+            $data = $post['data'];
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+            $this->data = $this->getPost($data);
             unset($post['data']);
         }
 

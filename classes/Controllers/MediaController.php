@@ -155,6 +155,9 @@ class MediaController extends AbstractController
         // Get field and data for the uploaded media.
         $field = $this->getPost('field');
         $data = $this->getPost('data');
+        if (is_string($data)) {
+            $data = json_decode($data, true);
+        }
         $filename = Utils::basename($data['name']);
 
         $response = [
