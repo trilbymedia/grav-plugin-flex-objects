@@ -145,6 +145,8 @@ class MediaController extends AbstractController
             throw new RuntimeException('Not Found', 404);
         }
 
+        $object->refresh();
+
         // Get updated object from Form Flash.
         $flash = $this->getFormFlash($object);
         if ($flash->exists()) {
@@ -159,6 +161,14 @@ class MediaController extends AbstractController
             $data = json_decode($data, true);
         }
         $filename = Utils::basename($data['name']);
+
+        // Update field.
+        $files = $object->getNestedProperty($field, []);
+        $files[$filename] = $data;
+        $object->setNestedProperty($field, $files);
+
+        $object->save();
+        $flash->save();
 
         $response = [
             'code'    => 200,
