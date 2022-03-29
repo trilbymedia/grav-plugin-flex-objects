@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Exception;
+use Grav\Common\Debugger;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Page\Medium\MediumFactory;
@@ -170,14 +171,22 @@ class MediaController extends AbstractController
         $object->save();
         $flash->save();
 
-        $response = [
-            'code'    => 200,
-            'status'  => 'success',
-            'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
-            'field' => $field,
-            'filename' => $filename,
-            'metadata' => $data
-        ];
+        try {
+            $response = [
+                'code' => 200,
+                'status' => 'success',
+                'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
+                'field' => $field,
+                'filename' => $filename,
+                'metadata' => $data
+            ];
+        } catch (\Exception $e) {
+            /** @var Debugger $debugger */
+            $debugger = $this->grav['debugger'];
+            $debugger->addException($e);
+
+            return $this->createJsonErrorResponse($e);
+        }
 
         return $this->createJsonResponse($response);
     }
