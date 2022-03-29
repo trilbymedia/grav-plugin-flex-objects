@@ -135,43 +135,43 @@ class MediaController extends AbstractController
 
     public function taskMediaUploadMeta(): ResponseInterface
     {
-        $this->checkAuthorization('media.create');
-
-        $object = $this->getObject();
-        if (null === $object) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        if (!method_exists($object, 'checkUploadedMediaFile')) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        $object->refresh();
-
-        // Get updated object from Form Flash.
-        $flash = $this->getFormFlash($object);
-        if ($flash->exists()) {
-            $object = $flash->getObject() ?? $object;
-            $object->update([], $flash->getFilesByFields());
-        }
-
-        // Get field and data for the uploaded media.
-        $field = $this->getPost('field');
-        $data = $this->getPost('data');
-        if (is_string($data)) {
-            $data = json_decode($data, true);
-        }
-        $filename = Utils::basename($data['name']);
-
-        // Update field.
-        $files = $object->getNestedProperty($field, []);
-        $files[$filename] = $data;
-        $object->setNestedProperty($field, $files);
-
-        $object->save();
-        $flash->save();
-
         try {
+            $this->checkAuthorization('media.create');
+
+            $object = $this->getObject();
+            if (null === $object) {
+                throw new RuntimeException('Not Found', 404);
+            }
+
+            if (!method_exists($object, 'checkUploadedMediaFile')) {
+                throw new RuntimeException('Not Found', 404);
+            }
+
+            $object->refresh();
+
+            // Get updated object from Form Flash.
+            $flash = $this->getFormFlash($object);
+            if ($flash->exists()) {
+                $object = $flash->getObject() ?? $object;
+                $object->update([], $flash->getFilesByFields());
+            }
+
+            // Get field and data for the uploaded media.
+            $field = $this->getPost('field');
+            $data = $this->getPost('data');
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+            $filename = Utils::basename($data['name']);
+
+            // Update field.
+            $files = $object->getNestedProperty($field, []);
+            $files[$filename] = $data;
+            $object->setNestedProperty($field, $files);
+
+            $object->save();
+            $flash->save();
+
             $response = [
                 'code' => 200,
                 'status' => 'success',
