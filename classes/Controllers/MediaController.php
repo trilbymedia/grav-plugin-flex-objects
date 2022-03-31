@@ -143,7 +143,7 @@ class MediaController extends AbstractController
                 throw new RuntimeException('Not Found', 404);
             }
 
-            if (!method_exists($object, 'checkUploadedMediaFile')) {
+            if (!method_exists($object, 'getMediaField')) {
                 throw new RuntimeException('Not Found', 404);
             }
 
@@ -157,17 +157,36 @@ class MediaController extends AbstractController
             }
 
             // Get field and data for the uploaded media.
-            $field = $this->getPost('field');
+            $field = (string)$this->getPost('field');
+            $media = $object->getMediaField($field);
+            if (!$media) {
+                throw new RuntimeException('Media field not found: ' . $field, 404);
+            }
+
             $data = $this->getPost('data');
             if (is_string($data)) {
                 $data = json_decode($data, true);
             }
-            $filename = Utils::basename($data['name']);
+
+            $filename = Utils::basename($data['name'] ?? '');
 
             // Update field.
             $files = $object->getNestedProperty($field, []);
             $files[$filename] = $data;
             $object->setNestedProperty($field, $files);
+
+            $info = [
+                'modified' => $data['meta']['lastModified'] ?? null,
+                'size' => $data['meta']['size'] ?? null,
+                'mime' => $data['type'] ?? null,
+                'width' => $data['meta']['width'] ?? null,
+                'height' => $data['meta']['height'] ?? null,
+                'orientation' => $data['meta']['orientation'] ?? null,
+                'meta' => $data
+            ];
+            $info = array_filter($info, static function ($val) { return $val !== null; });
+
+            $media->updateIndex([$filename => $info]);
 
             $object->save();
             $flash->save();
