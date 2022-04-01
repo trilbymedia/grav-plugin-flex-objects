@@ -186,6 +186,7 @@ class MediaController extends AbstractController
             ];
             $info = array_filter($info, static function ($val) { return $val !== null; });
 
+            // As the file may not be saved locally, we need to update the index.
             $media->updateIndex([$filename => $info]);
 
             $object->save();
@@ -329,6 +330,7 @@ class MediaController extends AbstractController
             throw new RuntimeException('Not Found', 404);
         }
 
+        $field = $this->getPost('field');
         $filename = $this->getPost('filename');
 
         // Handle bad filenames.
@@ -336,7 +338,7 @@ class MediaController extends AbstractController
             throw new RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
-        $object->deleteMediaFile($filename);
+        $object->deleteMediaFile($filename, $field);
 
         if ($object instanceof PageInterface) {
             // Backwards compatibility to existing plugins.
