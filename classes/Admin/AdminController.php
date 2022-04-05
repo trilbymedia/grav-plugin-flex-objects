@@ -1225,12 +1225,13 @@ class AdminController
      */
     protected function forwardMediaTask(string $type, string $name): ResponseInterface
     {
-        $route = Uri::getCurrentRoute()->withGravParam('task', null)->withGravParam($type, $name);
+        $route = Uri::getCurrentRoute()->withGravParam('task', null);
         $object = $this->getObject();
 
         /** @var ServerRequest $request */
         $request = $this->grav['request'];
         $request = $request
+            ->withAttribute($type, $name)
             ->withAttribute('type', $this->target)
             ->withAttribute('key', $this->id)
             ->withAttribute('storage_key', $object && $object->exists() ? $object->getStorageKey() : null)
