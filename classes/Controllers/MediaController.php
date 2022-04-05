@@ -172,7 +172,8 @@ class MediaController extends AbstractController
 
             // Update field.
             $files = $object->getNestedProperty($field, []);
-            $files[$filename] = $data;
+            // FIXME: Do we want to save something into the field as well?
+            $files[$filename] = [];
             $object->setNestedProperty($field, $files);
 
             $info = [
