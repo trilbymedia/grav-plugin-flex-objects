@@ -120,9 +120,9 @@ class AdminController
     /**
      * Unknown task, call onFlexTask[NAME] event.
      *
-     * @return bool
+     * @return void
      */
-    public function taskDefault(): bool
+    public function taskDefault(): void
     {
         $type = $this->target;
         $directory = $this->getDirectory($type);
@@ -160,19 +160,15 @@ class AdminController
             if ($redirect) {
                 $this->setRedirect($redirect);
             }
-
-            return $event->isPropagationStopped();
         }
-
-        return false;
     }
 
     /**
      * Default action, onFlexAction[NAME] event.
      *
-     * @return bool
+     * @return void
      */
-    public function actionDefault(): bool
+    public function actionDefault(): void
     {
         $type = $this->target;
         $directory = $this->getDirectory($type);
@@ -209,19 +205,15 @@ class AdminController
             if ($redirect) {
                 $this->setRedirect($redirect);
             }
-
-            return $event->isPropagationStopped();
         }
-
-        return false;
     }
 
     /**
      * Get datatable for list view.
      *
-     * @return void
+     * @return ResponseInterface|null
      */
-    public function actionList(): void
+    public function actionList(): ?ResponseInterface
     {
         $directory = $this->getDirectory();
         if (!$directory) {
@@ -248,28 +240,28 @@ class AdminController
 
             $table = $this->getFlex()->getDataTable($directory, $options);
 
-            $response = $this->createJsonResponse($table->jsonSerialize());
-
-            $this->close($response);
+            return $this->createJsonResponse($table->jsonSerialize());
         }
+
+        return null;
     }
 
     /**
      * Alias for Export action.
      *
-     * @return void
+     * @return ResponseInterface|null
      */
-    public function actionCsv(): void
+    public function actionCsv(): ?ResponseInterface
     {
-        $this->actionExport();
+        return $this->actionExport();
     }
 
     /**
      * Export action. Defaults to CVS export.
      *
-     * @return void
+     * @return ResponseInterface|null
      */
-    public function actionExport(): void
+    public function actionExport(): ?ResponseInterface
     {
         $collection = $this->getCollection();
         if (!$collection) {
@@ -341,15 +333,15 @@ class AdminController
             $formatter->encode($list)
         );
 
-        $this->close($response);
+        return $response;
     }
 
     /**
      * Delete object from directory.
      *
-     * @return ObjectInterface|bool
+     * @return void
      */
-    public function taskDelete()
+    public function taskDelete(): void
     {
         $directory = $this->getDirectory();
         if (!$directory) {
@@ -386,8 +378,6 @@ class AdminController
 
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
-
-        return $object !== null;
     }
 
     /**
@@ -482,6 +472,10 @@ class AdminController
         }
     }
 
+    /**
+     * @param FlexDirectoryInterface $directory
+     * @return void
+     */
     protected function continue(FlexDirectoryInterface $directory): void
     {
         $config = $directory->getConfig('admin');
@@ -625,10 +619,10 @@ class AdminController
      *
      * Route: /pages
      *
-     * @return bool True if the action was performed.
+     * @return void
      * @throws RuntimeException
      */
-    protected function taskCopy(): bool
+    protected function taskCopy(): void
     {
         try {
             $directory = $this->getDirectory();
@@ -680,8 +674,6 @@ class AdminController
             $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_COPY_FAILURE', $e->getMessage()]), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
-
-        return true;
     }
 
     /**
@@ -821,17 +813,17 @@ class AdminController
     }
 
     /**
-     * @return bool
+     * @return void
      */
-    public function taskSaveas(): bool
+    public function taskSaveas(): void
     {
-        return $this->taskSave();
+        $this->taskSave();
     }
 
     /**
-     * @return bool
+     * @return void
      */
-    public function taskSave(): bool
+    public function taskSave(): void
     {
         $directory = $this->getDirectory();
         if (!$directory) {
@@ -985,14 +977,12 @@ class AdminController
             // $this->setRedirect($this->referrerRoute->withQueryParam('uid', $flash->getUniqueId())->toString(true), 302);
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
-
-        return true;
     }
 
     /**
-     * @return bool
+     * @return void
      */
-    public function taskConfigure(): bool
+    public function taskConfigure(): void
     {
         $directory = $this->getDirectory();
         if (!$directory) {
@@ -1040,182 +1030,89 @@ class AdminController
             $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_CONFIGURE_FAILURE', $e->getMessage()]), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
-
-        return true;
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      */
-    public function taskMediaList(): bool
+    public function taskMediaList(): ResponseInterface
     {
-        $directory = $this->getDirectory();
-        if (!$directory) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        try {
-            $response = $this->forwardMediaTask('action', 'media.list');
-
-            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        return true;
+        return $this->forwardMediaTask('action', 'media.list');
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      */
-    public function taskMediaUpload(): bool
+    public function taskMediaUpload(): ResponseInterface
     {
-        $directory = $this->getDirectory();
-        if (!$directory) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        try {
-            $response = $this->forwardMediaTask('task', 'media.upload');
-
-            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        return true;
+        return $this->forwardMediaTask('task', 'media.upload');
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      */
-    public function taskMediaUploadMeta(): bool
+    public function taskMediaUploadMeta(): ResponseInterface
     {
-        $directory = $this->getDirectory();
-        if (!$directory) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        try {
-            $response = $this->forwardMediaTask('task', 'media.upload.meta');
-
-            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        return true;
+        return $this->forwardMediaTask('task', 'media.upload.meta');
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      */
-    public function taskMediaDelete(): bool
+    public function taskMediaDelete(): ResponseInterface
     {
-        $directory = $this->getDirectory();
-        if (!$directory) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        try {
-            $response = $this->forwardMediaTask('task', 'media.delete');
-
-            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        return true;
+        return $this->forwardMediaTask('task', 'media.delete');
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      */
-    public function taskListmedia(): bool
+    public function taskListmedia(): ResponseInterface
     {
         return $this->taskMediaList();
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      */
-    public function taskAddmedia(): bool
+    public function taskAddmedia(): ResponseInterface
     {
-        $directory = $this->getDirectory();
-        if (!$directory) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        try {
-            $response = $this->forwardMediaTask('task', 'media.copy');
-
-            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        return true;
+        return $this->forwardMediaTask('task', 'media.copy');
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      */
-    public function taskDelmedia(): bool
+    public function taskDelmedia(): ResponseInterface
     {
-        $directory = $this->getDirectory();
-        if (!$directory) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        try {
-            $response = $this->forwardMediaTask('task', 'media.remove');
-
-            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        return true;
+        return $this->forwardMediaTask('task', 'media.remove');
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      * @deprecated Do not use
      */
-    public function taskFilesUpload(): bool
+    public function taskFilesUpload(): ResponseInterface
     {
         throw new RuntimeException('Task filesUpload should not be called!');
     }
 
     /**
      * @param string|null $filename
-     * @return bool
+     * @return ResponseInterface
      * @deprecated Do not use
      */
-    public function taskRemoveMedia($filename = null): bool
+    public function taskRemoveMedia($filename = null): ResponseInterface
     {
         throw new RuntimeException('Task removeMedia should not be called!');
     }
 
     /**
-     * @return bool
+     * @return ResponseInterface
      */
-    public function taskGetFilesInFolder(): bool
+    public function taskGetFilesInFolder(): ResponseInterface
     {
-        $directory = $this->getDirectory();
-        if (!$directory) {
-            throw new RuntimeException('Not Found', 404);
-        }
-
-        try {
-            $response = $this->forwardMediaTask('action', 'media.picker');
-
-            $this->admin->json_response = json_decode($response->getBody(), false, 512, JSON_THROW_ON_ERROR);
-        } catch (Exception $e) {
-            $this->admin->json_response = ['success' => false, 'error' => $e->getMessage()];
-        }
-
-        return true;
+        return $this->forwardMediaTask('action', 'media.picker');
     }
 
     /**
@@ -1225,6 +1122,11 @@ class AdminController
      */
     protected function forwardMediaTask(string $type, string $name): ResponseInterface
     {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
         $route = Uri::getCurrentRoute()->withGravParam('task', null);
         $object = $this->getObject();
 

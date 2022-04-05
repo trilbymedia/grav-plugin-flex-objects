@@ -1,3 +1,9 @@
+# v1.3.0
+## 03/28/2022
+
+1. [](#bugfix)
+    * Fixed error responses in object media tasks
+
 # v1.2.0
 ## 03/28/2022
 
