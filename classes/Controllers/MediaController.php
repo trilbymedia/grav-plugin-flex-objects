@@ -177,12 +177,12 @@ class MediaController extends AbstractController
             $object->setNestedProperty($field, $files);
 
             $info = [
-                'modified' => $data['meta']['lastModified'] ?? null,
-                'size' => $data['meta']['size'] ?? null,
-                'mime' => $data['type'] ?? null,
-                'width' => $data['meta']['width'] ?? null,
-                'height' => $data['meta']['height'] ?? null,
-                'orientation' => $data['meta']['orientation'] ?? null,
+                'modified' => $data['modified'] ?? null,
+                'size' => $data['size'] ?? null,
+                'mime' => $data['mime'] ?? null,
+                'width' => $data['width'] ?? null,
+                'height' => $data['height'] ?? null,
+                'orientation' => $data['orientation'] ?? null,
                 'meta' => $data
             ];
             $info = array_filter($info, static function ($val) { return $val !== null; });
