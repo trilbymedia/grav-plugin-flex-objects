@@ -182,6 +182,7 @@ class MediaController extends AbstractController
                 'mime' => $data['mime'] ?? null,
                 'width' => $data['width'] ?? null,
                 'height' => $data['height'] ?? null,
+                'duration' => $data['duration'] ?? null,
                 'orientation' => $data['orientation'] ?? null,
                 'meta' => $data
             ];
