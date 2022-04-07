@@ -143,6 +143,7 @@ class AdminController
                     'directory' => $directory,
                     'object' => $object,
                     'data' => $this->data,
+                    'user' => $this->user,
                     'redirect' => $this->redirect
                 ]
             );
@@ -188,6 +189,7 @@ class AdminController
                     'flex' => $this->getFlex(),
                     'directory' => $directory,
                     'object' => $object,
+                    'user' => $this->user,
                     'redirect' => $this->redirect
                 ]
             );
