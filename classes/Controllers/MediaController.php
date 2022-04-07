@@ -184,7 +184,7 @@ class MediaController extends AbstractController
                 'height' => $data['height'] ?? null,
                 'duration' => $data['duration'] ?? null,
                 'orientation' => $data['orientation'] ?? null,
-                'meta' => $data
+                'meta' => array_filter($data, static function ($val) { return $val !== null; })
             ];
             $info = array_filter($info, static function ($val) { return $val !== null; });
 
