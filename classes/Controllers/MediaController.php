@@ -213,6 +213,20 @@ class MediaController extends AbstractController
         return $this->createJsonResponse($response);
     }
 
+    public function taskMediaReorder(): ResponseInterface
+    {
+        // FIXME: @mahagr reorder logic, you get `field` and `data` (data is an array of ids)
+        $response = [
+            'code' => 200,
+            'status' => 'success',
+            'message' => $this->translate('PLUGIN_ADMIN.FIELD_REORDER_SUCCESSFUL'),
+        ];
+
+        // error: $this->translate('PLUGIN_ADMIN.FIELD_REORDER_FAILED
+
+        return $this->createJsonResponse($response);
+    }
+
     /**
      * @return ResponseInterface
      */

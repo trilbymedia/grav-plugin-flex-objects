@@ -1061,6 +1061,14 @@ class AdminController
     /**
      * @return ResponseInterface
      */
+    public function taskMediaReorder(): ResponseInterface
+    {
+        return $this->forwardMediaTask('task', 'media.reorder');
+    }
+
+    /**
+     * @return ResponseInterface
+     */
     public function taskMediaDelete(): ResponseInterface
     {
         return $this->forwardMediaTask('task', 'media.delete');
