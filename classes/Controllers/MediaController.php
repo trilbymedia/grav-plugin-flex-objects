@@ -423,6 +423,12 @@ class MediaController extends AbstractController
         }
 
         $object->deleteMediaFile($filename, $field);
+        if ($field) {
+            $order = $object->getNestedProperty($field);
+            unset($order[$filename]);
+            $object->setNestedProperty($field, $order);
+            $object->save();
+        }
 
         if ($object instanceof PageInterface) {
             // Backwards compatibility to existing plugins.
