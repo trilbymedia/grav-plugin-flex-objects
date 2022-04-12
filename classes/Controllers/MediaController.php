@@ -133,6 +133,9 @@ class MediaController extends AbstractController
         return $this->createJsonResponse($response);
     }
 
+    /**
+     * @return ResponseInterface
+     */
     public function taskMediaUploadMeta(): ResponseInterface
     {
         try {
@@ -213,16 +216,81 @@ class MediaController extends AbstractController
         return $this->createJsonResponse($response);
     }
 
+    /**
+     * @return ResponseInterface
+     */
     public function taskMediaReorder(): ResponseInterface
     {
-        // FIXME: @mahagr reorder logic, you get `field` and `data` (data is an array of ids)
-        $response = [
-            'code' => 200,
-            'status' => 'success',
-            'message' => $this->translate('PLUGIN_ADMIN.FIELD_REORDER_SUCCESSFUL'),
-        ];
+        try {
+            $this->checkAuthorization('media.update');
 
-        // error: $this->translate('PLUGIN_ADMIN.FIELD_REORDER_FAILED
+            $object = $this->getObject();
+            if (null === $object) {
+                throw new RuntimeException('Not Found', 404);
+            }
+
+            if (!method_exists($object, 'getMediaField')) {
+                throw new RuntimeException('Not Found', 404);
+            }
+
+            $object->refresh();
+
+            // Get updated object from Form Flash.
+            $flash = $this->getFormFlash($object);
+            if ($flash->exists()) {
+                $object = $flash->getObject() ?? $object;
+                $object->update([], $flash->getFilesByFields());
+            }
+
+            // Get field and data for the uploaded media.
+            $field = (string)$this->getPost('field');
+            $media = $object->getMediaField($field);
+            if (!$media) {
+                throw new RuntimeException('Media field not found: ' . $field, 404);
+            }
+
+            // Create id => filename map from all files in the media.
+            $map = [];
+            foreach ($media as $name => $medium) {
+                $id = $medium->get('meta.id');
+                if ($id) {
+                    $map[$id] = $name;
+                }
+            }
+
+            // Get reorder list and reorder the map.
+            $data = $this->getPost('data');
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+            $data = array_fill_keys($data, null);
+            $map = array_filter(array_merge($data, $map), static function($val) { return $val !== null; });
+
+            // Reorder the files.
+            $files = $object->getNestedProperty($field, []);
+            $map = array_fill_keys($map, null);
+            $files = array_filter(array_merge($map, $files), static function($val) { return $val !== null; });
+
+            // Update field.
+            $object->setNestedProperty($field, $files);
+            $object->save();
+            $flash->save();
+
+            $response = [
+                'code' => 200,
+                'status' => 'success',
+                'message' => $this->translate('PLUGIN_ADMIN.FIELD_REORDER_SUCCESSFUL'),
+                'field' => $field,
+                'ordering' => array_keys($files)
+            ];
+        } catch (\Exception $e) {
+            /** @var Debugger $debugger */
+            $debugger = $this->grav['debugger'];
+            $debugger->addException($e);
+
+            $ex = new RuntimeException($this->translate('PLUGIN_ADMIN.FIELD_REORDER_FAILED', $field), $e->getCode(), $e);
+            return $this->createJsonErrorResponse($ex);
+        }
 
         return $this->createJsonResponse($response);
     }
@@ -585,6 +653,7 @@ class MediaController extends AbstractController
                 break;
 
             case 'media.create':
+            case 'media.update':
             case 'media.delete':
                 $action = $object->exists() ? 'update' : 'create';
                 break;
