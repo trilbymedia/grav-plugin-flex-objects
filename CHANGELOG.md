@@ -1,8 +1,14 @@
 # v1.3.0
-## 03/28/2022
+## mm/dd/2022
 
+1. [](#new)
+    * Added user object to `onFlexTask.*` and `onFlexAction.*` events
+    * Added tasks `MediaUploadMeta` and `MediaReorder` to support remote media fields
+    * Added support to remove media defined in a field
+2. [](#improved)
+    * Refactored admin controller tasks and actions
 1. [](#bugfix)
-    * Fixed error responses in object media tasks
+    * Fixed broken error responses in object media tasks
 
 # v1.2.0
 ## 03/28/2022
