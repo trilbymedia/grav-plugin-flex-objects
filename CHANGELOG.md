@@ -7,6 +7,7 @@
     * Added support to remove media defined in a field
 2. [](#improved)
     * Refactored admin controller tasks and actions
+    * Added image preview support for 3rd party editors
 1. [](#bugfix)
     * Fixed broken error responses in object media tasks
 

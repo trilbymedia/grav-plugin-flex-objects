@@ -12,6 +12,7 @@ use Grav\Common\Flex\Types\Pages\PageCollection;
 use Grav\Common\Flex\Types\Pages\PageIndex;
 use Grav\Common\Flex\Types\Pages\PageObject;
 use Grav\Common\Grav;
+use Grav\Common\Helpers\Excerpts;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Uri;
@@ -1032,6 +1033,61 @@ class AdminController
             $this->admin->setMessage($this->admin::translate(['PLUGIN_FLEX_OBJECTS.CONTROLLER.TASK_CONFIGURE_FAILURE', $e->getMessage()]), 'error');
             $this->setRedirect($this->referrerRoute->toString(true), 302);
         }
+    }
+
+    /**
+     * Used in 3rd party editors (e.g. next-gen).
+     *
+     * @return ResponseInterface
+     */
+    public function taskConvertUrls(): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        $key = $this->id;
+
+        $object = $this->getObject($key);
+        if (!$object instanceof PageInterface) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        $authorized = $object instanceof FlexAuthorizeInterface
+            ? $object->isAuthorized('read', 'admin', $this->user)
+            : $directory->isAuthorized($object->exists() ? 'read' : 'create', 'admin', $this->user);
+
+        if (!$authorized) {
+            throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save.',
+                403);
+        }
+
+        $request = $this->getRequest();
+        $data = $request->getParsedBody();
+
+        $data['data'] = json_decode($data['data'] ?? '{}', true, 512, JSON_THROW_ON_ERROR);
+        if (!isset($data['data'])) {
+            throw new RequestException($request, 'Bad Request', 400);
+        }
+
+        $converted_links = [];
+        foreach ($data['data']['a'] ?? [] as $link) {
+            $converted_links[$link] = Excerpts::processLinkHtml($link, $object);
+        }
+
+        $converted_images = [];
+        foreach ($data['data']['img'] ?? [] as $image) {
+            $converted_images[$image] = Excerpts::processImageHtml($image, $object);
+        }
+
+        $json = [
+            'status'  => 'success',
+            'message' => 'All links converted',
+            'data' => ['links' => $converted_links, 'images' => $converted_images]
+        ];
+
+        return $this->createJsonResponse($json, 200);
     }
 
     /**
