@@ -1,5 +1,5 @@
 # v1.3.0
-## mm/dd/2022
+## 06/14/2022
 
 1. [](#new)
     * Added user object to `onFlexTask.*` and `onFlexAction.*` events
