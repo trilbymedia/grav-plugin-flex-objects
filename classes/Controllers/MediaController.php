@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Controllers;
 
 use Exception;
+use Grav\Common\Debugger;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Medium\Medium;
 use Grav\Common\Page\Medium\MediumFactory;
@@ -132,39 +133,164 @@ class MediaController extends AbstractController
         return $this->createJsonResponse($response);
     }
 
+    /**
+     * @return ResponseInterface
+     */
     public function taskMediaUploadMeta(): ResponseInterface
     {
-        $this->checkAuthorization('media.create');
+        try {
+            $this->checkAuthorization('media.create');
 
-        $object = $this->getObject();
-        if (null === $object) {
-            throw new RuntimeException('Not Found', 404);
+            $object = $this->getObject();
+            if (null === $object) {
+                throw new RuntimeException('Not Found', 404);
+            }
+
+            if (!method_exists($object, 'getMediaField')) {
+                throw new RuntimeException('Not Found', 404);
+            }
+
+            $object->refresh();
+
+            // Get updated object from Form Flash.
+            $flash = $this->getFormFlash($object);
+            if ($flash->exists()) {
+                $object = $flash->getObject() ?? $object;
+                $object->update([], $flash->getFilesByFields());
+            }
+
+            // Get field and data for the uploaded media.
+            $field = (string)$this->getPost('field');
+            $media = $object->getMediaField($field);
+            if (!$media) {
+                throw new RuntimeException('Media field not found: ' . $field, 404);
+            }
+
+            $data = $this->getPost('data');
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+
+            $filename = Utils::basename($data['name'] ?? '');
+
+            // Update field.
+            $files = $object->getNestedProperty($field, []);
+            // FIXME: Do we want to save something into the field as well?
+            $files[$filename] = [];
+            $object->setNestedProperty($field, $files);
+
+            $info = [
+                'modified' => $data['modified'] ?? null,
+                'size' => $data['size'] ?? null,
+                'mime' => $data['mime'] ?? null,
+                'width' => $data['width'] ?? null,
+                'height' => $data['height'] ?? null,
+                'duration' => $data['duration'] ?? null,
+                'orientation' => $data['orientation'] ?? null,
+                'meta' => array_filter($data, static function ($val) { return $val !== null; })
+            ];
+            $info = array_filter($info, static function ($val) { return $val !== null; });
+
+            // As the file may not be saved locally, we need to update the index.
+            $media->updateIndex([$filename => $info]);
+
+            $object->save();
+            $flash->save();
+
+            $response = [
+                'code' => 200,
+                'status' => 'success',
+                'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
+                'field' => $field,
+                'filename' => $filename,
+                'metadata' => $data
+            ];
+        } catch (\Exception $e) {
+            /** @var Debugger $debugger */
+            $debugger = $this->grav['debugger'];
+            $debugger->addException($e);
+
+            return $this->createJsonErrorResponse($e);
         }
 
-        if (!method_exists($object, 'checkUploadedMediaFile')) {
-            throw new RuntimeException('Not Found', 404);
+        return $this->createJsonResponse($response);
+    }
+
+    /**
+     * @return ResponseInterface
+     */
+    public function taskMediaReorder(): ResponseInterface
+    {
+        try {
+            $this->checkAuthorization('media.update');
+
+            $object = $this->getObject();
+            if (null === $object) {
+                throw new RuntimeException('Not Found', 404);
+            }
+
+            if (!method_exists($object, 'getMediaField')) {
+                throw new RuntimeException('Not Found', 404);
+            }
+
+            $object->refresh();
+
+            // Get updated object from Form Flash.
+            $flash = $this->getFormFlash($object);
+            if ($flash->exists()) {
+                $object = $flash->getObject() ?? $object;
+                $object->update([], $flash->getFilesByFields());
+            }
+
+            // Get field and data for the uploaded media.
+            $field = (string)$this->getPost('field');
+            $media = $object->getMediaField($field);
+            if (!$media) {
+                throw new RuntimeException('Media field not found: ' . $field, 404);
+            }
+
+            // Create id => filename map from all files in the media.
+            $map = [];
+            foreach ($media as $name => $medium) {
+                $id = $medium->get('meta.id');
+                if ($id) {
+                    $map[$id] = $name;
+                }
+            }
+
+            // Get reorder list and reorder the map.
+            $data = $this->getPost('data');
+            if (is_string($data)) {
+                $data = json_decode($data, true);
+            }
+            $data = array_fill_keys($data, null);
+            $map = array_filter(array_merge($data, $map), static function($val) { return $val !== null; });
+
+            // Reorder the files.
+            $files = $object->getNestedProperty($field, []);
+            $map = array_fill_keys($map, null);
+            $files = array_filter(array_merge($map, $files), static function($val) { return $val !== null; });
+
+            // Update field.
+            $object->setNestedProperty($field, $files);
+            $object->save();
+            $flash->save();
+
+            $response = [
+                'code' => 200,
+                'status' => 'success',
+                'message' => $this->translate('PLUGIN_ADMIN.FIELD_REORDER_SUCCESSFUL'),
+                'field' => $field,
+                'ordering' => array_keys($files)
+            ];
+        } catch (\Exception $e) {
+            /** @var Debugger $debugger */
+            $debugger = $this->grav['debugger'];
+            $debugger->addException($e);
+
+            $ex = new RuntimeException($this->translate('PLUGIN_ADMIN.FIELD_REORDER_FAILED', $field), $e->getCode(), $e);
+            return $this->createJsonErrorResponse($ex);
         }
-
-        // Get updated object from Form Flash.
-        $flash = $this->getFormFlash($object);
-        if ($flash->exists()) {
-            $object = $flash->getObject() ?? $object;
-            $object->update([], $flash->getFilesByFields());
-        }
-
-        // Get field and data for the uploaded media.
-        $field = $this->getPost('field');
-        $data = $this->getPost('data');
-        $filename = Utils::basename($data['name']);
-
-        $response = [
-            'code'    => 200,
-            'status'  => 'success',
-            'message' => $this->translate('PLUGIN_ADMIN.FILE_UPLOADED_SUCCESSFULLY'),
-            'field' => $field,
-            'filename' => $filename,
-            'metadata' => $data
-        ];
 
         return $this->createJsonResponse($response);
     }
@@ -288,6 +414,7 @@ class MediaController extends AbstractController
             throw new RuntimeException('Not Found', 404);
         }
 
+        $field = $this->getPost('field');
         $filename = $this->getPost('filename');
 
         // Handle bad filenames.
@@ -295,7 +422,13 @@ class MediaController extends AbstractController
             throw new RuntimeException($this->translate('PLUGIN_ADMIN.NO_FILE_FOUND'), 400);
         }
 
-        $object->deleteMediaFile($filename);
+        $object->deleteMediaFile($filename, $field);
+        if ($field) {
+            $order = $object->getNestedProperty($field);
+            unset($order[$filename]);
+            $object->setNestedProperty($field, $order);
+            $object->save();
+        }
 
         if ($object instanceof PageInterface) {
             // Backwards compatibility to existing plugins.
@@ -526,6 +659,7 @@ class MediaController extends AbstractController
                 break;
 
             case 'media.create':
+            case 'media.update':
             case 'media.delete':
                 $action = $object->exists() ? 'update' : 'create';
                 break;

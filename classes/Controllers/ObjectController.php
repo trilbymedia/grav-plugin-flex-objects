@@ -343,6 +343,34 @@ class ObjectController extends AbstractController
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      */
+    public function taskMediaUploadMeta(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('task', 'media.upload.meta');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
+    public function taskMediaReorder(ServerRequestInterface $request): ResponseInterface
+    {
+        $directory = $this->getDirectory();
+        if (!$directory) {
+            throw new RuntimeException('Not Found', 404);
+        }
+
+        return $this->forwardMediaTask('task', 'media.reorder');
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     */
     public function taskMediaDelete(ServerRequestInterface $request): ResponseInterface
     {
         $directory = $this->getDirectory();
