@@ -1040,7 +1040,7 @@ class AdminController
      *
      * @return ResponseInterface
      */
-    public function taskConvertUrls(): ResponseInterface
+    public function actionConvertUrls(): ResponseInterface
     {
         $directory = $this->getDirectory();
         if (!$directory) {
