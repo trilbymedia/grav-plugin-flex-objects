@@ -1,3 +1,9 @@
+# v1.3.1
+## 09/08/2022
+
+1. [](#bugfix)
+   * Fixed `covnertUrls` action
+
 # v1.3.0
 ## 06/14/2022
 
