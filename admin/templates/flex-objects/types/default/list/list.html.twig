@@ -54,7 +54,7 @@
             {# FIXME: Search fields should be passed and individually customizable, right now defaulting to all fields selected #}
             {% set searchFields = searchFields|merge([key|replace({'.': '_'})]) %}
         {% endfor %}
-        {% set tableFields = tableFields|merge([{ name: '_actions_', title: 'Actions', titleClass: 'right' }]) %}
+        {% set tableFields = tableFields|merge([{ name: '_actions_', title: "PLUGIN_FLEX_OBJECTS.ACTION.ACTIONS"|tu, titleClass: 'right' }]) %}
 
 
         {% set list = table.jsonSerialize %}
