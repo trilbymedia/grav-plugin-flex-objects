@@ -1,3 +1,9 @@
+# v1.3.2
+## mm/dd/2022
+
+1. [](#bugfix)
+   * Fixed frontend editing objects with urlencoded ids
+
 # v1.3.1
 ## 09/08/2022
 
