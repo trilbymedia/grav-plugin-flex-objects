@@ -261,7 +261,7 @@ class FlexObjectsPlugin extends Plugin
         if (!isset($form['flex']['key']) && $edit === true) {
             /** @var Route $route */
             $route = $this->grav['route'];
-            $id = $route->getGravParam('id');
+            $id = rawurldecode($route->getGravParam('id'));
             if (null !== $id) {
                 $form['flex']['key'] = $id;
                 $event['form'] = $form;

@@ -30,13 +30,13 @@ PLUGIN_FLEX_OBJECTS:
     CREATE_NEW: Create New Item
     EDIT_ITEM: Edit Item
     LIST_ITEMS: "List Items"
-    LIST_ITEM: List Items
     DELETE_N: "Delete" # In some languages 'delete OBJECT' may need a special declination
     REALLY_DELETE: "Are you sure you want to permanently delete the %s?"
     SEARCH_PLACEHOLDER: "Search…"
     ADVANCED_OPTIONS: "Advanced Options"
     APPLY_FILTERS: "Apply Filters"
     RESET_FILTERS: "Reset to Defaults"
+    ACTIONS: "Actions"
 
   FILTER:
     PAGE_ATTRIBUTES: "Page Attributes"

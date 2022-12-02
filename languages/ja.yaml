@@ -30,13 +30,13 @@ PLUGIN_FLEX_OBJECTS:
     CREATE_NEW: 新しいデータを作成
     EDIT_ITEM: "データの編集"
     LIST_ITEMS: "データの一覧表示"
-    LIST_ITEM: データの一覧
     DELETE_N: "削除" # In some languages 'delete OBJECT' may need a special declination
     REALLY_DELETE: "%s を削除します。復元はできませんがよろしいですか？"
     SEARCH_PLACEHOLDER: "検索…"
     ADVANCED_OPTIONS: "詳細設定"
     APPLY_FILTERS: "フィルターを適用"
     RESET_FILTERS: "標準にリセットする"
+    ACTIONS: "アクション"
 
   FILTER:
     PAGE_ATTRIBUTES: "ページ属性"
