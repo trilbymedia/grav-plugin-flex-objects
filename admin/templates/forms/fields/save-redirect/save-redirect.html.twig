@@ -3,7 +3,7 @@
 {% set originalValue = value %}
 {% set value = (value is null ? field.default : value) %}
 {% set isNew = key ? false : true %}
-{% set savedOption = grav.session.post_entries_save|default('create-new') %}
+{% set savedOption = grav.session.post_entries_save|default('edit') %}
 
 {% if isNew %}
     {% set options = {'create-new':'PLUGIN_FLEX_OBJECTS.ACTION.CREATE_NEW', 'edit':'PLUGIN_FLEX_OBJECTS.ACTION.EDIT_ITEM', 'list':'PLUGIN_FLEX_OBJECTS.ACTION.LIST_ITEMS'} %}
@@ -12,7 +12,6 @@
 {% endif %}
 
 {% block input %}
-    {% set savedOption = not isNew and savedOption == 'create-new' ? 'edit' : savedOption %}
     {% for key, text in options %}
         {% set id = field.id|default(field.name) ~ '-' ~ key %}
 
