@@ -31,8 +31,8 @@
 {% set back_route = back_route ?? route.getRoute(1, -1) %}
 
 {% set configure_path = directory.config('admin.router.actions.configure.path') %}
-{% set configure_route = configure_route ?? (configure_path ? route.withRoute(admin_route(configure_path)|trim('/')) : null) %}
-{% set configure_route = configure_route ?? route.withGravParam('', 'configure') %}
+{% set configure_route = configure_route ?? (configure_path ? route.withRoute(admin_route(configure_path).toString(true)|trim('/')) : null) %}
+{% set configure_route = configure_route ?? route.withGravParam('', 'configure').toString(true) %}
 
 {% set title_icon = title_icon ?? view_config['icon'] ?? directory.config.admin.menu.list.icon ?? 'fa-file-text-o' %}
 {% set title -%}

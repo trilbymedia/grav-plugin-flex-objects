@@ -6,7 +6,7 @@
         <ul class="dropdown-menu lang-switcher">
             {% for type,option in export.options %}
                 <li>
-                    <a id="titlebar-button-export" class="button" href="{{ route.withGravParam('', 'export').withQueryParam('type', type) }}">
+                    <a id="titlebar-button-export" class="button" href="{{ route.withGravParam('', 'export').withQueryParam('type', type).toString(true) }}">
                         {{ option.title|tu }}
                     </a>
                 </li>
@@ -15,7 +15,7 @@
     </div>
 
 {% else %}
-<a id="titlebar-button-export" class="button" href="{{ route.withGravParam('', 'export') }}">
+<a id="titlebar-button-export" class="button" href="{{ route.withGravParam('', 'export').toString(true) }}">
     <i class="fa fa-download"></i> {{ export.title ?? (export.formatter.class ? 'PLUGIN_ADMIN.EXPORT'|tu : 'PLUGIN_FLEX_OBJECTS.CSV'|tu) }}
 </a>
 {% endif %}
