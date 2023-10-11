@@ -1,5 +1,5 @@
 # v1.3.6
-## mm/dd/2023
+## 10/11/2023
 
 1. [](#new)
    * Added a new `onAdminObjectGet()` event to allow for manipulation of flex objects
