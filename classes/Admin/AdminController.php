@@ -1579,6 +1579,8 @@ class AdminController
             }
         }
 
+        $this->grav->fireEvent('onAdminObjectGet', new Event(['object' => $this->object]));
+
         return $this->object ?: null;
     }
 
