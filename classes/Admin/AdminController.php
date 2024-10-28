@@ -1472,7 +1472,7 @@ class AdminController
      * @param FlexObjectInterface|null $object
      * @return FlexFormInterface
      */
-    public function getForm(FlexObjectInterface $object = null): FlexFormInterface
+    public function getForm(?FlexObjectInterface $object = null): FlexFormInterface
     {
         $object = $object ?? $this->getObject();
         if (!$object) {
@@ -1508,7 +1508,7 @@ class AdminController
      * @param FlexDirectoryInterface|null $directory
      * @return FlexFormInterface
      */
-    public function getDirectoryForm(FlexDirectoryInterface $directory = null): FlexFormInterface
+    public function getDirectoryForm(?FlexDirectoryInterface $directory = null): FlexFormInterface
     {
         $directory = $directory ?? $this->getDirectory();
         if (!$directory) {
@@ -1541,7 +1541,7 @@ class AdminController
      * @param string|null $key
      * @return FlexObjectInterface|null
      */
-    public function getObject(string $key = null): ?FlexObjectInterface
+    public function getObject(?string $key = null): ?FlexObjectInterface
     {
         if (null === $this->object) {
             $key = $key ?? $this->id;
@@ -1588,7 +1588,7 @@ class AdminController
      * @param string|null $type
      * @return FlexDirectoryInterface|null
      */
-    public function getDirectory(string $type = null): ?FlexDirectoryInterface
+    public function getDirectory(?string $type = null): ?FlexDirectoryInterface
     {
         $type = $type ?? $this->target;
 

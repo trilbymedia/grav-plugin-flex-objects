@@ -470,7 +470,7 @@ class ObjectController extends AbstractController
      * @return void
      * @throws RuntimeException
      */
-    public function checkAuthorization(string $action, string $scope = null): void
+    public function checkAuthorization(string $action, ?string $scope = null): void
     {
         $object = $this->getObject();
 

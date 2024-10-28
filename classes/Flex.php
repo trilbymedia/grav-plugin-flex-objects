@@ -110,7 +110,7 @@ class Flex implements FlexInterface
      * @param bool $keepMissing
      * @return array<FlexDirectoryInterface|null>
      */
-    public function getDirectories(array $types = null, bool $keepMissing = false): array
+    public function getDirectories(?array $types = null, bool $keepMissing = false): array
     {
         return $this->flex->getDirectories($types, $keepMissing);
     }
@@ -147,7 +147,7 @@ class Flex implements FlexInterface
      * @param string|null $keyField
      * @return FlexCollectionInterface|null
      */
-    public function getCollection(string $type, array $keys = null, string $keyField = null): ?FlexCollectionInterface
+    public function getCollection(string $type, ?array $keys = null, ?string $keyField = null): ?FlexCollectionInterface
     {
         return $this->flex->getCollection($type, $keys, $keyField);
     }
@@ -185,7 +185,7 @@ class Flex implements FlexInterface
      * @param string|null $keyField
      * @return FlexObjectInterface|null
      */
-    public function getObject(string $key, string $type = null, string $keyField = null): ?FlexObjectInterface
+    public function getObject(string $key, ?string $type = null, ?string $keyField = null): ?FlexObjectInterface
     {
         return $this->flex->getObject($key, $type, $keyField);
     }

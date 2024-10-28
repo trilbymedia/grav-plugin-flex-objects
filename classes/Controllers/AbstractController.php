@@ -153,7 +153,7 @@ abstract class AbstractController implements RequestHandlerInterface
      * @param mixed $default
      * @return mixed
      */
-    public function getPost(string $name = null, $default = null)
+    public function getPost(?string $name = null, $default = null)
     {
         $body = $this->request->getParsedBody();
 
@@ -176,7 +176,7 @@ abstract class AbstractController implements RequestHandlerInterface
      * @param string|null $type
      * @return FlexForm
      */
-    public function getForm(string $type = null): FlexFormInterface
+    public function getForm(?string $type = null): FlexFormInterface
     {
         $object = $this->getObject();
         if (!$object) {
