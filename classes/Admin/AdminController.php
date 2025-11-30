@@ -860,6 +860,18 @@ class AdminController
                 if (method_exists($object, 'storeOriginal')) {
                     $object->storeOriginal();
                 }
+
+                // Security: Strip sensitive header fields for non-superusers (GHSA-v8x2-fjv7-8hjh)
+                // This preserves existing values while preventing modification
+                // Configurable via plugins.flex-objects.security.restrict_page_frontmatter
+                $restrictFrontmatter = $this->grav['config']->get('plugins.flex-objects.security.restrict_page_frontmatter', true);
+                if ($restrictFrontmatter && !$this->user->authorize('admin.super') && isset($data['header'])) {
+                    $restrictedFields = ['form', 'forms', 'process', 'twig'];
+                    foreach ($restrictedFields as $field) {
+                        unset($data['header'][$field]);
+                    }
+                }
+
                 $object->update($data, $files);
 
                 // Support for expert mode.

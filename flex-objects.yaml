@@ -2,6 +2,14 @@ enabled: true
 
 built_in_css: true
 extra_admin_twig_path: 'theme://admin/templates'
+
+# Security settings
+security:
+  # Restrict non-superusers from modifying page form/process settings via header fields
+  # When enabled, header.form, header.forms, header.process, header.twig are stripped for non-superusers
+  # Set to false if editors legitimately need to modify forms (use with caution)
+  restrict_page_frontmatter: true
+
 admin_list:
   per_page: 15
   order:
