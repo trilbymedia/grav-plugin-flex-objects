@@ -46,6 +46,23 @@ form:
       validate:
         required: true
 
+    security_section:
+      type: section
+      title: Security
+      underline: true
+
+    security.restrict_page_frontmatter:
+      type: toggle
+      label: Restrict Page Frontmatter Editing
+      help: When enabled, non-superusers cannot modify form, forms, process, or twig settings in page headers. Disable if editors need to modify forms.
+      highlight: 1
+      default: 1
+      options:
+        1: PLUGIN_ADMIN.ENABLED
+        0: PLUGIN_ADMIN.DISABLED
+      validate:
+        type: bool
+
     directories:
       type: flex-objects
       label: PLUGIN_FLEX_OBJECTS.DIRECTORIES
