@@ -1,3 +1,10 @@
+# v1.4.0-beta.1
+## 11/29/2025
+
+1. [](#improved)
+   * Fix broken access control allowing non-superusers to edit form settings (GHSA-v8x2-fjv7-8hjh). 
+   * New option to disable enhanced security for access control (default to enabled)
+
 # v1.3.7
 ## 10/28/2023
 
