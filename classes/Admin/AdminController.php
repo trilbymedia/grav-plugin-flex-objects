@@ -857,6 +857,13 @@ class AdminController
             $form = $this->getForm($object);
 
             $callable = function (array $data, array $files, FlexObject $object) use ($form) {
+                if (!empty($data['frontmatter']) && !$this->user->authorize('admin.super')) {
+                    throw new RuntimeException(
+                        $this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' edit frontmatter.',
+                        403
+                    );
+                }
+
                 if (method_exists($object, 'storeOriginal')) {
                     $object->storeOriginal();
                 }
@@ -864,10 +871,6 @@ class AdminController
 
                 // Support for expert mode.
                 if (str_ends_with($form->getId(), '-raw') && isset($data['frontmatter']) && is_callable([$object, 'frontmatter'])) {
-                    if (!$this->user->authorize('admin.super')) {
-                        throw new RuntimeException($this->admin::translate('PLUGIN_ADMIN.INSUFFICIENT_PERMISSIONS_FOR_TASK') . ' save raw.',
-                        403);
-                    }
                     $object->frontmatter($data['frontmatter']);
                     unset($data['frontmatter']);
                 }
