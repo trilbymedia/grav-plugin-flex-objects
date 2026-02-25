@@ -1,3 +1,11 @@
+# v1.3.8
+## 03/25/2026
+
+1. [](#improved)
+   * New sqlitelindex backend class
+   * Fixed frontmatter permission patch
+   * Fixed non-superuser from editing frontmatter
+
 # v1.3.7
 ## 10/28/2023
 
