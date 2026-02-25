@@ -1,9 +1,23 @@
+# v1.4.0-beta.2
+## 11/30/2025
+
+1. [](#improved)
+    * Merged 1.3.8 fixes into 1.4.0 branch
+
 # v1.4.0-beta.1
 ## 11/30/2025
 
 1. [](#improved)
    * Fix broken access control allowing non-superusers to edit form settings (GHSA-v8x2-fjv7-8hjh). 
    * New option to disable enhanced security for access control (default to enabled)
+
+# v1.3.8
+## 03/25/2026
+
+1. [](#improved)
+   * New sqlitelindex backend class
+   * Fixed frontmatter permission patch
+   * Fixed non-superuser from editing frontmatter
 
 # v1.3.7
 ## 10/28/2023
