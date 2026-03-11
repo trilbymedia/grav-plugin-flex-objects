@@ -568,7 +568,16 @@ class AdminController
         unset($this->data['blueprint']);
         $key = trim("{$route}/{$folder}", '/');
         if ($directory->getObject($key)) {
-            throw new RuntimeException("Page '/{$key}' already exists!", 403);
+            $pageIndex = $directory->getIndex();
+            $baseKey = preg_replace('/\d+$/', '', $key);
+            $i = 1;
+            do {
+                $i++;
+                $test = "{$baseKey}{$i}";
+            } while ($pageIndex->containsKey($test));
+            $key = $test;
+            $folder = basename($key);
+            $this->data['folder'] = $folder;
         }
 
         $max = 0;
