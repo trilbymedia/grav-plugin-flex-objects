@@ -1,3 +1,9 @@
+# v1.4.0-beta.3
+## 03/11/2026
+
+1. [](#improved)
+    * Page creation now auto-deduplicates folder names (appending numeric suffix) instead of throwing an error, matching existing copy behavior
+
 # v1.4.0-beta.2
 ## 11/30/2025
 
