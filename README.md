@@ -60,6 +60,74 @@ Simply edit the **Flex Objects** plugin options in the Admin plugin, or copy the
 
 Most interesting configuration option is `directories`, which contains list or blueprint files which will define the flex types.
 
+## Nested Detail Rows
+
+Flex admin lists can optionally render a nested child table inside an expandable detail row. This works for Flex-to-Flex relations and reuses the child type list definition by default.
+
+### Parent list configuration
+
+Add `config.admin.list.detail` into the parent type blueprint:
+
+```yaml
+config:
+  admin:
+    list:
+      detail:
+        enabled: true
+        label: Payments
+        title: Payments
+        icon: fa-credit-card
+        limit: 12
+        actions: true
+        relation:
+          type: payments
+          local_key: username
+          foreign_key: subject_key
+          sort:
+            paid_at: desc
+```
+
+Options:
+
+* `enabled`: turn detail rows on for the list
+* `label`: toggle button title / accessibility label
+* `title`: text shown in the nested header
+* `icon`: Font Awesome icon used by the toggle button
+* `limit`: nested table page size
+* `actions`: include child edit/delete actions in the nested table
+* `relation.type`: child Flex type
+* `relation.local_key`: property from the parent object
+* `relation.foreign_key`: property from the child object used for filtering
+* `relation.sort`: default sort order for the child table
+
+### Nested fields
+
+If `detail.fields` is omitted, the nested table uses the child type list fields as-is.
+
+You can also override the nested view in the parent blueprint:
+
+```yaml
+config:
+  admin:
+    list:
+      detail:
+        fields:
+          amount:
+            width: 8
+          status: true
+          paid_at:
+            width: 12
+          internal_notes: false
+```
+
+Field values behave as follows:
+
+* `true`: include the child list field as-is
+* `false`: hide the field from the nested table
+* object: merge local overrides on top of the child list field definition
+
+Nested detail rows use the child Flex list JSON endpoint, so pagination, sorting and actions stay aligned with the regular admin list behavior.
+
 ## Displaying
 
 ![](assets/flex-objects-site.png)

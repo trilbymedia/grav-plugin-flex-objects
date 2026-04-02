@@ -1,4 +1,4 @@
-{% set object_title = title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item' %}
+{% set object_title = object_title ?? (title_field ? "'" ~ object[title_field]|join(' ') ~ "'" : 'Item') %}
 {% set can_read = object.isAuthorized('read', 'admin', user) %}
 {% set can_update = object.isAuthorized('update', 'admin', user) %}
 {% set can_delete = object.isAuthorized('delete', 'admin', user) %}
@@ -13,13 +13,13 @@
 
 {% if can_update %}
     {% block action_edit %}
-    <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="Edit {{ object_title }}" class="edit-action">
+    <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="{{ (('PLUGIN_FLEX_OBJECTS.ACTION.EDIT_ITEM'|tu) ~ ' ' ~ object_title)|e('html_attr') }}" class="edit-action">
         <i class="fa fa-pencil"></i>
     </a>
     {% endblock %}
 {% elseif can_read %}
     {% block action_read %}
-    <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="View {{ object_title }}" class="edit-action">
+    <a href="{{ route.withAddedPath(object.getKey()).withoutParams().getUri() }}" title="{{ (('PLUGIN_FLEX_OBJECTS.ACTION.VIEW_ITEM'|tu) ~ ' ' ~ object_title)|e('html_attr') }}" class="edit-action">
         <i class="fa fa-search"></i>
     </a>
     {% endblock %}
@@ -29,8 +29,9 @@
     {% block action_delete %}
     <a href="#delete"
        class="page-delete delete-action"
-       title="Delete {{ object_title }}"
+       title="{{ (('PLUGIN_FLEX_OBJECTS.ACTION.DELETE_N'|tu) ~ ' ' ~ object_title)|e('html_attr') }}"
        data-remodal-target="delete"
+       data-name="{{ object_title|e('html_attr') }}"
        data-delete-url="{{ grav.uri.addNonce(route.withAddedPath(object.getKey()).withoutParams().withGravParam('task', 'delete').getUri(), 'admin-form', 'admin-nonce') }}"
     >
         <i class="fa fa-close"></i>

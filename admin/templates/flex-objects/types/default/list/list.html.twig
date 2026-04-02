@@ -28,9 +28,22 @@
     {% else %}
         {% block entries %}
         {% set per_page = per_page ?? directory_config.per_page %}
+        {% set detail = view_config['detail'] ?? directory.blueprint.get('config/admin/views/list/detail') ?? directory.blueprint.get('config/admin/list/detail') %}
+        {% set detail_enabled = detail and detail.enabled %}
 
         {% set tableFields = [] %}
         {% set searchFields = [] %}
+        {% if detail_enabled %}
+            {% set tableFields = tableFields|merge([
+                {
+                    name: 'detail_toggle',
+                    title: '',
+                    width: '3.5%',
+                    titleClass: 'center flex-detail-column',
+                    dataClass: 'center flex-detail-cell'
+                }
+            ]) %}
+        {% endif %}
         {% for key, options in fields %}
             {% set name = key %}
             {% set sortField = options.sort.field ?? key %}
@@ -66,7 +79,11 @@
                     data: list,
                     api: grav.uri.currentRoute().withExtension('json').uri()|string,
                     perPage: per_page,
+                    trackBy: 'id',
                     fields: tableFields,
+                    detail: detail_enabled ? {
+                        enabled: true
+                    } : null,
                     searchFields: searchFields,
                     sortOrder: [{ field: directory_config.order.by, direction: directory_config.order.dir }],
                     searchPlaceholder: "PLUGIN_ADMIN.RESOURCE_FILTER"|tu,
