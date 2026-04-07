@@ -91,6 +91,12 @@ class FlexObjectsPlugin extends Plugin
             ],
             'onFormRegisterTypes' => [
                 ['onFormRegisterTypes', 0]
+            ],
+            'onApiRegisterRoutes' => [
+                ['onApiRegisterRoutes', 0]
+            ],
+            'onApiSidebarItems' => [
+                ['onApiSidebarItems', 0]
             ]
         ];
     }
@@ -729,6 +735,81 @@ class FlexObjectsPlugin extends Plugin
                 'priority' => $priority
             ] + $badge;
         }
+    }
+
+    /**
+     * Register API routes for admin-next.
+     */
+    public function onApiRegisterRoutes(Event $event): void
+    {
+        $routes = $event['routes'];
+        $controller = \Grav\Plugin\FlexObjects\Api\FlexApiController::class;
+        $blueprintController = \Grav\Plugin\FlexObjects\Api\FlexBlueprintController::class;
+
+        // Directory listing
+        $routes->get('/flex-objects', [$controller, 'directories']);
+
+        // CRUD routes — static paths before parameterized (FastRoute constraint)
+        $routes->get('/flex-objects/{type}/export', [$controller, 'export']);
+        $routes->get('/flex-objects/{type}', [$controller, 'index']);
+        $routes->post('/flex-objects/{type}', [$controller, 'create']);
+        $routes->get('/flex-objects/{type}/{key}', [$controller, 'show']);
+        $routes->patch('/flex-objects/{type}/{key}', [$controller, 'update']);
+        $routes->delete('/flex-objects/{type}/{key}', [$controller, 'delete']);
+
+        // Blueprint endpoint
+        $routes->get('/blueprints/flex-objects/{type}', [$blueprintController, 'flexBlueprint']);
+    }
+
+    /**
+     * Register sidebar items for admin-next.
+     */
+    public function onApiSidebarItems(Event $event): void
+    {
+        /** @var Flex $flex */
+        $flex = $this->grav['flex_objects'];
+        $user = $event['user'] ?? null;
+        $items = $event['items'] ?? [];
+
+        // Skip built-in types that already have dedicated admin-next UI
+        $builtIn = ['pages', 'user-accounts', 'user-groups'];
+        $isSuperAdmin = $user && $user->get('access.admin.super');
+
+        foreach ($flex->getAdminMenuItems() as $type => $menuItem) {
+            if (empty($type) || in_array($type, $builtIn, true)) {
+                continue;
+            }
+
+            $directory = $flex->getDirectory($type);
+            if (!$directory || !$directory->isEnabled()) {
+                continue;
+            }
+
+            // Check if user has list permission for this directory
+            if ($user && !$isSuperAdmin && !$directory->isAuthorized('list', 'admin', $user)) {
+                continue;
+            }
+
+            // Get object count
+            $count = null;
+            try {
+                $count = $directory->getCollection()->count();
+            } catch (\Exception $e) {
+                // Non-critical
+            }
+
+            $items[] = [
+                'id'       => 'flex-objects-' . $type,
+                'plugin'   => 'flex-objects',
+                'label'    => $menuItem['title'] ?? $directory->getTitle(),
+                'icon'     => $menuItem['icon'] ?? 'fa-file',
+                'route'    => '/flex-objects/' . $type,
+                'priority' => $menuItem['priority'] ?? 0,
+                'badge'    => $count,
+            ];
+        }
+
+        $event['items'] = $items;
     }
 
     /**

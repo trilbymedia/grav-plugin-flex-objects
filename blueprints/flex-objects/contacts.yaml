@@ -15,7 +15,7 @@ config:
       list:
         route: '/contacts'
         title: Contacts
-        icon: fa-address-card-o
+        icon: fa-address-card
         # Authorization to collection admin
         authorize: ['admin.contacts.list', 'admin.super']
         # Priority -10 .. 10 (highest goes up)

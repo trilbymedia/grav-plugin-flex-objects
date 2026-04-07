@@ -1,0 +1,362 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Grav\Plugin\FlexObjects\Api;
+
+use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
+use Grav\Plugin\Api\Controllers\AbstractApiController;
+use Grav\Plugin\Api\Exceptions\NotFoundException;
+use Grav\Plugin\Api\Response\ApiResponse;
+use Grav\Plugin\FlexObjects\Flex;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+
+class FlexApiController extends AbstractApiController
+{
+    /**
+     * GET /flex-objects — List all enabled flex directories with their admin config.
+     */
+    public function directories(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.access');
+
+        $flex = $this->getFlex();
+        $user = $this->getUser($request);
+        $result = [];
+
+        // Skip built-in types that already have dedicated admin-next UI
+        $builtIn = ['pages', 'user-accounts', 'user-groups'];
+
+        foreach ($flex->getDirectories() as $directory) {
+            if (!$directory->isEnabled()) {
+                continue;
+            }
+
+            if (in_array($directory->getFlexType(), $builtIn, true)) {
+                continue;
+            }
+
+            $config = $directory->getConfig('admin');
+            if (empty($config) || !empty($config['disabled'])) {
+                continue;
+            }
+
+            // Skip directories the user cannot list
+            if (!$this->isSuperAdmin($user) && !$directory->isAuthorized('list', 'admin', $user)) {
+                continue;
+            }
+
+            $menu = $config['menu']['list'] ?? [];
+
+            // Resolve form field types for list columns so frontend can render properly
+            $listFields = $config['list']['fields'] ?? [];
+            $fieldTypes = [];
+            try {
+                $blueprint = $directory->getBlueprint();
+                $formFields = $blueprint->fields();
+                foreach (array_keys($listFields) as $fieldName) {
+                    $fieldTypes[$fieldName] = $formFields[$fieldName]['type'] ?? 'text';
+                }
+            } catch (\Exception $e) {
+                // Non-critical
+            }
+
+            $result[] = [
+                'type'        => $directory->getFlexType(),
+                'title'       => $menu['title'] ?? $directory->getTitle(),
+                'description' => $directory->getDescription() ?? '',
+                'icon'        => $menu['icon'] ?? 'fa-file',
+                'list'        => $config['list'] ?? [],
+                'edit'        => $config['edit'] ?? [],
+                'search'      => $directory->getConfig('data.search') ?? [],
+                'field_types' => $fieldTypes,
+                'export'      => $config['export'] ?? [],
+            ];
+        }
+
+        return ApiResponse::create($result);
+    }
+
+    /**
+     * GET /flex-objects/{type} — List objects with pagination, search, sort.
+     */
+    public function index(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'list');
+
+        $pagination = $this->getPagination($request);
+        $query = $request->getQueryParams();
+        $search = $query['search'] ?? null;
+        $sortField = $query['sort'] ?? null;
+        $sortOrder = strtolower($query['order'] ?? 'asc');
+        if (!in_array($sortOrder, ['asc', 'desc'], true)) {
+            $sortOrder = 'asc';
+        }
+
+        $collection = $directory->getCollection();
+
+        // Apply search
+        if ($search && $search !== '') {
+            $collection = $collection->search($search);
+        }
+
+        // Apply sort
+        if ($sortField) {
+            $collection = $collection->sort([$sortField => $sortOrder]);
+        }
+
+        $total = $collection->count();
+
+        // Slice for pagination
+        $objects = $collection->slice($pagination['offset'], $pagination['limit']);
+
+        // Get list field names from config
+        $listFields = array_keys($directory->getConfig('admin.list.fields') ?? []);
+
+        $data = [];
+        foreach ($objects as $object) {
+            $data[] = $this->serializeForList($object, $listFields);
+        }
+
+        return ApiResponse::paginated(
+            data: $data,
+            total: $total,
+            page: $pagination['page'],
+            perPage: $pagination['per_page'],
+            baseUrl: $this->getApiBaseUrl() . '/flex-objects/' . $type,
+        );
+    }
+
+    /**
+     * GET /flex-objects/{type}/{key} — Get a single object.
+     */
+    public function show(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'read');
+
+        $key = $this->getRouteParam($request, 'key');
+        $object = $directory->getObject($key);
+
+        if (!$object) {
+            throw new NotFoundException("Object '{$key}' not found in '{$type}'.");
+        }
+
+        return $this->respondWithEtag($this->serializeObject($object));
+    }
+
+    /**
+     * POST /flex-objects/{type} — Create a new object.
+     */
+    public function create(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'create');
+
+        $body = $this->getRequestBody($request);
+
+        try {
+            $object = $directory->createObject($body, '');
+            $object->save();
+        } catch (\Exception $e) {
+            throw new \Grav\Plugin\Api\Exceptions\ValidationException(
+                'Failed to create object: ' . $e->getMessage(),
+            );
+        }
+
+        $this->fireAdminEvent('onAdminAfterSave', ['object' => $object]);
+
+        $key = $object->getKey();
+
+        return ApiResponse::created(
+            data: $this->serializeObject($object),
+            location: $this->getApiBaseUrl() . '/flex-objects/' . $type . '/' . $key,
+            headers: $this->invalidationHeaders([
+                'flex-objects:' . $type . ':list',
+            ]),
+        );
+    }
+
+    /**
+     * PATCH /flex-objects/{type}/{key} — Update an existing object.
+     */
+    public function update(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'update');
+
+        $key = $this->getRouteParam($request, 'key');
+        $object = $directory->getObject($key);
+
+        if (!$object) {
+            throw new NotFoundException("Object '{$key}' not found in '{$type}'.");
+        }
+
+        // ETag validation
+        $currentEtag = $this->generateEtag($this->serializeObject($object));
+        $this->validateEtag($request, $currentEtag);
+
+        $body = $this->getRequestBody($request);
+
+        try {
+            $object->update($body);
+            $object->save();
+        } catch (\Exception $e) {
+            throw new \Grav\Plugin\Api\Exceptions\ValidationException(
+                'Failed to update object: ' . $e->getMessage(),
+            );
+        }
+
+        $this->fireAdminEvent('onAdminAfterSave', ['object' => $object]);
+
+        return $this->respondWithEtag(
+            $this->serializeObject($object),
+            200,
+            ['flex-objects:' . $type . ':list', 'flex-objects:' . $type . ':update:' . $key],
+        );
+    }
+
+    /**
+     * DELETE /flex-objects/{type}/{key} — Delete an object.
+     */
+    public function delete(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'delete');
+
+        $key = $this->getRouteParam($request, 'key');
+        $object = $directory->getObject($key);
+
+        if (!$object) {
+            throw new NotFoundException("Object '{$key}' not found in '{$type}'.");
+        }
+
+        $object->delete();
+
+        $this->fireAdminEvent('onAdminAfterDelete', ['object' => $object]);
+
+        return ApiResponse::noContent(
+            $this->invalidationHeaders([
+                'flex-objects:' . $type . ':list',
+                'flex-objects:' . $type . ':delete:' . $key,
+            ]),
+        );
+    }
+
+    /**
+     * GET /flex-objects/{type}/export — Export all objects as YAML.
+     */
+    public function export(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'list');
+
+        $collection = $directory->getCollection();
+        $data = [];
+
+        foreach ($collection as $object) {
+            $data[$object->getKey()] = $object->jsonSerialize();
+        }
+
+        $yaml = \Grav\Common\Yaml::dump($data, 10, 2);
+        $filename = $type . '-' . date('Y-m-d') . '.yaml';
+
+        return new \Grav\Framework\Psr7\Response(
+            200,
+            [
+                'Content-Type' => 'application/x-yaml',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+                'Cache-Control' => 'no-store, max-age=0',
+            ],
+            $yaml,
+        );
+    }
+
+    // ─── Helpers ───────────────────────────────────────────────
+
+    private function getFlex(): Flex
+    {
+        return $this->grav['flex_objects'];
+    }
+
+    private function resolveDirectory(?string $type): FlexDirectory
+    {
+        if (!$type) {
+            throw new NotFoundException('Flex directory type is required.');
+        }
+
+        $flex = $this->getFlex();
+        $directory = $flex->getDirectory($type);
+
+        if (!$directory || !$directory->isEnabled()) {
+            throw new NotFoundException("Flex directory '{$type}' not found or not enabled.");
+        }
+
+        return $directory;
+    }
+
+    /**
+     * Check the directory-specific permission derived from the blueprint.
+     */
+    private function requireFlexPermission(
+        ServerRequestInterface $request,
+        FlexDirectory $directory,
+        string $action,
+    ): void {
+        $user = $this->getUser($request);
+
+        if ($this->isSuperAdmin($user)) {
+            return;
+        }
+
+        // Check API access
+        if (!$this->hasPermission($user, 'api.access')) {
+            throw new \Grav\Plugin\Api\Exceptions\ForbiddenException('API access is not enabled for this user.');
+        }
+
+        // Check directory-level permission from blueprint config
+        $permissions = $directory->getConfig('admin.permissions');
+        if ($permissions) {
+            $prefix = array_key_first($permissions);
+            $permission = $prefix . '.' . $action;
+            if (!$this->hasPermission($user, $permission)) {
+                throw new \Grav\Plugin\Api\Exceptions\ForbiddenException("Missing required permission: {$permission}");
+            }
+        }
+    }
+
+    private function serializeObject(FlexObjectInterface $object): array
+    {
+        $data = $object->jsonSerialize();
+
+        return array_merge(['key' => $object->getKey()], is_array($data) ? $data : []);
+    }
+
+    private function serializeForList(FlexObjectInterface $object, array $listFields): array
+    {
+        $data = ['key' => $object->getKey()];
+
+        if ($listFields) {
+            foreach ($listFields as $field) {
+                $data[$field] = $object->getProperty($field);
+            }
+        } else {
+            // No list config — return all data
+            $all = $object->jsonSerialize();
+            if (is_array($all)) {
+                $data = array_merge($data, $all);
+            }
+        }
+
+        return $data;
+    }
+}
