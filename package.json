@@ -32,13 +32,14 @@
         "exports-loader": "^3.0.0",
         "gulp-sourcemaps": "^3.0.0",
         "imports-loader": "^3.0.0",
-        "terser-webpack-plugin": "^5.2.4",
+        "terser-webpack-plugin": "^5.4.0",
         "vue-loader": "^15.9.8",
         "webpack": "^5.104.1",
         "webpack-cli": "^4.8.0"
     },
     "resolutions": {
-        "vuetable-2/axios": "^1.15.0"
+        "vuetable-2/axios": "^1.15.0",
+        "webpack/terser-webpack-plugin": "^5.4.0"
     },
     "browserslist": [
         "last 4 Chrome versions",
