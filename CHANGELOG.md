@@ -3,6 +3,7 @@
 
 1. [](#improved)
     * Page creation now auto-deduplicates folder names (appending numeric suffix) instead of throwing an error, matching existing copy behavior
+    * Resolved all open Dependabot security advisories by bumping axios, lodash, webpack, terser-webpack-plugin, js-yaml, picomatch, minimatch, flatted, braces and related transitive deps; removed dead `whatwg-fetch` ProvidePlugin from `webpack.conf.js`
 
 # v1.4.0-beta.2
 ## 11/30/2025
@@ -18,7 +19,7 @@
    * New option to disable enhanced security for access control (default to enabled)
 
 # v1.3.8
-## 03/25/2026
+## 02/25/2026
 
 1. [](#improved)
    * New sqlitelindex backend class
