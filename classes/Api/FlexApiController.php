@@ -16,6 +16,36 @@ use Psr\Http\Message\ServerRequestInterface;
 class FlexApiController extends AbstractApiController
 {
     /**
+     * GET /flex-objects/config
+     *
+     * Returns UI-relevant plugin configuration for admin-next. Never returns
+     * secrets or backend-only data. The flex directories list is exposed
+     * separately via GET /flex-objects so callers that just need config stay
+     * lightweight.
+     */
+    public function config(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.access');
+
+        $cfg = $this->config->get('plugins.flex-objects', []);
+
+        return ApiResponse::create([
+            'enabled'      => (bool) ($cfg['enabled'] ?? true),
+            'built_in_css' => (bool) ($cfg['built_in_css'] ?? true),
+            'security'     => [
+                'restrict_page_frontmatter' => (bool) ($cfg['security']['restrict_page_frontmatter'] ?? true),
+            ],
+            'admin_list'   => [
+                'per_page' => (int) ($cfg['admin_list']['per_page'] ?? 15),
+                'order'    => [
+                    'by'  => (string) ($cfg['admin_list']['order']['by'] ?? 'updated_timestamp'),
+                    'dir' => (string) ($cfg['admin_list']['order']['dir'] ?? 'desc'),
+                ],
+            ],
+        ]);
+    }
+
+    /**
      * GET /flex-objects — List all enabled flex directories with their admin config.
      */
     public function directories(ServerRequestInterface $request): ResponseInterface

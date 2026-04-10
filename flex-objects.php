@@ -742,10 +742,16 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onApiRegisterRoutes(Event $event): void
     {
+        if (!$this->config->get('plugins.flex-objects.enabled', true)) {
+            return;
+        }
+
         $routes = $event['routes'];
         $controller = \Grav\Plugin\FlexObjects\Api\FlexApiController::class;
         $blueprintController = \Grav\Plugin\FlexObjects\Api\FlexBlueprintController::class;
 
+        // Config endpoint — static routes first (FastRoute constraint)
+        $routes->get('/flex-objects/config', [$controller, 'config']);
         // Directory listing
         $routes->get('/flex-objects', [$controller, 'directories']);
 
@@ -766,6 +772,10 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onApiSidebarItems(Event $event): void
     {
+        if (!$this->config->get('plugins.flex-objects.enabled', true)) {
+            return;
+        }
+
         /** @var Flex $flex */
         $flex = $this->grav['flex_objects'];
         $user = $event['user'] ?? null;
