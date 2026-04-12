@@ -30,6 +30,9 @@ config:
       admin.contacts:
         type: crudpl
         label: Contacts
+      api.contacts:
+        type: crudpl
+        label: Contacts API
 
     # List view
     list:

@@ -336,6 +336,9 @@ class FlexApiController extends AbstractApiController
 
     /**
      * Check the directory-specific permission derived from the blueprint.
+     *
+     * Checks both api.* and admin.* prefixed permissions (OR logic) so users
+     * with either grant can access the flex directory via the API.
      */
     private function requireFlexPermission(
         ServerRequestInterface $request,
@@ -353,14 +356,20 @@ class FlexApiController extends AbstractApiController
             throw new \Grav\Plugin\Api\Exceptions\ForbiddenException('API access is not enabled for this user.');
         }
 
-        // Check directory-level permission from blueprint config
+        // Check directory-level permission from blueprint config.
+        // Blueprints may define both admin.* and api.* permissions — check all
+        // registered prefixes (OR: any matching permission grants access).
         $permissions = $directory->getConfig('admin.permissions');
         if ($permissions) {
-            $prefix = array_key_first($permissions);
-            $permission = $prefix . '.' . $action;
-            if (!$this->hasPermission($user, $permission)) {
-                throw new \Grav\Plugin\Api\Exceptions\ForbiddenException("Missing required permission: {$permission}");
+            foreach ($permissions as $prefix => $config) {
+                $permission = $prefix . '.' . $action;
+                if ($this->hasPermission($user, $permission)) {
+                    return;
+                }
             }
+            // None matched — report the first prefix for a clear error
+            $prefix = array_key_first($permissions);
+            throw new \Grav\Plugin\Api\Exceptions\ForbiddenException("Missing required permission: {$prefix}.{$action}");
         }
     }
 

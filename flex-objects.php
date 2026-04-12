@@ -808,14 +808,25 @@ class FlexObjectsPlugin extends Plugin
                 // Non-critical
             }
 
+            // Derive the api permission key from the blueprint's permission config
+            $perms = $directory->getConfig('admin.permissions', []);
+            $authorizeKey = null;
+            foreach ($perms as $prefix => $cfg) {
+                if (str_starts_with($prefix, 'api.')) {
+                    $authorizeKey = $prefix . '.list';
+                    break;
+                }
+            }
+
             $items[] = [
-                'id'       => 'flex-objects-' . $type,
-                'plugin'   => 'flex-objects',
-                'label'    => $menuItem['title'] ?? $directory->getTitle(),
-                'icon'     => $menuItem['icon'] ?? 'fa-file',
-                'route'    => '/flex-objects/' . $type,
-                'priority' => $menuItem['priority'] ?? 0,
-                'badge'    => $count,
+                'id'        => 'flex-objects-' . $type,
+                'plugin'    => 'flex-objects',
+                'label'     => $menuItem['title'] ?? $directory->getTitle(),
+                'icon'      => $menuItem['icon'] ?? 'fa-file',
+                'route'     => '/flex-objects/' . $type,
+                'priority'  => $menuItem['priority'] ?? 0,
+                'badge'     => $count,
+                'authorize' => $authorizeKey,
             ];
         }
 
