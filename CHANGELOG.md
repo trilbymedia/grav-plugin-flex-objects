@@ -1,9 +1,15 @@
 # v1.4.0-beta.3
-## 03/11/2026
+## 04/16/2026
 
-1. [](#improved)
-    * Page creation now auto-deduplicates folder names (appending numeric suffix) instead of throwing an error, matching existing copy behavior
-    * Resolved all open Dependabot security advisories by bumping axios, lodash, webpack, terser-webpack-plugin, js-yaml, picomatch, minimatch, flatted, braces and related transitive deps; removed dead `whatwg-fetch` ProvidePlugin from `webpack.conf.js`
+1. [](#new)
+    * Admin-next API integration: registers `onApiRegisterRoutes` and `onApiSidebarItems` so flex directories show up in the Admin 2.0 SPA. `FlexApiController` exposes paginated/sortable/filterable list, show, create, update, delete, and export endpoints; `FlexBlueprintController` serves directory blueprints for form rendering
+    * `save-redirect` custom field web component for configurable post-save navigation
+    * `/flex-objects/config` endpoint + server-side gating on admin-next event handlers so Admin 2.0 honors the plugin's `enabled_admin` / directory `enabled` toggles without the client having to guess
+    * `api.*` permission family alongside the existing `admin.*` set — `api.flex-objects` (crudl) registered globally, `api.contacts` (crudpl) on the contacts blueprint, with `requireFlexPermission()` accepting either prefix so operators can grant API authority without Admin-Classic implications. Sidebar items include the directory's `api.*` authorize field
+2. [](#improved)
+    * Page creation now auto-deduplicates folder names (appending a numeric suffix) instead of throwing an error, matching existing copy behavior
+    * Resolved all open Dependabot security advisories by bumping axios, lodash, webpack, terser-webpack-plugin, js-yaml, picomatch, minimatch, flatted, braces and related transitive deps; removed the dead `whatwg-fetch` ProvidePlugin from `webpack.conf.js`
+    * Contacts blueprint icon updated to Font Awesome 6 format
 
 # v1.4.0-beta.2
 ## 11/30/2025
