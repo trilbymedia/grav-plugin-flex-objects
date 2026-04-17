@@ -1,4 +1,10 @@
 # v1.4.0-beta.3
+## 04/17/2026
+
+1. [](improved)
+    * Fixed compatiblity
+
+# v1.4.0-beta.3
 ## 04/16/2026
 
 1. [](#new)
