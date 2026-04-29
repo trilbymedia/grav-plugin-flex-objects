@@ -1,4 +1,10 @@
-# v1.4.0-beta.3
+# v1.4.0-beta.5
+## 04/29/2026
+
+1. [](#bugfix)
+    * **Fix: plugin settings page now renders the Directories field properly in Admin 2.0.** It was previously falling back to a raw JSON editor because the `flex-objects` field type didn't have an admin-next implementation. A new web component shows one Enabled/Disabled toggle per available flex directory blueprint, matching the admin-classic UI.
+
+# v1.4.0-beta.4
 ## 04/17/2026
 
 1. [](improved)

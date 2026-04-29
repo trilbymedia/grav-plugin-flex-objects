@@ -110,6 +110,38 @@ class FlexApiController extends AbstractApiController
     }
 
     /**
+     * GET /flex-objects/blueprints — List every available flex directory blueprint.
+     *
+     * Powers the `directories` field on the flex-objects plugin settings page:
+     * one toggle per available blueprint, value is the array of enabled
+     * blueprint URLs. Includes hidden + currently-disabled blueprints because
+     * they're the things the admin is choosing to enable. The legacy URL
+     * (pre-rc.4 alias) is included so the field can match saved values that
+     * still reference the old form.
+     */
+    public function blueprints(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.access');
+
+        $flex = $this->getFlex();
+        $newToOld = Flex::getLegacyBlueprintMap(false); // [newUrl => oldUrl]
+
+        $items = [];
+        foreach ($flex->getBlueprints() as $directory) {
+            $url = $directory->getBlueprintFile();
+            $items[] = [
+                'url'         => $url,
+                'legacy_url'  => $newToOld[$url] ?? null,
+                'type'        => $directory->getFlexType(),
+                'title'       => $directory->getTitle(),
+                'description' => $directory->getDescription(),
+            ];
+        }
+
+        return ApiResponse::create($items);
+    }
+
+    /**
      * GET /flex-objects/{type} — List objects with pagination, search, sort.
      */
     public function index(ServerRequestInterface $request): ResponseInterface

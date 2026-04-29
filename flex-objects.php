@@ -752,6 +752,8 @@ class FlexObjectsPlugin extends Plugin
 
         // Config endpoint — static routes first (FastRoute constraint)
         $routes->get('/flex-objects/config', [$controller, 'config']);
+        // Available blueprints (powers the plugin-settings `directories` field)
+        $routes->get('/flex-objects/blueprints', [$controller, 'blueprints']);
         // Directory listing
         $routes->get('/flex-objects', [$controller, 'directories']);
 
