@@ -17,7 +17,7 @@ compatibility:
   grav: ['2.0']
 
 dependencies:
-    - { name: grav, version: '>=1.8.0-beta.1' }
+    - { name: grav, version: '>=2.0.0-beta.5' }
     - { name: form, version: '>=6.0.0' }
 
 form:

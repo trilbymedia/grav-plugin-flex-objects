@@ -432,7 +432,20 @@ class AdminController
             $maxOrder = max($maxOrder, (int)$order);
         }
 
-        $orderOfNewFolder = $maxOrder ? sprintf('%02d.', $maxOrder+1) : '';
+        // Match the digit width of the widest existing sibling so adding into a
+        // 3-digit collection stays 3-digit. Falls back to system default for
+        // brand-new collections.
+        $maxDigits = 0;
+        foreach ($parent->children()->visible() as $child) {
+            $childFolder = basename($child->path());
+            $w = \Grav\Common\Page\PageOrdering::digitsFromFolder($childFolder);
+            if ($w !== null && $w > $maxDigits) {
+                $maxDigits = $w;
+            }
+        }
+        $orderOfNewFolder = $maxOrder
+            ? \Grav\Common\Page\PageOrdering::prefix($maxOrder + 1, $maxDigits ?: null)
+            : '';
         $new_path         = $path . '/' . $orderOfNewFolder . $folder;
 
         /** @var UniformResourceLocator $locator */

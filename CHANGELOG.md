@@ -1,8 +1,9 @@
 # v1.4.0-beta.5
-## 04/29/2026
+## 04/30/2026
 
 1. [](#bugfix)
     * **Fix: plugin settings page now renders the Directories field properly in Admin 2.0.** It was previously falling back to a raw JSON editor because the `flex-objects` field type didn't have an admin-next implementation. A new web component shows one Enabled/Disabled toggle per available flex directory blueprint, matching the admin-classic UI.
+    * Adding a new sibling page under a parent whose existing children use a wider order prefix (e.g. `005.foo`) now matches that width instead of falling back to two digits ([grav-plugin-admin#2492](https://github.com/getgrav/grav-plugin-admin/issues/2492)).
 
 # v1.4.0-beta.4
 ## 04/17/2026
