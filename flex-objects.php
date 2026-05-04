@@ -97,6 +97,9 @@ class FlexObjectsPlugin extends Plugin
             ],
             'onApiSidebarItems' => [
                 ['onApiSidebarItems', 0]
+            ],
+            'onApiBlueprintResolved' => [
+                ['onApiBlueprintResolved', 0]
             ]
         ];
     }
@@ -767,6 +770,203 @@ class FlexObjectsPlugin extends Plugin
 
         // Blueprint endpoint
         $routes->get('/blueprints/flex-objects/{type}', [$blueprintController, 'flexBlueprint']);
+    }
+
+    /**
+     * Inject the shared Flex configure tabs (Caching) into admin-next plugin
+     * page blueprints owned by a plugin that registers a Flex directory.
+     *
+     * In admin-classic, FlexDirectory::getDirectoryBlueprint() automatically
+     * merges system/blueprints/flex/shared/configure.yaml on top of each
+     * directory's configure view, which is how the "Caching" tab appears in
+     * the configure form. Admin-next plugin pages don't go through the Flex
+     * configure pipeline — they're served by the API plugin's
+     * BlueprintController::pluginPageBlueprint, which fires
+     * onApiBlueprintResolved with context='plugin-page'. We hook that event
+     * here and append the same Caching tab so the two UIs match.
+     */
+    public function onApiBlueprintResolved(Event $event): void
+    {
+        if (($event['context'] ?? null) !== 'plugin-page') {
+            return;
+        }
+
+        $plugin = (string) ($event['plugin'] ?? '');
+        if ($plugin === '' || !$this->pluginOwnsFlexDirectory($plugin)) {
+            return;
+        }
+
+        $cacheTab = $this->buildSharedCacheTab();
+        if ($cacheTab === null) {
+            return;
+        }
+
+        $fields = $event['fields'];
+        $fields = $this->appendTab($fields, $cacheTab);
+        $event['fields'] = $fields;
+    }
+
+    /**
+     * Walk every registered Flex directory's blueprint path and check if it
+     * lives under plugin://{$slug}/. If so, the plugin owns at least one
+     * Flex directory and is a candidate for caching-tab injection.
+     */
+    private function pluginOwnsFlexDirectory(string $slug): bool
+    {
+        $flex = $this->grav['flex_objects'] ?? null;
+        if (!$flex) {
+            return false;
+        }
+
+        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
+        $locator = $this->grav['locator'];
+        $pluginPath = $locator->findResource("plugin://{$slug}", true);
+        if (!$pluginPath) {
+            return false;
+        }
+        $pluginPath = rtrim($pluginPath, '/') . '/';
+
+        foreach ($flex->getDirectories() as $directory) {
+            if (!$directory instanceof FlexDirectory) {
+                continue;
+            }
+
+            $blueprintFile = $directory->getBlueprint()->getFilename();
+            if (!$blueprintFile) {
+                continue;
+            }
+
+            $resolved = $locator->isStream($blueprintFile)
+                ? $locator->findResource($blueprintFile, true)
+                : $blueprintFile;
+            if ($resolved && str_starts_with((string) $resolved, $pluginPath)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Load system/blueprints/flex/shared/configure.yaml, isolate the
+     * `cache` tab, and serialize it into the same shape the API plugin's
+     * BlueprintController emits — so the result can be appended to a
+     * resolved field list directly.
+     */
+    private function buildSharedCacheTab(): ?array
+    {
+        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
+        $locator = $this->grav['locator'];
+        $path = $locator->findResource('blueprints://flex/shared/configure.yaml');
+        if (!$path) {
+            return null;
+        }
+
+        $blueprint = new \Grav\Common\Data\Blueprint($path);
+        $blueprint->load();
+
+        $form = $blueprint->form();
+        $cacheTab = $form['fields']['tabs']['fields']['cache'] ?? null;
+        if (!is_array($cacheTab)) {
+            return null;
+        }
+
+        // Translate language keys (best-effort — admin-next will also try).
+        $language = $this->grav['language'] ?? null;
+        $translate = static function ($value) use ($language) {
+            if (!is_string($value) || $language === null) {
+                return $value;
+            }
+            $translated = $language->translate($value);
+            return is_string($translated) ? $translated : $value;
+        };
+
+        return $this->serializeCacheTab($cacheTab, $translate);
+    }
+
+    /**
+     * Minimal field serializer mirroring BlueprintController::serializeFields
+     * for the property set the shared cache tab actually uses (toggle / text
+     * with toggleable, options, validate, config-default@). We don't need
+     * the full serializer here — the input is fixed and well-known.
+     */
+    private function serializeCacheTab(array $cacheTab, callable $translate): array
+    {
+        $serialized = [
+            'name'  => 'cache',
+            'type'  => 'tab',
+            'title' => $translate($cacheTab['title'] ?? 'Caching'),
+            'fields' => [],
+        ];
+
+        foreach ($cacheTab['fields'] ?? [] as $name => $field) {
+            if (!is_array($field)) {
+                continue;
+            }
+
+            $entry = [
+                'name' => (string) $name,
+                'type' => (string) ($field['type'] ?? 'text'),
+            ];
+
+            foreach (['label', 'help', 'highlight', 'toggleable', 'default', 'size'] as $prop) {
+                if (isset($field[$prop])) {
+                    $entry[$prop] = $field[$prop];
+                }
+            }
+
+            if (isset($entry['label'])) {
+                $entry['label'] = $translate($entry['label']);
+            }
+
+            if (isset($field['options']) && is_array($field['options'])) {
+                $ordered = [];
+                foreach ($field['options'] as $optKey => $optLabel) {
+                    $ordered[] = ['value' => (string) $optKey, 'label' => $translate($optLabel)];
+                }
+                $entry['options'] = $ordered;
+            }
+
+            if (isset($field['validate']) && is_array($field['validate'])) {
+                $entry['validate'] = $field['validate'];
+            }
+
+            // Resolve config-default@ — read the system config value so the
+            // form falls back to the system-wide cache defaults when the
+            // plugin hasn't overridden them.
+            if (isset($field['config-default@'])) {
+                $key = (string) $field['config-default@'];
+                $entry['default'] = $this->grav['config']->get($key);
+            }
+
+            $serialized['fields'][] = $entry;
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * Append a tab into the first `tabs` container we find in the serialized
+     * fields list. If no tabs container exists, wrap the existing top-level
+     * fields under a synthesized tabs container so the Caching tab still
+     * has somewhere to live.
+     */
+    private function appendTab(array $fields, array $tab): array
+    {
+        foreach ($fields as $i => $field) {
+            if (($field['type'] ?? null) === 'tabs' && isset($field['fields']) && is_array($field['fields'])) {
+                $fields[$i]['fields'][] = $tab;
+                return $fields;
+            }
+        }
+
+        return [
+            [
+                'name'   => 'tabs',
+                'type'   => 'tabs',
+                'fields' => array_merge($fields, [$tab]),
+            ],
+        ];
     }
 
     /**
