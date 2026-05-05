@@ -989,19 +989,28 @@ class FlexObjectsPlugin extends Plugin
 
         $language = $this->grav['language'];
 
-        foreach ($flex->getAdminMenuItems() as $type => $menuItem) {
-            if (empty($type) || in_array($type, $builtIn, true)) {
+        // We iterate every enabled directory, not just those returned by
+        // getAdminMenuItems(). Directories whose blueprint omits `admin.menu`
+        // get collapsed into a single empty-key entry by getAdminMenuItems()
+        // and would otherwise never appear in the admin-next sidebar (admin
+        // classic shows them via the Flex Objects index page instead). Pull
+        // the menu config per-directory so we can synthesize a fallback when
+        // it's absent.
+        $menuItems = $flex->getAdminMenuItems();
+        foreach ($flex->getDirectories() as $directory) {
+            $type = $directory->getFlexType();
+            if (empty($type) || in_array($type, $builtIn, true) || !$directory->isEnabled()) {
                 continue;
             }
+            if (!empty($directory->getConfig('admin.disabled'))) {
+                continue;
+            }
+
+            $menuItem = $menuItems[$type] ?? null;
 
             // Plugins that ship their own admin-next sidebar entry can opt out
             // of the generic flex auto-registration via the menu blueprint.
-            if (!empty($menuItem['hidden_in_admin_next'])) {
-                continue;
-            }
-
-            $directory = $flex->getDirectory($type);
-            if (!$directory || !$directory->isEnabled()) {
+            if ($menuItem && !empty($menuItem['hidden_in_admin_next'])) {
                 continue;
             }
 
@@ -1028,8 +1037,11 @@ class FlexObjectsPlugin extends Plugin
                 }
             }
 
+            // Fall back to the directory's own title/icon when the blueprint
+            // doesn't define an admin.menu block (issue #209). This mirrors
+            // admin-classic, which lists every enabled directory regardless.
             $rawLabel = $menuItem['title'] ?? $directory->getTitle();
-            $rawIcon = $menuItem['icon'] ?? 'fa-file';
+            $rawIcon = $menuItem['icon'] ?? $directory->getConfig('icon') ?? 'fa-database';
 
             $items[] = [
                 'id'        => 'flex-objects-' . $type,

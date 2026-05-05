@@ -1,3 +1,9 @@
+# v1.4.0-rc.3
+## 05/05/2026
+
+1. [](#bugfix)
+    * Custom flex directories whose blueprint doesn't declare an `admin.menu` block now appear as their own entries in the admin-next sidebar, falling back to the directory's title and icon. Previously they were collapsed into a single placeholder by `getAdminMenuItems()` and silently skipped, so a working `admin/<type>` directory in admin-classic had no row at all in admin-next ([#209](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/209)).
+
 # v1.4.0-rc.2
 ## 05/05/2026
 
