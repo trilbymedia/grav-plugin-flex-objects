@@ -987,8 +987,16 @@ class FlexObjectsPlugin extends Plugin
         $builtIn = ['pages', 'user-accounts', 'user-groups'];
         $isSuperAdmin = $user && $user->get('access.admin.super');
 
+        $language = $this->grav['language'];
+
         foreach ($flex->getAdminMenuItems() as $type => $menuItem) {
             if (empty($type) || in_array($type, $builtIn, true)) {
+                continue;
+            }
+
+            // Plugins that ship their own admin-next sidebar entry can opt out
+            // of the generic flex auto-registration via the menu blueprint.
+            if (!empty($menuItem['hidden_in_admin_next'])) {
                 continue;
             }
 
@@ -1020,11 +1028,14 @@ class FlexObjectsPlugin extends Plugin
                 }
             }
 
+            $rawLabel = $menuItem['title'] ?? $directory->getTitle();
+            $rawIcon = $menuItem['icon'] ?? 'fa-file';
+
             $items[] = [
                 'id'        => 'flex-objects-' . $type,
                 'plugin'    => 'flex-objects',
-                'label'     => $menuItem['title'] ?? $directory->getTitle(),
-                'icon'      => $menuItem['icon'] ?? 'fa-file',
+                'label'     => $language->translate($rawLabel) ?: $rawLabel,
+                'icon'      => $this->normalizeFaIcon($rawIcon),
                 'route'     => '/flex-objects/' . $type,
                 'priority'  => $menuItem['priority'] ?? 0,
                 'badge'     => $count,
@@ -1033,6 +1044,20 @@ class FlexObjectsPlugin extends Plugin
         }
 
         $event['items'] = $items;
+    }
+
+    /**
+     * Normalize legacy FontAwesome 4 icon names (e.g. `fa-clock-o`) to the
+     * FA5+ equivalents that admin-next renders. Falls back to the input.
+     */
+    private function normalizeFaIcon(string $icon): string
+    {
+        // Strip any leading style prefix so we can normalize the bare name.
+        $stripped = preg_replace('/^(fas|far|fab|fa-solid|fa-regular|fa-brands)\s+/', '', $icon) ?? $icon;
+        if (str_ends_with($stripped, '-o')) {
+            return substr($stripped, 0, -2);
+        }
+        return $stripped;
     }
 
     /**
