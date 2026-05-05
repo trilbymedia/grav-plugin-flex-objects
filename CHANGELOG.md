@@ -1,5 +1,11 @@
+# v1.3.9
+## 03/11/2026
+
+1. [](#improved)
+    * Page creation now auto-deduplicates folder names (appending numeric suffix) instead of throwing an error, matching existing copy behavior
+
 # v1.3.8
-## 03/25/2026
+## 02/25/2026
 
 1. [](#improved)
    * New sqlitelindex backend class

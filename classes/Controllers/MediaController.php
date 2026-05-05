@@ -474,7 +474,7 @@ class MediaController extends AbstractController
          */
         foreach ($media->all() as $name => $medium) {
             $media_list[$name] = [
-                'url' => $medium->display($medium->get('extension') === 'svg' ? 'source' : 'thumbnail')->cropZoom(400, 300)->url(),
+                'url' => ($thumb = $medium->display($medium->get('extension') === 'svg' ? 'source' : 'thumbnail')) ? $thumb->cropZoom(400, 300)->url() : '',
                 'size' => $medium->get('size'),
                 'metadata' => $medium->metadata() ?: [],
                 'original' => $medium->higherQualityAlternative()->get('filename')
