@@ -1,3 +1,11 @@
+# v1.4.0-rc.2
+## 05/05/2026
+
+1. [](#bugfix)
+    * Auto-registered admin-next sidebar entries from flex types now translate their labels and normalize legacy FontAwesome 4 icon names (e.g. `fa-clock-o`), so plugin-supplied flex menus no longer render raw `PLUGIN_*.KEY` strings or land with an empty icon slot.
+2. [](#new)
+    * Added a `hidden_in_admin_next` flag on flex `admin.menu.base` entries so plugins that already register their own admin-next sidebar item can suppress the duplicate auto-registered row.
+
 # v1.4.0-rc.1
 ## 05/04/2026
 
