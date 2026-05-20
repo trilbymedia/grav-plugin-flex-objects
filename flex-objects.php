@@ -985,7 +985,9 @@ class FlexObjectsPlugin extends Plugin
 
         // Skip built-in types that already have dedicated admin-next UI
         $builtIn = ['pages', 'user-accounts', 'user-groups'];
-        $isSuperAdmin = $user && $user->get('access.admin.super');
+        // Accept either super-admin scope: admin-next sessions use api.super,
+        // legacy admin-classic accounts use admin.super.
+        $isSuperAdmin = $user && ($user->get('access.api.super') || $user->get('access.admin.super'));
 
         $language = $this->grav['language'];
 

@@ -1,3 +1,9 @@
+# v1.4.0-rc.4
+## 05/20/2026
+
+1. [](#bugfix)
+    * Custom flex directories no longer disappear from the admin-next sidebar for super-admins whose account only carries `access.api.super` (the admin-next gate) rather than the legacy `access.admin.super` ([#209](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/209)).
+
 # v1.4.0-rc.3
 ## 05/05/2026
 
