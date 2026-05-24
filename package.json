@@ -9,7 +9,7 @@
         "prod": "webpack --mode production --config webpack.conf.js"
     },
     "dependencies": {
-        "axios": "^1.15.0",
+        "axios": "^1.15.2",
         "eventemitter3": "^4.0.7",
         "lodash": "^4.18.1",
         "tiny-cookie": "^2.3.2",
@@ -20,26 +20,26 @@
         "vuetable-2": "^1.7.5"
     },
     "devDependencies": {
-        "@babel/core": "^7.15.5",
-        "@babel/eslint-parser": "^7.15.7",
-        "@babel/plugin-proposal-object-rest-spread": "^7.15.6",
-        "@babel/preset-env": "^7.15.6",
+        "@babel/core": "^7.29.0",
+        "@babel/eslint-parser": "^7.28.6",
+        "@babel/plugin-transform-object-rest-spread": "^7.28.6",
+        "@babel/preset-env": "^7.29.5",
         "babel-loader": "^8.2.2",
         "cross-env": "^7.0.3",
         "css-loader": "^6.3.0",
         "eslint": "^7.32.0",
         "eslint-webpack-plugin": "^3.0.1",
         "exports-loader": "^3.0.0",
-        "gulp-sourcemaps": "^3.0.0",
         "imports-loader": "^3.0.0",
         "terser-webpack-plugin": "^5.4.0",
         "vue-loader": "^15.9.8",
         "webpack": "^5.104.1",
         "webpack-cli": "^4.8.0"
     },
-    "resolutions": {
-        "vuetable-2/axios": "^1.15.0",
-        "webpack/terser-webpack-plugin": "^5.4.0"
+    "overrides": {
+        "vuetable-2": {
+            "axios": "$axios"
+        }
     },
     "browserslist": [
         "last 4 Chrome versions",

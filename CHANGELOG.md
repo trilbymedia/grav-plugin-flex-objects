@@ -1,8 +1,14 @@
 # v1.4.0-rc.4
-## 05/20/2026
+## 05/24/2026
 
 1. [](#bugfix)
     * Custom flex directories no longer disappear from the admin-next sidebar for super-admins whose account only carries `access.api.super` (the admin-next gate) rather than the legacy `access.admin.super` ([#209](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/209)).
+2. [](#improved)
+    * Cleared the 3 high-severity `npm audit` advisories (axios SSRF / prototype-pollution chain, `follow-redirects` header leak) by replacing the yarn-only `resolutions` block with an npm-native `overrides` that pins vuetable-2's nested `axios` to the top-level v1.x. Note: the previous `resolutions` field was silently ignored under npm, so vuetable-2 had been shipping its bundled axios 0.x all along.
+    * Bumped `axios` to `^1.15.2` and refreshed `@babel/core`, `@babel/eslint-parser`, and `@babel/preset-env` to their current 7.28-7.29 releases, dropping a long list of deprecated `@babel/plugin-proposal-*` transitives.
+    * Renamed the deprecated `@babel/plugin-proposal-object-rest-spread` to `@babel/plugin-transform-object-rest-spread` (also updated in `webpack.conf.js`).
+    * Removed the unused `gulp-sourcemaps` devDependency, which existed only to pull in an ancient `postcss`.
+    * Switched the project's package manager to npm: deleted the stale `yarn.lock` and committed `package-lock.json`. Supersedes dependabot PRs [#205](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/205), [#206](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/206), [#208](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/208), [#210](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/210), [#211](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/211), [#212](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/212).
 
 # v1.4.0-rc.3
 ## 05/05/2026
