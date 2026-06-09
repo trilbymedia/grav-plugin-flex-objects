@@ -768,6 +768,12 @@ class FlexObjectsPlugin extends Plugin
         $routes->patch('/flex-objects/{type}/{key}', [$controller, 'update']);
         $routes->delete('/flex-objects/{type}/{key}', [$controller, 'delete']);
 
+        // Object media — stored alongside the object file in folder-based
+        // directories (e.g. user-data://flex-objects/contacts/{id}).
+        $routes->get('/flex-objects/{type}/{key}/media', [$controller, 'mediaList']);
+        $routes->post('/flex-objects/{type}/{key}/media', [$controller, 'mediaUpload']);
+        $routes->delete('/flex-objects/{type}/{key}/media/{filename}', [$controller, 'mediaDelete']);
+
         // Blueprint endpoint
         $routes->get('/blueprints/flex-objects/{type}', [$blueprintController, 'flexBlueprint']);
     }

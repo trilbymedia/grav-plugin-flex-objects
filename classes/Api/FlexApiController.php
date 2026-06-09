@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Grav\Plugin\FlexObjects\Api;
 
+use Grav\Common\Page\Media;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Plugin\Api\Controllers\AbstractApiController;
+use Grav\Plugin\Api\Controllers\HandlesMediaUploads;
 use Grav\Plugin\Api\Exceptions\NotFoundException;
+use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Response\ApiResponse;
 use Grav\Plugin\FlexObjects\Flex;
 use Psr\Http\Message\ResponseInterface;
@@ -15,6 +18,8 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class FlexApiController extends AbstractApiController
 {
+    use HandlesMediaUploads;
+
     /**
      * GET /flex-objects/config
      *
@@ -343,7 +348,176 @@ class FlexApiController extends AbstractApiController
         );
     }
 
+    /**
+     * GET /flex-objects/{type}/{key}/media — List media attached to an object.
+     *
+     * For folder-stored directories the media lives in the object's own
+     * storage folder (e.g. user-data://flex-objects/contacts/{id}), alongside
+     * the object's data file.
+     */
+    public function mediaList(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'read');
+
+        $object = $this->resolveObject($directory, $request);
+        $folder = $this->resolveMediaFolder($object);
+
+        $media = new Media($folder);
+        $serialized = $this->getSerializer()->serializeCollection($media->all());
+
+        return ApiResponse::create($serialized);
+    }
+
+    /**
+     * POST /flex-objects/{type}/{key}/media — Upload file(s) to an object.
+     */
+    public function mediaUpload(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'update');
+
+        $object = $this->resolveObject($directory, $request);
+        $key = $object->getKey();
+        $folder = $this->resolveMediaFolder($object);
+
+        if (!is_dir($folder) && !mkdir($folder, 0775, true) && !is_dir($folder)) {
+            throw new ValidationException('Unable to create media directory for this object.');
+        }
+
+        $uploadedFiles = $this->flattenUploadedFiles($request->getUploadedFiles());
+        if ($uploadedFiles === []) {
+            throw new ValidationException('No files were uploaded.');
+        }
+
+        $uploadedNames = [];
+        foreach ($uploadedFiles as $file) {
+            // Fire before event — plugins can throw to reject specific files
+            $this->fireEvent('onApiBeforeMediaUpload', [
+                'object' => $object,
+                'filename' => $file->getClientFilename(),
+                'type' => $file->getClientMediaType(),
+                'size' => $file->getSize(),
+            ]);
+
+            $this->processUploadedFile($file, $folder);
+            $uploadedNames[] = $file->getClientFilename();
+        }
+
+        // Fresh Media object to pick up the newly uploaded files
+        $media = new Media($folder);
+        $serialized = $this->getSerializer()->serializeCollection($media->all());
+
+        $this->fireAdminEvent('onAdminAfterAddMedia', ['object' => $object]);
+        $this->fireEvent('onApiMediaUploaded', [
+            'object' => $object,
+            'filenames' => $uploadedNames,
+        ]);
+
+        return ApiResponse::created(
+            data: $serialized,
+            location: $this->getApiBaseUrl() . '/flex-objects/' . $type . '/' . $key . '/media',
+            headers: $this->invalidationHeaders([
+                'flex-objects:' . $type . ':media:' . $key,
+                'flex-objects:' . $type . ':update:' . $key,
+            ]),
+        );
+    }
+
+    /**
+     * DELETE /flex-objects/{type}/{key}/media/{filename} — Delete a media file.
+     */
+    public function mediaDelete(ServerRequestInterface $request): ResponseInterface
+    {
+        $type = $this->getRouteParam($request, 'type');
+        $directory = $this->resolveDirectory($type);
+        $this->requireFlexPermission($request, $directory, 'update');
+
+        $object = $this->resolveObject($directory, $request);
+        $key = $object->getKey();
+        $folder = $this->resolveMediaFolder($object);
+        $filename = $this->getSafeFilename($request);
+
+        $filePath = $folder . '/' . $filename;
+        if (!file_exists($filePath)) {
+            throw new NotFoundException("Media file '{$filename}' not found on this object.");
+        }
+
+        $this->fireEvent('onApiBeforeMediaDelete', ['object' => $object, 'filename' => $filename]);
+
+        unlink($filePath);
+
+        // Also remove any metadata sidecar (.meta.yaml) if it exists
+        $metaPath = $filePath . '.meta.yaml';
+        if (file_exists($metaPath)) {
+            unlink($metaPath);
+        }
+
+        $this->fireAdminEvent('onAdminAfterDelMedia', ['object' => $object, 'filename' => $filename]);
+        $this->fireEvent('onApiMediaDeleted', ['object' => $object, 'filename' => $filename]);
+
+        return ApiResponse::noContent(
+            $this->invalidationHeaders([
+                'flex-objects:' . $type . ':media:' . $key,
+                'flex-objects:' . $type . ':update:' . $key,
+            ]),
+        );
+    }
+
     // ─── Helpers ───────────────────────────────────────────────
+
+    /**
+     * Resolve the {key} route param to an existing object or throw a 404.
+     */
+    private function resolveObject(FlexDirectory $directory, ServerRequestInterface $request): FlexObjectInterface
+    {
+        $key = $this->getRouteParam($request, 'key');
+        $object = $key !== null && $key !== '' ? $directory->getObject($key) : null;
+
+        if (!$object) {
+            $type = $directory->getFlexType();
+            throw new NotFoundException("Object '{$key}' not found in '{$type}'.");
+        }
+
+        return $object;
+    }
+
+    /**
+     * Resolve an object's media folder to an absolute, writable filesystem path.
+     *
+     * getMediaFolder() returns null for SimpleStorage directories (a single
+     * shared file, no per-object folder) and a GRAV_ROOT-relative or stream
+     * path for folder-stored ones. Normalize all cases to an absolute path.
+     */
+    private function resolveMediaFolder(FlexObjectInterface $object): string
+    {
+        $folder = method_exists($object, 'getMediaFolder') ? $object->getMediaFolder() : null;
+        if (!$folder) {
+            throw new ValidationException(
+                'This directory does not support per-object media. '
+                . 'Object media requires folder-based storage.',
+            );
+        }
+
+        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
+        $locator = $this->grav['locator'];
+        if ($locator->isStream($folder)) {
+            // Resolve to the absolute writable path, even if it doesn't exist yet
+            $resolved = $locator->findResource($folder, true, true);
+            if ($resolved) {
+                return $resolved;
+            }
+        }
+
+        // Already absolute? Use as-is. Otherwise treat as GRAV_ROOT-relative.
+        if (str_starts_with($folder, '/') || preg_match('#^[A-Za-z]:[\\\\/]#', $folder)) {
+            return $folder;
+        }
+
+        return rtrim(GRAV_ROOT, '/') . '/' . $folder;
+    }
 
     private function getFlex(): Flex
     {

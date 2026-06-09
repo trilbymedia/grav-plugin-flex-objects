@@ -1,3 +1,9 @@
+# v1.4.0-rc.5
+## 06/09/2026
+
+1. [](#new)
+    * Added API endpoints to list, upload, and delete a flex object's media files, stored alongside the object in its own folder ([#215](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/215)).
+
 # v1.4.0-rc.4
 ## 05/29/2026
 
