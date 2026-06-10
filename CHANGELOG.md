@@ -1,3 +1,9 @@
+# v1.4.0-rc.6
+## 06/10/2026
+
+1. [](#bugfix)
+    * A custom collection registered under more than one type no longer appears twice in the admin-next sidebar ([#4122](https://github.com/getgrav/grav/issues/4122)).
+
 # v1.4.0-rc.5
 ## 06/09/2026
 

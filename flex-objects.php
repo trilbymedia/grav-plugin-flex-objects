@@ -1005,12 +1005,32 @@ class FlexObjectsPlugin extends Plugin
         // the menu config per-directory so we can synthesize a fallback when
         // it's absent.
         $menuItems = $flex->getAdminMenuItems();
+
+        // Track the sidebar ids we've already emitted so a directory can never
+        // appear twice in the nav (issue #4122). A collection registered under
+        // two type keys — e.g. a migrated site where it sits in both the
+        // flex-objects `directories` config and a theme/plugin registration —
+        // would otherwise yield two identical entries. Seed from any items
+        // already on the event so a duplicate is dropped even if this handler
+        // somehow runs more than once.
+        $seen = [];
+        foreach ($items as $existing) {
+            if (isset($existing['id'])) {
+                $seen[$existing['id']] = true;
+            }
+        }
+
         foreach ($flex->getDirectories() as $directory) {
             $type = $directory->getFlexType();
             if (empty($type) || in_array($type, $builtIn, true) || !$directory->isEnabled()) {
                 continue;
             }
             if (!empty($directory->getConfig('admin.disabled'))) {
+                continue;
+            }
+
+            $id = 'flex-objects-' . $type;
+            if (isset($seen[$id])) {
                 continue;
             }
 
@@ -1051,8 +1071,9 @@ class FlexObjectsPlugin extends Plugin
             $rawLabel = $menuItem['title'] ?? $directory->getTitle();
             $rawIcon = $menuItem['icon'] ?? $directory->getConfig('icon') ?? 'fa-database';
 
+            $seen[$id] = true;
             $items[] = [
-                'id'        => 'flex-objects-' . $type,
+                'id'        => $id,
                 'plugin'    => 'flex-objects',
                 'label'     => $language->translate($rawLabel) ?: $rawLabel,
                 'icon'      => $this->normalizeFaIcon($rawIcon),
