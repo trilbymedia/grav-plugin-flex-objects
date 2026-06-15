@@ -3,6 +3,16 @@ enabled: true
 built_in_css: true
 extra_admin_twig_path: 'theme://admin/templates'
 
+# Media proxy (PROTOTYPE — see docs/specs/media-proxy.md)
+# Serve Flex Object media through PHP with an optional read-permission check,
+# so object media can live under a locked-down user/data instead of being
+# linked with a public /user/data/... URL.
+media_proxy:
+  enabled: false              # opt-in while prototyping
+  base: '/flex-media'         # public route prefix
+  authorize: false            # reads are NOT ACL-gated for now; flip on to honour the object's read ACL
+  cache_control: 'public, max-age=604800'
+
 # Security settings
 security:
   # Restrict non-superusers from modifying page form/process settings via header fields

@@ -1,3 +1,9 @@
+# v1.4.0-rc.7
+## 06/15/2026
+
+1. [](#new)
+    * Added an experimental, opt-in media proxy that serves a flex object's media through Grav, so object media can stay in a locked-down `user/data` instead of being linked directly; when enabled, existing `medium.url` links route through it automatically while resized images still serve from the cache ([getgrav/grav#4129](https://github.com/getgrav/grav/issues/4129)).
+
 # v1.4.0-rc.6
 ## 06/10/2026
 

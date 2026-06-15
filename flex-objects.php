@@ -212,7 +212,16 @@ class FlexObjectsPlugin extends Plugin
                 'onTwigTemplatePaths' => [
                     ['onTwigTemplatePaths', 0]
                 ],
+                'onTwigInitialized' => [
+                    ['onTwigInitialized', 0]
+                ],
+                'onFlexObjectMedia' => [
+                    ['onFlexObjectMedia', 0]
+                ],
                 'onPagesInitialized' => [
+                    // Serve Flex Object media through the permission-aware proxy
+                    // before the default flex router / 404 handler runs.
+                    ['serveMediaProxy', 100000],
                     ['onPagesInitialized', -10000]
                 ],
                 'onPageInitialized' => [
@@ -355,6 +364,97 @@ class FlexObjectsPlugin extends Plugin
                 }
             }
         }
+    }
+
+    /**
+     * [onPagesInitialized:100000] Serve Flex Object media through the
+     * permission-aware proxy (prototype — see docs/specs/media-proxy.md).
+     *
+     * Matches `<base>/<type>/<key>/<filename>` (base configurable, default
+     * `/flex-media`) and streams the file via MediaProxyController, so media can
+     * stay under a locked-down `user/data` instead of being linked directly.
+     *
+     * @param Event $event
+     */
+    public function serveMediaProxy(Event $event): void
+    {
+        if (!$this->config->get('plugins.flex-objects.media_proxy.enabled', false)) {
+            return;
+        }
+
+        /** @var Route|null $route */
+        $route = $event['route'] ?? null;
+        if (null === $route) {
+            return;
+        }
+
+        $base = '/' . trim((string) $this->config->get('plugins.flex-objects.media_proxy.base', '/flex-media'), '/');
+        $path = $route->getRoute();
+        if ($path !== $base && !str_starts_with($path, $base . '/')) {
+            return;
+        }
+
+        // <type>/<key>/<filename...> — filename may contain sub-paths.
+        $rest = trim(substr($path, strlen($base)), '/');
+        $parts = explode('/', $rest);
+        if (count($parts) < 3) {
+            return;
+        }
+        $type = array_shift($parts);
+        $key = array_shift($parts);
+        $filename = rawurldecode(implode('/', $parts));
+        $field = $route->getQueryParam('field');
+
+        $controller = new \Grav\Plugin\FlexObjects\Controllers\MediaProxyController($this->grav);
+        $response = $controller->serve($type, $key, $filename, is_string($field) ? $field : null, $event['request']);
+
+        $this->grav->close($response);
+    }
+
+    /**
+     * [onFlexObjectMedia] Stamp a proxy `url` override on each of an object's
+     * media items so `medium.url` routes the original through the proxy
+     * (prototype — see docs/specs/media-proxy.md). Core's ImageMedium honours the
+     * override only for unmodified originals, so resized/cropped derivatives keep
+     * serving straight from `images/`. No-op unless the proxy is enabled.
+     *
+     * @param Event $event
+     */
+    public function onFlexObjectMedia(Event $event): void
+    {
+        if (!$this->config->get('plugins.flex-objects.media_proxy.enabled', false)) {
+            return;
+        }
+
+        $object = $event['object'] ?? null;
+        $media = $event['media'] ?? null;
+        if (!$object instanceof \Grav\Framework\Flex\Interfaces\FlexObjectInterface
+            || !$media instanceof \Grav\Common\Media\Interfaces\MediaCollectionInterface) {
+            return;
+        }
+
+        foreach ($media as $filename => $medium) {
+            $medium->set('url', \Grav\Plugin\FlexObjects\Controllers\MediaProxyController::url($object, (string) $filename));
+        }
+    }
+
+    /**
+     * [onTwigInitialized] Register the `flex_media_url()` Twig helper so templates
+     * can link object media through the proxy while it is opt-in.
+     */
+    public function onTwigInitialized(): void
+    {
+        $twig = $this->grav['twig']->twig();
+        $twig->addFunction(new \Twig\TwigFunction(
+            'flex_media_url',
+            static function ($object, string $filename, ?string $field = null): string {
+                if (!$object instanceof \Grav\Framework\Flex\Interfaces\FlexObjectInterface) {
+                    return '';
+                }
+
+                return \Grav\Plugin\FlexObjects\Controllers\MediaProxyController::url($object, $filename, $field);
+            }
+        ));
     }
 
     /**
