@@ -394,6 +394,10 @@ class FlexApiController extends AbstractApiController
             throw new ValidationException('No files were uploaded.');
         }
 
+        // Honor per-field upload settings (random_name, accept, ...) forwarded
+        // by the file field; absent, this is an inert no-op.
+        $settings = $this->parseUploadFieldSettings($request);
+
         $uploadedNames = [];
         foreach ($uploadedFiles as $file) {
             // Fire before event — plugins can throw to reject specific files
@@ -404,8 +408,7 @@ class FlexApiController extends AbstractApiController
                 'size' => $file->getSize(),
             ]);
 
-            $this->processUploadedFile($file, $folder);
-            $uploadedNames[] = $file->getClientFilename();
+            $uploadedNames[] = $this->processUploadedFile($file, $folder, $settings);
         }
 
         // Fresh Media object to pick up the newly uploaded files
