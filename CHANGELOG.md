@@ -3,6 +3,8 @@
 
 1. [](#new)
     * Added an experimental, opt-in media proxy that serves a flex object's media through Grav, so object media can stay in a locked-down `user/data` instead of being linked directly; when enabled, existing `medium.url` links route through it automatically while resized images still serve from the cache ([getgrav/grav#4129](https://github.com/getgrav/grav/issues/4129)).
+    * A flex object's API response now includes its id, directory, and storage location, which admin-next shows in a copyable info panel on the editor ([getgrav/grav#4130](https://github.com/getgrav/grav/issues/4130)).
+    * Added a `[flex-objects]` shortcode (alias `[flex]`) to render a collection inline in page content, a safe alternative to putting Twig in content now that the Grav 2.0 sandbox blocks it ([#217](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/217)).
 
 # v1.4.0-rc.6
 ## 06/10/2026

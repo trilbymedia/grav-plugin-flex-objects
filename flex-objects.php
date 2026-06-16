@@ -100,6 +100,9 @@ class FlexObjectsPlugin extends Plugin
             ],
             'onApiBlueprintResolved' => [
                 ['onApiBlueprintResolved', 0]
+            ],
+            'onShortcodeHandlers' => [
+                ['onShortcodeHandlers', 0]
             ]
         ];
     }
@@ -664,6 +667,19 @@ class FlexObjectsPlugin extends Plugin
         /** @var Forms $forms */
         $forms = $event['forms'];
         $forms->registerType('flex', new FlexFormFactory());
+    }
+
+    /**
+     * [onShortcodeHandlers]: register the [flex-objects] / [flex] shortcode.
+     *
+     * Only fires when the Shortcode Core plugin is installed and active, so it
+     * adds no hard dependency — without it the event simply never runs.
+     *
+     * @return void
+     */
+    public function onShortcodeHandlers(): void
+    {
+        $this->grav['shortcode']->registerAllShortcodes(__DIR__ . '/classes/shortcodes');
     }
 
     /**

@@ -227,6 +227,7 @@ class FlexApiController extends AbstractApiController
         $this->requireFlexPermission($request, $directory, 'create');
 
         $body = $this->getRequestBody($request);
+        unset($body['__meta']);
 
         try {
             $object = $directory->createObject($body, '');
@@ -271,6 +272,7 @@ class FlexApiController extends AbstractApiController
         $this->validateEtag($request, $currentEtag);
 
         $body = $this->getRequestBody($request);
+        unset($body['__meta']);
 
         try {
             $object->update($body);
@@ -583,7 +585,38 @@ class FlexApiController extends AbstractApiController
     {
         $data = $object->jsonSerialize();
 
-        return array_merge(['key' => $object->getKey()], is_array($data) ? $data : []);
+        return array_merge(
+            ['key' => $object->getKey(), '__meta' => $this->objectMeta($object)],
+            is_array($data) ? $data : [],
+        );
+    }
+
+    /**
+     * Read-only metadata for the admin "object info" panel: the identifier used
+     * in code snippets plus where the object lives on disk. Returned under the
+     * reserved `__meta` key so the admin can show it without it ever becoming
+     * part of the saved object data.
+     *
+     * @return array<string, string>
+     */
+    private function objectMeta(FlexObjectInterface $object): array
+    {
+        $meta = [
+            'type' => $object->getFlexType(),
+            'key' => $object->getKey(),
+            'storageKey' => $object->getStorageKey(),
+        ];
+
+        // Storage folder comes from the media trait, not the object interface,
+        // so guard it — some storages return null until the object is saved.
+        if (method_exists($object, 'getStorageFolder')) {
+            $folder = $object->getStorageFolder();
+            if ($folder) {
+                $meta['storagePath'] = $folder;
+            }
+        }
+
+        return $meta;
     }
 
     private function serializeForList(FlexObjectInterface $object, array $listFields): array
