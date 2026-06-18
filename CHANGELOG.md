@@ -1,3 +1,9 @@
+# v1.4.0-rc.8
+## 06/18/2026
+
+1. [](#bugfix)
+    * The flex directories list API now localizes admin config labels, such as directory titles and list column headers, to the signed-in user's admin language instead of returning raw translation keys ([#219](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/219)).
+
 # v1.4.0-rc.7
 ## 06/15/2026
 

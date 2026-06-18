@@ -9,6 +9,7 @@ use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Plugin\Api\Controllers\AbstractApiController;
 use Grav\Plugin\Api\Controllers\HandlesMediaUploads;
+use Grav\Plugin\Api\Controllers\TranslatesAdminLabels;
 use Grav\Plugin\Api\Exceptions\NotFoundException;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\Api\Response\ApiResponse;
@@ -19,6 +20,36 @@ use Psr\Http\Message\ServerRequestInterface;
 class FlexApiController extends AbstractApiController
 {
     use HandlesMediaUploads;
+    use TranslatesAdminLabels;
+
+    /**
+     * Admin-config keys whose string values are user-facing labels and should
+     * be translated against the signed-in user's admin language. Everything
+     * else (Twig templates in `value`, formatters, field `type`, etc.) is left
+     * untouched, matching how blueprint serialization only translates labels.
+     */
+    private const TRANSLATABLE_LABEL_KEYS = ['label', 'title', 'text', 'help', 'placeholder', 'description'];
+
+    /**
+     * Recursively translate language-key-looking label values within an admin
+     * config subtree. {@see translateLabel()} is a no-op for anything that
+     * isn't a translation key, so non-label strings pass through unchanged.
+     *
+     * @param array<mixed> $node
+     * @return array<mixed>
+     */
+    private function translateConfigLabels(array $node): array
+    {
+        foreach ($node as $key => $value) {
+            if (is_array($value)) {
+                $node[$key] = $this->translateConfigLabels($value);
+            } elseif (is_string($value) && in_array($key, self::TRANSLATABLE_LABEL_KEYS, true)) {
+                $node[$key] = $this->translateLabel($value);
+            }
+        }
+
+        return $node;
+    }
 
     /**
      * GET /flex-objects/config
@@ -61,6 +92,11 @@ class FlexApiController extends AbstractApiController
         $user = $this->getUser($request);
         $result = [];
 
+        // Resolve the signed-in user's admin language once so the directory
+        // labels below come back localized instead of as raw PLUGIN_* keys
+        // (matching how the blueprint endpoints translate their labels).
+        $this->primeAdminLanguages($request);
+
         // Skip built-in types that already have dedicated admin-next UI
         $builtIn = ['pages', 'user-accounts', 'user-groups'];
 
@@ -100,14 +136,14 @@ class FlexApiController extends AbstractApiController
 
             $result[] = [
                 'type'        => $directory->getFlexType(),
-                'title'       => $menu['title'] ?? $directory->getTitle(),
-                'description' => $directory->getDescription() ?? '',
+                'title'       => $this->translateLabel($menu['title'] ?? $directory->getTitle()),
+                'description' => $this->translateLabel($directory->getDescription() ?? ''),
                 'icon'        => $menu['icon'] ?? 'fa-file',
-                'list'        => $config['list'] ?? [],
-                'edit'        => $config['edit'] ?? [],
+                'list'        => $this->translateConfigLabels($config['list'] ?? []),
+                'edit'        => $this->translateConfigLabels($config['edit'] ?? []),
                 'search'      => $directory->getConfig('data.search') ?? [],
                 'field_types' => $fieldTypes,
-                'export'      => $config['export'] ?? [],
+                'export'      => $this->translateConfigLabels($config['export'] ?? []),
             ];
         }
 
