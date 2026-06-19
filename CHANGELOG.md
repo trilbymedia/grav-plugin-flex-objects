@@ -1,7 +1,8 @@
 # v1.4.0-rc.8
-## 06/18/2026
+## 06/19/2026
 
 1. [](#bugfix)
+    * A dynamic collection or object title set in page frontmatter is now evaluated through Grav's sandboxed Twig instead of as a full template, so an editor can no longer use a title to run arbitrary code on the server.
     * The flex directories list API now localizes admin config labels, such as directory titles and list column headers, to the signed-in user's admin language instead of returning raw translation keys ([#219](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/219)).
 
 # v1.4.0-rc.7

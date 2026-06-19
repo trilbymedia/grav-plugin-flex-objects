@@ -7,7 +7,12 @@
 {% if object %}
     {%- set title = options.title -%}
     {%- if title matches '/\{/' -%}
-        {%- set title = include(template_from_string(title, 'object title template'))|trim -%}
+        {# The title comes from page frontmatter (page.header.flex.object.title)
+           and is editor-controlled. Render it through evaluate_twig (the sandboxed
+           Twig::processString path) instead of template_from_string, which would
+           produce an unsandboxed sub-template and turn an editor-supplied title
+           into arbitrary server-side Twig. GHSA-623v-m3c4-3pw8. #}
+        {%- set title = evaluate_twig(title)|trim -%}
     {%- endif -%}
     {% if title %}
         {% do page.title(title) %}
