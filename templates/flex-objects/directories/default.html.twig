@@ -13,7 +13,9 @@
     {% for type, directory in directories %}
         {%- set title = options.directories[type]['title'] ?? options.directories[type]['collection']['title'] ?? directory.title -%}
         {%- if title matches '/\{/' -%}
-            {%- set title = include(template_from_string(title, 'collection title template'))|trim -%}
+            {# Editor-controlled title from frontmatter: render via the sandboxed
+               evaluate_twig path, not template_from_string. GHSA-623v-m3c4-3pw8. #}
+            {%- set title = evaluate_twig(title)|trim -%}
         {%- endif -%}
         {%- set description = options.directories[type]['description'] ?? options.directories[type]['collection']['description'] ?? directory.description -%}
 

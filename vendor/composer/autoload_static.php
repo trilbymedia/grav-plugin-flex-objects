@@ -7,14 +7,14 @@ namespace Composer\Autoload;
 class ComposerStaticInit69fc28174abe912f71ebf710ee161e8f
 {
     public static $prefixLengthsPsr4 = array (
-        'G' => 
+        'G' =>
         array (
             'Grav\\Plugin\\FlexObjects\\' => 24,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Grav\\Plugin\\FlexObjects\\' => 
+        'Grav\\Plugin\\FlexObjects\\' =>
         array (
             0 => __DIR__ . '/../..' . '/classes',
         ),
