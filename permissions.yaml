@@ -3,6 +3,10 @@ actions:
     type: crudl
     label: Flex Objects
 
+  api.flex-objects:
+    type: crudl
+    label: Flex Objects API
+
 types:
   crudpl:
     type: crud

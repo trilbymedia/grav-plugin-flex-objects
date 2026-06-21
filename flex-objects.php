@@ -91,6 +91,18 @@ class FlexObjectsPlugin extends Plugin
             ],
             'onFormRegisterTypes' => [
                 ['onFormRegisterTypes', 0]
+            ],
+            'onApiRegisterRoutes' => [
+                ['onApiRegisterRoutes', 0]
+            ],
+            'onApiSidebarItems' => [
+                ['onApiSidebarItems', 0]
+            ],
+            'onApiBlueprintResolved' => [
+                ['onApiBlueprintResolved', 0]
+            ],
+            'onShortcodeHandlers' => [
+                ['onShortcodeHandlers', 0]
             ]
         ];
     }
@@ -203,7 +215,16 @@ class FlexObjectsPlugin extends Plugin
                 'onTwigTemplatePaths' => [
                     ['onTwigTemplatePaths', 0]
                 ],
+                'onTwigInitialized' => [
+                    ['onTwigInitialized', 0]
+                ],
+                'onFlexObjectMedia' => [
+                    ['onFlexObjectMedia', 0]
+                ],
                 'onPagesInitialized' => [
+                    // Serve Flex Object media through the permission-aware proxy
+                    // before the default flex router / 404 handler runs.
+                    ['serveMediaProxy', 100000],
                     ['onPagesInitialized', -10000]
                 ],
                 'onPageInitialized' => [
@@ -346,6 +367,97 @@ class FlexObjectsPlugin extends Plugin
                 }
             }
         }
+    }
+
+    /**
+     * [onPagesInitialized:100000] Serve Flex Object media through the
+     * permission-aware proxy (prototype — see docs/specs/media-proxy.md).
+     *
+     * Matches `<base>/<type>/<key>/<filename>` (base configurable, default
+     * `/flex-media`) and streams the file via MediaProxyController, so media can
+     * stay under a locked-down `user/data` instead of being linked directly.
+     *
+     * @param Event $event
+     */
+    public function serveMediaProxy(Event $event): void
+    {
+        if (!$this->config->get('plugins.flex-objects.media_proxy.enabled', false)) {
+            return;
+        }
+
+        /** @var Route|null $route */
+        $route = $event['route'] ?? null;
+        if (null === $route) {
+            return;
+        }
+
+        $base = '/' . trim((string) $this->config->get('plugins.flex-objects.media_proxy.base', '/flex-media'), '/');
+        $path = $route->getRoute();
+        if ($path !== $base && !str_starts_with($path, $base . '/')) {
+            return;
+        }
+
+        // <type>/<key>/<filename...> — filename may contain sub-paths.
+        $rest = trim(substr($path, strlen($base)), '/');
+        $parts = explode('/', $rest);
+        if (count($parts) < 3) {
+            return;
+        }
+        $type = array_shift($parts);
+        $key = array_shift($parts);
+        $filename = rawurldecode(implode('/', $parts));
+        $field = $route->getQueryParam('field');
+
+        $controller = new \Grav\Plugin\FlexObjects\Controllers\MediaProxyController($this->grav);
+        $response = $controller->serve($type, $key, $filename, is_string($field) ? $field : null, $event['request']);
+
+        $this->grav->close($response);
+    }
+
+    /**
+     * [onFlexObjectMedia] Stamp a proxy `url` override on each of an object's
+     * media items so `medium.url` routes the original through the proxy
+     * (prototype — see docs/specs/media-proxy.md). Core's ImageMedium honours the
+     * override only for unmodified originals, so resized/cropped derivatives keep
+     * serving straight from `images/`. No-op unless the proxy is enabled.
+     *
+     * @param Event $event
+     */
+    public function onFlexObjectMedia(Event $event): void
+    {
+        if (!$this->config->get('plugins.flex-objects.media_proxy.enabled', false)) {
+            return;
+        }
+
+        $object = $event['object'] ?? null;
+        $media = $event['media'] ?? null;
+        if (!$object instanceof \Grav\Framework\Flex\Interfaces\FlexObjectInterface
+            || !$media instanceof \Grav\Common\Media\Interfaces\MediaCollectionInterface) {
+            return;
+        }
+
+        foreach ($media as $filename => $medium) {
+            $medium->set('url', \Grav\Plugin\FlexObjects\Controllers\MediaProxyController::url($object, (string) $filename));
+        }
+    }
+
+    /**
+     * [onTwigInitialized] Register the `flex_media_url()` Twig helper so templates
+     * can link object media through the proxy while it is opt-in.
+     */
+    public function onTwigInitialized(): void
+    {
+        $twig = $this->grav['twig']->twig();
+        $twig->addFunction(new \Twig\TwigFunction(
+            'flex_media_url',
+            static function ($object, string $filename, ?string $field = null): string {
+                if (!$object instanceof \Grav\Framework\Flex\Interfaces\FlexObjectInterface) {
+                    return '';
+                }
+
+                return \Grav\Plugin\FlexObjects\Controllers\MediaProxyController::url($object, $filename, $field);
+            }
+        ));
     }
 
     /**
@@ -558,6 +670,19 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
+     * [onShortcodeHandlers]: register the [flex-objects] / [flex] shortcode.
+     *
+     * Only fires when the Shortcode Core plugin is installed and active, so it
+     * adds no hard dependency — without it the event simply never runs.
+     *
+     * @return void
+     */
+    public function onShortcodeHandlers(): void
+    {
+        $this->grav['shortcode']->registerAllShortcodes(__DIR__ . '/classes/shortcodes');
+    }
+
+    /**
      * @param Event $event
      * @return void
      */
@@ -729,6 +854,367 @@ class FlexObjectsPlugin extends Plugin
                 'priority' => $priority
             ] + $badge;
         }
+    }
+
+    /**
+     * Register API routes for admin-next.
+     */
+    public function onApiRegisterRoutes(Event $event): void
+    {
+        if (!$this->config->get('plugins.flex-objects.enabled', true)) {
+            return;
+        }
+
+        $routes = $event['routes'];
+        $controller = \Grav\Plugin\FlexObjects\Api\FlexApiController::class;
+        $blueprintController = \Grav\Plugin\FlexObjects\Api\FlexBlueprintController::class;
+
+        // Config endpoint — static routes first (FastRoute constraint)
+        $routes->get('/flex-objects/config', [$controller, 'config']);
+        // Available blueprints (powers the plugin-settings `directories` field)
+        $routes->get('/flex-objects/blueprints', [$controller, 'blueprints']);
+        // Directory listing
+        $routes->get('/flex-objects', [$controller, 'directories']);
+
+        // CRUD routes — static paths before parameterized (FastRoute constraint)
+        $routes->get('/flex-objects/{type}/export', [$controller, 'export']);
+        $routes->get('/flex-objects/{type}', [$controller, 'index']);
+        $routes->post('/flex-objects/{type}', [$controller, 'create']);
+        $routes->get('/flex-objects/{type}/{key}', [$controller, 'show']);
+        $routes->patch('/flex-objects/{type}/{key}', [$controller, 'update']);
+        $routes->delete('/flex-objects/{type}/{key}', [$controller, 'delete']);
+
+        // Object media — stored alongside the object file in folder-based
+        // directories (e.g. user-data://flex-objects/contacts/{id}).
+        $routes->get('/flex-objects/{type}/{key}/media', [$controller, 'mediaList']);
+        $routes->post('/flex-objects/{type}/{key}/media', [$controller, 'mediaUpload']);
+        $routes->delete('/flex-objects/{type}/{key}/media/{filename}', [$controller, 'mediaDelete']);
+
+        // Blueprint endpoint
+        $routes->get('/blueprints/flex-objects/{type}', [$blueprintController, 'flexBlueprint']);
+    }
+
+    /**
+     * Inject the shared Flex configure tabs (Caching) into admin-next plugin
+     * page blueprints owned by a plugin that registers a Flex directory.
+     *
+     * In admin-classic, FlexDirectory::getDirectoryBlueprint() automatically
+     * merges system/blueprints/flex/shared/configure.yaml on top of each
+     * directory's configure view, which is how the "Caching" tab appears in
+     * the configure form. Admin-next plugin pages don't go through the Flex
+     * configure pipeline — they're served by the API plugin's
+     * BlueprintController::pluginPageBlueprint, which fires
+     * onApiBlueprintResolved with context='plugin-page'. We hook that event
+     * here and append the same Caching tab so the two UIs match.
+     */
+    public function onApiBlueprintResolved(Event $event): void
+    {
+        if (($event['context'] ?? null) !== 'plugin-page') {
+            return;
+        }
+
+        $plugin = (string) ($event['plugin'] ?? '');
+        if ($plugin === '' || !$this->pluginOwnsFlexDirectory($plugin)) {
+            return;
+        }
+
+        $cacheTab = $this->buildSharedCacheTab();
+        if ($cacheTab === null) {
+            return;
+        }
+
+        $fields = $event['fields'];
+        $fields = $this->appendTab($fields, $cacheTab);
+        $event['fields'] = $fields;
+    }
+
+    /**
+     * Walk every registered Flex directory's blueprint path and check if it
+     * lives under plugin://{$slug}/. If so, the plugin owns at least one
+     * Flex directory and is a candidate for caching-tab injection.
+     */
+    private function pluginOwnsFlexDirectory(string $slug): bool
+    {
+        $flex = $this->grav['flex_objects'] ?? null;
+        if (!$flex) {
+            return false;
+        }
+
+        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
+        $locator = $this->grav['locator'];
+        $pluginPath = $locator->findResource("plugin://{$slug}", true);
+        if (!$pluginPath) {
+            return false;
+        }
+        $pluginPath = rtrim($pluginPath, '/') . '/';
+
+        foreach ($flex->getDirectories() as $directory) {
+            if (!$directory instanceof FlexDirectory) {
+                continue;
+            }
+
+            $blueprintFile = $directory->getBlueprint()->getFilename();
+            if (!$blueprintFile) {
+                continue;
+            }
+
+            $resolved = $locator->isStream($blueprintFile)
+                ? $locator->findResource($blueprintFile, true)
+                : $blueprintFile;
+            if ($resolved && str_starts_with((string) $resolved, $pluginPath)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Load system/blueprints/flex/shared/configure.yaml, isolate the
+     * `cache` tab, and serialize it into the same shape the API plugin's
+     * BlueprintController emits — so the result can be appended to a
+     * resolved field list directly.
+     */
+    private function buildSharedCacheTab(): ?array
+    {
+        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
+        $locator = $this->grav['locator'];
+        $path = $locator->findResource('blueprints://flex/shared/configure.yaml');
+        if (!$path) {
+            return null;
+        }
+
+        $blueprint = new \Grav\Common\Data\Blueprint($path);
+        $blueprint->load();
+
+        $form = $blueprint->form();
+        $cacheTab = $form['fields']['tabs']['fields']['cache'] ?? null;
+        if (!is_array($cacheTab)) {
+            return null;
+        }
+
+        // Translate language keys (best-effort — admin-next will also try).
+        $language = $this->grav['language'] ?? null;
+        $translate = static function ($value) use ($language) {
+            if (!is_string($value) || $language === null) {
+                return $value;
+            }
+            $translated = $language->translate($value);
+            return is_string($translated) ? $translated : $value;
+        };
+
+        return $this->serializeCacheTab($cacheTab, $translate);
+    }
+
+    /**
+     * Minimal field serializer mirroring BlueprintController::serializeFields
+     * for the property set the shared cache tab actually uses (toggle / text
+     * with toggleable, options, validate, config-default@). We don't need
+     * the full serializer here — the input is fixed and well-known.
+     */
+    private function serializeCacheTab(array $cacheTab, callable $translate): array
+    {
+        $serialized = [
+            'name'  => 'cache',
+            'type'  => 'tab',
+            'title' => $translate($cacheTab['title'] ?? 'Caching'),
+            'fields' => [],
+        ];
+
+        foreach ($cacheTab['fields'] ?? [] as $name => $field) {
+            if (!is_array($field)) {
+                continue;
+            }
+
+            $entry = [
+                'name' => (string) $name,
+                'type' => (string) ($field['type'] ?? 'text'),
+            ];
+
+            foreach (['label', 'help', 'highlight', 'toggleable', 'default', 'size'] as $prop) {
+                if (isset($field[$prop])) {
+                    $entry[$prop] = $field[$prop];
+                }
+            }
+
+            if (isset($entry['label'])) {
+                $entry['label'] = $translate($entry['label']);
+            }
+
+            if (isset($field['options']) && is_array($field['options'])) {
+                $ordered = [];
+                foreach ($field['options'] as $optKey => $optLabel) {
+                    $ordered[] = ['value' => (string) $optKey, 'label' => $translate($optLabel)];
+                }
+                $entry['options'] = $ordered;
+            }
+
+            if (isset($field['validate']) && is_array($field['validate'])) {
+                $entry['validate'] = $field['validate'];
+            }
+
+            // Resolve config-default@ — read the system config value so the
+            // form falls back to the system-wide cache defaults when the
+            // plugin hasn't overridden them.
+            if (isset($field['config-default@'])) {
+                $key = (string) $field['config-default@'];
+                $entry['default'] = $this->grav['config']->get($key);
+            }
+
+            $serialized['fields'][] = $entry;
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * Append a tab into the first `tabs` container we find in the serialized
+     * fields list. If no tabs container exists, wrap the existing top-level
+     * fields under a synthesized tabs container so the Caching tab still
+     * has somewhere to live.
+     */
+    private function appendTab(array $fields, array $tab): array
+    {
+        foreach ($fields as $i => $field) {
+            if (($field['type'] ?? null) === 'tabs' && isset($field['fields']) && is_array($field['fields'])) {
+                $fields[$i]['fields'][] = $tab;
+                return $fields;
+            }
+        }
+
+        return [
+            [
+                'name'   => 'tabs',
+                'type'   => 'tabs',
+                'fields' => array_merge($fields, [$tab]),
+            ],
+        ];
+    }
+
+    /**
+     * Register sidebar items for admin-next.
+     */
+    public function onApiSidebarItems(Event $event): void
+    {
+        if (!$this->config->get('plugins.flex-objects.enabled', true)) {
+            return;
+        }
+
+        /** @var Flex $flex */
+        $flex = $this->grav['flex_objects'];
+        $user = $event['user'] ?? null;
+        $items = $event['items'] ?? [];
+
+        // Skip built-in types that already have dedicated admin-next UI
+        $builtIn = ['pages', 'user-accounts', 'user-groups'];
+        // Accept either super-admin scope: admin-next sessions use api.super,
+        // legacy admin-classic accounts use admin.super.
+        $isSuperAdmin = $user && ($user->get('access.api.super') || $user->get('access.admin.super'));
+
+        $language = $this->grav['language'];
+
+        // We iterate every enabled directory, not just those returned by
+        // getAdminMenuItems(). Directories whose blueprint omits `admin.menu`
+        // get collapsed into a single empty-key entry by getAdminMenuItems()
+        // and would otherwise never appear in the admin-next sidebar (admin
+        // classic shows them via the Flex Objects index page instead). Pull
+        // the menu config per-directory so we can synthesize a fallback when
+        // it's absent.
+        $menuItems = $flex->getAdminMenuItems();
+
+        // Track the sidebar ids we've already emitted so a directory can never
+        // appear twice in the nav (issue #4122). A collection registered under
+        // two type keys — e.g. a migrated site where it sits in both the
+        // flex-objects `directories` config and a theme/plugin registration —
+        // would otherwise yield two identical entries. Seed from any items
+        // already on the event so a duplicate is dropped even if this handler
+        // somehow runs more than once.
+        $seen = [];
+        foreach ($items as $existing) {
+            if (isset($existing['id'])) {
+                $seen[$existing['id']] = true;
+            }
+        }
+
+        foreach ($flex->getDirectories() as $directory) {
+            $type = $directory->getFlexType();
+            if (empty($type) || in_array($type, $builtIn, true) || !$directory->isEnabled()) {
+                continue;
+            }
+            if (!empty($directory->getConfig('admin.disabled'))) {
+                continue;
+            }
+
+            $id = 'flex-objects-' . $type;
+            if (isset($seen[$id])) {
+                continue;
+            }
+
+            $menuItem = $menuItems[$type] ?? null;
+
+            // Plugins that ship their own admin-next sidebar entry can opt out
+            // of the generic flex auto-registration via the menu blueprint.
+            if ($menuItem && !empty($menuItem['hidden_in_admin_next'])) {
+                continue;
+            }
+
+            // Check if user has list permission for this directory
+            if ($user && !$isSuperAdmin && !$directory->isAuthorized('list', 'admin', $user)) {
+                continue;
+            }
+
+            // Get object count
+            $count = null;
+            try {
+                $count = $directory->getCollection()->count();
+            } catch (\Exception $e) {
+                // Non-critical
+            }
+
+            // Derive the api permission key from the blueprint's permission config
+            $perms = $directory->getConfig('admin.permissions', []);
+            $authorizeKey = null;
+            foreach ($perms as $prefix => $cfg) {
+                if (str_starts_with($prefix, 'api.')) {
+                    $authorizeKey = $prefix . '.list';
+                    break;
+                }
+            }
+
+            // Fall back to the directory's own title/icon when the blueprint
+            // doesn't define an admin.menu block (issue #209). This mirrors
+            // admin-classic, which lists every enabled directory regardless.
+            $rawLabel = $menuItem['title'] ?? $directory->getTitle();
+            $rawIcon = $menuItem['icon'] ?? $directory->getConfig('icon') ?? 'fa-database';
+
+            $seen[$id] = true;
+            $items[] = [
+                'id'        => $id,
+                'plugin'    => 'flex-objects',
+                'label'     => $language->translate($rawLabel) ?: $rawLabel,
+                'icon'      => $this->normalizeFaIcon($rawIcon),
+                'route'     => '/flex-objects/' . $type,
+                'priority'  => $menuItem['priority'] ?? 0,
+                'badge'     => $count,
+                'authorize' => $authorizeKey,
+            ];
+        }
+
+        $event['items'] = $items;
+    }
+
+    /**
+     * Normalize legacy FontAwesome 4 icon names (e.g. `fa-clock-o`) to the
+     * FA5+ equivalents that admin-next renders. Falls back to the input.
+     */
+    private function normalizeFaIcon(string $icon): string
+    {
+        // Strip any leading style prefix so we can normalize the bare name.
+        $stripped = preg_replace('/^(fas|far|fab|fa-solid|fa-regular|fa-brands)\s+/', '', $icon) ?? $icon;
+        if (str_ends_with($stripped, '-o')) {
+            return substr($stripped, 0, -2);
+        }
+        return $stripped;
     }
 
     /**
