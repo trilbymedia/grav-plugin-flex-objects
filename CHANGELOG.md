@@ -1,3 +1,9 @@
+# v1.4.1
+## 06/21/2026
+
+1. [](#bugfix)
+    * Release with version fix
+
 # v1.4.0
 ## 06/20/2026
 
