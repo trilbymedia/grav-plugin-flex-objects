@@ -52,6 +52,36 @@ class FlexApiController extends AbstractApiController
     }
 
     /**
+     * Flatten a blueprint field's `options` into a translated value→label map
+     * the frontend can use to render select/checkbox/radio list cells as their
+     * configured labels instead of raw stored keys.
+     *
+     * Only static option arrays are handled. Dynamic options (`data-options@`
+     * callables) and non-scalar shapes return null, so the frontend falls back
+     * to showing the raw value rather than a wrong label.
+     *
+     * @param mixed $options
+     * @return array<string, string>|null
+     */
+    private function normalizeOptionLabels($options): ?array
+    {
+        if (!is_array($options) || $options === []) {
+            return null;
+        }
+
+        $map = [];
+        foreach ($options as $value => $label) {
+            // Reject grouped/nested option arrays — only flat maps are supported.
+            if (is_array($label)) {
+                return null;
+            }
+            $map[(string) $value] = $this->translateLabel((string) $label);
+        }
+
+        return $map;
+    }
+
+    /**
      * GET /flex-objects/config
      *
      * Returns UI-relevant plugin configuration for admin-next. Never returns
@@ -121,29 +151,44 @@ class FlexApiController extends AbstractApiController
 
             $menu = $config['menu']['list'] ?? [];
 
-            // Resolve form field types for list columns so frontend can render properly
+            // Resolve the display type (and, for choice fields, the value→label
+            // option map) for each list column so the frontend can render typed
+            // cells — datetimes as dates, selects as labels — instead of raw
+            // stored values. A list column's own `field.type` wins over the
+            // edit-form field type so a list-only `datetime` column isn't
+            // mis-reported as `text`.
             $listFields = $config['list']['fields'] ?? [];
             $fieldTypes = [];
+            $fieldOptions = [];
             try {
-                $blueprint = $directory->getBlueprint();
-                $formFields = $blueprint->fields();
-                foreach (array_keys($listFields) as $fieldName) {
-                    $fieldTypes[$fieldName] = $formFields[$fieldName]['type'] ?? 'text';
+                $formFields = $directory->getBlueprint()->fields();
+                foreach ($listFields as $fieldName => $listFieldCfg) {
+                    $listDef = (array) ($listFieldCfg['field'] ?? []);
+                    $formDef = (array) ($formFields[$fieldName] ?? []);
+
+                    $fieldTypes[$fieldName] = $listDef['type'] ?? $formDef['type'] ?? 'text';
+
+                    $options = $listDef['options'] ?? $formDef['options'] ?? null;
+                    $normalized = $this->normalizeOptionLabels($options);
+                    if ($normalized !== null) {
+                        $fieldOptions[$fieldName] = $normalized;
+                    }
                 }
             } catch (\Exception $e) {
                 // Non-critical
             }
 
             $result[] = [
-                'type'        => $directory->getFlexType(),
-                'title'       => $this->translateLabel($menu['title'] ?? $directory->getTitle()),
-                'description' => $this->translateLabel($directory->getDescription() ?? ''),
-                'icon'        => $menu['icon'] ?? 'fa-file',
-                'list'        => $this->translateConfigLabels($config['list'] ?? []),
-                'edit'        => $this->translateConfigLabels($config['edit'] ?? []),
-                'search'      => $directory->getConfig('data.search') ?? [],
-                'field_types' => $fieldTypes,
-                'export'      => $this->translateConfigLabels($config['export'] ?? []),
+                'type'          => $directory->getFlexType(),
+                'title'         => $this->translateLabel($menu['title'] ?? $directory->getTitle()),
+                'description'   => $this->translateLabel($directory->getDescription() ?? ''),
+                'icon'          => $menu['icon'] ?? 'fa-file',
+                'list'          => $this->translateConfigLabels($config['list'] ?? []),
+                'edit'          => $this->translateConfigLabels($config['edit'] ?? []),
+                'search'        => $directory->getConfig('data.search') ?? [],
+                'field_types'   => $fieldTypes,
+                'field_options' => $fieldOptions,
+                'export'        => $this->translateConfigLabels($config['export'] ?? []),
             ];
         }
 
@@ -191,11 +236,22 @@ class FlexApiController extends AbstractApiController
         $directory = $this->resolveDirectory($type);
         $this->requireFlexPermission($request, $directory, 'list');
 
-        $pagination = $this->getPagination($request);
+        // Per-directory list defaults (admin.list.options). Explicit client
+        // query params always win; these only fill the gaps so non-Admin2 API
+        // consumers get the same initial page size and ordering Admin2 shows.
+        $listOptions = $directory->getConfig('admin.list.options') ?? [];
+
         $query = $request->getQueryParams();
+        $defaultPerPage = isset($listOptions['per_page']) ? (int) $listOptions['per_page'] : null;
+        $pagination = $this->getPagination($request, $defaultPerPage);
+
         $search = $query['search'] ?? null;
         $sortField = $query['sort'] ?? null;
-        $sortOrder = strtolower($query['order'] ?? 'asc');
+        $sortOrder = strtolower($query['order'] ?? '');
+        if ($sortField === null && !empty($listOptions['order']['by'])) {
+            $sortField = (string) $listOptions['order']['by'];
+            $sortOrder = $sortOrder !== '' ? $sortOrder : strtolower((string) ($listOptions['order']['dir'] ?? 'asc'));
+        }
         if (!in_array($sortOrder, ['asc', 'desc'], true)) {
             $sortOrder = 'asc';
         }

@@ -1,3 +1,10 @@
+# v1.4.0-rc.9
+## 06/20/2026
+
+1. [](#bugfix)
+    * The flex directories API now reports the real field type for list-only columns and includes select option labels, so the admin can show formatted dates and choice labels instead of raw timestamps and keys ([#220](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/220)).
+    * The flex object list API now falls back to a directory's configured default page size and sort order when the request doesn't ask for its own ([#221](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/221)).
+
 # v1.4.0-rc.8
 ## 06/19/2026
 
