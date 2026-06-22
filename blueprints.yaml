@@ -2,7 +2,7 @@ name: Flex Objects
 slug: flex-objects
 type: plugin
 testing: false
-version: 1.4.1
+version: 1.4.2
 description: Flex Objects plugin allows you to manage Flex Objects in Grav Admin.
 icon: list-alt
 author:
@@ -44,12 +44,6 @@ form:
         0: PLUGIN_ADMIN.DISABLED
       validate:
         type: bool
-    extra_admin_twig_path:
-      type: text
-      label: PLUGIN_FLEX_OBJECTS.EXTRA_ADMIN_TWIG_PATH
-      validate:
-        required: true
-
     security_section:
       type: section
       title: Security

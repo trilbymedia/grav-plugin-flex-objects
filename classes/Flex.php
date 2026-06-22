@@ -7,7 +7,6 @@ namespace Grav\Plugin\FlexObjects;
 use Grav\Common\Config\Config;
 use Grav\Common\Filesystem\Folder;
 use Grav\Common\Grav;
-use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexObject;
@@ -16,8 +15,6 @@ use Grav\Framework\Flex\Interfaces\FlexCommonInterface;
 use Grav\Framework\Flex\Interfaces\FlexDirectoryInterface;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
-use Grav\Plugin\FlexObjects\Admin\AdminController;
-use Grav\Plugin\FlexObjects\Table\DataTable;
 
 /**
  * Class Flex
@@ -254,28 +251,6 @@ class Flex implements FlexInterface
     }
 
     /**
-     * @param string|FlexDirectory $type
-     * @param array $options
-     * @return DataTable
-     */
-    public function getDataTable($type, array $options = []): DataTable
-    {
-        $directory = $type instanceof FlexDirectory ? $type : $this->getDirectory($type);
-        if (!$directory) {
-            throw new \RuntimeException('Not Found', 404);
-        }
-
-        $collection = $options['collection'] ?? $directory->getCollection();
-        if (isset($options['filters']) && is_array($options['filters'])) {
-            $collection = $collection->filterBy($options['filters']);
-        }
-        $table = new DataTable($options);
-        $table->setCollection($collection);
-
-        return $table;
-    }
-
-    /**
      * @param string|object|null $type
      * @param array $params
      * @param string $extension
@@ -351,24 +326,6 @@ class Flex implements FlexInterface
         $extension = $extension ? '.' . $extension : '';
 
         return $route . $extension . ($p ? '/' . implode('/', $p) : '');
-    }
-
-    public function getAdminController(): ?AdminController
-    {
-        $grav = Grav::instance();
-        if (!isset($grav['admin'])) {
-            return null;
-        }
-
-        /** @var PageInterface $page */
-        $page = $grav['page'];
-        $header = $page->header();
-        $callable = $header->controller['controller']['instance'] ?? null;
-        if (null !== $callable && \is_callable($callable)) {
-            return $callable();
-        }
-
-        return null;
     }
 
     /**
