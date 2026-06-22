@@ -1,7 +1,6 @@
 enabled: true
 
 built_in_css: true
-extra_admin_twig_path: 'theme://admin/templates'
 
 # Media proxy (PROTOTYPE — see docs/specs/media-proxy.md)
 # Serve Flex Object media through PHP with an optional read-permission check,

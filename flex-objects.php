@@ -20,16 +20,13 @@ use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Route\Route;
-use Grav\Plugin\Admin\Admin;
 use Grav\Plugin\FlexObjects\Controllers\ObjectController;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
-use Grav\Plugin\FlexObjects\Admin\AdminController;
 use Grav\Plugin\FlexObjects\Flex;
 use Psr\Http\Message\ServerRequestInterface;
 use RocketTheme\Toolbox\Event\Event;
 use function is_array;
-use function is_callable;
 
 /**
  * Class FlexObjectsPlugin
@@ -44,9 +41,6 @@ class FlexObjectsPlugin extends Plugin
     public $features = [
         'blueprints' => 1000,
     ];
-
-    /** @var AdminController */
-    protected $controller;
 
     /**
      * @return bool
@@ -178,36 +172,12 @@ class FlexObjectsPlugin extends Plugin
             }
 
             $this->enable([
-                'onAdminTwigTemplatePaths' => [
-                    ['onAdminTwigTemplatePaths', 10]
-                ],
-                'onAdminMenu' => [
-                    ['onAdminMenu', 0]
-                ],
-                'onAdminPage' => [
-                    ['onAdminPage', 0]
-                ],
-                'onAdminCompilePresetSCSS' => [
-                    ['onAdminCompilePresetSCSS', 0]
-                ],
-                'onDataTypeExcludeFromDataManagerPluginHook' => [
-                    ['onDataTypeExcludeFromDataManagerPluginHook', 0]
-                ],
-                'onAdminControllerInit' => [
-                    ['onAdminControllerInit', 0]
-                ],
                 'onThemeInitialized' => [
                     ['onThemeInitialized', 0]
                 ],
-                'onPageInitialized' => [
-                    ['onAdminPageInitialized', 0]
-                ],
-                'onTwigSiteVariables' => [
-                    ['onTwigAdminVariables', 0]
-                ],
-                'onGetPageTemplates' =>
+                'onGetPageTemplates' => [
                     ['onGetPageTemplates', 0]
-
+                ],
             ]);
 
         } else {
@@ -262,8 +232,6 @@ class FlexObjectsPlugin extends Plugin
         $flex = $this->grav['flex'];
         $types = (array)$this->config->get('plugins.flex-objects.directories', []);
         $this->registerDirectories($flex, $types, true);
-
-        $this->controller = new AdminController();
 
         /** @var Debugger $debugger */
         $debugger = Grav::instance()['debugger'];
@@ -686,64 +654,6 @@ class FlexObjectsPlugin extends Plugin
      * @param Event $event
      * @return void
      */
-    public function onAdminPage(Event $event): void
-    {
-        if ($this->controller->isActive()) {
-            $event->stopPropagation();
-
-            /** @var PageInterface $page */
-            $page = $event['page'];
-            $page->init(new \SplFileInfo(__DIR__ . '/admin/pages/flex-objects.md'));
-            $page->slug($this->controller->getLocation());
-            $header = $page->header();
-            $header->access = ['admin.login'];
-            $header->controller = $this->controller->getInfo();
-        }
-    }
-
-    /**
-     * [onPageInitialized:0]: Run controller
-     *
-     * @return void
-     */
-    public function onAdminPageInitialized(): void
-    {
-        if ($this->controller->isActive()) {
-            $this->controller->execute();
-            $this->controller->redirect();
-        }
-    }
-
-    /**
-     * @param Event $event
-     * @return void
-     */
-    public function onAdminControllerInit(Event $event): void
-    {
-        $eventController = $event['controller'];
-
-        // Blacklist all admin routes, including aliases and redirects.
-        $eventController->blacklist_views[] = 'flex-objects';
-        foreach ($this->controller->getAdminRoutes() as $route => $info) {
-            $eventController->blacklist_views[] = trim($route, '/');
-        }
-    }
-
-    /**
-     * Add Flex-Object's preset.scss to the Admin Preset SCSS compile process
-     *
-     * @param Event $event
-     * @return void
-     */
-    public function onAdminCompilePresetSCSS(Event $event): void
-    {
-        $event['scss']->add($this->grav['locator']->findResource('plugins://flex-objects/scss/_preset.scss'));
-    }
-
-    /**
-     * @param Event $event
-     * @return void
-     */
     public function onGetPageTemplates(Event $event): void
     {
         /** @var Types $types */
@@ -774,86 +684,6 @@ class FlexObjectsPlugin extends Plugin
         }
 
         return $list;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAdminMenu(): array
-    {
-        /** @var Flex $flex */
-        $flex = $this->grav['flex_objects'];
-
-        $list = [];
-        foreach ($flex->getAdminMenuItems() as $name => $item) {
-            $route = trim($item['route'] ?? $name, '/');
-            $list[$route] = $item;
-        }
-
-        return $list;
-    }
-
-    /**
-     * Add Flex Directory to admin menu
-     *
-     * @return void
-     */
-    public function onAdminMenu(): void
-    {
-        /** @var Flex $flex */
-        $flex = $this->grav['flex_objects'];
-        /** @var Admin $admin */
-        $admin = $this->grav['admin'];
-
-        foreach ($this->getAdminMenu() as $route => $item) {
-            $directory = null;
-            if (isset($item['directory'])) {
-                $directory = $flex->getDirectory($item['directory']);
-                if (!$directory || !$directory->isEnabled()) {
-                    continue;
-                }
-            }
-
-            $title = $item['title'] ?? 'PLUGIN_FLEX_OBJECTS.TITLE';
-            $index = $item['index'] ?? 0;
-            if (($this->grav['twig']->plugins_hooked_nav[$title]['index'] ?? 1000) <= $index) {
-                continue;
-            }
-
-            $location = $item['location'] ?? $route;
-            $hidden = $item['hidden'] ?? false;
-            $icon = $item['icon'] ?? 'fa-list';
-            $authorize = $item['authorize'] ?? ($directory ? null : ['admin.flex-objects', 'admin.super']);
-            if ($hidden || (null === $authorize && $directory->isAuthorized('list', 'admin', $admin->user))) {
-                continue;
-            }
-            $cache = $directory ? $directory->getCache('index') : null;
-            $count = $cache ? $cache->get('admin-count-' . md5($admin->user->username)) : false;
-            if (null === $count) {
-                try {
-                    $collection = $directory->getCollection();
-                    if (is_callable([$collection, 'isAuthorized'])) {
-                        $count = $collection->isAuthorized('list', 'admin', $admin->user)->count();
-                    } else {
-                        $count = $collection->count();
-                    }
-                    $cache->set('admin-count-' . md5($admin->user->username), $count);
-                } catch (\InvalidArgumentException $e) {
-                    continue;
-                }
-            }
-            $badge = $directory ? ['badge' => ['count' => $count]] : [];
-            $priority = $item['priority'] ?? 0;
-
-            $this->grav['twig']->plugins_hooked_nav[$title] = [
-                'location' => $location,
-                'route' => $route,
-                'index' => $index,
-                'icon' => $icon,
-                'authorize' => $authorize,
-                'priority' => $priority
-            ] + $badge;
-        }
     }
 
     /**
@@ -1218,16 +1048,6 @@ class FlexObjectsPlugin extends Plugin
     }
 
     /**
-     * Exclude Flex Directory data from the Data Manager plugin
-     *
-     * @return void
-     */
-    public function onDataTypeExcludeFromDataManagerPluginHook(): void
-    {
-        $this->grav['admin']->dataTypesExcludedFromDataManagerPlugin[] = 'flex-objects';
-    }
-
-    /**
      * Add current directory to twig lookup paths.
      *
      * @return void
@@ -1241,51 +1061,5 @@ class FlexObjectsPlugin extends Plugin
         }
 
         $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
-    }
-
-    /**
-     * Add plugin templates path
-     *
-     * @param Event $event
-     * @return void
-     */
-    public function onAdminTwigTemplatePaths(Event $event): void
-    {
-        $extra_admin_twig_path = $this->config->get('plugins.flex-objects.extra_admin_twig_path');
-        $extra_path = $extra_admin_twig_path ? $this->grav['locator']->findResource($extra_admin_twig_path) : null;
-
-        $paths = $event['paths'];
-        if ($extra_path) {
-            $paths[] = $extra_path;
-        }
-
-        $paths[] = __DIR__ . '/admin/templates';
-        $event['paths'] = $paths;
-    }
-
-    /**
-     * Set needed variables to display directory.
-     *
-     * @return void
-     */
-    public function onTwigAdminVariables(): void
-    {
-        if ($this->controller->isActive()) {
-            // Twig shortcuts
-            $this->grav['twig']->twig_vars['controller'] = $this->controller;
-            $this->grav['twig']->twig_vars['action'] = $this->controller->getAction();
-            $this->grav['twig']->twig_vars['task'] = $this->controller->getTask();
-            $this->grav['twig']->twig_vars['target'] = $this->controller->getTarget();
-            $this->grav['twig']->twig_vars['key'] = $this->controller->getId();
-
-            $this->grav['twig']->twig_vars['flex'] = $this->grav['flex_objects'];
-            $this->grav['twig']->twig_vars['directory'] = $this->controller->getDirectory();
-            $this->grav['twig']->twig_vars['collection'] = $this->controller->getCollection();
-            $this->grav['twig']->twig_vars['object'] = $this->controller->getObject();
-
-            // CSS / JS Assets
-            $this->grav['assets']->addCss('plugin://flex-objects/css/admin.css');
-            $this->grav['assets']->addCss('plugin://admin/themes/grav/css/codemirror/codemirror.css');
-        }
     }
 }
