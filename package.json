@@ -32,7 +32,7 @@
         "exports-loader": "^3.0.0",
         "imports-loader": "^3.0.0",
         "terser-webpack-plugin": "^5.4.0",
-        "vue-loader": "^15.9.8",
+        "vue-loader": "^17.4.2",
         "webpack": "^5.104.1",
         "webpack-cli": "^4.8.0"
     },
