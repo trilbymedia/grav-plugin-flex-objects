@@ -20,11 +20,11 @@
         "vuetable-2": "^1.7.5"
     },
     "devDependencies": {
-        "@babel/core": "^7.29.0",
-        "@babel/eslint-parser": "^7.28.6",
-        "@babel/plugin-transform-object-rest-spread": "^7.28.6",
-        "@babel/preset-env": "^7.29.5",
-        "babel-loader": "^8.2.2",
+        "@babel/core": "^8.0.1",
+        "@babel/eslint-parser": "^8.0.1",
+        "@babel/plugin-transform-object-rest-spread": "^8.0.1",
+        "@babel/preset-env": "^8.0.2",
+        "babel-loader": "^10.1.1",
         "cross-env": "^7.0.3",
         "css-loader": "^6.3.0",
         "eslint": "^7.32.0",
