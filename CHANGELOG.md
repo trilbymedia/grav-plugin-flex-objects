@@ -1,5 +1,5 @@
 # v1.4.2
-## 06/22/2026
+## 06/23/2026
 
 1. [](#improved)
     * Removed the legacy classic-admin interface and its Vue build, so Flex Objects now runs entirely on the Admin Next interface.
