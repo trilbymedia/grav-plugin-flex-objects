@@ -97,6 +97,22 @@ class FlexApiControllerTranslationTest extends TestCase
         );
     }
 
+    #[Test]
+    public function normalizes_detail_sort_to_admin_next_contract(): void
+    {
+        self::assertSame(
+            ['by' => 'timeline_at', 'dir' => 'desc'],
+            $this->invoke('normalizeSortConfig', ['timeline_at' => 'desc']),
+        );
+
+        self::assertSame(
+            ['by' => 'paid_at', 'dir' => 'asc'],
+            $this->invoke('normalizeSortConfig', ['by' => 'paid_at', 'dir' => 'sideways']),
+        );
+
+        self::assertSame([], $this->invoke('normalizeSortConfig', []));
+    }
+
     private function invoke(string $method, mixed ...$args): mixed
     {
         $ref = new ReflectionMethod($this->controller, $method);

@@ -707,6 +707,7 @@ class FlexObjectsPlugin extends Plugin
         $routes->get('/flex-objects', [$controller, 'directories']);
 
         // CRUD routes — static paths before parameterized (FastRoute constraint)
+        $routes->get('/flex-objects/{type}/metadata', [$controller, 'metadata']);
         $routes->get('/flex-objects/{type}/export', [$controller, 'export']);
         $routes->get('/flex-objects/{type}', [$controller, 'index']);
         $routes->post('/flex-objects/{type}', [$controller, 'create']);
