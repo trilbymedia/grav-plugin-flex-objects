@@ -663,17 +663,27 @@ class FlexApiController extends AbstractApiController
         // Blueprints may define both admin.* and api.* permissions — check all
         // registered prefixes (OR: any matching permission grants access).
         $permissions = $directory->getConfig('admin.permissions');
-        if ($permissions) {
-            foreach ($permissions as $prefix => $config) {
-                $permission = $prefix . '.' . $action;
-                if ($this->hasPermission($user, $permission)) {
-                    return;
-                }
+        if (!$permissions) {
+            // No blueprint-defined permissions: defer to core's authorization
+            // rules (admin.flex-object.<action>) rather than allowing access.
+            // Mirrors the gate used by directories() when listing directories.
+            if (!$directory->isAuthorized($action, 'admin', $user)) {
+                throw new \Grav\Plugin\Api\Exceptions\ForbiddenException(
+                    "Missing required permission for '{$directory->getFlexType()}'.",
+                );
             }
-            // None matched — report the first prefix for a clear error
-            $prefix = array_key_first($permissions);
-            throw new \Grav\Plugin\Api\Exceptions\ForbiddenException("Missing required permission: {$prefix}.{$action}");
+            return;
         }
+
+        foreach ($permissions as $prefix => $config) {
+            $permission = $prefix . '.' . $action;
+            if ($this->hasPermission($user, $permission)) {
+                return;
+            }
+        }
+        // None matched — report the first prefix for a clear error
+        $prefix = array_key_first($permissions);
+        throw new \Grav\Plugin\Api\Exceptions\ForbiddenException("Missing required permission: {$prefix}.{$action}");
     }
 
     private function serializeObject(FlexObjectInterface $object): array
