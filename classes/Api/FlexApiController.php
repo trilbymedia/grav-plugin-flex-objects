@@ -208,6 +208,7 @@ class FlexApiController extends AbstractApiController
     public function blueprints(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, 'api.access');
+        $this->primeAdminLanguages($request);
 
         $flex = $this->getFlex();
         $newToOld = Flex::getLegacyBlueprintMap(false); // [newUrl => oldUrl]
@@ -219,8 +220,8 @@ class FlexApiController extends AbstractApiController
                 'url'         => $url,
                 'legacy_url'  => $newToOld[$url] ?? null,
                 'type'        => $directory->getFlexType(),
-                'title'       => $directory->getTitle(),
-                'description' => $directory->getDescription(),
+                'title'       => $this->translateLabel($directory->getTitle()),
+                'description' => $this->translateLabel($directory->getDescription() ?? ''),
             ];
         }
 
