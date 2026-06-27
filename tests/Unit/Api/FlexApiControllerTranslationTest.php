@@ -15,6 +15,7 @@ use Grav\Plugin\FlexObjects\Flex;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionMethod;
 use ReflectionProperty;
 
@@ -99,6 +100,64 @@ class FlexApiControllerTranslationTest extends TestCase
             'Случаи терапии',
             $this->invoke('translateLabel', 'PLUGIN_MYPLUGIN.ADMIN.ITEMS.TITLE'),
         );
+    }
+
+    #[Test]
+    public function blueprints_endpoint_translates_titles_with_admin_language(): void
+    {
+        $translations = [
+            'ICU.PLUGIN_MYPLUGIN.ADMIN.ITEMS.TITLE' => 'Pagos',
+            'ICU.PLUGIN_MYPLUGIN.ADMIN.ITEMS.DESC'  => 'Historial de pagos',
+        ];
+
+        $language = $this->createMock(Language::class);
+        $language->method('translate')->willReturnCallback(
+            static fn($key, $languages = null, $array = false) => $translations[$key] ?? $key,
+        );
+        $language->method('getLanguage')->willReturn('en');
+
+        $directory = $this->createMock(FlexDirectory::class);
+        $directory->method('getBlueprintFile')->willReturn('blueprints://flex-objects/items.yaml');
+        $directory->method('getFlexType')->willReturn('items');
+        $directory->method('getTitle')->willReturn('PLUGIN_MYPLUGIN.ADMIN.ITEMS.TITLE');
+        $directory->method('getDescription')->willReturn('PLUGIN_MYPLUGIN.ADMIN.ITEMS.DESC');
+
+        $flex = $this->createMock(Flex::class);
+        $flex->method('getBlueprints')->willReturn([$directory]);
+
+        $grav = $this->createMock(Grav::class);
+        $grav->method('offsetExists')->willReturnCallback(
+            static fn($key) => in_array($key, ['language', 'flex_objects', 'locator'], true),
+        );
+        $grav->method('offsetGet')->willReturnCallback(
+            static fn($key) => match ($key) {
+                'language' => $language,
+                'flex_objects' => $flex,
+                'locator' => new FlexTranslationTestLocator(),
+                default => null,
+            },
+        );
+
+        $user = $this->createMock(UserInterface::class);
+        $user->method('get')->willReturnCallback(
+            static fn($key, mixed $default = null) => match ($key) {
+                'access.api.super' => true,
+                'admin_next' => ['preferences' => ['adminLanguage' => 'es']],
+                default => $default,
+            },
+        );
+
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->method('getAttribute')->willReturnCallback(
+            static fn($name, $default = null) => $name === 'api_user' ? $user : $default,
+        );
+
+        $controller = new FlexApiController($grav, new Config([]));
+        $response = $controller->blueprints($request);
+        $payload = json_decode((string) $response->getBody(), true);
+
+        self::assertSame('Pagos', $payload['data'][0]['title']);
+        self::assertSame('Historial de pagos', $payload['data'][0]['description']);
     }
 
     #[Test]
@@ -247,5 +306,13 @@ class FlexApiControllerTranslationTest extends TestCase
         );
 
         return new FlexApiController($grav, new Config([]));
+    }
+}
+
+final class FlexTranslationTestLocator
+{
+    public function findResource(string $uri, bool $absolute = true, bool $create = false): ?string
+    {
+        return null;
     }
 }
