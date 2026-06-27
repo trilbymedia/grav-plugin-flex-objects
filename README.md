@@ -92,7 +92,7 @@ Options:
 - `title`: heading shown above the nested table.
 - `icon`: Font Awesome icon used by the toggle button.
 - `limit`: nested table page size.
-- `actions`: include child edit/delete actions in the nested table.
+- `actions`: include allowed child edit/delete actions in the nested table.
 - `relation.type`: child Flex type.
 - `relation.local_key`: parent object property used as the relation value.
 - `relation.foreign_key`: child object property filtered by the parent value.
@@ -121,6 +121,8 @@ Field values behave as follows:
 - object: merge local overrides on top of the child list field definition.
 
 The metadata is available through `GET /api/v1/flex-objects/{type}/metadata`, and child rows are loaded through `GET /api/v1/flex-objects/{childType}` with exact `filters[field]=value` query parameters.
+
+Action buttons are permission-aware. When `actions: true`, the API exposes only the actions the current user can perform on the child type (`can_edit`, `can_delete`). Edit also requires the child type to have a generic Admin Next Flex edit route; built-in types with dedicated Admin Next pages do not expose that action through nested detail rows. Exact child filters currently scan the materialized Flex collection in PHP, matching the existing list/search/sort path; very large child directories may eventually need an indexed lookup.
 
 ## Security Settings
 

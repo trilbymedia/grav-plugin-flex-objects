@@ -32,6 +32,12 @@ class FlexApiController extends AbstractApiController
     private const TRANSLATABLE_LABEL_KEYS = ['label', 'title', 'text', 'help', 'placeholder', 'description'];
 
     /**
+     * Flex types with dedicated Admin Next pages. They can still expose
+     * metadata to those pages, but they do not have the generic Flex edit route.
+     */
+    private const ADMIN_NEXT_DEDICATED_TYPES = ['pages', 'user-accounts', 'user-groups'];
+
+    /**
      * Recursively translate language-key-looking label values within an admin
      * config subtree. {@see translateLabel()} is a no-op for anything that
      * isn't a translation key, so non-label strings pass through unchanged.
@@ -128,15 +134,12 @@ class FlexApiController extends AbstractApiController
         // (matching how the blueprint endpoints translate their labels).
         $this->primeAdminLanguages($request);
 
-        // Skip built-in types that already have dedicated admin-next UI
-        $builtIn = ['pages', 'user-accounts', 'user-groups'];
-
         foreach ($flex->getDirectories() as $directory) {
             if (!$directory->isEnabled()) {
                 continue;
             }
 
-            if (in_array($directory->getFlexType(), $builtIn, true)) {
+            if (in_array($directory->getFlexType(), self::ADMIN_NEXT_DEDICATED_TYPES, true)) {
                 continue;
             }
 
@@ -821,6 +824,14 @@ class FlexApiController extends AbstractApiController
             return null;
         }
 
+        $actionsEnabled = (bool) ($detail['actions'] ?? false);
+        $isSuperAdmin = $this->isSuperAdmin($user);
+        $canEdit = $actionsEnabled
+            && $this->hasAdminNextFlexEditRoute($relatedDirectory)
+            && ($isSuperAdmin || $relatedDirectory->isAuthorized('update', 'admin', $user));
+        $canDelete = $actionsEnabled
+            && ($isSuperAdmin || $relatedDirectory->isAuthorized('delete', 'admin', $user));
+
         $fields = $this->resolveDetailFields($relatedDirectory, $detail['fields'] ?? null);
         [$fieldTypes, $fieldOptions] = $this->describeListFields($relatedDirectory, $fields);
         $relatedOptions = $relatedDirectory->getConfig('admin.list.options') ?? [];
@@ -832,7 +843,9 @@ class FlexApiController extends AbstractApiController
             'title'         => $detail['title'] ?? ($detail['label'] ?? $relatedDirectory->getTitle()),
             'icon'          => $detail['icon'] ?? 'fa-list',
             'limit'         => max(1, (int) ($detail['limit'] ?? ($relatedOptions['per_page'] ?? 10))),
-            'actions'       => (bool) ($detail['actions'] ?? false),
+            'actions'       => $canEdit || $canDelete,
+            'can_edit'      => $canEdit,
+            'can_delete'    => $canDelete,
             'relation'      => [
                 'type'        => $relatedType,
                 'local_key'   => $localKey,
@@ -843,6 +856,17 @@ class FlexApiController extends AbstractApiController
             'field_types'   => $fieldTypes,
             'field_options' => $fieldOptions,
         ];
+    }
+
+    private function hasAdminNextFlexEditRoute(FlexDirectory $directory): bool
+    {
+        if (in_array($directory->getFlexType(), self::ADMIN_NEXT_DEDICATED_TYPES, true)) {
+            return false;
+        }
+
+        $config = $directory->getConfig('admin');
+
+        return is_array($config) && $config !== [] && empty($config['disabled']);
     }
 
     /**
@@ -1005,7 +1029,7 @@ class FlexApiController extends AbstractApiController
 
         if ($listFields) {
             foreach ($listFields as $field) {
-                $data[$field] = $this->getObjectValue($object, $field);
+                $data[$field] = $object->getProperty($field);
             }
         } else {
             // No list config — return all data
@@ -1020,13 +1044,15 @@ class FlexApiController extends AbstractApiController
             $localValue = $this->getObjectValue($object, $localKey);
             if ($localValue !== null && $localValue !== '') {
                 $data['__detail'] = [
-                    'type'    => $detail['relation']['type'],
-                    'title'   => $this->translateLabel((string) $detail['title']),
-                    'label'   => $this->translateLabel((string) $detail['label']),
-                    'filter'  => [$detail['relation']['foreign_key'] => $localValue],
-                    'limit'   => $detail['limit'],
-                    'sort'    => $detail['relation']['sort'],
-                    'actions' => $detail['actions'],
+                    'type'       => $detail['relation']['type'],
+                    'title'      => $this->translateLabel((string) $detail['title']),
+                    'label'      => $this->translateLabel((string) $detail['label']),
+                    'filter'     => [$detail['relation']['foreign_key'] => $localValue],
+                    'limit'      => $detail['limit'],
+                    'sort'       => $detail['relation']['sort'],
+                    'actions'    => $detail['actions'],
+                    'can_edit'   => $detail['can_edit'],
+                    'can_delete' => $detail['can_delete'],
                 ];
             }
         }
