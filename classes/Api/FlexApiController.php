@@ -6,6 +6,7 @@ namespace Grav\Plugin\FlexObjects\Api;
 
 use Grav\Common\Page\Media;
 use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Plugin\Api\Controllers\AbstractApiController;
 use Grav\Plugin\Api\Controllers\HandlesMediaUploads;
@@ -29,6 +30,12 @@ class FlexApiController extends AbstractApiController
      * untouched, matching how blueprint serialization only translates labels.
      */
     private const TRANSLATABLE_LABEL_KEYS = ['label', 'title', 'text', 'help', 'placeholder', 'description'];
+
+    /**
+     * Flex types with dedicated Admin Next pages. They can still expose
+     * metadata to those pages, but they do not have the generic Flex edit route.
+     */
+    private const ADMIN_NEXT_DEDICATED_TYPES = ['pages', 'user-accounts', 'user-groups'];
 
     /**
      * Recursively translate language-key-looking label values within an admin
@@ -127,15 +134,12 @@ class FlexApiController extends AbstractApiController
         // (matching how the blueprint endpoints translate their labels).
         $this->primeAdminLanguages($request);
 
-        // Skip built-in types that already have dedicated admin-next UI
-        $builtIn = ['pages', 'user-accounts', 'user-groups'];
-
         foreach ($flex->getDirectories() as $directory) {
             if (!$directory->isEnabled()) {
                 continue;
             }
 
-            if (in_array($directory->getFlexType(), $builtIn, true)) {
+            if (in_array($directory->getFlexType(), self::ADMIN_NEXT_DEDICATED_TYPES, true)) {
                 continue;
             }
 
@@ -149,50 +153,34 @@ class FlexApiController extends AbstractApiController
                 continue;
             }
 
-            $menu = $config['menu']['list'] ?? [];
-
-            // Resolve the display type (and, for choice fields, the value→label
-            // option map) for each list column so the frontend can render typed
-            // cells — datetimes as dates, selects as labels — instead of raw
-            // stored values. A list column's own `field.type` wins over the
-            // edit-form field type so a list-only `datetime` column isn't
-            // mis-reported as `text`.
-            $listFields = $config['list']['fields'] ?? [];
-            $fieldTypes = [];
-            $fieldOptions = [];
-            try {
-                $formFields = $directory->getBlueprint()->fields();
-                foreach ($listFields as $fieldName => $listFieldCfg) {
-                    $listDef = (array) ($listFieldCfg['field'] ?? []);
-                    $formDef = (array) ($formFields[$fieldName] ?? []);
-
-                    $fieldTypes[$fieldName] = $listDef['type'] ?? $formDef['type'] ?? 'text';
-
-                    $options = $listDef['options'] ?? $formDef['options'] ?? null;
-                    $normalized = $this->normalizeOptionLabels($options);
-                    if ($normalized !== null) {
-                        $fieldOptions[$fieldName] = $normalized;
-                    }
-                }
-            } catch (\Exception $e) {
-                // Non-critical
-            }
-
-            $result[] = [
-                'type'          => $directory->getFlexType(),
-                'title'         => $this->translateLabel($menu['title'] ?? $directory->getTitle()),
-                'description'   => $this->translateLabel($directory->getDescription() ?? ''),
-                'icon'          => $menu['icon'] ?? 'fa-file',
-                'list'          => $this->translateConfigLabels($config['list'] ?? []),
-                'edit'          => $this->translateConfigLabels($config['edit'] ?? []),
-                'search'        => $directory->getConfig('data.search') ?? [],
-                'field_types'   => $fieldTypes,
-                'field_options' => $fieldOptions,
-                'export'        => $this->translateConfigLabels($config['export'] ?? []),
-            ];
+            $result[] = $this->serializeDirectoryMetadata($directory, $user);
         }
 
         return ApiResponse::create($result);
+    }
+
+    /**
+     * GET /flex-objects/{type}/metadata — Get one directory's Admin Next metadata.
+     *
+     * Unlike GET /flex-objects this endpoint also serves built-in directories
+     * such as user-accounts, so dedicated Admin Next pages can opt into the
+     * Flex list/detail configuration without exposing duplicate Flex sidebar
+     * entries.
+     */
+    public function metadata(ServerRequestInterface $request): ResponseInterface
+    {
+        $this->requirePermission($request, 'api.access');
+
+        $directory = $this->resolveDirectory($this->getRouteParam($request, 'type'));
+        $user = $this->getUser($request);
+
+        if (!$this->isSuperAdmin($user) && !$directory->isAuthorized('list', 'admin', $user)) {
+            throw new \Grav\Plugin\Api\Exceptions\ForbiddenException('Missing required permission to list this Flex directory.');
+        }
+
+        $this->primeAdminLanguages($request);
+
+        return ApiResponse::create($this->serializeDirectoryMetadata($directory, $user));
     }
 
     /**
@@ -257,6 +245,11 @@ class FlexApiController extends AbstractApiController
         }
 
         $collection = $directory->getCollection();
+        $filters = $this->parseFilters($query['filters'] ?? []);
+
+        if ($filters) {
+            $collection = $this->applyFilters($collection, $filters);
+        }
 
         // Apply search
         if ($search && $search !== '') {
@@ -275,10 +268,11 @@ class FlexApiController extends AbstractApiController
 
         // Get list field names from config
         $listFields = array_keys($directory->getConfig('admin.list.fields') ?? []);
+        $detail = $this->normalizeDetailConfig($directory, $directory->getConfig('admin.list.detail'), $this->getUser($request));
 
         $data = [];
         foreach ($objects as $object) {
-            $data[] = $this->serializeForList($object, $listFields);
+            $data[] = $this->serializeForList($object, $listFields, $detail);
         }
 
         return ApiResponse::paginated(
@@ -724,7 +718,312 @@ class FlexApiController extends AbstractApiController
         return $meta;
     }
 
-    private function serializeForList(FlexObjectInterface $object, array $listFields): array
+    /**
+     * @param mixed $user
+     * @return array<string, mixed>
+     */
+    private function serializeDirectoryMetadata(FlexDirectory $directory, $user): array
+    {
+        $config = $directory->getConfig('admin') ?? [];
+        $menu = $config['menu']['list'] ?? [];
+
+        // Resolve the display type (and, for choice fields, the value→label
+        // option map) for each list column so the frontend can render typed
+        // cells — datetimes as dates, selects as labels — instead of raw
+        // stored values. A list column's own `field.type` wins over the
+        // edit-form field type so a list-only `datetime` column isn't
+        // mis-reported as `text`.
+        $list = $config['list'] ?? [];
+        $listFields = $list['fields'] ?? [];
+        [$fieldTypes, $fieldOptions] = $this->describeListFields($directory, $listFields);
+        $detail = $this->normalizeDetailConfig($directory, $list['detail'] ?? null, $user);
+        if ($detail !== null) {
+            $list['detail'] = $detail;
+        }
+
+        return [
+            'type'          => $directory->getFlexType(),
+            'title'         => $this->translateLabel($menu['title'] ?? $directory->getTitle()),
+            'description'   => $this->translateLabel($directory->getDescription() ?? ''),
+            'icon'          => $menu['icon'] ?? 'fa-file',
+            'list'          => $this->translateConfigLabels($list),
+            'edit'          => $this->translateConfigLabels($config['edit'] ?? []),
+            'search'        => $directory->getConfig('data.search') ?? [],
+            'field_types'   => $fieldTypes,
+            'field_options' => $fieldOptions,
+            'export'        => $this->translateConfigLabels($config['export'] ?? []),
+        ];
+    }
+
+    /**
+     * Resolve field display metadata for Admin Next's Flex list renderer.
+     *
+     * @param array<string, mixed> $listFields
+     * @return array{0: array<string, string>, 1: array<string, array<string, string>>}
+     */
+    private function describeListFields(FlexDirectory $directory, array $listFields): array
+    {
+        $fieldTypes = [];
+        $fieldOptions = [];
+
+        try {
+            $formFields = $directory->getBlueprint()->fields();
+            foreach ($listFields as $fieldName => $listFieldCfg) {
+                $listDef = (array) ($listFieldCfg['field'] ?? []);
+                $formDef = (array) ($formFields[$fieldName] ?? []);
+
+                $fieldTypes[$fieldName] = $listDef['type'] ?? $formDef['type'] ?? 'text';
+
+                $options = $listDef['options'] ?? $formDef['options'] ?? null;
+                $normalized = $this->normalizeOptionLabels($options);
+                if ($normalized !== null) {
+                    $fieldOptions[$fieldName] = $normalized;
+                }
+            }
+        } catch (\Exception $e) {
+            // Non-critical: callers can still render raw values.
+        }
+
+        return [$fieldTypes, $fieldOptions];
+    }
+
+    /**
+     * Normalize config.admin.list.detail into a self-contained Admin Next
+     * contract. The accepted YAML shape mirrors the classic-admin PR:
+     *
+     * detail.fields:
+     * - omitted: use the child type list fields as-is
+     * - true: include the child list field as-is
+     * - false: hide the field
+     * - object: merge overrides on top of the child list field definition
+     *
+     * @param mixed $detail
+     * @param mixed $user
+     * @return array<string, mixed>|null
+     */
+    private function normalizeDetailConfig(FlexDirectory $directory, $detail, $user): ?array
+    {
+        if (!is_array($detail) || empty($detail['enabled'])) {
+            return null;
+        }
+
+        $relation = (array) ($detail['relation'] ?? []);
+        $relatedType = (string) ($relation['type'] ?? '');
+        $localKey = (string) ($relation['local_key'] ?? '');
+        $foreignKey = (string) ($relation['foreign_key'] ?? '');
+        if ($relatedType === '' || $localKey === '' || $foreignKey === '') {
+            return null;
+        }
+
+        $relatedDirectory = $this->getFlex()->getDirectory($relatedType);
+        if (!$relatedDirectory || !$relatedDirectory->isEnabled()) {
+            return null;
+        }
+
+        if (!$this->isSuperAdmin($user) && !$relatedDirectory->isAuthorized('list', 'admin', $user)) {
+            return null;
+        }
+
+        $actionsEnabled = (bool) ($detail['actions'] ?? false);
+        $isSuperAdmin = $this->isSuperAdmin($user);
+        $canEdit = $actionsEnabled
+            && $this->hasAdminNextFlexEditRoute($relatedDirectory)
+            && ($isSuperAdmin || $relatedDirectory->isAuthorized('update', 'admin', $user));
+        $canDelete = $actionsEnabled
+            && ($isSuperAdmin || $relatedDirectory->isAuthorized('delete', 'admin', $user));
+
+        $fields = $this->resolveDetailFields($relatedDirectory, $detail['fields'] ?? null);
+        [$fieldTypes, $fieldOptions] = $this->describeListFields($relatedDirectory, $fields);
+        $relatedOptions = $relatedDirectory->getConfig('admin.list.options') ?? [];
+        $sort = $this->normalizeSortConfig($relation['sort'] ?? ($relatedOptions['order'] ?? []));
+
+        return [
+            'enabled'       => true,
+            'label'         => $detail['label'] ?? $relatedDirectory->getTitle(),
+            'title'         => $detail['title'] ?? ($detail['label'] ?? $relatedDirectory->getTitle()),
+            'icon'          => $detail['icon'] ?? 'fa-list',
+            'limit'         => max(1, (int) ($detail['limit'] ?? ($relatedOptions['per_page'] ?? 10))),
+            'actions'       => $canEdit || $canDelete,
+            'can_edit'      => $canEdit,
+            'can_delete'    => $canDelete,
+            'relation'      => [
+                'type'        => $relatedType,
+                'local_key'   => $localKey,
+                'foreign_key' => $foreignKey,
+                'sort'        => $sort,
+            ],
+            'fields'        => $fields,
+            'field_types'   => $fieldTypes,
+            'field_options' => $fieldOptions,
+        ];
+    }
+
+    private function hasAdminNextFlexEditRoute(FlexDirectory $directory): bool
+    {
+        if (in_array($directory->getFlexType(), self::ADMIN_NEXT_DEDICATED_TYPES, true)) {
+            return false;
+        }
+
+        $config = $directory->getConfig('admin');
+
+        return is_array($config) && $config !== [] && empty($config['disabled']);
+    }
+
+    /**
+     * @param mixed $fields
+     * @return array<string, mixed>
+     */
+    private function resolveDetailFields(FlexDirectory $directory, $fields): array
+    {
+        $defaultFields = $directory->getConfig('admin.list.fields') ?? [];
+
+        if (!is_array($fields) || $fields === []) {
+            return $defaultFields;
+        }
+
+        $resolved = [];
+        foreach ($fields as $key => $options) {
+            if (is_int($key)) {
+                $key = is_string($options) ? $options : null;
+                $options = true;
+            }
+
+            if (!$key || $options === false || $options === null) {
+                continue;
+            }
+
+            $base = (array) ($defaultFields[$key] ?? []);
+            if ($options === true) {
+                $resolved[$key] = $base;
+                continue;
+            }
+
+            if (!is_array($options)) {
+                continue;
+            }
+
+            $resolved[$key] = $base ? array_replace_recursive($base, $options) : $options;
+        }
+
+        return $resolved;
+    }
+
+    /**
+     * @param mixed $sort
+     * @return array{by?: string, dir?: string}
+     */
+    private function normalizeSortConfig($sort): array
+    {
+        if (!is_array($sort)) {
+            return [];
+        }
+
+        if (isset($sort['by'])) {
+            $field = (string) $sort['by'];
+            $dir = strtolower((string) ($sort['dir'] ?? 'asc'));
+
+            return $field !== '' ? ['by' => $field, 'dir' => $dir === 'desc' ? 'desc' : 'asc'] : [];
+        }
+
+        foreach ($sort as $field => $dir) {
+            if (!is_string($field) || $field === '') {
+                continue;
+            }
+            $dir = strtolower((string) $dir);
+
+            return ['by' => $field, 'dir' => $dir === 'desc' ? 'desc' : 'asc'];
+        }
+
+        return [];
+    }
+
+    /**
+     * @param mixed $filters
+     * @return array<string, mixed>
+     */
+    private function parseFilters($filters): array
+    {
+        if (is_string($filters) && $filters !== '') {
+            $decoded = json_decode($filters, true);
+            if (is_array($decoded)) {
+                $filters = $decoded;
+            }
+        }
+
+        if (!is_array($filters)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($filters as $field => $value) {
+            if (!is_string($field) || $field === '' || $value === null || $value === '') {
+                continue;
+            }
+
+            if (is_array($value)) {
+                $values = array_values(array_filter($value, static fn($item) => is_scalar($item) && $item !== ''));
+                if ($values === []) {
+                    continue;
+                }
+                $normalized[$field] = $values;
+                continue;
+            }
+
+            if (is_scalar($value)) {
+                $normalized[$field] = $value;
+            }
+        }
+
+        return $normalized;
+    }
+
+    private function applyFilters(FlexCollectionInterface $collection, array $filters): FlexCollectionInterface
+    {
+        return $collection->filter(function (FlexObjectInterface $object) use ($filters): bool {
+            foreach ($filters as $field => $expected) {
+                $actual = $this->getObjectValue($object, $field);
+
+                if (is_array($expected)) {
+                    $expectedValues = array_map('strval', $expected);
+                    if (!in_array((string) $actual, $expectedValues, true)) {
+                        return false;
+                    }
+                    continue;
+                }
+
+                if ((string) $actual !== (string) $expected) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    private function getObjectValue(FlexObjectInterface $object, string $field): mixed
+    {
+        if ($field === 'key' || $field === 'id') {
+            return $object->getKey();
+        }
+
+        if (method_exists($object, 'getFormValue')) {
+            $value = $object->getFormValue($field);
+            if ($value !== null) {
+                return $value;
+            }
+        }
+
+        if (method_exists($object, 'getNestedProperty')) {
+            $value = $object->getNestedProperty($field);
+            if ($value !== null) {
+                return $value;
+            }
+        }
+
+        return $object->getProperty($field);
+    }
+
+    private function serializeForList(FlexObjectInterface $object, array $listFields, ?array $detail = null): array
     {
         $data = ['key' => $object->getKey()];
 
@@ -737,6 +1036,24 @@ class FlexApiController extends AbstractApiController
             $all = $object->jsonSerialize();
             if (is_array($all)) {
                 $data = array_merge($data, $all);
+            }
+        }
+
+        if ($detail) {
+            $localKey = $detail['relation']['local_key'];
+            $localValue = $this->getObjectValue($object, $localKey);
+            if ($localValue !== null && $localValue !== '') {
+                $data['__detail'] = [
+                    'type'       => $detail['relation']['type'],
+                    'title'      => $this->translateLabel((string) $detail['title']),
+                    'label'      => $this->translateLabel((string) $detail['label']),
+                    'filter'     => [$detail['relation']['foreign_key'] => $localValue],
+                    'limit'      => $detail['limit'],
+                    'sort'       => $detail['relation']['sort'],
+                    'actions'    => $detail['actions'],
+                    'can_edit'   => $detail['can_edit'],
+                    'can_delete' => $detail['can_delete'],
+                ];
             }
         }
 
