@@ -20,6 +20,7 @@ class FlexBlueprintController extends BlueprintController
     public function flexBlueprint(ServerRequestInterface $request): ResponseInterface
     {
         $this->requirePermission($request, 'api.access');
+        $this->primeAdminLanguages($request);
 
         $type = $this->getRouteParam($request, 'type');
 

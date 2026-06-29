@@ -1,3 +1,12 @@
+# v1.4.3
+## 06/29/2026
+
+1. [](#new)
+    * The Flex API now exposes the metadata and filtering Admin Next needs to show nested detail rows under a list item, such as a user's related records ([#227](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/227)).
+1. [](#bugfix)
+    * [security] Flex directories whose blueprint defines no permissions block are no longer open to every user with API access; they now default to denied, matching the authorization the directory listing already enforces (GHSA-23vq-365v-qcmh).
+    * The Flex blueprint metadata endpoints now return directory titles and descriptions in the signed-in user's admin language instead of raw translation keys ([#228](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/228)).
+
 # v1.4.2
 ## 06/23/2026
 

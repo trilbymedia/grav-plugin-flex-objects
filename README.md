@@ -60,6 +60,70 @@ Simply edit the **Flex Objects** plugin options in the Admin plugin, or copy the
 
 Most interesting configuration option is `directories`, which contains list or blueprint files which will define the flex types.
 
+## Admin Next Nested Detail Rows
+
+Admin Next can render an expandable child Flex table for a parent list row when the parent type exposes `config.admin.list.detail` metadata. This is useful for Flex-to-Flex relations such as users to payments.
+
+Add `config.admin.list.detail` to the parent type blueprint:
+
+```yaml
+config:
+  admin:
+    list:
+      detail:
+        enabled: true
+        label: Payments
+        title: Payments
+        icon: fa-credit-card
+        limit: 12
+        actions: true
+        relation:
+          type: payments
+          local_key: username
+          foreign_key: subject_key
+          sort:
+            paid_at: desc
+```
+
+Options:
+
+- `enabled`: turn detail rows on for the list.
+- `label`: toggle button title and accessibility label.
+- `title`: heading shown above the nested table.
+- `icon`: Font Awesome icon used by the toggle button.
+- `limit`: nested table page size.
+- `actions`: include allowed child edit/delete actions in the nested table.
+- `relation.type`: child Flex type.
+- `relation.local_key`: parent object property used as the relation value.
+- `relation.foreign_key`: child object property filtered by the parent value.
+- `relation.sort`: default child sort order, either `{ by: field, dir: asc|desc }` or `{ field: asc|desc }`.
+
+If `detail.fields` is omitted, the nested table uses the child type list fields. You can also override the nested view in the parent blueprint:
+
+```yaml
+config:
+  admin:
+    list:
+      detail:
+        fields:
+          amount:
+            width: 8
+          status: true
+          paid_at:
+            width: 12
+          internal_notes: false
+```
+
+Field values behave as follows:
+
+- `true`: include the child list field as-is.
+- `false`: hide the field.
+- object: merge local overrides on top of the child list field definition.
+
+The metadata is available through `GET /api/v1/flex-objects/{type}/metadata`, and child rows are loaded through `GET /api/v1/flex-objects/{childType}` with exact `filters[field]=value` query parameters.
+
+Action buttons are permission-aware. When `actions: true`, the API exposes only the actions the current user can perform on the child type (`can_edit`, `can_delete`). Edit also requires the child type to have a generic Admin Next Flex edit route; built-in types with dedicated Admin Next pages do not expose that action through nested detail rows. Exact child filters currently scan the materialized Flex collection in PHP, matching the existing list/search/sort path; very large child directories may eventually need an indexed lookup.
+
 ## Security Settings
 
 The plugin includes security settings to protect against unauthorized modification of sensitive page settings:
