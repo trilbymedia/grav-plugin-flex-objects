@@ -1,5 +1,5 @@
 # v1.4.3
-## 06/27/2026
+## 06/29/2026
 
 1. [](#new)
     * The Flex API now exposes the metadata and filtering Admin Next needs to show nested detail rows under a list item, such as a user's related records ([#227](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/227)).
