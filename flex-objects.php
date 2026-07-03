@@ -13,6 +13,7 @@ use Grav\Common\Utils;
 use Grav\Events\FlexRegisterEvent;
 use Grav\Events\PermissionsRegisterEvent;
 use Grav\Events\PluginsLoadedEvent;
+use Grav\Framework\Acl\Permissions;
 use Grav\Framework\Acl\PermissionsReader;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\FlexForm;
@@ -20,6 +21,7 @@ use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Route\Route;
+use Grav\Plugin\Api\PermissionResolver;
 use Grav\Plugin\FlexObjects\Controllers\ObjectController;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
@@ -989,9 +991,30 @@ class FlexObjectsPlugin extends Plugin
                 continue;
             }
 
-            // Check if user has list permission for this directory
-            if ($user && !$isSuperAdmin && !$directory->isAuthorized('list', 'admin', $user)) {
-                continue;
+            // Check if user has list permission for this directory.
+            // FlexDirectory::isAuthorized() applies a 'test' scope prefix when a
+            // user is explicitly passed, causing the permission lookup to always
+            // fail for non-super-admin users in API context. Use PermissionResolver
+            // (which supports parent-key inheritance) instead.
+            if ($user && !$isSuperAdmin) {
+                $perms = $directory->getConfig('admin.permissions', []);
+                $authorized = false;
+                if ($perms) {
+                    $resolver = new PermissionResolver($this->grav['permissions']);
+                    foreach ($perms as $prefix => $cfg) {
+                        if ($resolver->resolve($user, $prefix . '.list')) {
+                            $authorized = true;
+                            break;
+                        }
+                    }
+                } else {
+                    $resolver = new PermissionResolver($this->grav['permissions']);
+                    $rule = $directory->getAuthorizeRule('admin', 'list');
+                    $authorized = (bool) $resolver->resolve($user, $rule);
+                }
+                if (!$authorized) {
+                    continue;
+                }
             }
 
             // Get object count
