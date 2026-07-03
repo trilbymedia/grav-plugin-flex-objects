@@ -562,10 +562,8 @@ class FlexApiController extends AbstractApiController
     /**
      * Check if a user is authorized for an action on a Flex directory.
      *
-     * Uses the API's PermissionResolver (with parent-key inheritance) instead
-     * of FlexDirectory::isAuthorized(), which applies a 'test' scope prefix
-     * when a user is explicitly passed — causing the permission lookup to
-     * always fail for non-super-admin users in API context.
+     * Delegates to {@see DirectoryPermission} so this check stays in sync with
+     * the sidebar registration in flex-objects.php.
      */
     private function isDirectoryAuthorized(FlexDirectory $directory, string $action, UserInterface $user): bool
     {
@@ -573,21 +571,9 @@ class FlexApiController extends AbstractApiController
             return true;
         }
 
-        $permissions = $directory->getConfig('admin.permissions');
-        if ($permissions) {
-            foreach ($permissions as $prefix => $config) {
-                $permission = $prefix . '.' . $action;
-                if ($this->hasPermission($user, $permission)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        $rule = $directory->getAuthorizeRule('admin', $action);
-        return $this->hasPermission($user, $rule);
+        return DirectoryPermission::isAuthorized($directory, $action, $user, $this->getPermissionResolver());
     }
-    
+
     // ─── Helpers ───────────────────────────────────────────────
 
     /**
@@ -856,7 +842,6 @@ class FlexApiController extends AbstractApiController
         }
 
         $actionsEnabled = (bool) ($detail['actions'] ?? false);
-        $isSuperAdmin = $this->isSuperAdmin($user);
         $canEdit = $actionsEnabled
             && $this->hasAdminNextFlexEditRoute($relatedDirectory)
             && $this->isDirectoryAuthorized($relatedDirectory, 'update', $user);
