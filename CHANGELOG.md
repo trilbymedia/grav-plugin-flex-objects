@@ -1,3 +1,11 @@
+# v1.4.4
+## 07/03/2026
+
+1. [](#bugfix)
+    * A non-super-admin user who is granted a Flex directory's own admin permission can now see and edit that directory's objects through the Admin Next API and sidebar without needing any other admin access. The check used `FlexDirectory::isAuthorized()`, which applies a `test` scope prefix when a user is passed explicitly and so always denied non-super-admins in API context; the API controller and the sidebar registration now resolve the directory's `admin.permissions` prefixes through the API PermissionResolver (with parent-key inheritance) ([#229](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/229), [#230](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/230)).
+1. [](#improved)
+    * The Flex API and admin-next sidebar permission checks are unified in a shared `DirectoryPermission::isAuthorized()` helper so they can't drift apart, and the sidebar sweep now builds a single `PermissionResolver` instead of one per directory.
+
 # v1.4.3
 ## 06/29/2026
 

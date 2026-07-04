@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grav\Plugin\FlexObjects\Api;
 
 use Grav\Common\Page\Media;
+use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
@@ -149,7 +150,7 @@ class FlexApiController extends AbstractApiController
             }
 
             // Skip directories the user cannot list
-            if (!$this->isSuperAdmin($user) && !$directory->isAuthorized('list', 'admin', $user)) {
+            if (!$this->isDirectoryAuthorized($directory, 'list', $user)) {
                 continue;
             }
 
@@ -174,7 +175,7 @@ class FlexApiController extends AbstractApiController
         $directory = $this->resolveDirectory($this->getRouteParam($request, 'type'));
         $user = $this->getUser($request);
 
-        if (!$this->isSuperAdmin($user) && !$directory->isAuthorized('list', 'admin', $user)) {
+        if (!$this->isDirectoryAuthorized($directory, 'list', $user)) {
             throw new \Grav\Plugin\Api\Exceptions\ForbiddenException('Missing required permission to list this Flex directory.');
         }
 
@@ -558,6 +559,21 @@ class FlexApiController extends AbstractApiController
         );
     }
 
+    /**
+     * Check if a user is authorized for an action on a Flex directory.
+     *
+     * Delegates to {@see DirectoryPermission} so this check stays in sync with
+     * the sidebar registration in flex-objects.php.
+     */
+    private function isDirectoryAuthorized(FlexDirectory $directory, string $action, UserInterface $user): bool
+    {
+        if ($this->isSuperAdmin($user)) {
+            return true;
+        }
+
+        return DirectoryPermission::isAuthorized($directory, $action, $user, $this->getPermissionResolver());
+    }
+
     // ─── Helpers ───────────────────────────────────────────────
 
     /**
@@ -821,17 +837,16 @@ class FlexApiController extends AbstractApiController
             return null;
         }
 
-        if (!$this->isSuperAdmin($user) && !$relatedDirectory->isAuthorized('list', 'admin', $user)) {
+        if (!$this->isDirectoryAuthorized($relatedDirectory, 'list', $user)) {
             return null;
         }
 
         $actionsEnabled = (bool) ($detail['actions'] ?? false);
-        $isSuperAdmin = $this->isSuperAdmin($user);
         $canEdit = $actionsEnabled
             && $this->hasAdminNextFlexEditRoute($relatedDirectory)
-            && ($isSuperAdmin || $relatedDirectory->isAuthorized('update', 'admin', $user));
+            && $this->isDirectoryAuthorized($relatedDirectory, 'update', $user);
         $canDelete = $actionsEnabled
-            && ($isSuperAdmin || $relatedDirectory->isAuthorized('delete', 'admin', $user));
+            && $this->isDirectoryAuthorized($relatedDirectory, 'delete', $user);
 
         $fields = $this->resolveDetailFields($relatedDirectory, $detail['fields'] ?? null);
         [$fieldTypes, $fieldOptions] = $this->describeListFields($relatedDirectory, $fields);

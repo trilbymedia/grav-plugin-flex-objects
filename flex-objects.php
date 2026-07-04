@@ -20,6 +20,8 @@ use Grav\Framework\Flex\Interfaces\FlexAuthorizeInterface;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Route\Route;
+use Grav\Plugin\Api\PermissionResolver;
+use Grav\Plugin\FlexObjects\Api\DirectoryPermission;
 use Grav\Plugin\FlexObjects\Controllers\ObjectController;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
@@ -967,6 +969,11 @@ class FlexObjectsPlugin extends Plugin
             }
         }
 
+        // Build the permission resolver once for the whole sweep; it caches the
+        // user's flattened access, so a fresh instance per directory would
+        // rebuild that map every iteration. Only needed for non-super-admins.
+        $resolver = $user && !$isSuperAdmin ? new PermissionResolver($this->grav['permissions']) : null;
+
         foreach ($flex->getDirectories() as $directory) {
             $type = $directory->getFlexType();
             if (empty($type) || in_array($type, $builtIn, true) || !$directory->isEnabled()) {
@@ -989,8 +996,10 @@ class FlexObjectsPlugin extends Plugin
                 continue;
             }
 
-            // Check if user has list permission for this directory
-            if ($user && !$isSuperAdmin && !$directory->isAuthorized('list', 'admin', $user)) {
+            // Check list permission for this directory. FlexDirectory::isAuthorized()
+            // applies a 'test' scope prefix when a user is passed explicitly, so use
+            // the shared PermissionResolver-based check (see DirectoryPermission).
+            if ($resolver && !DirectoryPermission::isAuthorized($directory, 'list', $user, $resolver)) {
                 continue;
             }
 
