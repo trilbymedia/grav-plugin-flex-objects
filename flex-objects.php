@@ -449,7 +449,7 @@ class FlexObjectsPlugin extends Plugin
         // Update dynamic flex forms from the page.
         $form = null;
         foreach ($forms as $name => $test) {
-            $type = $form['type'] ?? null;
+            $type = $test['type'] ?? null;
             if ($type === 'flex') {
                 $form = $test;
 

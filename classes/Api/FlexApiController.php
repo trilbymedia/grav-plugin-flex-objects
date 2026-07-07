@@ -661,6 +661,16 @@ class FlexApiController extends AbstractApiController
     ): void {
         $user = $this->getUser($request);
 
+        // API-key scope cap (GHSA-x7hm). A key minted with a non-empty `scopes`
+        // list is capped to exactly those permissions regardless of the owning
+        // account's ACL. AbstractApiController::requirePermission() enforces this
+        // before its own super-admin short-circuit, but the Flex CRUD/media/export
+        // routes authorize against the directory blueprint instead of calling
+        // requirePermission(), so the cap must be applied here too — before the
+        // super-admin bypass below — or a narrowly-scoped key on a super account
+        // would reach every Flex directory.
+        $this->requireFlexScope($request, $directory, $action);
+
         if ($this->isSuperAdmin($user)) {
             return;
         }
@@ -695,6 +705,69 @@ class FlexApiController extends AbstractApiController
         // None matched — report the first prefix for a clear error
         $prefix = array_key_first($permissions);
         throw new \Grav\Plugin\Api\Exceptions\ForbiddenException("Missing required permission: {$prefix}.{$action}");
+    }
+
+    /**
+     * Enforce the API-key scope cap for a Flex directory action (GHSA-x7hm).
+     *
+     * When the request carries a non-empty `api_key_scopes` attribute, the key
+     * is restricted to those scopes even on a super-admin account. The action is
+     * allowed only if a scope permits at least one of the directory's candidate
+     * permissions (`<prefix>.<action>` for each blueprint permission prefix, plus
+     * the generic `admin.flex-object.<action>` fallback used when a directory
+     * declares no permissions block). An empty or absent scope set (unscoped
+     * keys, JWT, and session credentials) means full access, so this is a no-op.
+     *
+     * The scope-match logic mirrors AbstractApiController::scopesPermit(), which
+     * is private in the API plugin; kept in sync deliberately.
+     */
+    private function requireFlexScope(
+        ServerRequestInterface $request,
+        FlexDirectory $directory,
+        string $action,
+    ): void {
+        $scopes = $request->getAttribute('api_key_scopes');
+        if (!is_array($scopes) || $scopes === []) {
+            return;
+        }
+
+        $candidates = [];
+        foreach (($directory->getConfig('admin.permissions') ?? []) as $prefix => $config) {
+            $candidates[] = $prefix . '.' . $action;
+        }
+        $candidates[] = 'admin.flex-object.' . $action;
+
+        foreach ($candidates as $permission) {
+            if ($this->scopesPermitPermission($scopes, $permission)) {
+                return;
+            }
+        }
+
+        throw new \Grav\Plugin\Api\Exceptions\ForbiddenException(
+            "API key is not authorized for the '{$action}' action on '{$directory->getFlexType()}'.",
+        );
+    }
+
+    /**
+     * Whether a non-empty API-key scope list grants a permission. A scope grants
+     * its own permission and everything beneath it (`api.contacts` covers
+     * `api.contacts.read`); `*` grants everything. Mirrors
+     * AbstractApiController::scopesPermit() (see GHSA-x7hm).
+     *
+     * @param array<int, mixed> $scopes
+     */
+    private function scopesPermitPermission(array $scopes, string $permission): bool
+    {
+        foreach ($scopes as $scope) {
+            if (!is_string($scope) || $scope === '') {
+                continue;
+            }
+            if ($scope === '*' || $scope === $permission || str_starts_with($permission, $scope . '.')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function serializeObject(FlexObjectInterface $object): array
