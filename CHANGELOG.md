@@ -1,3 +1,10 @@
+# v1.4.5
+## 07/07/2026
+
+1. [](#bugfix)
+    * [security] Scoped API keys are now capped on every Flex object, media, and export endpoint, so a narrowly-scoped key can no longer reach Flex directories outside its scope (GHSA-x7hm).
+    * [security] Restored the page-level access check for embedded Flex edit forms, so an unauthorized visitor can no longer open a pre-filled edit form through a page's own route.
+
 # v1.4.4
 ## 07/03/2026
 
