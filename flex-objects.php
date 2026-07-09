@@ -944,8 +944,6 @@ class FlexObjectsPlugin extends Plugin
         // legacy admin-classic accounts use admin.super.
         $isSuperAdmin = $user && ($user->get('access.api.super') || $user->get('access.admin.super'));
 
-        $language = $this->grav['language'];
-
         // We iterate every enabled directory, not just those returned by
         // getAdminMenuItems(). Directories whose blueprint omits `admin.menu`
         // get collapsed into a single empty-key entry by getAdminMenuItems()
@@ -1031,7 +1029,9 @@ class FlexObjectsPlugin extends Plugin
             $items[] = [
                 'id'        => $id,
                 'plugin'    => 'flex-objects',
-                'label'     => $language->translate($rawLabel) ?: $rawLabel,
+                // Keep translation keys intact. SidebarController resolves
+                // them against the signed-in user's Admin Next language.
+                'label'     => $rawLabel,
                 'icon'      => $this->normalizeFaIcon($rawIcon),
                 'route'     => '/flex-objects/' . $type,
                 'priority'  => $menuItem['priority'] ?? 0,
