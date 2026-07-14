@@ -6,6 +6,7 @@ namespace Grav\Plugin\FlexObjects\Api;
 
 use Grav\Common\Page\Media;
 use Grav\Common\User\Interfaces\UserInterface;
+use Grav\Common\Utils;
 use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
@@ -363,7 +364,13 @@ class FlexApiController extends AbstractApiController
         unset($body['__meta']);
 
         try {
-            $object->update($body);
+            // Diff the incoming media-field values against what's stored so core
+            // physically unlinks any file the user removed. Without the second
+            // $files argument, update() only rewrites the field property and
+            // leaves the file orphaned on disk — admin-next has no form-flash
+            // delete queue like classic admin's FlexForm::submit().
+            $removedFiles = $this->collectRemovedMediaFiles($object, $body);
+            $object->update($body, $removedFiles);
             $object->save();
         } catch (\Exception $e) {
             throw new \Grav\Plugin\Api\Exceptions\ValidationException(
@@ -512,9 +519,12 @@ class FlexApiController extends AbstractApiController
         return ApiResponse::created(
             data: $serialized,
             location: $this->getApiBaseUrl() . '/flex-objects/' . $type . '/' . $key . '/media',
+            // Media-only channel: a media write doesn't change item.json, so it
+            // must not fire the object's `:update:` channel (the edit page reads
+            // that as an external modification). The list route's `:*` wildcard
+            // still catches this for directory badges.
             headers: $this->invalidationHeaders([
                 'flex-objects:' . $type . ':media:' . $key,
-                'flex-objects:' . $type . ':update:' . $key,
             ]),
         );
     }
@@ -552,9 +562,10 @@ class FlexApiController extends AbstractApiController
         $this->fireEvent('onApiMediaDeleted', ['object' => $object, 'filename' => $filename]);
 
         return ApiResponse::noContent(
+            // Media-only channel — see mediaUpload(): a media delete doesn't
+            // touch item.json, so it must not fire the object's `:update:`.
             $this->invalidationHeaders([
                 'flex-objects:' . $type . ':media:' . $key,
-                'flex-objects:' . $type . ':update:' . $key,
             ]),
         );
     }
@@ -625,6 +636,146 @@ class FlexApiController extends AbstractApiController
         }
 
         return rtrim(GRAV_ROOT, '/') . '/' . $folder;
+    }
+
+    /**
+     * Build a core-compatible `$files` delete map for object-local media that an
+     * incoming update removes.
+     *
+     * Admin-next has no FormFlash queue, so a PATCH that drops a file from a
+     * `type: file` field only rewrites the field value — the physical file is
+     * never unlinked. This reproduces what classic admin's FlexForm::submit()
+     * did: diff each media field's stored value against the incoming body and
+     * hand core a `[$field => [$filename => null]]` map, which
+     * FlexObject::update() feeds to setUpdatedMedia()/saveUpdatedMedia() to
+     * delete the file when the object saves.
+     *
+     * Only self-owned (object folder) media is queued for deletion. A field
+     * with a shared destination (e.g. `media://`, `user://`) is dereferenced
+     * but left on disk, since the file may be used elsewhere.
+     *
+     * @param array<string,mixed> $body
+     * @return array<string,array<string,null>>
+     */
+    private function collectRemovedMediaFiles(FlexObjectInterface $object, array $body): array
+    {
+        if (!method_exists($object, 'getBlueprint') || !method_exists($object, 'getNestedProperty')) {
+            return [];
+        }
+
+        try {
+            $items = $object->getBlueprint()->schema()->getState()['items'] ?? [];
+        } catch (\Throwable $e) {
+            return [];
+        }
+
+        $files = [];
+        foreach ($items as $field => $settings) {
+            if (!is_array($settings)) {
+                continue;
+            }
+
+            $type = $settings['type'] ?? '';
+            $isMedia = in_array($type, ['avatar', 'file', 'pagemedia'], true)
+                || array_key_exists('destination', $settings);
+            if (!$isMedia) {
+                continue;
+            }
+
+            // Only physically delete object-local media. A shared destination
+            // is dereferenced but kept on disk (matches getFieldSettings()'s
+            // `self` resolution in core's FlexMediaTrait).
+            $destination = rtrim((string)($settings['destination'] ?? ''), '/');
+            if (!in_array($destination, ['', '@self', 'self@', '@self@'], true)) {
+                continue;
+            }
+
+            // Skip fields the client didn't send — a partial update must not
+            // read an absent field as "every file removed".
+            if (!$this->bodyHasField($body, (string)$field)) {
+                continue;
+            }
+
+            $stored = $this->mediaFileBasenames($object->getNestedProperty((string)$field));
+            $incoming = $this->mediaFileBasenames($this->bodyGetField($body, (string)$field));
+
+            foreach (array_keys(array_diff_key($stored, $incoming)) as $filename) {
+                $files[(string)$field][$filename] = null;
+            }
+        }
+
+        return $files;
+    }
+
+    /**
+     * Normalize a file-field value (Grav's keyed `{ path: {name,...} }` format)
+     * to a set of bare filenames, keyed by basename for O(1) diffing. Keying on
+     * basename keeps the diff stable whether values are stored by full path or
+     * by bare filename.
+     *
+     * @param mixed $value
+     * @return array<string,true>
+     */
+    private function mediaFileBasenames($value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $names = [];
+        foreach ($value as $key => $info) {
+            if (is_array($info)) {
+                $name = $info['name'] ?? $info['path'] ?? (is_string($key) ? $key : '');
+            } else {
+                $name = is_string($key) ? $key : (string)$info;
+            }
+
+            $name = Utils::basename((string)$name);
+            if ($name !== '') {
+                $names[$name] = true;
+            }
+        }
+
+        return $names;
+    }
+
+    /**
+     * Read a dot-notation field from a nested body array. Returns null if any
+     * path segment is missing.
+     *
+     * @param array<string,mixed> $body
+     * @return mixed
+     */
+    private function bodyGetField(array $body, string $field)
+    {
+        $current = $body;
+        foreach (explode('.', $field) as $part) {
+            if (!is_array($current) || !array_key_exists($part, $current)) {
+                return null;
+            }
+            $current = $current[$part];
+        }
+
+        return $current;
+    }
+
+    /**
+     * Whether the incoming body explicitly carries a value for a dot-notation
+     * field (even if null/empty), so partial updates skip untouched fields.
+     *
+     * @param array<string,mixed> $body
+     */
+    private function bodyHasField(array $body, string $field): bool
+    {
+        $current = $body;
+        foreach (explode('.', $field) as $part) {
+            if (!is_array($current) || !array_key_exists($part, $current)) {
+                return false;
+            }
+            $current = $current[$part];
+        }
+
+        return true;
     }
 
     private function getFlex(): Flex

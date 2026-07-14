@@ -1,3 +1,10 @@
+# v1.4.6
+## 07/09/2026
+
+1. [](#bugfix)
+    * Flex directory sidebar labels now display in the signed-in user's admin language instead of the site's content language, so the new admin's sidebar no longer mixes languages ([#232](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/232)).
+    * Removing an image from a Flex object's file field now deletes the file from disk when you save, instead of leaving it orphaned in the object's folder.
+
 # v1.4.5
 ## 07/07/2026
 
