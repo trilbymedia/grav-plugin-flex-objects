@@ -112,6 +112,81 @@ class FlexApiControllerMediaTest extends TestCase
         self::assertSame($absolute, $this->invoke('resolveMediaFolder', $object));
     }
 
+    #[Test]
+    public function removed_object_local_file_is_queued_for_physical_deletion(): void
+    {
+        // Stored: two images. Incoming update keeps only one. The dropped file
+        // must be queued as a `[$field => [$filename => null]]` delete marker so
+        // core unlinks it on save (regression: admin-next left it orphaned).
+        $object = $this->fakeMediaObject(
+            ['images' => ['type' => 'file', 'multiple' => true]],
+            ['images' => [
+                'keep.png' => ['name' => 'keep.png', 'path' => 'keep.png'],
+                'drop.png' => ['name' => 'drop.png', 'path' => 'drop.png'],
+            ]],
+        );
+
+        $body = ['images' => ['keep.png' => ['name' => 'keep.png', 'path' => 'keep.png']]];
+
+        self::assertSame(
+            ['images' => ['drop.png' => null]],
+            $this->invoke('collectRemovedMediaFiles', $object, $body),
+        );
+    }
+
+    #[Test]
+    public function shared_destination_file_is_dereferenced_but_not_deleted(): void
+    {
+        // A `media://` (or any non-self) destination points at shared storage —
+        // dropping the reference must NOT unlink the file, which may be in use
+        // elsewhere. So no delete marker is produced.
+        $object = $this->fakeMediaObject(
+            ['images' => ['type' => 'file', 'destination' => 'media://']],
+            ['images' => ['shared.png' => ['name' => 'shared.png', 'path' => 'shared.png']]],
+        );
+
+        $body = ['images' => []];
+
+        self::assertSame([], $this->invoke('collectRemovedMediaFiles', $object, $body));
+    }
+
+    #[Test]
+    public function field_absent_from_body_is_left_untouched(): void
+    {
+        // A partial update that doesn't send the media field must not read the
+        // absence as "all files removed".
+        $object = $this->fakeMediaObject(
+            ['images' => ['type' => 'file']],
+            ['images' => ['a.png' => ['name' => 'a.png', 'path' => 'a.png']]],
+        );
+
+        self::assertSame([], $this->invoke('collectRemovedMediaFiles', $object, ['title' => 'x']));
+    }
+
+    #[Test]
+    public function non_media_fields_are_ignored(): void
+    {
+        $object = $this->fakeMediaObject(
+            ['title' => ['type' => 'text']],
+            ['title' => 'old'],
+        );
+
+        self::assertSame([], $this->invoke('collectRemovedMediaFiles', $object, ['title' => 'new']));
+    }
+
+    #[Test]
+    public function file_basenames_normalize_full_paths(): void
+    {
+        // The value may be keyed by full path or bare filename; both normalize
+        // to the same basename set so the diff stays stable.
+        $names = $this->invoke('mediaFileBasenames', [
+            'user/data/flex-objects/x/photo.png' => ['name' => 'photo.png', 'path' => 'user/data/flex-objects/x/photo.png'],
+            'logo.svg' => ['name' => 'logo.svg', 'path' => 'logo.svg'],
+        ]);
+
+        self::assertSame(['photo.png' => true, 'logo.svg' => true], $names);
+    }
+
     /**
      * A folder-stored Flex object stub that only needs to answer getMediaFolder()
      * and getKey() for the media-folder resolution path.
@@ -121,6 +196,25 @@ class FlexApiControllerMediaTest extends TestCase
         $object = $this->createMock(FlexObject::class);
         $object->method('getMediaFolder')->willReturn($mediaFolder);
         $object->method('getKey')->willReturn($key);
+
+        return $object;
+    }
+
+    /**
+     * A Flex object stub for the media-deletion diff: it answers getBlueprint()
+     * (→ schema()->getState()['items']) and getNestedProperty() for stored
+     * field values, which is all collectRemovedMediaFiles() touches.
+     *
+     * @param array<string,array<string,mixed>> $items  blueprint schema items
+     * @param array<string,mixed>               $stored current field values
+     */
+    private function fakeMediaObject(array $items, array $stored): FlexObject
+    {
+        $object = $this->createMock(FlexObject::class);
+        $object->method('getBlueprint')->willReturn(new FlexMediaTestBlueprint($items));
+        $object->method('getNestedProperty')->willReturnCallback(
+            static fn($field) => $stored[$field] ?? null,
+        );
 
         return $object;
     }
@@ -216,4 +310,31 @@ final class FlexMediaTestFile implements UploadedFileInterface
     public function getError(): int { return UPLOAD_ERR_OK; }
     public function getClientFilename(): ?string { return $this->filename; }
     public function getClientMediaType(): ?string { return 'image/png'; }
+}
+
+/**
+ * Minimal blueprint stub exposing schema()->getState()['items'] — the only
+ * blueprint surface collectRemovedMediaFiles() reads.
+ */
+final class FlexMediaTestBlueprint
+{
+    /** @param array<string,array<string,mixed>> $items */
+    public function __construct(private readonly array $items) {}
+
+    public function schema(): FlexMediaTestSchema
+    {
+        return new FlexMediaTestSchema($this->items);
+    }
+}
+
+final class FlexMediaTestSchema
+{
+    /** @param array<string,array<string,mixed>> $items */
+    public function __construct(private readonly array $items) {}
+
+    /** @return array{items: array<string,array<string,mixed>>} */
+    public function getState(): array
+    {
+        return ['items' => $this->items];
+    }
 }
