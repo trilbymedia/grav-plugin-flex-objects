@@ -40,6 +40,18 @@ class FlexApiController extends AbstractApiController
     private const ADMIN_NEXT_DEDICATED_TYPES = ['pages', 'user-accounts', 'user-groups'];
 
     /**
+     * User/group directories must NOT be written through the generic Flex route.
+     * That route authorizes only against the directory blueprint permission
+     * (e.g. admin.users.update) and skips the super-admin-target and per-field
+     * (password/access/state/groups) guards the dedicated Users and Groups API
+     * controllers enforce — so a delegated user-manager could otherwise reset a
+     * super-admin's password or elevate an account to super (GHSA-pc8m-jxvh-vmrc).
+     * Admin Next edits these types through their dedicated endpoints, not this
+     * route, so refusing generic writes here changes no legitimate flow.
+     */
+    private const DEDICATED_WRITE_ONLY_TYPES = ['user-accounts', 'user-groups'];
+
+    /**
      * Recursively translate language-key-looking label values within an admin
      * config subtree. {@see translateLabel()} is a no-op for anything that
      * isn't a translation key, so non-label strings pass through unchanged.
@@ -313,6 +325,7 @@ class FlexApiController extends AbstractApiController
     {
         $type = $this->getRouteParam($request, 'type');
         $directory = $this->resolveDirectory($type);
+        $this->assertGenericWriteAllowed($directory);
         $this->requireFlexPermission($request, $directory, 'create');
 
         $body = $this->getRequestBody($request);
@@ -347,6 +360,7 @@ class FlexApiController extends AbstractApiController
     {
         $type = $this->getRouteParam($request, 'type');
         $directory = $this->resolveDirectory($type);
+        $this->assertGenericWriteAllowed($directory);
         $this->requireFlexPermission($request, $directory, 'update');
 
         $key = $this->getRouteParam($request, 'key');
@@ -394,6 +408,7 @@ class FlexApiController extends AbstractApiController
     {
         $type = $this->getRouteParam($request, 'type');
         $directory = $this->resolveDirectory($type);
+        $this->assertGenericWriteAllowed($directory);
         $this->requireFlexPermission($request, $directory, 'delete');
 
         $key = $this->getRouteParam($request, 'key');
@@ -797,6 +812,21 @@ class FlexApiController extends AbstractApiController
         }
 
         return $directory;
+    }
+
+    /**
+     * Refuse a generic Flex write to a user/group directory. Those types carry
+     * privilege-bearing fields (password, access, state, groups) and have
+     * dedicated API controllers that gate them; the generic route does not.
+     * See DEDICATED_WRITE_ONLY_TYPES / GHSA-pc8m-jxvh-vmrc.
+     */
+    private function assertGenericWriteAllowed(FlexDirectory $directory): void
+    {
+        if (in_array($directory->getFlexType(), self::DEDICATED_WRITE_ONLY_TYPES, true)) {
+            throw new \Grav\Plugin\Api\Exceptions\ForbiddenException(
+                "The '{$directory->getFlexType()}' directory must be modified through its dedicated API endpoint.",
+            );
+        }
     }
 
     /**
