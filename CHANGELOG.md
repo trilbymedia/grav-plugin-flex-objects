@@ -1,3 +1,9 @@
+# v1.4.7
+## 07/25/2026
+
+1. [](#bugfix)
+    * [security] A user with delegated user-management permission can no longer reset another account's password or grant it super-admin access by editing the account through the generic Flex Objects write endpoint, which skipped the checks the dedicated user and group endpoints apply; user and group records must now be changed through those dedicated endpoints ([GHSA-pc8m-jxvh-vmrc](https://github.com/getgrav/grav/security/advisories/GHSA-pc8m-jxvh-vmrc)).
+
 # v1.4.6
 ## 07/09/2026
 
