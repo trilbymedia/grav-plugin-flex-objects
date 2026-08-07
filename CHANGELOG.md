@@ -1,3 +1,10 @@
+# v1.4.8
+## 08/07/2026
+
+1. [](#bugfix)
+    * [security] The `[flex-objects]` shortcode now checks permission before rendering, so someone who can only edit page content can no longer publish a Flex directory that the admin panel keeps behind a permission ([GHSA-x929-528m-vx2m](https://github.com/getgrav/grav/security/advisories/GHSA-x929-528m-vx2m)).
+    * A Flex directory with a missing or broken blueprint no longer takes down the whole page when the shortcode is used, and logs why nothing was rendered instead.
+
 # v1.4.7
 ## 07/25/2026
 

@@ -2,9 +2,11 @@
 
 namespace Grav\Plugin\Shortcodes;
 
+use Grav\Framework\Flex\FlexDirectory;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexInterface;
 use Thunder\Shortcode\Shortcode\ShortcodeInterface;
+use Throwable;
 
 /**
  * [flex-objects] shortcode — render a Flex collection inline in page content.
@@ -57,7 +59,12 @@ class FlexObjectsShortcode extends Shortcode
 
         /** @var FlexInterface|null $flex */
         $flex = $this->grav['flex'] ?? null;
-        $collection = $flex ? $flex->getCollection($type) : null;
+        $directory = $flex ? $flex->getDirectory($type) : null;
+        if (null === $directory || !$this->isRenderable($directory)) {
+            return '';
+        }
+
+        $collection = $directory->getCollection();
         if (!$collection instanceof FlexCollectionInterface) {
             return '';
         }
@@ -93,5 +100,46 @@ class FlexObjectsShortcode extends Shortcode
         $layout = is_string($layout) && $layout !== '' ? $layout : null;
 
         return (string) $collection->render($layout);
+    }
+
+    /**
+     * A shortcode is stored content: anyone who can edit a page can name any registered
+     * Flex type, and the render then happens for whoever views that page. Resolving the
+     * type is therefore not enough on its own, the directory has to say it may be shown.
+     *
+     * A directory is renderable when its blueprint opts in to public output
+     * (`config.site.shortcode: true`), or when the viewer is authorized to list it
+     * anyway. Anything else renders nothing, so a directory keeps the same ACL the
+     * admin enforces.
+     *
+     * @param FlexDirectory $directory
+     * @return bool
+     */
+    protected function isRenderable(FlexDirectory $directory): bool
+    {
+        try {
+            // Blueprint opt-in, for collections meant to be published, e.g. a staff list.
+            if (true === $directory->getConfig('site.shortcode', false)) {
+                return true;
+            }
+
+            // Otherwise fall back to the viewer's own list permission, so an authorized
+            // user still sees the collection while everyone else gets nothing.
+            return true === $directory->isAuthorized('list');
+        } catch (Throwable $e) {
+            // A directory whose blueprint is missing or broken cannot be checked, and a
+            // shortcode must never take a page down with it. Treat it as not renderable,
+            // but leave a trace so an empty render can be explained.
+            $log = $this->grav['log'] ?? null;
+            if ($log) {
+                $log->debug(sprintf(
+                    '[flex-objects] shortcode could not authorize "%s": %s',
+                    $directory->getFlexType(),
+                    $e->getMessage()
+                ));
+            }
+
+            return false;
+        }
     }
 }
