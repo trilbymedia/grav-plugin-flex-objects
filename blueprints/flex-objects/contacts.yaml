@@ -72,6 +72,12 @@ config:
 
   # Site Configuration
   site:
+    # Allow the [flex-objects] shortcode to render this directory on the frontend.
+    # Off by default: without it, the shortcode renders nothing for visitors who are
+    # not authorized to list the directory. Only turn it on for collections whose
+    # contents are safe to publish.
+    # shortcode: true
+
     templates:
       collection:
         # Lookup for the template layout files for collections of objects
