@@ -107,10 +107,19 @@ class FlexObjectsShortcode extends Shortcode
      * Flex type, and the render then happens for whoever views that page. Resolving the
      * type is therefore not enough on its own, the directory has to say it may be shown.
      *
-     * A directory is renderable when its blueprint opts in to public output
-     * (`config.site.shortcode: true`), or when the viewer is authorized to list it
-     * anyway. Anything else renders nothing, so a directory keeps the same ACL the
-     * admin enforces.
+     * The line is drawn where Flex already draws it for the site. A directory marked
+     * `config.site.hidden` holds admin data (accounts, groups, pages) and renders only
+     * for a viewer authorized to list it. An ordinary content directory renders for
+     * everyone, which is the same data a theme template calling the collection directly
+     * has always been free to render.
+     *
+     * `config.site.shortcode` overrides that in either direction: true always publishes,
+     * false keeps the directory out of page content unless the viewer may list it.
+     *
+     * Checking the list permission alone is not enough, and was the bug in 1.4.8:
+     * FlexDirectory::getAuthorizeRule() drops the scope whenever the blueprint declares
+     * `admin.permissions`, so a frontend visitor was asked for an admin permission and
+     * every public collection rendered empty.
      *
      * @param FlexDirectory $directory
      * @return bool
@@ -118,13 +127,19 @@ class FlexObjectsShortcode extends Shortcode
     protected function isRenderable(FlexDirectory $directory): bool
     {
         try {
-            // Blueprint opt-in, for collections meant to be published, e.g. a staff list.
-            if (true === $directory->getConfig('site.shortcode', false)) {
+            // An explicit blueprint setting wins, whichever way it points.
+            $shortcode = $directory->getConfig('site.shortcode');
+            if (null !== $shortcode) {
+                return true === $shortcode || true === $directory->isAuthorized('list');
+            }
+
+            // Not hidden from the site means ordinary content, so publish it.
+            if (true !== $directory->getConfig('site.hidden', false)) {
                 return true;
             }
 
-            // Otherwise fall back to the viewer's own list permission, so an authorized
-            // user still sees the collection while everyone else gets nothing.
+            // Admin-only data: fall back to the viewer's own list permission, so an
+            // authorized user still sees the collection while everyone else gets nothing.
             return true === $directory->isAuthorized('list');
         } catch (Throwable $e) {
             // A directory whose blueprint is missing or broken cannot be checked, and a
