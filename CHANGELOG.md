@@ -2,6 +2,7 @@
 ## 08/10/2026
 
 1. [](#bugfix)
+    * [security] The Flex Object media proxy now denies a request whenever it cannot positively confirm the requester may read the object, rather than only on an explicit denial ([GHSA-ww63-g7x4-jwpg](https://github.com/getgrav/grav/security/advisories/GHSA-ww63-g7x4-jwpg)).
     * Fixed the `[flex-objects]` shortcode rendering nothing for logged-out visitors, so public collections show up in page content again ([#235](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/235)).
 
 # v1.4.8
