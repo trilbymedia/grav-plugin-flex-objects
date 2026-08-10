@@ -1,3 +1,9 @@
+# v1.4.9
+## 08/10/2026
+
+1. [](#bugfix)
+    * [security] The Flex Object media proxy now denies a request whenever it cannot positively confirm the requester may read the object, rather than only on an explicit denial ([GHSA-ww63-g7x4-jwpg](https://github.com/getgrav/grav/security/advisories/GHSA-ww63-g7x4-jwpg)).
+
 # v1.4.8
 ## 08/07/2026
 
