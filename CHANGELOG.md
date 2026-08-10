@@ -1,3 +1,9 @@
+# v1.4.9
+## 08/10/2026
+
+1. [](#bugfix)
+    * Fixed the `[flex-objects]` shortcode rendering nothing for logged-out visitors, so public collections show up in page content again ([#235](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/235)).
+
 # v1.4.8
 ## 08/07/2026
 

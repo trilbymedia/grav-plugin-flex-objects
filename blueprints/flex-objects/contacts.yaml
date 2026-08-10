@@ -72,10 +72,11 @@ config:
 
   # Site Configuration
   site:
-    # Allow the [flex-objects] shortcode to render this directory on the frontend.
-    # Off by default: without it, the shortcode renders nothing for visitors who are
-    # not authorized to list the directory. Only turn it on for collections whose
-    # contents are safe to publish.
+    # Controls whether the [flex-objects] shortcode may render this directory on the
+    # frontend. An ordinary content directory like this one is renderable by default;
+    # set this to false to keep it out of page content unless the viewer is authorized
+    # to list it. Directories hidden from the site (accounts, groups, pages) work the
+    # other way round: private unless this is set to true.
     # shortcode: true
 
     templates:
