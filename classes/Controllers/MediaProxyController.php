@@ -102,11 +102,13 @@ final class MediaProxyController
 
         // Permission gate. Off by default — the proxy currently exists to keep a
         // single retrieval chokepoint, not to ACL-gate reads. When explicitly
-        // enabled, only an explicit "no" blocks the file, so directories without
-        // a read ACL keep behaving as public media.
+        // enabled, the object has to say "yes": isAuthorized() is tri-state, and a
+        // null (no rule matched, indeterminate) means we could not establish that
+        // the caller may read this object, so deny rather than hand the file over
+        // (GHSA-ww63-g7x4-jwpg).
         if ($config->get('plugins.flex-objects.media_proxy.authorize', false)) {
             $user = $this->grav['user'] ?? null;
-            if ($object->isAuthorized('read', 'frontend', $user) === false) {
+            if ($object->isAuthorized('read', 'frontend', $user) !== true) {
                 return $this->error(403);
             }
         }

@@ -125,11 +125,16 @@ proxy is a pure routing/integrity gate (serve any existing media, no permission
 check). Its purpose at this stage is a single retrieval chokepoint, not
 per-object access control.
 
-The capability is kept behind the flag: setting `authorize: true` makes the
-proxy deny only on an **explicit** `false` from the object's read check, so
-directories without a read ACL keep behaving as public media (no regression)
-while directories that *do* define a read restriction get it enforced. Turn this
-on only once the caching story for private media (below) is settled.
+The capability is kept behind the flag, and **`authorize: true` is not usable
+yet**. `isAuthorized('read', 'frontend', $user)` returns a hard `false` for
+anonymous visitors and for ordinary logged-in accounts on every stock directory
+— there is no "public read" grant for it to answer yes to — so turning the flag
+on today denies *all* media to everyone except a super-admin. It is not the
+"enforce where defined, stay public elsewhere" behaviour this section used to
+describe. A public-read answer in the Flex ACL, plus the caching story below,
+both have to land before this flag is recommended to anyone. When enabled, the
+gate denies on anything other than an explicit `true`, so an indeterminate
+result fails closed rather than open.
 
 ## Configuration
 
@@ -137,7 +142,7 @@ on only once the caching story for private media (below) is settled.
 media_proxy:
   enabled: false              # opt-in while prototyping
   base: '/flex-media'         # public route prefix
-  authorize: true             # honour the object's read ACL
+  authorize: false            # honour the object's read ACL — see "Permission model", not usable yet
   cache_control: 'public, max-age=604800'
 ```
 
