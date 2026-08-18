@@ -1,7 +1,7 @@
 /**
  * Save-Redirect — custom web component field for flex-objects.
  *
- * Renders radio buttons for "After Save..." redirect behavior.
+ * Renders radio buttons for the "After Save" redirect behavior.
  * The `field` property contains the blueprint definition which
  * may include an `options` array. If not, defaults are provided.
  *
@@ -37,27 +37,30 @@ class SaveRedirectField extends HTMLElement {
     }
 
     _getOptions() {
-        // Check if blueprint provides explicit options
+        // The blueprint declares all three, already translated server-side.
         if (this._field?.options && Array.isArray(this._field.options)) {
             return this._field.options.map(o => ({
                 value: o.value,
                 label: o.label,
             }));
         }
-        // Show "Create New Item" only when the current value is create-new
-        // (i.e. when creating a new item — the blueprint default is create-new)
-        const isNewContext = this._value === 'create-new';
-        const options = [];
-        if (isNewContext) {
-            options.push({ value: 'create-new', label: 'Create New Item' });
-        }
-        options.push({ value: 'edit', label: 'Edit Item' });
-        options.push({ value: 'list', label: 'List Items' });
-        return options;
+        // No options in the served blueprint (an older flex-objects, or a
+        // directory that overrode the field). Offer all three regardless of the
+        // current value: gating the list on it removed "create new" from the
+        // group the moment a blueprint set any other default, which made
+        // `default: edit` impossible to use (admin2#160).
+        return [
+            { value: 'create-new', label: 'Create New Item' },
+            { value: 'edit', label: 'Edit Item' },
+            { value: 'list', label: 'List Items' },
+        ];
     }
 
     _render() {
         const options = this._getOptions();
+        // Translated server-side alongside the options; falls back to the
+        // English wording only if an older blueprint sends no label at all.
+        const heading = this._field?.label ?? 'After Save...';
 
         this.innerHTML = `
             <style>
@@ -85,7 +88,7 @@ class SaveRedirectField extends HTMLElement {
                 }
             </style>
             <div class="sr-container">
-                <span class="sr-label-text">After Save...</span>
+                <span class="sr-label-text">${heading}</span>
                 ${options.map(opt => `
                     <label class="sr-option">
                         <input type="radio" name="sr-${this._uid}" value="${opt.value}" />

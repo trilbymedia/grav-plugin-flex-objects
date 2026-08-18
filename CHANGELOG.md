@@ -1,3 +1,10 @@
+# v1.4.10
+## 08/18/2026
+
+1. [](#bugfix)
+    * The After Save control now offers all three choices whatever the configured default is, so a directory blueprint can set "Edit Item" as its default without the "Create New" option disappearing ([#160](https://github.com/getgrav/grav-plugin-admin2/issues/160)).
+    * The After Save control's heading and choices are now translated instead of always showing English.
+
 # v1.4.9
 ## 08/11/2026
 
