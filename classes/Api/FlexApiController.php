@@ -437,7 +437,20 @@ class FlexApiController extends AbstractApiController
     {
         $type = $this->getRouteParam($request, 'type');
         $directory = $this->resolveDirectory($type);
-        $this->requireFlexPermission($request, $directory, 'list');
+
+        // Export returns every field of every object, which is read-grade data.
+        // `list` only covers the minimised column view index() serves, and the
+        // classic admin export controller gated on `read` for the same reason
+        // (GHSA-3v3h-qxj8-43p3).
+        $this->requireFlexPermission($request, $directory, 'read');
+
+        // Honour the directory's export switch. A directory that never opted in
+        // (user accounts, groups, pages) has no export feature to offer, and must
+        // not be dumped wholesale through this endpoint.
+        $exportConfig = $directory->getConfig('admin.export') ?? [];
+        if (empty($exportConfig['enabled'])) {
+            throw new NotFoundException("Export is not enabled for '{$type}'.");
+        }
 
         $collection = $directory->getCollection();
         $data = [];

@@ -1,3 +1,11 @@
+# v1.4.10
+## 08/21/2026
+
+1. [](#bugfix)
+    * [security] The Flex export endpoint now requires the directory's `read` permission instead of `list`, and only exports directories whose blueprint enables export, so a list-only credential can no longer dump every field of every record and directories that never offered export (accounts, groups, pages) are no longer exportable.
+    * The After Save control now offers all three choices whatever the configured default is, so a directory blueprint can set "Edit Item" as its default without the "Create New" option disappearing ([#160](https://github.com/getgrav/grav-plugin-admin2/issues/160)).
+    * The After Save control's heading and choices are now translated instead of always showing English.
+
 # v1.4.9
 ## 08/11/2026
 

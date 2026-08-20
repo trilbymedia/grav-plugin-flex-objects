@@ -13,4 +13,11 @@ form:
           label: PLUGIN_FLEX_OBJECTS.AFTER_SAVE
           type: save-redirect
           default: create-new
+          # Declared here so the labels are translated server-side (the SPA's
+          # own string table only carries the ADMIN_NEXT namespace) and so every
+          # choice always renders, whatever the configured default happens to be.
+          options:
+            create-new: PLUGIN_FLEX_OBJECTS.ACTION.CREATE_NEW
+            edit: PLUGIN_FLEX_OBJECTS.ACTION.EDIT_ITEM
+            list: PLUGIN_FLEX_OBJECTS.ACTION.LIST_ITEMS
 
