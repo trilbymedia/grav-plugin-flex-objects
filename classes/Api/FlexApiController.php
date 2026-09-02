@@ -1312,7 +1312,19 @@ class FlexApiController extends AbstractApiController
 
         if ($listFields) {
             foreach ($listFields as $field) {
-                $data[$field] = $object->getProperty($field);
+                // A directory whose storage nests its data (FolderStorage with a
+                // MarkdownFormatter keeps everything under `header`) has to declare
+                // its list columns as dotted paths, and getProperty() only ever
+                // reads the top level. Fall back to the nested lookup, but only
+                // when the flat read came back null: the built-in directories then
+                // keep resolving exactly what they resolve today, and a column that
+                // legitimately holds `false` is never re-read (#237).
+                $value = $object->getProperty($field);
+                if ($value === null) {
+                    $value = $object->getNestedProperty($field);
+                }
+
+                $data[$field] = $value;
             }
         } else {
             // No list config — return all data
