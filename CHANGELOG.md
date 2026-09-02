@@ -1,3 +1,9 @@
+# v1.4.11
+## 09/02/2026
+
+1. [](#bugfix)
+    * A Flex directory whose list columns point at nested values, such as `header.title`, now shows those values instead of an empty cell in every row. Thanks to @Rbau30 [#237](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/237)
+
 # v1.4.10
 ## 08/21/2026
 
