@@ -1,0 +1,179 @@
+# MCP tool manifest, read by the API plugin and served at GET /mcp/tools so an
+# MCP server (grav-mcp, grav-plugin-mcp-server) can offer Flex directories to a
+# model. Format: grav-plugin-api README, "MCP tool manifests".
+#
+# Version 2 because create_object and update_object use `body`: the fields of a
+# Flex object come from each site's blueprints, so they cannot be declared here.
+# The `object` argument is sent verbatim as the request body, and a blueprint
+# field named `type` or `key` never collides with the path parameters. An API
+# plugin that predates version 2 skips this file with a warning instead of
+# serving a tool that would write a junk `object` field into every record.
+#
+# The CRUD tools carry no `permission`: the route enforces the directory's own
+# permission (for example api.contacts.read) at call time, and only it can know
+# which directory a call names. Built-in user-accounts and user-groups refuse
+# generic writes and are managed through their own tools.
+version: 2
+prefix: flex
+
+tools:
+  - name: list_directories
+    title: List Flex directories
+    description: >
+      List the enabled Flex Objects directories the caller may list, with each
+      directory's title, list columns, field types and searchable fields. Start
+      here to learn the `type` values every other flex tool takes. The built-in
+      pages, user-accounts and user-groups directories are not included; they
+      have dedicated tools.
+    method: GET
+    path: /flex-objects
+    permission: api.access
+
+  - name: get_directory
+    title: Get a Flex directory
+    description: >
+      Return one Flex directory's metadata: title, description, list columns
+      with their field types and option labels, edit and export configuration,
+      and searchable fields. Use get_blueprint for the full field definitions.
+    method: GET
+    path: /flex-objects/{type}/metadata
+    permission: api.access
+    input:
+      type: object
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+
+  - name: get_blueprint
+    title: Get a Flex directory blueprint
+    description: >
+      Return the form blueprint of a Flex directory: every field with its type,
+      label, options, default and validation rules. Read it before calling
+      create_object or update_object, since the `object` argument's keys are
+      these field names.
+    method: GET
+    path: /blueprints/flex-objects/{type}
+    permission: api.access
+    input:
+      type: object
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+
+  - name: list_objects
+    title: List Flex objects
+    description: >
+      List the objects in a Flex directory with paging, full-text search, sorting
+      and exact-match filters. Each row carries `key` and the directory's
+      configured list columns (or every field when the directory configures
+      none). Use get_object for one object with everything on it.
+    method: GET
+    path: /flex-objects/{type}
+    input:
+      type: object
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+        page: { type: integer, minimum: 1, default: 1 }
+        per_page: { type: integer, minimum: 1, description: "Rows per page; defaults to the directory's admin list size" }
+        search: { type: string, description: "Full-text search over the directory's searchable fields" }
+        sort: { type: string, description: "Field to sort by; defaults to the directory's admin list order" }
+        order: { type: string, enum: [asc, desc] }
+        filters:
+          type: object
+          description: "Exact-match filters, field name to value or to a list of accepted values, e.g. {\"published\": true}"
+          additionalProperties: true
+
+  - name: get_object
+    title: Get a Flex object
+    description: >
+      Return one Flex object with every stored field, plus `key` and a read-only
+      `__meta` block (type, key, storage key and path).
+    method: GET
+    path: /flex-objects/{type}/{key}
+    input:
+      type: object
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+        key: { type: string, description: "Object key, as returned by list_objects" }
+
+  - name: create_object
+    title: Create a Flex object
+    description: >
+      Create an object in a Flex directory from the fields in `object`. The
+      field names and validation rules are the directory blueprint's
+      (get_blueprint); the object's key is assigned by the directory's storage
+      and returned in the result. Fails with a validation error when a required
+      field is missing or a value does not validate.
+    method: POST
+    path: /flex-objects/{type}
+    body: object
+    input:
+      type: object
+      required: [type, object]
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+        object:
+          type: object
+          description: "The object's fields, named per the directory blueprint"
+          additionalProperties: true
+
+  - name: update_object
+    title: Update a Flex object
+    description: >
+      Change one or more fields of a Flex object. Only the fields sent in
+      `object` are changed; a null value removes that field. Field names and
+      validation rules are the directory blueprint's (get_blueprint). Returns the
+      whole object after the update.
+    method: PATCH
+    path: /flex-objects/{type}/{key}
+    body: object
+    input:
+      type: object
+      required: [type, key, object]
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+        key: { type: string, description: "Object key, as returned by list_objects" }
+        object:
+          type: object
+          description: "The fields to change, named per the directory blueprint; null removes a field"
+          additionalProperties: true
+
+  - name: delete_object
+    title: Delete a Flex object
+    description: >
+      Delete a Flex object and, for folder-stored directories, the media stored
+      with it. Returns nothing on success.
+    method: DELETE
+    path: /flex-objects/{type}/{key}
+    input:
+      type: object
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+        key: { type: string, description: "Object key, as returned by list_objects" }
+
+  - name: list_media
+    title: List a Flex object's media
+    description: >
+      List the media files stored with a Flex object: name, type, size and
+      image dimensions. Only folder-stored directories keep per-object media;
+      a directory stored as a single file answers with an error saying so.
+    method: GET
+    path: /flex-objects/{type}/{key}/media
+    input:
+      type: object
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+        key: { type: string, description: "Object key, as returned by list_objects" }
+
+  - name: delete_media
+    title: Delete a Flex object's media file
+    description: >
+      Delete one media file stored with a Flex object, together with its
+      metadata sidecar. Returns nothing on success. Uploading media is not
+      available as a tool; it needs a multipart request.
+    method: DELETE
+    path: /flex-objects/{type}/{key}/media/{filename}
+    input:
+      type: object
+      properties:
+        type: { type: string, description: "Directory type, e.g. contacts" }
+        key: { type: string, description: "Object key, as returned by list_objects" }
+        filename: { type: string, description: "File name as listed by list_media" }
