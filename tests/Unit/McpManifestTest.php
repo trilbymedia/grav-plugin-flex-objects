@@ -88,8 +88,8 @@ class McpManifestTest extends TestCase
     #[Test]
     public function every_tool_names_a_registered_route(): void
     {
-        // ponytail: the routes are read from the plugin source rather than by
-        // booting Grav; register a route any other way and update this regex.
+        // The routes are read from the plugin source rather than by booting
+        // Grav; register a route any other way and this regex needs updating.
         preg_match_all(
             '/\$routes->(get|post|patch|put|delete)\(\s*\'([^\']+)\'/',
             (string) file_get_contents(self::PLUGIN),

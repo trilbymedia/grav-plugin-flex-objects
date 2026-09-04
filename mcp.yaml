@@ -1,4 +1,4 @@
-# MCP tool manifest, read by the API plugin and served at GET /mcp/tools so an
+# MCP tool manifest, read by the API plugin and served at GET /api/v1/mcp/tools so an
 # MCP server (grav-mcp, grav-plugin-mcp-server) can offer Flex directories to a
 # model. Format: grav-plugin-api README, "MCP tool manifests".
 #
