@@ -126,7 +126,7 @@ Action buttons are permission-aware. When `actions: true`, the API exposes only 
 
 ## MCP Tools
 
-The plugin ships an `mcp.yaml` manifest, which the API plugin serves at `GET /api/v1/mcp/tools`. An MCP server such as [grav-mcp](https://github.com/getgrav/grav-mcp) or [grav-plugin-mcp-server](https://github.com/sandymac/grav-plugin-mcp-server) turns it into ten `flex_*` tools: list directories, read a directory's metadata and blueprint, and list, read, create, update and delete objects and their media. Each call is checked against the directory's own permissions exactly like the REST route it maps to.
+The plugin ships an `mcp.yaml` manifest, which the API plugin serves at `GET /api/v1/mcp/tools`. An MCP server such as [grav-mcp](https://github.com/getgrav/grav-mcp) or [grav-plugin-mcp-server](https://github.com/sandymac/grav-plugin-mcp-server) turns it into ten `flex_*` tools: list directories, read a directory's metadata and blueprint, and list, read, create, update and delete objects and their media. The three catalog tools (directories, metadata, blueprint) need `api.access`, the same as their routes. The object and media tools are checked at call time against the directory's own permissions (for example `api.contacts.update`), exactly like the REST routes they map to.
 
 Because an object's fields come from the directory blueprint, `flex_create_object` and `flex_update_object` take them as a single `object` argument that is sent as the request body. A model should call `flex_get_blueprint` first to learn the field names. This needs API plugin 1.0.26 or later; an older API plugin skips the manifest with a warning in the `GET /api/v1/mcp/tools` response.
 
