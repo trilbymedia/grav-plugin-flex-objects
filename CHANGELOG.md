@@ -2,7 +2,11 @@
 ## 09/03/2026
 
 1. [](#new)
-    * Flex directories can now be driven from an MCP client. The plugin ships an `mcp.yaml` manifest that the API plugin serves at `GET /api/v1/mcp/tools`, so grav-mcp and grav-plugin-mcp-server offer ten `flex_*` tools: listing directories and their blueprints, listing, reading, creating, updating and deleting objects, and listing and deleting object media. Create and update take the object's fields as one `object` argument that is sent as the request body, because the field names come from each site's blueprints and cannot be declared in advance. Needs API plugin 1.0.26 or later, the release that reads manifest version 2 [getgrav/grav-plugin-api#32](https://github.com/getgrav/grav-plugin-api/issues/32)
+    * Flex directories can now be driven from an MCP client such as grav-mcp or grav-plugin-mcp-server [getgrav/grav-plugin-api#32](https://github.com/getgrav/grav-plugin-api/issues/32)
+    * The plugin ships an `mcp.yaml` manifest, which the API plugin serves at `GET /api/v1/mcp/tools`
+    * Ten `flex_*` tools list directories and their blueprints, list, read, create, update and delete objects, and list and delete object media
+    * Creating or updating an object takes its fields as one `object` argument, because the field names come from each site's blueprints
+    * Requires API plugin 1.0.26 or later
 
 # v1.4.11
 ## 09/02/2026
