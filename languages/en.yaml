@@ -9,6 +9,10 @@ PLUGIN_FLEX_OBJECTS:
   EMPTY_RESULT: The requested query returns no result
 
   USE_BUILT_IN_CSS: "Use built in CSS"
+  SECURITY_SECTION: "Security"
+  SECURITY:
+    RESTRICT_PAGE_FRONTMATTER: "Restrict Page Frontmatter Editing"
+    RESTRICT_PAGE_FRONTMATTER_HELP: "When enabled, non-superusers cannot modify form, forms, process, or twig settings in page headers. Disable if editors need to modify forms."
   EXTRA_ADMIN_TWIG_PATH: "Extra Admin Twig Path"
   DIRECTORIES: "Directories"
   CSV: "CSV"
