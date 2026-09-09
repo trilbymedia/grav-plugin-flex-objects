@@ -2,7 +2,7 @@ name: Flex Objects
 slug: flex-objects
 type: plugin
 testing: false
-version: 1.4.12
+version: 1.4.13
 description: Flex Objects plugin allows you to manage Flex Objects in Grav Admin.
 icon: list-alt
 author:
@@ -19,7 +19,7 @@ compatibility:
 dependencies:
   - { name: grav, version: ">=2.0.0" }
   - { name: form, version: ">=6.0.0" }
-  - { name: api, version: ">=1.0.0" }
+  - { name: api, version: ">=1.0.28" }
 
 form:
   validation: loose
