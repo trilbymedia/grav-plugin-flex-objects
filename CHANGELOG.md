@@ -1,3 +1,9 @@
+# v1.4.12
+## 09/09/2026
+
+1. [](#improved)
+    * The Security section heading and the "Restrict Page Frontmatter Editing" option now use translation keys instead of hardcoded English, with Spanish included [#239](https://github.com/trilbymedia/grav-plugin-flex-objects/pull/239)
+
 # v1.4.11
 ## 09/02/2026
 
