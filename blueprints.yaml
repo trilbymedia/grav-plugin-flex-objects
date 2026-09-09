@@ -2,7 +2,7 @@ name: Flex Objects
 slug: flex-objects
 type: plugin
 testing: false
-version: 1.4.12
+version: 1.4.13
 description: Flex Objects plugin allows you to manage Flex Objects in Grav Admin.
 icon: list-alt
 author:
@@ -19,7 +19,7 @@ compatibility:
 dependencies:
   - { name: grav, version: ">=2.0.0" }
   - { name: form, version: ">=6.0.0" }
-  - { name: api, version: ">=1.0.26" }
+  - { name: api, version: ">=1.0.28" }
 
 form:
   validation: loose
@@ -46,13 +46,13 @@ form:
         type: bool
     security_section:
       type: section
-      title: Security
+      title: PLUGIN_FLEX_OBJECTS.SECURITY_SECTION
       underline: true
 
     security.restrict_page_frontmatter:
       type: toggle
-      label: Restrict Page Frontmatter Editing
-      help: When enabled, non-superusers cannot modify form, forms, process, or twig settings in page headers. Disable if editors need to modify forms.
+      label: PLUGIN_FLEX_OBJECTS.SECURITY.RESTRICT_PAGE_FRONTMATTER
+      help: PLUGIN_FLEX_OBJECTS.SECURITY.RESTRICT_PAGE_FRONTMATTER_HELP
       highlight: 1
       default: 1
       options:
