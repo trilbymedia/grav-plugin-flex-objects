@@ -12,7 +12,7 @@ PLUGIN_FLEX_OBJECTS:
   SECURITY_SECTION: "Seguridad"
   SECURITY:
     RESTRICT_PAGE_FRONTMATTER: "Restringir edición de Frontmatter de página"
-    RESTRICT_PAGE_FRONTMATTER_HELP: "Cuando está activada, los usuarios que no sean superusuarios no pueden modificar la configuración de `form`, `forms`, `process` ni `twig` en las cabeceras de las páginas. Desactívala si los editores necesitan modificar los formularios."
+    RESTRICT_PAGE_FRONTMATTER_HELP: "Cuando está activada, los usuarios que no sean superusuarios no pueden modificar la configuración de form, forms, process ni twig en las cabeceras de las páginas. Desactívala si los editores necesitan modificar los formularios."
   EXTRA_ADMIN_TWIG_PATH: "Ruta extra de twig para Admin"
   DIRECTORIES: "Directorios"
   CSV: "CSV"
