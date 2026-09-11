@@ -1,3 +1,9 @@
+# v1.4.14
+## 09/10/2026
+
+1. [](#bugfix)
+    * An API key limited to certain Flex directories no longer lists the others or shows records from related directories it wasn't given, even when the account that created it is a super admin
+
 # v1.4.13
 ## 09/09/2026
 
