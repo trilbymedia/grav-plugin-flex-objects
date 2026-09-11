@@ -163,11 +163,11 @@ class FlexApiController extends AbstractApiController
             }
 
             // Skip directories the user cannot list
-            if (!$this->isDirectoryAuthorized($directory, 'list', $user)) {
+            if (!$this->isDirectoryAuthorized($directory, 'list', $user, $request)) {
                 continue;
             }
 
-            $result[] = $this->serializeDirectoryMetadata($directory, $user);
+            $result[] = $this->serializeDirectoryMetadata($directory, $user, $request);
         }
 
         return ApiResponse::create($result);
@@ -188,13 +188,13 @@ class FlexApiController extends AbstractApiController
         $directory = $this->resolveDirectory($this->getRouteParam($request, 'type'));
         $user = $this->getUser($request);
 
-        if (!$this->isDirectoryAuthorized($directory, 'list', $user)) {
+        if (!$this->isDirectoryAuthorized($directory, 'list', $user, $request)) {
             throw new \Grav\Plugin\Api\Exceptions\ForbiddenException('Missing required permission to list this Flex directory.');
         }
 
         $this->primeAdminLanguages($request);
 
-        return ApiResponse::create($this->serializeDirectoryMetadata($directory, $user));
+        return ApiResponse::create($this->serializeDirectoryMetadata($directory, $user, $request));
     }
 
     /**
@@ -283,7 +283,7 @@ class FlexApiController extends AbstractApiController
 
         // Get list field names from config
         $listFields = array_keys($directory->getConfig('admin.list.fields') ?? []);
-        $detail = $this->normalizeDetailConfig($directory, $directory->getConfig('admin.list.detail'), $this->getUser($request));
+        $detail = $this->normalizeDetailConfig($directory, $directory->getConfig('admin.list.detail'), $this->getUser($request), $request);
 
         $data = [];
         foreach ($objects as $object) {
@@ -604,8 +604,16 @@ class FlexApiController extends AbstractApiController
      * Delegates to {@see DirectoryPermission} so this check stays in sync with
      * the sidebar registration in flex-objects.php.
      */
-    private function isDirectoryAuthorized(FlexDirectory $directory, string $action, UserInterface $user): bool
+    private function isDirectoryAuthorized(FlexDirectory $directory, string $action, UserInterface $user, ?ServerRequestInterface $request = null): bool
     {
+        // API-key scope cap first, as requireFlexPermission() does. Without it a
+        // key scoped to one directory could list every other directory and read
+        // related records in a detail panel, because the super-admin
+        // short-circuit below reads the account behind the key.
+        if ($request !== null && !$this->flexScopeAllows($request, $directory, $action)) {
+            return false;
+        }
+
         if ($this->isSuperAdmin($user)) {
             return true;
         }
@@ -920,9 +928,22 @@ class FlexApiController extends AbstractApiController
         FlexDirectory $directory,
         string $action,
     ): void {
+        if (!$this->flexScopeAllows($request, $directory, $action)) {
+            throw new \Grav\Plugin\Api\Exceptions\ForbiddenException(
+                "API key is not authorized for the '{$action}' action on '{$directory->getFlexType()}'.",
+            );
+        }
+    }
+
+    /**
+     * Non-throwing form of requireFlexScope(), for checks that skip or hide
+     * rather than reject.
+     */
+    private function flexScopeAllows(ServerRequestInterface $request, FlexDirectory $directory, string $action): bool
+    {
         $scopes = $request->getAttribute('api_key_scopes');
         if (!is_array($scopes) || $scopes === []) {
-            return;
+            return true;
         }
 
         $candidates = [];
@@ -933,13 +954,11 @@ class FlexApiController extends AbstractApiController
 
         foreach ($candidates as $permission) {
             if ($this->scopesPermitPermission($scopes, $permission)) {
-                return;
+                return true;
             }
         }
 
-        throw new \Grav\Plugin\Api\Exceptions\ForbiddenException(
-            "API key is not authorized for the '{$action}' action on '{$directory->getFlexType()}'.",
-        );
+        return false;
     }
 
     /**
@@ -1006,7 +1025,7 @@ class FlexApiController extends AbstractApiController
      * @param mixed $user
      * @return array<string, mixed>
      */
-    private function serializeDirectoryMetadata(FlexDirectory $directory, $user): array
+    private function serializeDirectoryMetadata(FlexDirectory $directory, $user, ?ServerRequestInterface $request = null): array
     {
         $config = $directory->getConfig('admin') ?? [];
         $menu = $config['menu']['list'] ?? [];
@@ -1020,7 +1039,7 @@ class FlexApiController extends AbstractApiController
         $list = $config['list'] ?? [];
         $listFields = $list['fields'] ?? [];
         [$fieldTypes, $fieldOptions] = $this->describeListFields($directory, $listFields);
-        $detail = $this->normalizeDetailConfig($directory, $list['detail'] ?? null, $user);
+        $detail = $this->normalizeDetailConfig($directory, $list['detail'] ?? null, $user, $request);
         if ($detail !== null) {
             $list['detail'] = $detail;
         }
@@ -1085,7 +1104,7 @@ class FlexApiController extends AbstractApiController
      * @param mixed $user
      * @return array<string, mixed>|null
      */
-    private function normalizeDetailConfig(FlexDirectory $directory, $detail, $user): ?array
+    private function normalizeDetailConfig(FlexDirectory $directory, $detail, $user, ?ServerRequestInterface $request = null): ?array
     {
         if (!is_array($detail) || empty($detail['enabled'])) {
             return null;
@@ -1104,16 +1123,16 @@ class FlexApiController extends AbstractApiController
             return null;
         }
 
-        if (!$this->isDirectoryAuthorized($relatedDirectory, 'list', $user)) {
+        if (!$this->isDirectoryAuthorized($relatedDirectory, 'list', $user, $request)) {
             return null;
         }
 
         $actionsEnabled = (bool) ($detail['actions'] ?? false);
         $canEdit = $actionsEnabled
             && $this->hasAdminNextFlexEditRoute($relatedDirectory)
-            && $this->isDirectoryAuthorized($relatedDirectory, 'update', $user);
+            && $this->isDirectoryAuthorized($relatedDirectory, 'update', $user, $request);
         $canDelete = $actionsEnabled
-            && $this->isDirectoryAuthorized($relatedDirectory, 'delete', $user);
+            && $this->isDirectoryAuthorized($relatedDirectory, 'delete', $user, $request);
 
         $fields = $this->resolveDetailFields($relatedDirectory, $detail['fields'] ?? null);
         [$fieldTypes, $fieldOptions] = $this->describeListFields($relatedDirectory, $fields);
