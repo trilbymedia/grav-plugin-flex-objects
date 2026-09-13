@@ -42,7 +42,7 @@ This plugin works out of the box, but provides several fields that make modifyin
 enabled: true
 
 built_in_css: true
-extra_site_twig_path: 'user://templates'
+#extra_site_twig_path: 'user://templates'
 admin_list:
   per_page: 15
   order:
@@ -386,7 +386,7 @@ user/themes/YOUR_THEME/templates/flex/YOUR_TYPE/object/default.html.twig
 
 Grav puts the theme's templates ahead of every plugin's, so these win automatically. Use this only in a theme you control (a custom theme, or an inherited one); a stock theme has the same update problem the plugin does.
 
-### 2. `user/templates/` (the default `extra_site_twig_path`)
+### 2. `user/templates/` (via `extra_site_twig_path`)
 
 If you would rather not tie the templates to a theme, create the folder `user/templates` and use the same structure:
 
@@ -395,7 +395,15 @@ user/templates/flex/YOUR_TYPE/collection/default.html.twig
 user/templates/flex/YOUR_TYPE/object/default.html.twig
 ```
 
-Nothing else is required — `extra_site_twig_path` ships pointing at `user://templates`, and no package ever writes to `user/templates`. To use a different folder instead, set it in `user/config/plugins/flex-objects.yaml`:
+Then switch the option on in `user/config/plugins/flex-objects.yaml`:
+
+```yaml
+extra_site_twig_path: 'user://templates'
+```
+
+It ships commented out rather than enabled, because the root is added to Twig's search path ahead of Grav's own `system://templates`, and a site that already has a `user/templates` folder for something else would suddenly have those files shadowing core templates. Nothing Grav installs ever writes to `user/templates`, so once you opt in, a plugin or theme update cannot remove what you put there.
+
+Any folder works, not just that one:
 
 ```yaml
 extra_site_twig_path: 'config://flex-objects/templates'

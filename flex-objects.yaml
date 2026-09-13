@@ -20,7 +20,12 @@ built_in_css: true
 #     - 'config://flex-objects/templates'
 #
 # Your theme's own `templates/flex/...` folder still takes precedence over this.
-extra_site_twig_path: 'user://templates'
+#
+# Left unset by default: the root is added to Twig's search path ahead of Grav's
+# own `system://templates`, so enabling it on a site that already has a
+# `user/templates` folder would let those files shadow core templates. Set it
+# deliberately rather than inheriting it from an update.
+#extra_site_twig_path: 'user://templates'
 
 # Media proxy (PROTOTYPE — see docs/specs/media-proxy.md)
 # Serve Flex Object media through PHP with an optional read-permission check,
