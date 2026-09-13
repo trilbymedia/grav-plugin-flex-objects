@@ -1101,14 +1101,37 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Add current directory to twig lookup paths.
      *
+     * `extra_site_twig_path` lets a site keep its Flex site templates somewhere a
+     * plugin update cannot reach. This matters because updating a plugin deletes and
+     * replaces the whole plugin directory, so anything hand-added under
+     * `user/plugins/flex-objects/templates/` is gone after the next update.
+     *
+     * The value is a stream URI (or a list of them) pointing at a *templates root*,
+     * not at an individual file: `user://templates` means Flex site templates live at
+     * `user/templates/flex/<type>/collection/default.html.twig` and so on. Each
+     * resolved root is registered before the plugin's own `templates/` directory, so
+     * files there override the shipped ones, while the theme still wins over both
+     * (Grav adds `theme://templates` before firing this event).
+     *
      * @return void
      */
     public function onTwigTemplatePaths(): void
     {
-        $extra_site_twig_path = $this->config->get('plugins.flex-objects.extra_site_twig_path');
-        $extra_path = $extra_site_twig_path ? $this->grav['locator']->findResource($extra_site_twig_path) : null;
-        if ($extra_path) {
-            $this->grav['twig']->twig_paths[] = $extra_path;
+        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
+        $locator = $this->grav['locator'];
+
+        $extra = $this->config->get('plugins.flex-objects.extra_site_twig_path');
+        foreach ((array)$extra as $uri) {
+            if (!is_string($uri) || $uri === '') {
+                continue;
+            }
+
+            // findResources(), not findResource(): a stream can map to several
+            // roots (`config://` spans environment/user/system, an inherited theme
+            // spans child and parent), and all of them should be searchable.
+            foreach ($locator->findResources($uri) as $path) {
+                $this->grav['twig']->twig_paths[] = $path;
+            }
         }
 
         $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
