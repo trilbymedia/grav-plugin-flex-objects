@@ -1,3 +1,9 @@
+# v1.4.15
+## 09/13/2026
+
+1. [](#bugfix)
+    * A Flex directory whose blueprint is shipped by a theme no longer goes missing from the frontend and from Admin Next on requests that carry a session cookie. Thanks to @phmg701 [#240](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/240)
+
 # v1.4.14
 ## 09/10/2026
 
