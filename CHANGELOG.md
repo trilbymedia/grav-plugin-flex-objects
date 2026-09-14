@@ -1,3 +1,10 @@
+# v1.4.15
+## 09/13/2026
+
+1. [](#bugfix)
+    * A Flex directory whose blueprint is shipped by a theme no longer goes missing from the frontend and from Admin Next on requests that carry a session cookie. Thanks to @phmg701 [#240](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/240)
+    * Site templates can be kept outside the plugin folder, where a plugin update cannot delete them. The option that does this is now documented and shipped in the plugin's config, and it accepts a list of folders. Thanks to @ttytrekker [#242](https://github.com/trilbymedia/grav-plugin-flex-objects/issues/242)
+
 # v1.4.14
 ## 09/10/2026
 

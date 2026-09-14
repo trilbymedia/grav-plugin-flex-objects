@@ -42,7 +42,7 @@ This plugin works out of the box, but provides several fields that make modifyin
 enabled: true
 
 built_in_css: true
-extra_admin_twig_path: 'theme://admin/templates'
+#extra_site_twig_path: 'user://templates'
 admin_list:
   per_page: 15
   order:
@@ -367,8 +367,92 @@ Right now there are a few limitations:
 
 ### Notes:
 
-1. You can actually use pretty much any folder under the `user/` folder of Grav. Simply edit the **Extra Admin Twig Path** option in the `flex-objects.yaml` file.  It defaults to `theme://admin/templates` which means it uses the default theme's `admin/templates/` folder if it exists.
-2. You can use any path for front end Twig templates also, if you don't want to put them in your theme, you can add an entry in the **Extra Site Twig Path** option of the `flex-objects.yaml` configuration and point to another location.
+1. You can use any path for frontend Twig templates, if you don't want to put them in your theme. Set the **Extra Site Twig Path** (`extra_site_twig_path`) option in `user/config/plugins/flex-objects.yaml` and point it at another location. See [Where to keep your templates](#where-to-keep-your-templates) below.
+
+# Where to keep your templates
+
+**Never keep your own files inside `user/plugins/flex-objects/`.** Updating a plugin deletes the plugin directory and replaces it with the new release, so anything you copied in there — templates, blueprints, notes — is gone after the next update. That applies to every Grav plugin, not just this one.
+
+There are two update-safe places for Flex site templates.
+
+### 1. Your theme (no configuration needed)
+
+Mirror the plugin's structure under your theme's `templates/` folder:
+
+```text
+user/themes/YOUR_THEME/templates/flex/YOUR_TYPE/collection/default.html.twig
+user/themes/YOUR_THEME/templates/flex/YOUR_TYPE/object/default.html.twig
+```
+
+Grav puts the theme's templates ahead of every plugin's, so these win automatically. Use this only in a theme you control (a custom theme, or an inherited one); a stock theme has the same update problem the plugin does.
+
+### 2. `user/templates/` (via `extra_site_twig_path`)
+
+If you would rather not tie the templates to a theme, create the folder `user/templates` and use the same structure:
+
+```text
+user/templates/flex/YOUR_TYPE/collection/default.html.twig
+user/templates/flex/YOUR_TYPE/object/default.html.twig
+```
+
+Then switch the option on in `user/config/plugins/flex-objects.yaml`:
+
+```yaml
+extra_site_twig_path: 'user://templates'
+```
+
+It ships commented out rather than enabled, because the root is added to Twig's search path ahead of Grav's own `system://templates`, and a site that already has a `user/templates` folder for something else would suddenly have those files shadowing core templates. Nothing Grav installs ever writes to `user/templates`, so once you opt in, a plugin or theme update cannot remove what you put there.
+
+Any folder works, not just that one:
+
+```yaml
+extra_site_twig_path: 'config://flex-objects/templates'
+```
+
+A list works too, and the first match wins:
+
+```yaml
+extra_site_twig_path:
+  - 'user://templates'
+  - 'config://flex-objects/templates'
+```
+
+The lookup order for a Flex site template is: your theme (and any theme it inherits from), then each `extra_site_twig_path` root, then this plugin's own `templates/` folder, then Grav's core templates.
+
+### `config.site.templates.*.paths` is not a folder setting
+
+A common mistake is to try to relocate templates by putting a stream URI in the blueprint:
+
+```yaml
+# WRONG - this will fail with: Template "config://..." is not defined
+config:
+  site:
+    templates:
+      collection:
+        paths:
+          - 'config://flex-objects/templates/flex/changelog/collection/default.html.twig'
+```
+
+Those `paths` entries are **template names handed to Twig**, resolved against the directories Twig already knows about. They are not search roots, and they do not understand `config://`, `user://` or any other Grav stream. Leave them as the relative patterns the stock blueprints use and let `extra_site_twig_path` (or your theme) decide *where* those names are found:
+
+```yaml
+config:
+  site:
+    templates:
+      collection:
+        paths:
+          - 'flex/{TYPE}/collection/{LAYOUT}{EXT}'
+      object:
+        paths:
+          - 'flex/{TYPE}/object/{LAYOUT}{EXT}'
+      defaults:
+        type: changelog
+        layout: default
+```
+
+`{TYPE}`, `{LAYOUT}` and `{EXT}` are placeholders Flex Objects fills in while rendering — write them exactly as shown.
+
+Blueprints themselves are already safe: `user/blueprints/flex-objects/YOUR_TYPE.yaml` is outside the plugin and survives updates.
 
 # Tricks and tips
 

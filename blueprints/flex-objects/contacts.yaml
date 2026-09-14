@@ -79,13 +79,20 @@ config:
     # other way round: private unless this is set to true.
     # shortcode: true
 
+    # These are template NAMES handed to Twig, not folders: Twig resolves them
+    # against the directories it already searches (your theme, then the plugin's
+    # `extra_site_twig_path` roots, then this plugin's own `templates/`, then core).
+    # A Grav stream such as `config://...` or `user://...` will NOT work here.
+    # To keep your templates outside the plugin — a plugin update deletes the whole
+    # plugin folder — put them in your theme's `templates/flex/...`, or in
+    # `user/templates/flex/...` and leave these patterns as they are.
     templates:
       collection:
-        # Lookup for the template layout files for collections of objects
+        # Template names looked up for collections of objects
         paths:
           - 'flex/{TYPE}/collection/{LAYOUT}{EXT}'
       object:
-        # Lookup for the template layout files for objects
+        # Template names looked up for individual objects
         paths:
           - 'flex/{TYPE}/object/{LAYOUT}{EXT}'
       defaults:

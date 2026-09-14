@@ -2,6 +2,31 @@ enabled: true
 
 built_in_css: true
 
+# Extra root for Flex *site* (frontend) Twig templates, searched before the ones
+# this plugin ships. Use it to keep your own templates outside the plugin folder:
+# updating a plugin deletes and replaces its whole directory, so custom files left
+# in `user/plugins/flex-objects/templates/` are lost on the next update.
+#
+# The default points at `user/templates`, which no package ever overwrites. Create
+# the folder and drop your layouts in, mirroring the plugin's own structure:
+#
+#   user/templates/flex/<type>/collection/default.html.twig
+#   user/templates/flex/<type>/object/default.html.twig
+#
+# A list is also accepted, and the first match wins:
+#
+#   extra_site_twig_path:
+#     - 'user://templates'
+#     - 'config://flex-objects/templates'
+#
+# Your theme's own `templates/flex/...` folder still takes precedence over this.
+#
+# Left unset by default: the root is added to Twig's search path ahead of Grav's
+# own `system://templates`, so enabling it on a site that already has a
+# `user/templates` folder would let those files shadow core templates. Set it
+# deliberately rather than inheriting it from an update.
+#extra_site_twig_path: 'user://templates'
+
 # Media proxy (PROTOTYPE — see docs/specs/media-proxy.md)
 # Serve Flex Object media through PHP with an optional read-permission check,
 # so object media can live under a locked-down user/data instead of being

@@ -45,6 +45,13 @@ class FlexObjectsPlugin extends Plugin
     ];
 
     /**
+     * True once Flex has been booted and FlexRegisterEvent has been handled.
+     *
+     * @var bool
+     */
+    protected $flexInitialized = false;
+
+    /**
      * @return bool
      */
     public static function checkRequirements(): bool
@@ -156,6 +163,17 @@ class FlexObjectsPlugin extends Plugin
 
             return $flexObjects;
         };
+
+        // `onPluginsInitialized` is never fired in CLI, so subscribe here instead. CLI
+        // commands that initialize themes need the same late re-registration as web
+        // requests do.
+        if ($this->isCli()) {
+            $this->enable([
+                'onThemeInitialized' => [
+                    ['onThemeInitialized', 0]
+                ],
+            ]);
+        }
     }
 
     /**
@@ -184,6 +202,9 @@ class FlexObjectsPlugin extends Plugin
 
         } else {
             $this->enable([
+                'onThemeInitialized' => [
+                    ['onThemeInitialized', 0]
+                ],
                 'onTwigTemplatePaths' => [
                     ['onTwigTemplatePaths', 0]
                 ],
@@ -218,6 +239,8 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onRegisterFlex(FlexRegisterEvent $event): void
     {
+        $this->flexInitialized = true;
+
         /** @var \Grav\Framework\Flex\Flex $flex */
         $flex = $event->flex;
         $types = (array)$this->config->get('plugins.flex-objects.directories', []);
@@ -229,6 +252,24 @@ class FlexObjectsPlugin extends Plugin
      */
     public function onThemeInitialized(): void
     {
+        // Themes only join the `blueprints://` stream when they initialize, so any Flex
+        // directory whose blueprint is shipped by the theme is silently skipped if Flex
+        // was booted earlier in the request. That happens on plenty of ordinary requests:
+        // starting a session unserializes the stored user, which reloads the account
+        // blueprint and resolves its `groups` field through Flex, and sites using Flex
+        // user accounts boot Flex during initialization on every single request.
+        //
+        // Re-run the registration now that the theme stream resolves. Blueprints that are
+        // already registered and enabled are left alone, so this is a no-op when nothing
+        // was missed.
+        if (!$this->flexInitialized && !$this->isAdmin()) {
+            // Flex has not been booted yet, so nothing was missed. Leave it that way
+            // rather than booting Flex (and hitting the filesystem) on requests that
+            // would never have used it; registration happens on first use, by which time
+            // the theme stream is already in place.
+            return;
+        }
+
         // Register directories defined in the theme.
         /** @var \Grav\Framework\Flex\Flex $flex */
         $flex = $this->grav['flex'];
@@ -1060,14 +1101,37 @@ class FlexObjectsPlugin extends Plugin
     /**
      * Add current directory to twig lookup paths.
      *
+     * `extra_site_twig_path` lets a site keep its Flex site templates somewhere a
+     * plugin update cannot reach. This matters because updating a plugin deletes and
+     * replaces the whole plugin directory, so anything hand-added under
+     * `user/plugins/flex-objects/templates/` is gone after the next update.
+     *
+     * The value is a stream URI (or a list of them) pointing at a *templates root*,
+     * not at an individual file: `user://templates` means Flex site templates live at
+     * `user/templates/flex/<type>/collection/default.html.twig` and so on. Each
+     * resolved root is registered before the plugin's own `templates/` directory, so
+     * files there override the shipped ones, while the theme still wins over both
+     * (Grav adds `theme://templates` before firing this event).
+     *
      * @return void
      */
     public function onTwigTemplatePaths(): void
     {
-        $extra_site_twig_path = $this->config->get('plugins.flex-objects.extra_site_twig_path');
-        $extra_path = $extra_site_twig_path ? $this->grav['locator']->findResource($extra_site_twig_path) : null;
-        if ($extra_path) {
-            $this->grav['twig']->twig_paths[] = $extra_path;
+        /** @var \RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator $locator */
+        $locator = $this->grav['locator'];
+
+        $extra = $this->config->get('plugins.flex-objects.extra_site_twig_path');
+        foreach ((array)$extra as $uri) {
+            if (!is_string($uri) || $uri === '') {
+                continue;
+            }
+
+            // findResources(), not findResource(): a stream can map to several
+            // roots (`config://` spans environment/user/system, an inherited theme
+            // spans child and parent), and all of them should be searchable.
+            foreach ($locator->findResources($uri) as $path) {
+                $this->grav['twig']->twig_paths[] = $path;
+            }
         }
 
         $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
