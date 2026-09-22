@@ -4,11 +4,23 @@
 {%- set flex = grav.get('flex_objects') %}
 {%- set list = list ?? options.list ?? (options.directories ?? flex.defaultDirectories())|keys %}
 
+{#- The stylesheet and List.js go in their own groups and are written out right
+    here rather than left to the theme. On a theme whose asset block is not
+    deferred, the head has already been rendered by the time page content runs,
+    so head-group assets never reach the page. List.js cannot move to 'bottom'
+    instead: collection templates call `new List()` in an inline script, which
+    needs it loaded first. #}
 {%- if page_assets.css ?? config.get('plugins.flex-objects.built_in_css') ?? true %}
-    {% do assets.addCss('plugin://flex-objects/css/site.css') %}
+    {% if assets.css('flex-objects', {}, false) is empty %}
+        {% do assets.addCss('plugin://flex-objects/css/site.css', { 'group': 'flex-objects' }) %}
+        {{ assets.css('flex-objects', {}, false)|raw }}
+    {% endif %}
 {% endif %}
 {%- if page_assets.jss ?? true %}
-    {% do assets.addJs('plugin://flex-objects/js/list.min.js') %}
+    {% if assets.js('flex-objects', {}, false) is empty %}
+        {% do assets.addJs('plugin://flex-objects/js/list.min.js', { 'group': 'flex-objects' }) %}
+        {{ assets.js('flex-objects', {}, false)|raw }}
+    {% endif %}
 {% endif %}
 
 {%- if type %}
