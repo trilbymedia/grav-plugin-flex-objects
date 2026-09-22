@@ -6,21 +6,21 @@ PLUGIN_FLEX_OBJECTS:
   TYPES_TITLE: Répertoires
   AFTER_SAVE: Après la sauvegarde…
   LIST_INFO: "Affichage des enregistrements {from} à {to} sur un total de {total}"
-  EMPTY_RESULT: La requète ne donne aucun résutat
+  EMPTY_RESULT: La requête ne donne aucun résultat
 
-  USE_BUILT_IN_CSS: "Utlisation du CSS intégré"
+  USE_BUILT_IN_CSS: "Utiliser le CSS intégré"
   SECURITY_SECTION: "Sécurité"
   SECURITY:
     RESTRICT_PAGE_FRONTMATTER: "Restreindre l'édition en page publique"
-    RESTRICT_PAGE_FRONTMATTER_HELP: "Lorsque activé, les utilisateurs qui n'ont pas le status super-utilisateur ne peuvent pas modifier les paramètres de form, forms, process, ou twig dans l'en-tête de page. Désactiver si les éditeurs doivent pouvoir modifier les forms."
-  EXTRA_ADMIN_TWIG_PATH: "Chemin Twig Extra Admin"
+    RESTRICT_PAGE_FRONTMATTER_HELP: "Lorsque cette option est activée, les utilisateurs qui n'ont pas le statut de super-utilisateur ne peuvent pas modifier les paramètres form, forms, process ou twig dans l'en-tête des pages. Désactivez-la si les éditeurs doivent pouvoir modifier les formulaires."
+  EXTRA_ADMIN_TWIG_PATH: "Chemin Twig supplémentaire pour l'admin"
   DIRECTORIES: "Répertoires"
   CSV: "CSV"
   PARENTS: "Parents"
   NEW: "Nouveau"
 
   CONTROLLER:
-    TASK_DELETE_SUCCESS: "Enregistrement effacé avec succès"
+    TASK_DELETE_SUCCESS: "Enregistrement supprimé avec succès"
     TASK_DELETE_FAILURE: "Échec lors de la suppression de : %s"
     TASK_NEW_FOLDER_SUCCESS: "Dossier créé avec succès"
     TASK_COPY_SUCCESS: "Copie créée avec succès"
@@ -32,10 +32,10 @@ PLUGIN_FLEX_OBJECTS:
 
   ACTION:
     CREATE_NEW: "Créer un nouvel élément"
-    EDIT_ITEM: "Editer l'élément"
+    EDIT_ITEM: "Modifier l'élément"
     LIST_ITEMS: "Lister les éléments"
-    DELETE_N: "Effacer" # In some languages 'delete OBJECT' may need a special declination
-    REALLY_DELETE: "Êtes-vous sûr•e de vouloir effacer définitivement %s ?"
+    DELETE_N: "Supprimer" # In some languages 'delete OBJECT' may need a special declination
+    REALLY_DELETE: "Voulez-vous vraiment supprimer définitivement %s ?"
     SEARCH_PLACEHOLDER: "Rechercher…"
     ADVANCED_OPTIONS: "Options avancées"
     APPLY_FILTERS: "Appliquer les filtres"
@@ -48,30 +48,30 @@ PLUGIN_FLEX_OBJECTS:
     MODULAR_TYPES: "Types de modules"
 
   LANGUAGE:
-    USING_DEFAULT: "utilisation du fichier de langue <b>Default</b>."
-    UNUSED_DEFAULT: "Unused <b>Default</b> language file also exists."
-    USING_OVERRIDE: "Utilisation de <b>%s</b> remplacement de la langue."
-    NOT_TRANSLATED_YET: "Cette page n'a pas été traduite en <i class=\"fa fa-flag-o\"></i> <b>%s</b> pour l'instant !"
+    USING_DEFAULT: "Utilisation du fichier de langue <b>par défaut</b>."
+    UNUSED_DEFAULT: "Un fichier de langue <b>par défaut</b> inutilisé existe également."
+    USING_OVERRIDE: "Utilisation de la surcharge de langue <b>%s</b>."
+    NOT_TRANSLATED_YET: "Cette page n'a pas encore été traduite en <i class=\"fa fa-flag-o\"></i> <b>%s</b> !"
     NO_FALLBACK_FOUND: "Aucune traduction de repli trouvée."
-    FALLING_BACK: "Repli vers le <b>%s</b>."
+    FALLING_BACK: "Repli sur la langue <b>%s</b>."
 
   STATE:
     LOADING: "Chargement…"
     CREATED_SUCCESSFULLY: "Créé avec succès"
     UPDATED_SUCCESSFULLY: "Mis à jour avec succès"
-    DELETED_SUCCESSFULLY: "Effacé avec succès"
-    EDITING_DRAFT: "Vous êtes en train d'éditer un brouillon précdemment sauvegardé."
-    NOT_CREATED_YET: "Cette page n'ecistera pas tant qu'elle ne sera pas sauvegardée."
+    DELETED_SUCCESSFULLY: "Supprimé avec succès"
+    EDITING_DRAFT: "Vous êtes en train de modifier un brouillon enregistré."
+    NOT_CREATED_YET: "Cette page n'existera pas tant qu'elle n'aura pas été enregistrée."
 
   ERROR:
     BAD_DIRECTORY: "Mauvais répertoire"
     PAGE_NOT_FOUND: "Page non trouvée"
     PAGE_NOT_EXIST: "Oups ! Il semble que cette page n'existe pas."
-    PAGE_FORBIDDEN: "Oups ! il semble que vousn'ayez pas l'autorisation d'accéder à cette page."
-    LAYOUT_NOT_FOUND: "Mise en forme d'objet '%s' non trouvée."
-    BLUEPRINT_NO_LIST: "Le Blueprint pour <i>%s</i> ne définit pas les champs affichés ou l'override de page de liste."
+    PAGE_FORBIDDEN: "Oups ! Il semble que vous n'ayez pas l'autorisation d'accéder à cette page."
+    LAYOUT_NOT_FOUND: "Mise en page d'objet '%s' introuvable."
+    BLUEPRINT_NO_LIST: "Le blueprint de <i>%s</i> ne définit ni les champs affichés ni de page de liste personnalisée."
     BLUEPRINT_NO_LIST_ADVISE: "Merci d'ajouter la liste des champs au fichier blueprint."
-    BLUEPRINT_NO_LIST_TEMPLATE: "Merci de créer un fichier de template pour le type dans <b>flex-objects/types/%s/list.html.twig</b>"
+    BLUEPRINT_NO_LIST_TEMPLATE: "Merci de créer un fichier de template pour ce type dans <b>flex-objects/types/%s/list.html.twig</b>"
     LIST_EMPTY: "Il n'y a actuellement aucun enregistrement."
-    LIST_EMPTY_ADD: "Il n'y a actuellement aucun enregistrement. Cliquer sur le bouton <a href=\"%s\">Ajouter</a> pour en créer un nouveau…"
+    LIST_EMPTY_ADD: "Il n'y a actuellement aucun enregistrement. Cliquez sur le bouton <a href=\"%s\">Ajouter</a> pour en créer un nouveau…"
     NO_FLEX_DIRECTORIES: "Aucun répertoire Flex détecté"
