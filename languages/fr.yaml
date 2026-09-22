@@ -1,0 +1,77 @@
+PLUGIN_FLEX_OBJECTS:
+  PLUGIN_NAME: "Flex Objects"
+  PLUGIN_DESCRIPTION: "Le plugin Flex Objects vous permet de gérer les Flex Objects dans l'Admin Grav."
+
+  TITLE: Flex Objects
+  TYPES_TITLE: Répertoires
+  AFTER_SAVE: Après la sauvegarde…
+  LIST_INFO: "Affichage des enregistrements {from} à {to} sur un total de {total}"
+  EMPTY_RESULT: La requète ne donne aucun résutat
+
+  USE_BUILT_IN_CSS: "Utlisation du CSS intégré"
+  SECURITY_SECTION: "Sécurité"
+  SECURITY:
+    RESTRICT_PAGE_FRONTMATTER: "Restreindre l'édition en page publique"
+    RESTRICT_PAGE_FRONTMATTER_HELP: "Lorsque activé, les utilisateurs qui n'ont pas le status super-utilisateur ne peuvent pas modifier les paramètres de form, forms, process, ou twig dans l'en-tête de page. Désactiver si les éditeurs doivent pouvoir modifier les forms."
+  EXTRA_ADMIN_TWIG_PATH: "Chemin Twig Extra Admin"
+  DIRECTORIES: "Répertoires"
+  CSV: "CSV"
+  PARENTS: "Parents"
+  NEW: "Nouveau"
+
+  CONTROLLER:
+    TASK_DELETE_SUCCESS: "Enregistrement effacé avec succès"
+    TASK_DELETE_FAILURE: "Échec lors de la suppression de : %s"
+    TASK_NEW_FOLDER_SUCCESS: "Dossier créé avec succès"
+    TASK_COPY_SUCCESS: "Copie créée avec succès"
+    TASK_COPY_FAILURE: "Échec lors de la copie de : %s"
+    TASK_SAVE_SUCCESS: "Enregistrement sauvegardé avec succès"
+    TASK_SAVE_FAILURE: "Échec lors de la sauvegarde de : %s"
+    TASK_CONFIGURE_SUCCESS: "Configuration sauvegardée avec succès"
+    TASK_CONFIGURE_FAILURE: "Échec lors de la sauvegarde de la configuration : %s"
+
+  ACTION:
+    CREATE_NEW: "Créer un nouvel élément"
+    EDIT_ITEM: "Editer l'élément"
+    LIST_ITEMS: "Lister les éléments"
+    DELETE_N: "Effacer" # In some languages 'delete OBJECT' may need a special declination
+    REALLY_DELETE: "Êtes-vous sûr•e de vouloir effacer définitivement %s ?"
+    SEARCH_PLACEHOLDER: "Rechercher…"
+    ADVANCED_OPTIONS: "Options avancées"
+    APPLY_FILTERS: "Appliquer les filtres"
+    RESET_FILTERS: "Réinitialiser aux valeurs par défaut"
+    ACTIONS: "Actions"
+
+  FILTER:
+    PAGE_ATTRIBUTES: "Attributs de page"
+    PAGE_TYPES: "Types de pages"
+    MODULAR_TYPES: "Types de modules"
+
+  LANGUAGE:
+    USING_DEFAULT: "utilisation du fichier de langue <b>Default</b>."
+    UNUSED_DEFAULT: "Unused <b>Default</b> language file also exists."
+    USING_OVERRIDE: "Utilisation de <b>%s</b> remplacement de la langue."
+    NOT_TRANSLATED_YET: "Cette page n'a pas été traduite en <i class=\"fa fa-flag-o\"></i> <b>%s</b> pour l'instant !"
+    NO_FALLBACK_FOUND: "Aucune traduction de repli trouvée."
+    FALLING_BACK: "Repli vers le <b>%s</b>."
+
+  STATE:
+    LOADING: "Chargement…"
+    CREATED_SUCCESSFULLY: "Créé avec succès"
+    UPDATED_SUCCESSFULLY: "Mis à jour avec succès"
+    DELETED_SUCCESSFULLY: "Effacé avec succès"
+    EDITING_DRAFT: "Vous êtes en train d'éditer un brouillon précdemment sauvegardé."
+    NOT_CREATED_YET: "Cette page n'ecistera pas tant qu'elle ne sera pas sauvegardée."
+
+  ERROR:
+    BAD_DIRECTORY: "Mauvais répertoire"
+    PAGE_NOT_FOUND: "Page non trouvée"
+    PAGE_NOT_EXIST: "Oups ! Il semble que cette page n'existe pas."
+    PAGE_FORBIDDEN: "Oups ! il semble que vousn'ayez pas l'autorisation d'accéder à cette page."
+    LAYOUT_NOT_FOUND: "Mise en forme d'objet '%s' non trouvée."
+    BLUEPRINT_NO_LIST: "Le Blueprint pour <i>%s</i> ne définit pas les champs affichés ou l'override de page de liste."
+    BLUEPRINT_NO_LIST_ADVISE: "Merci d'ajouter la liste des champs au fichier blueprint."
+    BLUEPRINT_NO_LIST_TEMPLATE: "Merci de créer un fichier de template pour le type dans <b>flex-objects/types/%s/list.html.twig</b>"
+    LIST_EMPTY: "Il n'y a actuellement aucun enregistrement."
+    LIST_EMPTY_ADD: "Il n'y a actuellement aucun enregistrement. Cliquer sur le bouton <a href=\"%s\">Ajouter</a> pour en créer un nouveau…"
+    NO_FLEX_DIRECTORIES: "Aucun répertoire Flex détecté"
