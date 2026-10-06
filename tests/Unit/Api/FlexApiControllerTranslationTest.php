@@ -142,6 +142,7 @@ class FlexApiControllerTranslationTest extends TestCase
         $user->method('get')->willReturnCallback(
             static fn($key, mixed $default = null) => match ($key) {
                 'access.api.super' => true,
+                'access' => ['api' => ['super' => true]],
                 'admin_next' => ['preferences' => ['adminLanguage' => 'es']],
                 default => $default,
             },
@@ -200,7 +201,7 @@ class FlexApiControllerTranslationTest extends TestCase
                 'local_key' => 'username',
                 'foreign_key' => 'subject_key',
             ],
-        ], $this->fakeUser(false));
+        ], $this->fakeUser(false, ['payments' => ['list' => true, 'update' => true, 'delete' => false]]));
 
         self::assertIsArray($detail);
         self::assertTrue($detail['actions']);
@@ -232,7 +233,7 @@ class FlexApiControllerTranslationTest extends TestCase
                 'local_key' => 'subject_key',
                 'foreign_key' => 'username',
             ],
-        ], $this->fakeUser(false));
+        ], $this->fakeUser(false, ['user-accounts' => ['list' => true, 'update' => true, 'delete' => true]]));
 
         self::assertIsArray($detail);
         self::assertTrue($detail['actions']);
@@ -278,15 +279,32 @@ class FlexApiControllerTranslationTest extends TestCase
         $directory->method('isAuthorized')->willReturnCallback(
             static fn(string $action) => $authorization[$action] ?? false,
         );
+        // DirectoryPermission resolves this rule against the user's access map;
+        // fakeUser() grants it from the same per-action flags.
+        $directory->method('getAuthorizeRule')->willReturnCallback(
+            static fn(string $scope, string $action) => "flextest.{$type}.{$action}",
+        );
 
         return $directory;
     }
 
-    private function fakeUser(bool $super): UserInterface
+    /**
+     * @param array<string, array<string, bool>> $grants per-action flags keyed by flex type
+     */
+    private function fakeUser(bool $super, array $grants = []): UserInterface
     {
+        $access = ['api' => ['super' => $super]];
+        if ($grants) {
+            $access['flextest'] = $grants;
+        }
+
         $user = $this->createMock(UserInterface::class);
         $user->method('get')->willReturnCallback(
-            static fn($key, mixed $default = null, $separator = null) => $key === 'access.api.super' ? $super : $default,
+            static fn($key, mixed $default = null, $separator = null) => match ($key) {
+                'access.api.super' => $super,
+                'access' => $access,
+                default => $default,
+            },
         );
 
         return $user;
