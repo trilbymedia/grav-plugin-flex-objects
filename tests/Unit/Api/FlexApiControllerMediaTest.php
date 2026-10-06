@@ -7,6 +7,8 @@ namespace Grav\Plugin\FlexObjects\Tests\Unit\Api;
 use Grav\Common\Config\Config;
 use Grav\Common\Flex\FlexObject;
 use Grav\Common\Grav;
+use Grav\Framework\Flex\FlexDirectory;
+use Grav\Framework\Flex\Storage\FolderStorage;
 use Grav\Plugin\Api\Exceptions\ValidationException;
 use Grav\Plugin\FlexObjects\Api\FlexApiController;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -185,6 +187,61 @@ class FlexApiControllerMediaTest extends TestCase
         ]);
 
         self::assertSame(['photo.png' => true, 'logo.svg' => true], $names);
+    }
+
+    #[Test]
+    public function the_objects_own_data_file_is_not_media(): void
+    {
+        // Folder storage keeps item.json next to the object's media, and `json`
+        // is a media type, so without this the data file showed up in the media
+        // list (and could be deleted or overwritten as if it were an upload).
+        $object = $this->fakeStoredObject('user/data/flex-objects/files/abc/item.json');
+
+        self::assertSame('item.json', $this->invoke('objectDataFile', $object));
+        self::assertTrue($this->invoke('isObjectDataFile', $object, 'item.json'));
+        self::assertTrue($this->invoke('isObjectDataFile', $object, 'ITEM.JSON'));
+        self::assertFalse($this->invoke('isObjectDataFile', $object, 'photo.json'));
+        self::assertFalse($this->invoke('isObjectDataFile', $object, 'item.json.bak'));
+    }
+
+    #[Test]
+    public function a_custom_data_file_name_is_honoured(): void
+    {
+        $object = $this->fakeStoredObject('user/data/flex-objects/files/abc/page.yaml');
+
+        self::assertTrue($this->invoke('isObjectDataFile', $object, 'page.yaml'));
+        self::assertFalse($this->invoke('isObjectDataFile', $object, 'item.json'));
+    }
+
+    #[Test]
+    public function storage_without_a_per_object_file_has_no_data_file_to_hide(): void
+    {
+        $directory = $this->createMock(FlexDirectory::class);
+        $directory->method('getStorage')->willReturn($this->createMock(\Grav\Framework\Flex\Storage\SimpleStorage::class));
+        $object = $this->createMock(FlexObject::class);
+        $object->method('getFlexDirectory')->willReturn($directory);
+
+        self::assertNull($this->invoke('objectDataFile', $object));
+        self::assertFalse($this->invoke('isObjectDataFile', $object, 'item.json'));
+    }
+
+    /**
+     * An object whose directory uses folder storage; getPathFromKey() reports
+     * where the object's data file lives.
+     */
+    private function fakeStoredObject(string $dataPath): FlexObject
+    {
+        $storage = $this->createMock(FolderStorage::class);
+        $storage->method('getPathFromKey')->willReturn($dataPath);
+
+        $directory = $this->createMock(FlexDirectory::class);
+        $directory->method('getStorage')->willReturn($storage);
+
+        $object = $this->createMock(FlexObject::class);
+        $object->method('getFlexDirectory')->willReturn($directory);
+        $object->method('getStorageKey')->willReturn('abc');
+
+        return $object;
     }
 
     /**

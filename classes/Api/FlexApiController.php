@@ -52,6 +52,17 @@ class FlexApiController extends AbstractApiController
     private const DEDICATED_WRITE_ONLY_TYPES = ['user-accounts', 'user-groups'];
 
     /**
+     * Pages are not served by the generic Flex object routes at all. Those
+     * routes authorize against the directory blueprint permission only
+     * (`admin.pages.<action>`), so they skip what the Pages API applies to every
+     * page: the `api.pages.*` permissions and the page's own `permissions`
+     * frontmatter. Admin Next reads and writes pages through `/pages`, so
+     * refusing them here changes no flow of its own. Directory metadata and the
+     * blueprint stay available.
+     */
+    private const DEDICATED_ONLY_TYPES = ['pages'];
+
+    /**
      * Recursively translate language-key-looking label values within an admin
      * config subtree. {@see translateLabel()} is a no-op for anything that
      * isn't a translation key, so non-label strings pass through unchanged.
@@ -489,8 +500,7 @@ class FlexApiController extends AbstractApiController
         $object = $this->resolveObject($directory, $request);
         $folder = $this->resolveMediaFolder($object);
 
-        $media = new Media($folder);
-        $serialized = $this->getSerializer()->serializeCollection($media->all());
+        $serialized = $this->getSerializer()->serializeCollection($this->objectMediaItems($object, $folder));
 
         return ApiResponse::create($serialized);
     }
@@ -521,6 +531,15 @@ class FlexApiController extends AbstractApiController
         // by the file field; absent, this is an inert no-op.
         $settings = $this->parseUploadFieldSettings($request);
 
+        // The object's own data file lives in this folder, so an upload under
+        // that name would overwrite the object itself.
+        foreach ($uploadedFiles as $file) {
+            $name = basename((string)$file->getClientFilename());
+            if ($this->isObjectDataFile($object, $name)) {
+                throw new ValidationException("'{$name}' is reserved for the object's own data.");
+            }
+        }
+
         $uploadedNames = [];
         foreach ($uploadedFiles as $file) {
             // Fire before event — plugins can throw to reject specific files
@@ -535,8 +554,7 @@ class FlexApiController extends AbstractApiController
         }
 
         // Fresh Media object to pick up the newly uploaded files
-        $media = new Media($folder);
-        $serialized = $this->getSerializer()->serializeCollection($media->all());
+        $serialized = $this->getSerializer()->serializeCollection($this->objectMediaItems($object, $folder));
 
         $this->fireAdminEvent('onAdminAfterAddMedia', ['object' => $object]);
         $this->fireEvent('onApiMediaUploaded', [
@@ -572,7 +590,8 @@ class FlexApiController extends AbstractApiController
         $filename = $this->getSafeFilename($request);
 
         $filePath = $folder . '/' . $filename;
-        if (!file_exists($filePath)) {
+        // The object's own data file is not media; deleting it would delete the object's data.
+        if (!file_exists($filePath) || $this->isObjectDataFile($object, $filename)) {
             throw new NotFoundException("Media file '{$filename}' not found on this object.");
         }
 
@@ -672,6 +691,51 @@ class FlexApiController extends AbstractApiController
         }
 
         return rtrim(GRAV_ROOT, '/') . '/' . $folder;
+    }
+
+    /**
+     * Filename of the object's own data file (e.g. `item.json`), or null when the
+     * storage has no per-object file. Folder storage keeps it in the same folder
+     * as the object's media, so it has to be told apart from the media itself.
+     */
+    private function objectDataFile(FlexObjectInterface $object): ?string
+    {
+        $directory = method_exists($object, 'getFlexDirectory') ? $object->getFlexDirectory() : null;
+        $storage = $directory?->getStorage();
+        if (!is_object($storage) || !method_exists($storage, 'getPathFromKey')) {
+            return null;
+        }
+
+        $name = basename((string)$storage->getPathFromKey($object->getStorageKey()));
+
+        return $name !== '' ? $name : null;
+    }
+
+    private function isObjectDataFile(FlexObjectInterface $object, string $filename): bool
+    {
+        $dataFile = $this->objectDataFile($object);
+
+        return $dataFile !== null && strcasecmp($filename, $dataFile) === 0;
+    }
+
+    /**
+     * The media in an object's folder, minus the object's own data file. Core's
+     * Media class skips a page's `.md` the same way, but `json` is a media type,
+     * so `item.json` would otherwise be listed (and offered for deletion).
+     *
+     * @return array<string,mixed>
+     */
+    private function objectMediaItems(FlexObjectInterface $object, string $folder): array
+    {
+        $items = (new Media($folder))->all();
+
+        foreach (array_keys($items) as $name) {
+            if ($this->isObjectDataFile($object, (string)$name)) {
+                unset($items[$name]);
+            }
+        }
+
+        return $items;
     }
 
     /**
@@ -851,6 +915,19 @@ class FlexApiController extends AbstractApiController
     }
 
     /**
+     * Refuse every generic Flex object route for a type that is served only by
+     * its dedicated API controller. See DEDICATED_ONLY_TYPES.
+     */
+    private function assertGenericRouteAllowed(FlexDirectory $directory): void
+    {
+        if (in_array($directory->getFlexType(), self::DEDICATED_ONLY_TYPES, true)) {
+            throw new \Grav\Plugin\Api\Exceptions\ForbiddenException(
+                "The '{$directory->getFlexType()}' directory is only available through its dedicated API endpoint.",
+            );
+        }
+    }
+
+    /**
      * Check the directory-specific permission derived from the blueprint.
      *
      * Checks both api.* and admin.* prefixed permissions (OR logic) so users
@@ -861,6 +938,10 @@ class FlexApiController extends AbstractApiController
         FlexDirectory $directory,
         string $action,
     ): void {
+        // Every object, export and media route comes through here, so this is
+        // the one place a dedicated-only type is turned away, super included.
+        $this->assertGenericRouteAllowed($directory);
+
         $user = $this->getUser($request);
 
         // API-key scope cap (GHSA-x7hm). A key minted with a non-empty `scopes`
