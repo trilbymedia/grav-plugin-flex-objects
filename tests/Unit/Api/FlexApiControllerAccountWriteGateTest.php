@@ -59,14 +59,6 @@ class FlexApiControllerAccountWriteGateTest extends TestCase
         $this->addToAssertionCount(1); // no exception == pass
     }
 
-    #[Test]
-    public function pages_are_not_blocked_by_this_gate(): void
-    {
-        // Pages carry no privilege-bearing fields; blocking them here would break
-        // legitimate generic Flex page writes, so the gate is user/group only.
-        $this->assertGenericWriteAllowed('pages');
-        $this->addToAssertionCount(1);
-    }
 
     private function assertGenericWriteAllowed(string $flexType): void
     {

@@ -52,6 +52,17 @@ class FlexApiController extends AbstractApiController
     private const DEDICATED_WRITE_ONLY_TYPES = ['user-accounts', 'user-groups'];
 
     /**
+     * Pages are not served by the generic Flex object routes at all. Those
+     * routes authorize against the directory blueprint permission only
+     * (`admin.pages.<action>`), so they skip what the Pages API applies to every
+     * page: the `api.pages.*` permissions and the page's own `permissions`
+     * frontmatter. Admin Next reads and writes pages through `/pages`, so
+     * refusing them here changes no flow of its own. Directory metadata and the
+     * blueprint stay available.
+     */
+    private const DEDICATED_ONLY_TYPES = ['pages'];
+
+    /**
      * Recursively translate language-key-looking label values within an admin
      * config subtree. {@see translateLabel()} is a no-op for anything that
      * isn't a translation key, so non-label strings pass through unchanged.
@@ -904,6 +915,19 @@ class FlexApiController extends AbstractApiController
     }
 
     /**
+     * Refuse every generic Flex object route for a type that is served only by
+     * its dedicated API controller. See DEDICATED_ONLY_TYPES.
+     */
+    private function assertGenericRouteAllowed(FlexDirectory $directory): void
+    {
+        if (in_array($directory->getFlexType(), self::DEDICATED_ONLY_TYPES, true)) {
+            throw new \Grav\Plugin\Api\Exceptions\ForbiddenException(
+                "The '{$directory->getFlexType()}' directory is only available through its dedicated API endpoint.",
+            );
+        }
+    }
+
+    /**
      * Check the directory-specific permission derived from the blueprint.
      *
      * Checks both api.* and admin.* prefixed permissions (OR logic) so users
@@ -914,6 +938,10 @@ class FlexApiController extends AbstractApiController
         FlexDirectory $directory,
         string $action,
     ): void {
+        // Every object, export and media route comes through here, so this is
+        // the one place a dedicated-only type is turned away, super included.
+        $this->assertGenericRouteAllowed($directory);
+
         $user = $this->getUser($request);
 
         // API-key scope cap (GHSA-x7hm). A key minted with a non-empty `scopes`
