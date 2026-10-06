@@ -1,3 +1,9 @@
+# v1.4.17
+## 10/06/2026
+
+1. [](#bugfix)
+    * The Media list of a flex object no longer shows the object's own data file (such as `item.json`), and that file can no longer be deleted or overwritten from there [admin2#192](https://github.com/getgrav/grav-plugin-admin2/issues/192)
+
 # v1.4.16
 ## 09/22/2026
 
