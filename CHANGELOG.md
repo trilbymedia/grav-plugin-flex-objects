@@ -1,3 +1,13 @@
+# v1.4.18
+## 10/31/2026
+
+1. [](#bugfix)
+    * [security] The security fixes below were found by Anthropic's OSS Scanner
+    * [security] A page whose Flex form names a directory that doesn't exist is now refused, and every Flex form on a page is checked, not only the last one
+    * [security] Objects sent to the Flex API to be created are now checked against the directory's blueprint, and can no longer choose where they are stored
+    * [security] The object and directory views of a page now show only directories that exist and are allowed on the site, so account and group data stays out of page content
+    * [security] The media proxy ignores an `If-Modified-Since` header that is too long to be a date
+
 # v1.4.17
 ## 10/06/2026
 

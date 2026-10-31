@@ -14,6 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use function in_array;
 use function is_string;
+use function strlen;
 
 /**
  * Public, permission-aware proxy for Flex Object media.
@@ -41,6 +42,9 @@ final class MediaProxyController
         'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'bmp', 'ico',
         'mp4', 'webm', 'ogg', 'ogv', 'mov', 'mp3', 'wav', 'm4a', 'flac', 'pdf',
     ];
+
+    /** A date in an HTTP header is about 30 characters long; anything much longer is not parsed. */
+    private const HTTP_DATE_MAX_LENGTH = 64;
 
     public function __construct(private readonly Grav $grav)
     {
@@ -158,7 +162,7 @@ final class MediaProxyController
         $ifNoneMatch = $request->getHeaderLine('If-None-Match');
         $ifModifiedSince = $request->getHeaderLine('If-Modified-Since');
         if (($ifNoneMatch !== '' && trim($ifNoneMatch) === $etag)
-            || ($ifModifiedSince !== '' && @strtotime($ifModifiedSince) >= $mtime)) {
+            || ($ifModifiedSince !== '' && strlen($ifModifiedSince) <= self::HTTP_DATE_MAX_LENGTH && @strtotime($ifModifiedSince) >= $mtime)) {
             return new Response(304, $baseHeaders);
         }
 

@@ -130,6 +130,37 @@ class Flex implements FlexInterface
     }
 
     /**
+     * Whether a page may show the directory's objects on the site.
+     *
+     * The type can come from page content, so it has to name a directory that exists. A directory marked
+     * `config.site.hidden` holds admin data (accounts, groups, pages): it shows only to a viewer who may list it.
+     *
+     * @param mixed $type
+     * @return bool
+     */
+    public function isDirectoryViewable($type): bool
+    {
+        if (!is_string($type) || $type === '') {
+            return false;
+        }
+
+        $directory = $this->getDirectory($type);
+        if (!$directory || !$directory->isEnabled()) {
+            return false;
+        }
+
+        if (true !== $directory->getConfig('site.hidden', false)) {
+            return true;
+        }
+
+        try {
+            return true === $directory->isAuthorized('list');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
      * @param string $type
      * @return FlexDirectory|null
      */
