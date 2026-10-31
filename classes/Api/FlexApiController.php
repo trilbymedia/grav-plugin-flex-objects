@@ -340,10 +340,9 @@ class FlexApiController extends AbstractApiController
         $this->requireFlexPermission($request, $directory, 'create');
 
         $body = $this->getRequestBody($request);
-        unset($body['__meta']);
 
         try {
-            $object = $directory->createObject($body, '');
+            $object = $this->createObjectFromRequest($directory, $body);
             $object->save();
         } catch (\Exception $e) {
             throw new \Grav\Plugin\Api\Exceptions\ValidationException(
@@ -362,6 +361,23 @@ class FlexApiController extends AbstractApiController
                 'flex-objects:' . $type . ':list',
             ]),
         );
+    }
+
+    /**
+     * Build a new object from submitted data, validated against the directory's blueprint.
+     *
+     * The data describes the new object and nothing else: the storage metadata (`__META`) and the storage key
+     * and timestamp are not the client's to choose, or the object could be stored under, and replace, another one.
+     *
+     * @param FlexDirectory $directory
+     * @param array<string, mixed> $data
+     * @return FlexObjectInterface
+     */
+    private function createObjectFromRequest(FlexDirectory $directory, array $data): FlexObjectInterface
+    {
+        unset($data['__META'], $data['__meta'], $data['storage_key'], $data['storage_timestamp']);
+
+        return $directory->createObject($data, '', true);
     }
 
     /**
