@@ -1,7 +1,8 @@
 {# flex-objects/views/directory.html.twig #}
 
 {% set flex = grav.get('flex_objects') %}
-{% set directory = flex.directory(type) %}
+{# The type can come from page content, so only a directory the site may show gets this far. #}
+{% set directory = flex.isDirectoryViewable(type) ? flex.directory(type) : null %}
 
 {% if directory %}
     {% set layout = options.layout ?? 'default' %}

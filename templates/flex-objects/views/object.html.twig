@@ -1,8 +1,9 @@
 {# flex-objects/views/object.html.twig #}
 
 {% set flex = grav.get('flex_objects') %}
-{% set directory = flex.directory(type) %}
-{% set object = directory.getObject(id) %}
+{# The type can come from page content, so only a directory the site may show gets this far. #}
+{% set directory = flex.isDirectoryViewable(type) ? flex.directory(type) : null %}
+{% set object = directory ? directory.getObject(id) : null %}
 
 {% if object %}
     {%- set title = options.title -%}
