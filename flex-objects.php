@@ -488,7 +488,7 @@ class FlexObjectsPlugin extends Plugin
         $forms = $page->getForms();
 
         // Update dynamic flex forms from the page.
-        $form = null;
+        $flexForms = [];
         foreach ($forms as $name => $test) {
             $type = $test['type'] ?? null;
             if ($type === 'flex') {
@@ -497,15 +497,58 @@ class FlexObjectsPlugin extends Plugin
                 // Update the form and add it back to the page.
                 $this->grav->fireEvent('onBeforeFlexFormInitialize', new Event(['page' => $page, 'name' => $name, 'form' => &$form]));
                 $page->addForms([$form], true);
+
+                $flexForms[] = $form;
+                unset($form);
             }
         }
 
         // Make sure the page contains flex.
         $config = $header->flex ?? null;
-        if (!is_array($config) && !$form) {
+        if (!is_array($config) && !$flexForms) {
             return;
         }
 
+        // Every flex form on the page has to pass, not only the last one.
+        $hasAccess = true;
+        foreach ($flexForms ?: [null] as $form) {
+            if (!$this->isFlexFormAuthorized($form, $config)) {
+                $hasAccess = false;
+                break;
+            }
+        }
+
+        if (!$hasAccess) {
+            // Hide the page (404).
+            $page->routable(false);
+            $page->visible(false);
+
+            // If page is not a module, replace the current page with unauthorized page.
+            if (!$page->isModule()) {
+                $login = $this->grav['login'] ?? null;
+                $unauthorized = $login ? $login->addPage('unauthorized') : null;
+                if ($unauthorized) {
+                    unset($this->grav['page']);
+                    $this->grav['page'] = $unauthorized;
+                }
+            }
+        } elseif ($config['access']['override'] ?? false) {
+            // Override page access settings (allow).
+            $page->modifyHeader('access', []);
+        }
+    }
+
+    /**
+     * Check the access the current user has to the flex directory (and object) a page, or one of its flex forms, is for.
+     *
+     * A flex form which does not name a directory that exists is denied: there is nothing to check its access against.
+     *
+     * @param array|null $form The flex form, or null when the page only has the flex header.
+     * @param mixed $config The page's `flex` header.
+     * @return bool
+     */
+    protected function isFlexFormAuthorized(?array $form, $config): bool
+    {
         /** @var Route $route */
         $route = $this->grav['route'];
 
@@ -520,7 +563,7 @@ class FlexObjectsPlugin extends Plugin
         }
 
         if (!$directory) {
-            return;
+            return $form === null;
         }
 
         $create = (bool)($form['actions']['create'] ?? false);
@@ -562,24 +605,7 @@ class FlexObjectsPlugin extends Plugin
             }
         }
 
-        if (!$hasAccess) {
-            // Hide the page (404).
-            $page->routable(false);
-            $page->visible(false);
-
-            // If page is not a module, replace the current page with unauthorized page.
-            if (!$page->isModule()) {
-                $login = $this->grav['login'] ?? null;
-                $unauthorized = $login ? $login->addPage('unauthorized') : null;
-                if ($unauthorized) {
-                    unset($this->grav['page']);
-                    $this->grav['page'] = $unauthorized;
-                }
-            }
-        } elseif ($config['access']['override'] ?? false) {
-            // Override page access settings (allow).
-            $page->modifyHeader('access', []);
-        }
+        return (bool)$hasAccess;
     }
 
     /**
