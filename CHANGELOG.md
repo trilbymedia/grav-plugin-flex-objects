@@ -1,3 +1,9 @@
+# v1.4.19
+## 11/02/2026
+
+1. [](#bugfix)
+    * Media uploaded to a folder-stored Flex object through the API is saved in the object's folder when Grav serves a public subfolder (`GRAV_WEBROOT`) apart from the private install folder, instead of in a `user/` folder created inside the private install folder
+
 # v1.4.18
 ## 10/31/2026
 
