@@ -678,8 +678,9 @@ class FlexApiController extends AbstractApiController
      * Resolve an object's media folder to an absolute, writable filesystem path.
      *
      * getMediaFolder() returns null for SimpleStorage directories (a single
-     * shared file, no per-object folder) and a GRAV_ROOT-relative or stream
-     * path for folder-stored ones. Normalize all cases to an absolute path.
+     * shared file, no per-object folder) and a stream or webroot-relative
+     * path for folder-stored ones (relative to the locator base, GRAV_WEBROOT,
+     * which is where user/ lives). Normalize all cases to an absolute path.
      */
     private function resolveMediaFolder(FlexObjectInterface $object): string
     {
@@ -701,12 +702,12 @@ class FlexApiController extends AbstractApiController
             }
         }
 
-        // Already absolute? Use as-is. Otherwise treat as GRAV_ROOT-relative.
+        // Already absolute? Use as-is. Otherwise treat as webroot-relative.
         if (str_starts_with($folder, '/') || preg_match('#^[A-Za-z]:[\\\\/]#', $folder)) {
             return $folder;
         }
 
-        return rtrim(GRAV_ROOT, '/') . '/' . $folder;
+        return rtrim(GRAV_WEBROOT, '/') . '/' . $folder;
     }
 
     /**

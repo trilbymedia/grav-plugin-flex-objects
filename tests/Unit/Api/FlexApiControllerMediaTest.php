@@ -92,15 +92,16 @@ class FlexApiControllerMediaTest extends TestCase
     }
 
     #[Test]
-    public function grav_root_relative_media_folder_is_made_absolute(): void
+    public function webroot_relative_media_folder_is_made_absolute(): void
     {
-        // FolderStorage typically returns a GRAV_ROOT-relative, non-stream path.
+        // FolderStorage typically returns a path relative to the locator base
+        // (GRAV_WEBROOT, where user/ lives), not a stream.
         $object = $this->fakeObject('user/data/flex-objects/contacts/9', '9');
 
         $resolved = $this->invoke('resolveMediaFolder', $object);
 
         self::assertSame(
-            rtrim(GRAV_ROOT, '/') . '/user/data/flex-objects/contacts/9',
+            rtrim(GRAV_WEBROOT, '/') . '/user/data/flex-objects/contacts/9',
             $resolved,
         );
     }
