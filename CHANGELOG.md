@@ -1,5 +1,5 @@
 # v1.4.19
-## mm/dd/2026
+## 11/20/2026
 
 1. [](#improved)
     * Added PHP 8.6 compatibility (while keeping PHP 8.3+ support): an `id:` route param carrying a NUL byte is no longer taken as a Flex form's object key, and a missing `id:` param no longer passes null to `rawurldecode()` (`onBeforeFlexFormInitialize`); the media proxy returns a clean 404 for a filename containing a NUL byte (`MediaProxyController`); and removed deprecated `ReflectionProperty::setAccessible()` calls from the test suite
