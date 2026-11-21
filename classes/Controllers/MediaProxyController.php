@@ -87,8 +87,8 @@ final class MediaProxyController
     ): ResponseInterface {
         $config = $this->grav['config'];
 
-        // Reject path traversal and hidden files outright.
-        if ($filename === '' || str_contains($filename, '..') || str_starts_with($filename, '.')) {
+        // Reject path traversal, hidden files and NUL bytes outright.
+        if ($filename === '' || str_contains($filename, "\0") || str_contains($filename, '..') || str_starts_with($filename, '.')) {
             return $this->error(404);
         }
 

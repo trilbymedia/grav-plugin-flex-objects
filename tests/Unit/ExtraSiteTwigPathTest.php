@@ -165,7 +165,6 @@ class ExtraSiteTwigPathTest extends TestCase
     private function setSingleton(?Grav $grav): void
     {
         $property = new ReflectionProperty(Grav::class, 'instance');
-        $property->setAccessible(true);
         $property->setValue(null, $grav);
     }
 }
