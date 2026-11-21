@@ -293,11 +293,13 @@ class FlexObjectsPlugin extends Plugin
         if (!isset($form['flex']['key']) && $edit === true) {
             /** @var Route $route */
             $route = $this->grav['route'];
-            $id = rawurldecode($route->getGravParam('id'));
-            if (null !== $id) {
-                $form['flex']['key'] = $id;
-                $event['form'] = $form;
+            $id = rawurldecode((string) $route->getGravParam('id'));
+            // A key never contains a NUL byte (PHP 8.6 filesystem calls throw on one), so treat it as no id.
+            if (str_contains($id, "\0")) {
+                $id = '';
             }
+            $form['flex']['key'] = $id;
+            $event['form'] = $form;
         }
     }
 
