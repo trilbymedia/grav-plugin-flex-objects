@@ -58,6 +58,12 @@ class ObjectController extends AbstractController
     {
         $this->checkAuthorization('create');
 
+        // A create task makes a new object, it never edits one which is stored already.
+        $existing = $this->getObject();
+        if ($existing && $existing->exists()) {
+            throw new RuntimeException('Object already exists', 409);
+        }
+
         $form = $this->getForm();
         $callable = function (array $data, array $files, FlexObject $object) {
             if (method_exists($object, 'storeOriginal')) {
