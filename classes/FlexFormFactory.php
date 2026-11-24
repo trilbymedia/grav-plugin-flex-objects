@@ -11,6 +11,7 @@ use Grav\Framework\Form\Interfaces\FormFactoryInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
 use RocketTheme\Toolbox\Event\Event;
 use function is_callable;
+use function is_object;
 use function is_string;
 
 /**
@@ -42,6 +43,14 @@ class FlexFormFactory implements FormFactoryInterface
         $grav = Grav::instance();
         $grav->fireEvent('onBeforeFlexFormInitialize', new Event(['page' => $page, 'name' => $name, 'form' => &$form]));
         $page->addForms([$form], true);
+
+        // Authorize the form where it is created, not only on the page being requested: a form can be rendered
+        // by a page other than the one it belongs to, such as a module shown in a collection.
+        $header = $page->header();
+        $config = is_object($header) ? ($header->flex ?? null) : null;
+        if (!FlexFormAuthorizer::isAuthorized($form, $config)) {
+            return null;
+        }
 
         $formFlex = $form['flex'] ?? [];
 
