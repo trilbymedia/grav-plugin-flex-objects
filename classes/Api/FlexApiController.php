@@ -375,9 +375,22 @@ class FlexApiController extends AbstractApiController
      */
     private function createObjectFromRequest(FlexDirectory $directory, array $data): FlexObjectInterface
     {
+        return $directory->createObject($this->withoutStorageFields($data), '', true);
+    }
+
+    /**
+     * Drop the storage metadata (`__META`), storage key and storage timestamp from submitted data. They belong to
+     * the stored object, so a request can neither choose where a new object is stored nor change where an
+     * existing one is.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    private function withoutStorageFields(array $data): array
+    {
         unset($data['__META'], $data['__meta'], $data['storage_key'], $data['storage_timestamp']);
 
-        return $directory->createObject($data, '', true);
+        return $data;
     }
 
     /**
@@ -401,8 +414,7 @@ class FlexApiController extends AbstractApiController
         $currentEtag = $this->generateEtag($this->serializeObject($object));
         $this->validateEtag($request, $currentEtag);
 
-        $body = $this->getRequestBody($request);
-        unset($body['__meta']);
+        $body = $this->withoutStorageFields($this->getRequestBody($request));
 
         try {
             // Diff the incoming media-field values against what's stored so core
