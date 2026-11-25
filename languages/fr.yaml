@@ -9,10 +9,6 @@ PLUGIN_FLEX_OBJECTS:
   EMPTY_RESULT: La requête ne donne aucun résultat
 
   USE_BUILT_IN_CSS: "Utiliser le CSS intégré"
-  SECURITY_SECTION: "Sécurité"
-  SECURITY:
-    RESTRICT_PAGE_FRONTMATTER: "Restreindre l'édition en page publique"
-    RESTRICT_PAGE_FRONTMATTER_HELP: "Lorsque cette option est activée, les utilisateurs qui n'ont pas le statut de super-utilisateur ne peuvent pas modifier les paramètres form, forms, process ou twig dans l'en-tête des pages. Désactivez-la si les éditeurs doivent pouvoir modifier les formulaires."
   EXTRA_ADMIN_TWIG_PATH: "Chemin Twig supplémentaire pour l'admin"
   DIRECTORIES: "Répertoires"
   CSV: "CSV"

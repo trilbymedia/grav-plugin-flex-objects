@@ -130,9 +130,6 @@ class FlexApiController extends AbstractApiController
         return ApiResponse::create([
             'enabled'      => (bool) ($cfg['enabled'] ?? true),
             'built_in_css' => (bool) ($cfg['built_in_css'] ?? true),
-            'security'     => [
-                'restrict_page_frontmatter' => (bool) ($cfg['security']['restrict_page_frontmatter'] ?? true),
-            ],
             'admin_list'   => [
                 'per_page' => (int) ($cfg['admin_list']['per_page'] ?? 15),
                 'order'    => [

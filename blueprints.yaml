@@ -44,23 +44,6 @@ form:
         0: PLUGIN_ADMIN.DISABLED
       validate:
         type: bool
-    security_section:
-      type: section
-      title: PLUGIN_FLEX_OBJECTS.SECURITY_SECTION
-      underline: true
-
-    security.restrict_page_frontmatter:
-      type: toggle
-      label: PLUGIN_FLEX_OBJECTS.SECURITY.RESTRICT_PAGE_FRONTMATTER
-      help: PLUGIN_FLEX_OBJECTS.SECURITY.RESTRICT_PAGE_FRONTMATTER_HELP
-      highlight: 1
-      default: 1
-      options:
-        1: PLUGIN_ADMIN.ENABLED
-        0: PLUGIN_ADMIN.DISABLED
-      validate:
-        type: bool
-
     directories:
       type: flex-objects
       label: PLUGIN_FLEX_OBJECTS.DIRECTORIES
