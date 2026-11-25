@@ -132,44 +132,6 @@ Because an object's fields come from the directory blueprint, `flex_create_objec
 
 An API key restricted with a `scopes` list needs `api.access` among its scopes to reach the three catalog tools. A key scoped to `api.contacts` alone can read and write contacts, but `flex_get_blueprint` refuses it, so scope such a key as `[api.access, api.contacts]`. There is no media upload tool, because that route takes a multipart form rather than JSON, so a file removed with `flex_delete_media` cannot be put back through MCP.
 
-## Security Settings
-
-The plugin includes security settings to protect against unauthorized modification of sensitive page settings:
-
-```yaml
-security:
-  # Restrict non-superusers from modifying page form/process settings
-  restrict_page_frontmatter: true
-```
-
-### Page Frontmatter Restriction
-
-When `restrict_page_frontmatter` is enabled (the default), non-superuser accounts cannot modify the following page header fields:
-
-- `header.form` - Form definitions and process handlers
-- `header.forms` - Multiple form definitions
-- `header.process` - Page process settings
-- `header.twig` - Twig processing settings
-
-**Important Notes:**
-
-- This setting is **enabled by default** for security
-- When enabled, editors can still save pages that contain forms - the existing form definitions are preserved
-- Only the ability to **modify** these fields is restricted; existing values remain intact
-- Superusers always have full access regardless of this setting
-
-**If your editors need to modify forms:**
-
-If you have a legitimate use case where editors need to modify form definitions (e.g., in Expert mode), you can disable this restriction:
-
-```yaml
-# user/config/plugins/flex-objects.yaml
-security:
-  restrict_page_frontmatter: false
-```
-
-> **Warning:** Disabling this setting allows editors to modify form process handlers, which could potentially be used to execute arbitrary code if an editor account is compromised. Only disable if you trust all editor-level users.
-
 ## Displaying
 
 ![](assets/flex-objects-site.png)

@@ -23,6 +23,7 @@ use Grav\Framework\Route\Route;
 use Grav\Plugin\Api\PermissionResolver;
 use Grav\Plugin\FlexObjects\Api\DirectoryPermission;
 use Grav\Plugin\FlexObjects\Controllers\ObjectController;
+use Grav\Plugin\FlexObjects\FlexFormAuthorizer;
 use Grav\Plugin\FlexObjects\FlexFormFactory;
 use Grav\Plugin\Form\Forms;
 use Grav\Plugin\FlexObjects\Flex;
@@ -551,63 +552,7 @@ class FlexObjectsPlugin extends Plugin
      */
     protected function isFlexFormAuthorized(?array $form, $config): bool
     {
-        /** @var Route $route */
-        $route = $this->grav['route'];
-
-        $type = $form['flex']['type'] ?? $config['directory'] ?? $route->getGravParam('directory') ?? null;
-        $key = $form['flex']['key'] ?? $config['id'] ?? $route->getGravParam('id') ?? '';
-        if (\is_string($type)) {
-            /** @var Flex $flex */
-            $flex = $this->grav['flex_objects'];
-            $directory = $flex->getDirectory($type);
-        } else {
-            $directory = null;
-        }
-
-        if (!$directory) {
-            return $form === null;
-        }
-
-        $create = (bool)($form['actions']['create'] ?? false);
-        $edit = (bool)($form['actions']['edit'] ?? false);
-
-        $scope = $config['access']['scope'] ?? null;
-
-        $object = $key !== '' ? $directory->getObject($key) : null;
-        $hasAccess = null;
-
-        $action = $config['access']['action'] ?? null;
-        if (null === $action) {
-            if (!$form) {
-                $action = $key !== '' ? 'read' : 'list';
-                if (null === $scope) {
-                    $hasAccess = true;
-                }
-            } elseif ($object) {
-                if ($edit) {
-                    $scope = $scope ?? 'admin';
-                    $action = 'update';
-                } else {
-                    $hasAccess = false;
-                }
-            } elseif ($create) {
-                $object = $directory->createObject([], $key);
-                $scope = $scope ?? 'admin';
-                $action = 'create';
-            } else {
-                $hasAccess = false;
-            }
-        }
-
-        if ($action && $hasAccess === null) {
-            if ($object instanceof FlexAuthorizeInterface) {
-                $hasAccess = $object->isAuthorized($action, $scope);
-            } else {
-                $hasAccess = $directory->isAuthorized($action, $scope);
-            }
-        }
-
-        return (bool)$hasAccess;
+        return FlexFormAuthorizer::isAuthorized($form, $config);
     }
 
     /**
