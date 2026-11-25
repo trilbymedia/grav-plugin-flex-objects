@@ -6,6 +6,7 @@
     * [security] Updating an object through the Flex API no longer accepts storage details such as its storage key from the request
     * [security] A Flex form is now checked for access where it is created, so it is no longer shown by a page other than the one it belongs to when the visitor may not use it
     * [security] The save check for a Flex object now refuses to pass when there is no signed-in user to check, such as when it runs from the command line
+    * Removed the `restrict_page_frontmatter` setting, which has had no effect since 1.4.2
 
 # v1.4.19
 ## 11/20/2026
